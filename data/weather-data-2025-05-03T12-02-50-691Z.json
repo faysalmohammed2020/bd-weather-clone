@@ -1,0 +1,123 @@
+{
+  "timestamp": "2025-05-03T12:02:50.551Z",
+  "basicInfo": {
+    "dataType": "11",
+    "stationNo": "11111",
+    "year": "11",
+    "month": "11",
+    "day": "11"
+  },
+  "firstCard": {
+    "pressure": {
+      "subIndicator": "1",
+      "alteredThermometer": "1",
+      "barAsRead": "1",
+      "correctedForIndex": "1",
+      "heightDifference": "1",
+      "correctionForTemp": "1",
+      "stationLevelPressure": "1",
+      "seaLevelReduction": "1",
+      "correctedSeaLevelPressure": "1",
+      "altimeterSetting": "1",
+      "pressureChange24h": "1"
+    },
+    "temperature": {
+      "asRead": {
+        "dryBulb": "1",
+        "wetBulb": "1",
+        "maxMin": "1"
+      },
+      "dewPoint": "1",
+      "relativeHumidity": "1"
+    },
+    "humidity": {}
+  },
+  "secondCard": {
+    "cloud": {
+      "totalAmount": "1",
+      "lowCloud": {
+        "direction": "1",
+        "height": "1",
+        "form": "1",
+        "amount": "1"
+      },
+      "significantCloud": {
+        "layer1": {
+          "height": "1",
+          "form": "1",
+          "amount": "1"
+        },
+        "layer2": {
+          "height": "2",
+          "form": "2",
+          "amount": "2"
+        },
+        "layer3": {
+          "height": "3",
+          "form": "3",
+          "amount": "3"
+        },
+        "layer4": {
+          "height": "4",
+          "form": "4",
+          "amount": "4"
+        }
+      },
+      "mediumCloud": {
+        "direction": "2",
+        "height": "2",
+        "form": "2",
+        "amount": "2"
+      },
+      "highCloud": {
+        "direction": "3",
+        "height": "3",
+        "form": "3",
+        "amount": "3"
+      }
+    },
+    "rainfall": {},
+    "wind": {}
+  },
+  "dailySummary": {
+    "measurements": [
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10",
+      "10"
+    ],
+    "meteorCodes": [
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1",
+      "1"
+    ],
+    "characterCodes": {
+      "drizzle": "lightDrizzle",
+      "contRain": "lightContRain",
+      "interRain": "lightInterRain",
+      "shower": "lightShower"
+    },
+    "windDirection": "SE",
+    "windTime": "12.00"
+  },
+  "synopticCode": {
+    "weatherRemark": "Good Weather."
+  }
+}

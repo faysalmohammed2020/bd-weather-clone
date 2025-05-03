@@ -34,7 +34,7 @@ const validationSchema = Yup.object({
   weatherRemark: Yup.string().required("Weather remark is required"),
 });
 
-export default function WeatherDataForm() {
+export default function SynopticCodeForm() {
   const [submitting, setSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState<{
     success?: boolean;

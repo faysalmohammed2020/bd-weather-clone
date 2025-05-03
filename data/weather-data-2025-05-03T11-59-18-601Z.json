@@ -1,0 +1,56 @@
+{
+  "timestamp": "2025-05-03T11:59:18.493Z",
+  "basicInfo": {
+    "dataType": "",
+    "stationNo": "",
+    "year": "",
+    "month": "",
+    "day": ""
+  },
+  "firstCard": {
+    "pressure": {},
+    "temperature": {},
+    "humidity": {}
+  },
+  "secondCard": {
+    "cloud": {},
+    "rainfall": {},
+    "wind": {}
+  },
+  "dailySummary": {
+    "measurements": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "meteorCodes": [
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "characterCodes": {},
+    "windDirection": "",
+    "windTime": ""
+  },
+  "synopticCode": {
+    "weatherRemark": ""
+  }
+}

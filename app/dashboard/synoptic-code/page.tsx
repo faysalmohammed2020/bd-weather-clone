@@ -16,7 +16,7 @@ export interface SynopticFormValues {
 }
 
 export default function WeatherTabsPage() {
-  const [activeTab, setActiveTab] = useState<"weather" | "synoptic">("weather");
+  const [activeTab, setActiveTab] = useState<"weather" | "synoptic">("synoptic");
 
   const initialValues: SynopticFormValues = {
     dataType: "",
