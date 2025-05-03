@@ -1,0 +1,13 @@
+{
+  "subIndicator": "1000",
+  "alteredThermometer": "1200",
+  "barAsRead": "1000",
+  "correctedForIndex": "1000",
+  "heightDifference": "5000",
+  "correctionForTemp": "44204",
+  "stationLevelPressure": "41040",
+  "seaLevelReduction": "40440",
+  "correctedSeaLevelPressure": "40440",
+  "afternoonReading": "404414",
+  "pressureChange24h": "71717"
+}

@@ -1,0 +1,29 @@
+{
+  "dataType": {
+    "0": "0",
+    "1": "1"
+  },
+  "stationNo": {
+    "0": "1",
+    "1": "1",
+    "2": "2",
+    "3": "5",
+    "4": "6"
+  },
+  "stationName": "District Meteorological Office (DMO), Mymensingh",
+  "year": {
+    "0": "2",
+    "1": "5"
+  },
+  "subIndicator": "12",
+  "alteredThermometer": "12",
+  "barAsRead": "12",
+  "correctedForIndex": "12",
+  "heightDifference": "12",
+  "correctionForTemp": "12",
+  "correctedSeaLevelPressure": "12",
+  "seaLevelReduction": "12",
+  "stationLevelPressure": "12",
+  "afternoonReading": "12",
+  "pressureChange24h": "12"
+}

@@ -1,0 +1,29 @@
+{
+  "subIndicator": "1200",
+  "alteredThermometer": "200",
+  "barAsRead": "30",
+  "correctedForIndex": "400",
+  "heightDifference": "2500",
+  "correctionForTemp": "658468",
+  "stationLevelPressure": "5455",
+  "seaLevelReduction": "300",
+  "correctedSeaLevelPressure": "48000",
+  "afternoonReading": "25000",
+  "pressureChange24h": "85200",
+  "dataType": {
+    "0": "0",
+    "1": "1"
+  },
+  "stationNo": {
+    "0": "5",
+    "1": "4",
+    "2": "2",
+    "3": "5",
+    "4": "3"
+  },
+  "stationName": "Dhaka",
+  "year": {
+    "0": "2",
+    "1": "5"
+  }
+}
