@@ -36,13 +36,13 @@ const Sidebar = () => {
       href: "/dashboard/first-card",
       icon: <CloudHail className="w-5 h-5" />,
       label: "First Card",
-      roles: ["super_admin", "data_admin", "station_admin"],
+      roles: ["data_admin", "station_admin"],
     },
     {
       href: "/dashboard/second-card",
       icon: <Binoculars className="w-5 h-5" />,
       label: "Second Card",
-      roles: ["super_admin", "data_admin", "station_admin"],
+      roles: ["data_admin", "station_admin"],
     },
     {
       href: "/dashboard/daily-summery",
@@ -54,7 +54,7 @@ const Sidebar = () => {
       href: "/dashboard/synoptic-code",
       icon: <Codesandbox className="w-5 h-5" />,
       label: "Synoptic Code",
-      roles: ["super_admin", "data_admin", "station_admin"],
+      roles: ["data_admin", "station_admin"],
     },
     {
       href: "/dashboard/user",
