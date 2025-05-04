@@ -1,7 +1,8 @@
+
 "use client"
 
 import type React from "react"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -76,6 +77,11 @@ export function MeteorologicalDataForm() {
     },
   }
 
+  // Debug logging for formData changes
+  useEffect(() => {
+    console.log("Form data updated:", formData)
+  }, [formData])
+
   // Add this function after the state declarations
   const calculateDewPointAndHumidity = (dryBulb, wetBulb) => {
     if (!dryBulb || !wetBulb) return
@@ -135,68 +141,90 @@ export function MeteorologicalDataForm() {
   const calculatePressureValues = (dryBulb, barAsRead) => {
     if (!dryBulb || !barAsRead) return
 
-    // Parse input values to numbers
-    const barAsReadValue = Number.parseFloat(barAsRead)
+    try {
+      // Parse input values to numbers
+      const dryBulbValue = Number.parseFloat(dryBulb)
+      const barAsReadValue = Number.parseFloat(barAsRead)
 
-    // Round dry bulb to nearest integer
-    const roundedDryBulb = Math.round(Number.parseFloat(dryBulb))
+      // Round dry bulb to nearest integer
+      const roundedDryBulb = Math.round(dryBulbValue)
 
-    // Calculate Height Difference Correction (hPa)
-    // For this example, we'll use a simple calculation
-    const heightDifferenceCorrection = 0.3 // This is a placeholder value
+      // Calculate Height Difference Correction (hPa)
+      // For this example, we'll use a simple calculation
+      const heightDifferenceCorrection = 0.95 // This is a placeholder value
 
-    // Calculate Station Level Pressure
-    const stationLevelPressure = barAsReadValue + heightDifferenceCorrection
+      // Calculate Station Level Pressure
+      const stationLevelPressure = barAsReadValue + heightDifferenceCorrection
 
-    // Round station level pressure to nearest 5 for lookup
-    const roundedStationPressure = Math.round(stationLevelPressure / 5) * 5
+      // Round station level pressure to nearest 5 for lookup
+      const roundedStationPressure = Math.round(stationLevelPressure / 5) * 5
 
-    // Check if the rounded dry bulb temperature exists in the table
-    if (!stationPressure[roundedDryBulb.toString()]) {
-      toast.error(`Temperature ${roundedDryBulb}°C not found in station pressure table`)
-      return
-    }
+      // Convert rounded dry bulb to string with .0 format for lookup
+      const dryBulbKey = `${roundedDryBulb}.0`
 
-    // Find the closest available pressure in the table
-    let closestPressure = 1000 // Default value
-    const availablePressures = Object.keys(stationPressure[roundedDryBulb.toString()])
-      .map(Number)
-      .sort((a, b) => a - b)
-
-    for (const pressure of availablePressures) {
-      if (pressure >= roundedStationPressure) {
-        closestPressure = pressure
-        break
+      // Check if the rounded dry bulb temperature exists in the table
+      if (!stationPressure[dryBulbKey]) {
+        toast.error(`Temperature ${roundedDryBulb}°C not found in station pressure table`)
+        return
       }
-      closestPressure = pressure
+
+      // Find the closest available pressure in the table
+      let closestPressure = 1000 // Default value
+      const availablePressures = Object.keys(stationPressure[dryBulbKey])
+        .map(Number)
+        .sort((a, b) => a - b)
+
+      for (const pressure of availablePressures) {
+        if (pressure >= roundedStationPressure) {
+          closestPressure = pressure
+          break
+        }
+        closestPressure = pressure
+      }
+
+      // Look up Sea Level Reduction Constant in the table
+      let seaLevelReductionConstant = 0
+      if (stationPressure[dryBulbKey] && stationPressure[dryBulbKey][closestPressure.toString()]) {
+        seaLevelReductionConstant = stationPressure[dryBulbKey][closestPressure.toString()]
+      } else {
+        toast.error("Could not find sea level reduction constant in table")
+        return
+      }
+
+      // Calculate Sea-Level Pressure
+      const seaLevelPressure = stationLevelPressure + seaLevelReductionConstant
+
+      // Format values for display
+      const heightDifferenceStr = heightDifferenceCorrection.toFixed(2)
+      const stationLevelPressureStr = stationLevelPressure.toFixed(2)
+      const seaLevelReductionStr = seaLevelReductionConstant.toFixed(2)
+      const seaLevelPressureStr = seaLevelPressure.toFixed(2)
+
+      console.log("Calculated pressure values:", {
+        heightDifference: heightDifferenceStr,
+        stationLevelPressure: stationLevelPressureStr,
+        seaLevelReduction: seaLevelReductionStr,
+        correctedSeaLevelPressure: seaLevelPressureStr,
+      })
+
+      // Update the form data with a new object to ensure state change is detected
+      setFormData((prev) => {
+        const newData = {
+          ...prev,
+          heightDifference: heightDifferenceStr,
+          stationLevelPressure: stationLevelPressureStr,
+          seaLevelReduction: seaLevelReductionStr,
+          correctedSeaLevelPressure: seaLevelPressureStr,
+        }
+        return newData
+      })
+
+      // Show success message
+      toast.success("Pressure values calculated successfully")
+    } catch (error) {
+      console.error("Error calculating pressure values:", error)
+      toast.error("Failed to calculate pressure values. Please check your inputs.")
     }
-
-    // Look up Sea Level Reduction Constant in the table
-    let seaLevelReductionConstant = 0
-    if (
-      stationPressure[roundedDryBulb.toString()] &&
-      stationPressure[roundedDryBulb.toString()][closestPressure.toString()]
-    ) {
-      seaLevelReductionConstant = stationPressure[roundedDryBulb.toString()][closestPressure.toString()]
-    } else {
-      toast.error("Could not find sea level reduction constant in table")
-      return
-    }
-
-    // Calculate Sea-Level Pressure
-    const seaLevelPressure = stationLevelPressure + seaLevelReductionConstant
-
-    // Update the form data
-    setFormData((prev) => ({
-      ...prev,
-      heightDifference: heightDifferenceCorrection.toFixed(2),
-      stationLevelPressure: stationLevelPressure.toFixed(2),
-      seaLevelReduction: seaLevelReductionConstant.toFixed(2),
-      correctedSeaLevelPressure: seaLevelPressure.toFixed(2),
-    }))
-
-    // Show success message
-    toast.success("Pressure values calculated successfully")
   }
 
   // Update the handleSubmit function to save the JSON file on the server
