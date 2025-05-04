@@ -513,7 +513,7 @@ export default function UserTable() {
       setIsSubmitting(true);
       await signUp.email(
         {
-          name,
+          name: name || "",
           email,
           password,
           role,
