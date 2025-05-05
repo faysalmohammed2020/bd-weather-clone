@@ -269,29 +269,75 @@ export function MeteorologicalDataForm() {
     }
   };
 
+  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
+  
     try {
+      // Add timestamp to the form data
+      const submissionData = {
+        ...formData,
+        timestamp: new Date().toISOString(),
+        stationInfo: {
+          stationName: formData.stationName,
+          stationNo: formData.stationNo,
+          year: formData.year
+        }
+      };
+  
       const response = await fetch("/api/first-card-data", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submissionData),
       });
-
+  
       const result = await response.json();
-
-      if (result.success) {
-        toast.success("Meteorological data saved successfully.");
-      } else {
+  
+      if (!response.ok) {
         throw new Error(result.message || "Failed to save data");
       }
+  
+      toast.success("Meteorological data saved successfully!", {
+        description: `Entry #${result.dataCount} saved at ${new Date().toLocaleTimeString()}`,
+        action: {
+          label: "View All",
+          onClick: () => {
+            // Optional: Add navigation to view all data
+            console.log("View all data clicked");
+          },
+        },
+      });
+  
+      // Reset form after successful submission if needed
+      setFormData({
+        // Keep station info but clear measurements
+        ...(formData.stationName && { stationName: formData.stationName }),
+        ...(formData.stationNo && { stationNo: formData.stationNo }),
+        ...(formData.year && { year: formData.year }),
+      });
+  
+      // Reset hygrometric data
+      setHygrometricData({
+        dryBulb: "",
+        wetBulb: "",
+        difference: "",
+        dewPoint: "",
+        relativeHumidity: "",
+      });
+  
     } catch (error) {
       console.error("Error saving data:", error);
-      toast.error("Failed to save meteorological data. Please try again.");
+      toast.error("Failed to save data", {
+        description: error instanceof Error ? error.message : "Please check your connection and try again.",
+        action: {
+          label: "Retry",
+          onClick: () => handleSubmit(e),
+        },
+      });
     } finally {
       setIsSubmitting(false);
     }
