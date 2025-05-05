@@ -104,12 +104,16 @@ export function MeteorologicalDataForm() {
 
     // Look up values in the hygrometric table
     const tableEntry = hygrometricTable[roundedDryBulb.toString() as keyof typeof hygrometricTable]
+    console.log("Table Entry:", tableEntry)
+
     if (!tableEntry) {
       toast.error("Could not find dry bulb temperature in hygrometric table")
       return
     }
 
     const valueEntry = tableEntry[difference.toString() as keyof typeof tableEntry]
+    console.log("Value Entry:", valueEntry)
+
     if (!valueEntry) {
       toast.error("Could not find temperature difference in hygrometric table")
       return
@@ -145,19 +149,33 @@ export function MeteorologicalDataForm() {
       // Parse input values to numbers
       const dryBulbValue = Number.parseFloat(dryBulb)
       const barAsReadValue = Number.parseFloat(barAsRead)
+      
 
       // Round dry bulb to nearest integer
       const roundedDryBulb = Math.round(dryBulbValue)
 
+        // Look up values in the hygrometric table
+    const tableEntry = stationPressure[`${roundedDryBulb}.0` as keyof typeof stationPressure]
+    console.log("Pressure Entry:", tableEntry)
+
+
+    const heightDifferenceCorrection = tableEntry[barAsReadValue.toString() as keyof typeof tableEntry]
+    console.log("Pressure Value:", heightDifferenceCorrection)
+    
+    if (!heightDifferenceCorrection) {
+      toast.error("Could not find temperature difference in hygrometric table")
+      return
+    }
       // Calculate Height Difference Correction (hPa)
       // For this example, we'll use a simple calculation
-      const heightDifferenceCorrection = 0.95 // This is a placeholder value
+     // const heightDifferenceCorrection = 0.95 // This is a placeholder value
 
       // Calculate Station Level Pressure
       const stationLevelPressure = barAsReadValue + heightDifferenceCorrection
 
       // Round station level pressure to nearest 5 for lookup
       const roundedStationPressure = Math.round(stationLevelPressure / 5) * 5
+      console.log("Rounded Station Pressure:", roundedStationPressure)
 
       // Convert rounded dry bulb to string with .0 format for lookup
       const dryBulbKey = `${roundedDryBulb}.0`
@@ -190,6 +208,7 @@ export function MeteorologicalDataForm() {
         toast.error("Could not find sea level reduction constant in table")
         return
       }
+      console.log("Sea Level Reduction Constant:", seaLevelReductionConstant)
 
       // Calculate Sea-Level Pressure
       const seaLevelPressure = stationLevelPressure + seaLevelReductionConstant
