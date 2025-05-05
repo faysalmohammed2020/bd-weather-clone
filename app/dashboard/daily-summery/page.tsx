@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WeatherDataTable from "./weatherDataTable";
 import WeatherDataForm from "./weather-data-form";
+import ExampleTable from "./weatherSummaryTable";
 
 export default function DailySummaryPage() {
   const [activeTab, setActiveTab] = useState<string>("form");
@@ -19,11 +20,13 @@ export default function DailySummaryPage() {
         </TabsList>
 
         <TabsContent value="form" className="mt-6">
-          <WeatherDataForm />
+          {/* <WeatherDataForm /> */}
+          <WeatherDataTable />
         </TabsContent>
 
         <TabsContent value="report" className="mt-6">
-          <WeatherDataTable />
+          {/* <WeatherDataTable /> */}
+          <ExampleTable />
         </TabsContent>
       </Tabs>
     </main>
