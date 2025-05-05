@@ -78,70 +78,119 @@ export function MeteorologicalDataForm() {
   }, [formData]);
 
   // Add this function after the state declarations
+  // const calculateDewPointAndHumidity = (dryBulb, wetBulb) => {
+  //   if (!dryBulb || !wetBulb) return;
+
+  //   // Parse input values to numbers
+  //   const dryBulbValue = Number.parseFloat(dryBulb);
+  //   const wetBulbValue = Number.parseFloat(wetBulb);
+
+  //   // Calculate difference
+  //   const difference = Math.abs(dryBulbValue - wetBulbValue).toFixed(1);
+
+  //   // Round dry bulb to nearest integer
+  //   const roundedDryBulb = Math.round(dryBulbValue);
+
+  //   // Check if values are within range of the table
+  //   if (roundedDryBulb < 1 || roundedDryBulb > 25 || Number(difference) > 1.9) {
+  //     toast.error(
+  //       "Temperature values are outside the range of the hygrometric table"
+  //     );
+  //     return;
+  //   }
+
+  //   // Look up values in the hygrometric table
+  //   const tableEntry =
+  //     hygrometricTable[
+  //       roundedDryBulb.toString() as keyof typeof hygrometricTable
+  //     ];
+  //   console.log("Table Entry:", tableEntry);
+
+  //   if (!tableEntry) {
+  //     toast.error("Could not find dry bulb temperature in hygrometric table");
+  //     return;
+  //   }
+
+  //   const valueEntry =
+  //     tableEntry[difference.toString() as keyof typeof tableEntry];
+  //   console.log("Value Entry:", valueEntry);
+
+  //   if (!valueEntry) {
+  //     toast.error("Could not find temperature difference in hygrometric table");
+  //     return;
+  //   }
+
+  //   // Parse the dew point and relative humidity from the table entry
+  //   const [dewPoint, relativeHumidity] = valueEntry.split("/");
+
+  //   // Update the state
+  //   setHygrometricData({
+  //     dryBulb: dryBulbValue.toString(),
+  //     wetBulb: wetBulbValue.toString(),
+  //     difference: difference.toString(),
+  //     dewPoint,
+  //     relativeHumidity,
+  //   });
+
+  //   // Update the form data
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     Td: dewPoint,
+  //     relativeHumidity,
+  //   }));
+
+  //   // Show success message
+  //   toast.success("Dew point and relative humidity calculated successfully");
+  // };
+
   const calculateDewPointAndHumidity = (dryBulb, wetBulb) => {
     if (!dryBulb || !wetBulb) return;
-
-    // Parse input values to numbers
+  
     const dryBulbValue = Number.parseFloat(dryBulb);
     const wetBulbValue = Number.parseFloat(wetBulb);
-
-    // Calculate difference
-    const difference = Math.abs(dryBulbValue - wetBulbValue).toFixed(1);
-
-    // Round dry bulb to nearest integer
+    const difference = Number(Math.abs(dryBulbValue - wetBulbValue).toFixed(1));
     const roundedDryBulb = Math.round(dryBulbValue);
-
-    // Check if values are within range of the table
-    if (roundedDryBulb < 1 || roundedDryBulb > 25 || Number(difference) > 1.9) {
-      toast.error(
-        "Temperature values are outside the range of the hygrometric table"
-      );
+  
+    // Validate ranges
+    if (roundedDryBulb < 1 || roundedDryBulb > 25 || difference > 1.9) {
+      toast.error("Temperature values are outside the range of the hygrometric table");
       return;
     }
-
-    // Look up values in the hygrometric table
-    const tableEntry =
-      hygrometricTable[
-        roundedDryBulb.toString() as keyof typeof hygrometricTable
-      ];
-    console.log("Table Entry:", tableEntry);
-
-    if (!tableEntry) {
-      toast.error("Could not find dry bulb temperature in hygrometric table");
+  
+    // Find index of the difference in 'differences'
+    const diffIndex = hygrometricTable.differences.indexOf(difference);
+    if (diffIndex === -1) {
+      toast.error("Invalid temperature difference for lookup");
       return;
     }
-
-    const valueEntry =
-      tableEntry[difference.toString() as keyof typeof tableEntry];
-    console.log("Value Entry:", valueEntry);
-
-    if (!valueEntry) {
-      toast.error("Could not find temperature difference in hygrometric table");
+  
+    // Find the dbT entry
+    const dbtEntry = hygrometricTable.data.find(entry => entry.dbT === roundedDryBulb);
+    if (!dbtEntry || !dbtEntry.values || !dbtEntry.values[diffIndex]) {
+      toast.error("Could not find matching dry bulb temperature or difference in the table");
       return;
     }
-
-    // Parse the dew point and relative humidity from the table entry
-    const [dewPoint, relativeHumidity] = valueEntry.split("/");
-
-    // Update the state
+  
+    const { DpT, RH } = dbtEntry.values[diffIndex];
+  
+    // Update state
     setHygrometricData({
       dryBulb: dryBulbValue.toString(),
       wetBulb: wetBulbValue.toString(),
       difference: difference.toString(),
-      dewPoint,
-      relativeHumidity,
+      dewPoint: DpT.toString(),
+      relativeHumidity: RH.toString(),
     });
-
-    // Update the form data
-    setFormData((prev) => ({
+  
+    setFormData(prev => ({
       ...prev,
-      Td: dewPoint,
-      relativeHumidity,
+      Td: DpT.toString(),
+      relativeHumidity: RH.toString(),
     }));
-
-    // Show success message
+  
     toast.success("Dew point and relative humidity calculated successfully");
   };
+  
 
   // Update the handleSubmit function to save the JSON file on the server
 
