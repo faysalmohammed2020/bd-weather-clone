@@ -152,7 +152,7 @@ export function MeteorologicalDataForm() {
     const roundedDryBulb = Math.round(dryBulbValue);
   
     // Validate ranges
-    if (roundedDryBulb < 1 || roundedDryBulb > 25 || difference > 1.9) {
+    if (roundedDryBulb < 0 || roundedDryBulb > 50 || difference > 30.0) {
       toast.error("Temperature values are outside the range of the hygrometric table");
       return;
     }
