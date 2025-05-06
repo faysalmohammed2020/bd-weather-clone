@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
         email: true,
         role: true,
         stationId: true,
+        stationName: true,
         division: true,
         district: true,
         upazila: true,
@@ -43,14 +44,23 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { email, name, role, stationId, division, district, upazila } =
-      await req.json();
+    const {
+      email,
+      name,
+      role,
+      stationId,
+      stationName,
+      division,
+      district,
+      upazila,
+    } = await req.json();
     const newUser = await prisma.users.create({
       data: {
         email,
         name,
         role,
         stationId,
+        stationName,
         division,
         district,
         upazila,
