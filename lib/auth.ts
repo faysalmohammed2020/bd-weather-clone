@@ -22,6 +22,11 @@ export const auth = betterAuth({
         required: true,
         type: "string",
       },
+      stationName: {
+        nullable: true,
+        required: false,
+        type: "string",
+      },
       stationId: {
         nullable: true,
         required: false,

@@ -29,6 +29,7 @@ model users {
   division      String
   district      String
   upazila       String
+  stationName   String?
   stationId     String?
   createdAt     DateTime
   updatedAt     DateTime
