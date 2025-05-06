@@ -40,6 +40,7 @@ export default function WeatherObservationForm() {
       medium: {},
       high: {},
     },
+    totalCloud: {},
     significantClouds: {
       layer1: {},
       layer2: {},
@@ -48,8 +49,7 @@ export default function WeatherObservationForm() {
     },
     rainfall: {},
     wind: {},
-    observer: {},
-    totalCloud: {},
+    observer: {}
   })
 
   // Handle input changes and update the form data state
@@ -134,6 +134,7 @@ export default function WeatherObservationForm() {
       // Prepare the data object from our state
       const dataToSubmit = {
         clouds: formData.clouds,
+        totalCloud: formData.totalCloud,
         significantClouds: formData.significantClouds,
         rainfall: formData.rainfall,
         wind: {
@@ -142,7 +143,7 @@ export default function WeatherObservationForm() {
         },
         observer: {
           ...formData.observer,
-          "total-cloud-amount": formData.totalCloud["total-cloud-amount"],
+         
         },
       }
 
