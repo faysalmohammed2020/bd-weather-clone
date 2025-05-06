@@ -1,406 +1,3 @@
-// "use client";
-
-// import { useState, useEffect } from "react";
-// import { FiSearch, FiEdit2, FiTrash2, FiX, FiCheck } from "react-icons/fi";
-
-// interface User {
-//   id: string;
-//   name?: string;
-//   email: string;
-//   role: string;
-//   stationId?: string;
-//   division?: string;
-//   district?: string;
-//   upazila?: string;
-//   createdAt?: string;
-//   updatedAt?: string;
-// }
-
-// export default function UserTable() {
-//   const [roleFilter, setRoleFilter] = useState("all");
-//   const [searchTerm, setSearchTerm] = useState("");
-//   const [users, setUsers] = useState<User[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const [isEditing, setIsEditing] = useState(false);
-//   const [currentUser, setCurrentUser] = useState<User | null>(null);
-//   const [newUser, setNewUser] = useState<Partial<User>>({
-//     name: "",
-//     email: "",
-//     role: "dataentry",
-//     stationId: "",
-//     division: "",
-//     district: "",
-//     upazila: "",
-//   });
-
-//   const fetchUsers = async () => {
-//     try {
-//       setLoading(true);
-//       const res = await fetch("/api/users");
-//       if (!res.ok) {
-//         throw new Error("Failed to fetch users");
-//       }
-//       const data = await res.json();
-//       setUsers(data);
-//     } catch (err) {
-//       console.error("Failed to fetch users", err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchUsers();
-//   }, []);
-
-//   const filteredUsers = users.filter((user) => {
-//     const roleMatch = roleFilter === "all" || user.role === roleFilter;
-//     const searchMatch =
-//       user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//       user.email.toLowerCase().includes(searchTerm.toLowerCase());
-//     return roleMatch && searchMatch;
-//   });
-
-//   const handleEdit = (user: User) => {
-//     setIsEditing(true);
-//     setCurrentUser({ ...user });
-//   };
-
-//   const handleUpdate = async () => {
-//     if (!currentUser) return;
-
-//     try {
-//       const res = await fetch("/api/users", {
-//         method: "PUT",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify(currentUser),
-//       });
-
-//       if (!res.ok) {
-//         throw new Error("Failed to update user");
-//       }
-
-//       await fetchUsers();
-//       setIsEditing(false);
-//       setCurrentUser(null);
-//     } catch (error) {
-//       console.error("Error updating user:", error);
-//       alert("Failed to update user");
-//     }
-//   };
-
-//   const handleDelete = async (userId: string) => {
-//     if (confirm("Are you sure you want to delete this user?")) {
-//       try {
-//         const res = await fetch("/api/users", {
-//           method: "DELETE",
-//           headers: {
-//             "Content-Type": "application/json",
-//           },
-//           body: JSON.stringify({ userId }),
-//         });
-
-//         if (!res.ok) {
-//           throw new Error("Failed to delete user");
-//         }
-
-//         await fetchUsers();
-//       } catch (error) {
-//         console.error("Error deleting user:", error);
-//         alert("Failed to delete user");
-//       }
-//     }
-//   };
-
-//   const handleCreate = async () => {
-//     try {
-//       const res = await fetch("/api/users", {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify(newUser),
-//       });
-
-//       if (!res.ok) {
-//         throw new Error("Failed to create user");
-//       }
-
-//       await fetchUsers();
-//       setNewUser({
-//         name: "",
-//         email: "",
-//         role: "dataentry",
-//         stationId: "",
-//         division: "",
-//         district: "",
-//         upazila: "",
-//       });
-//     } catch (error) {
-//       console.error("Error creating user:", error);
-//       alert("Failed to create user");
-//     }
-//   };
-//   return (
-//     <div className="p-6 bg-white shadow rounded-lg">
-//       <div className="flex justify-between items-center mb-4">
-//         <h2 className="text-xl font-semibold">User Management</h2>
-//       </div>
-
-//       {/* Filters */}
-//       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
-//         <div className="flex items-center gap-2">
-//           <label htmlFor="role" className="text-sm font-medium text-gray-700">
-//             Filter by Role:
-//           </label>
-//           <select
-//             id="role"
-//             value={roleFilter}
-//             onChange={(e) => setRoleFilter(e.target.value)}
-//             className="border border-gray-300 rounded-md p-2 text-sm"
-//           >
-//             <option value="all">All</option>
-//             <option value="stationadmin">Station Admin</option>
-//             <option value="dataentry">Data Entry</option>
-//           </select>
-//         </div>
-
-//         <div className="relative w-full sm:w-64">
-//           <input
-//             type="text"
-//             placeholder="Search by name or email"
-//             value={searchTerm}
-//             onChange={(e) => setSearchTerm(e.target.value)}
-//             className="w-full border border-gray-300 rounded-md pl-10 pr-4 py-2 text-sm"
-//           />
-//           <FiSearch className="absolute left-3 top-2.5 text-gray-400" />
-//         </div>
-//       </div>
-
-//       {/* Edit User Form */}
-//       {isEditing && currentUser && (
-//         <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-70">
-//           <div className="bg-white w-full max-w-3xl mx-4 p-6 rounded-lg shadow-xl overflow-y-auto max-h-[90vh]">
-//             <h3 className="text-xl font-semibold mb-4">Edit User</h3>
-//             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-//               {/* Name */}
-//               <div>
-//                 <label className="block text-sm font-medium text-gray-700 mb-1">
-//                   Name
-//                 </label>
-//                 <input
-//                   type="text"
-//                   value={currentUser.name || ""}
-//                   onChange={(e) =>
-//                     setCurrentUser({ ...currentUser, name: e.target.value })
-//                   }
-//                   className="w-full border border-gray-300 rounded-md p-2 text-sm"
-//                 />
-//               </div>
-//               {/* Email */}
-//               <div>
-//                 <label className="block text-sm font-medium text-gray-700 mb-1">
-//                   Email
-//                 </label>
-//                 <input
-//                   type="email"
-//                   value={currentUser.email}
-//                   onChange={(e) =>
-//                     setCurrentUser({ ...currentUser, email: e.target.value })
-//                   }
-//                   className="w-full border border-gray-300 rounded-md p-2 text-sm"
-//                 />
-//               </div>
-//               {/* Role */}
-//               <div>
-//                 <label className="block text-sm font-medium text-gray-700 mb-1">
-//                   Role
-//                 </label>
-//                 <select
-//                   value={currentUser.role}
-//                   onChange={(e) =>
-//                     setCurrentUser({ ...currentUser, role: e.target.value })
-//                   }
-//                   className="w-full border border-gray-300 rounded-md p-2 text-sm"
-//                 >
-//                   <option value="station_admin">Station Admin</option>
-//                   <option value="data_admin">Data Entry</option>
-//                 </select>
-//               </div>
-//               {/* Station ID */}
-//               <div>
-//                 <label className="block text-sm font-medium text-gray-700 mb-1">
-//                   Station ID
-//                 </label>
-//                 <input
-//                   type="text"
-//                   value={currentUser.stationId || ""}
-//                   onChange={(e) =>
-//                     setCurrentUser({
-//                       ...currentUser,
-//                       stationId: e.target.value,
-//                     })
-//                   }
-//                   className="w-full border border-gray-300 rounded-md p-2 text-sm"
-//                 />
-//               </div>
-//               {/* Division */}
-//               <div>
-//                 <label className="block text-sm font-medium text-gray-700 mb-1">
-//                   Division
-//                 </label>
-//                 <input
-//                   type="text"
-//                   value={currentUser.division || ""}
-//                   onChange={(e) =>
-//                     setCurrentUser({ ...currentUser, division: e.target.value })
-//                   }
-//                   className="w-full border border-gray-300 rounded-md p-2 text-sm"
-//                 />
-//               </div>
-//               {/* District */}
-//               <div>
-//                 <label className="block text-sm font-medium text-gray-700 mb-1">
-//                   District
-//                 </label>
-//                 <input
-//                   type="text"
-//                   value={currentUser.district || ""}
-//                   onChange={(e) =>
-//                     setCurrentUser({ ...currentUser, district: e.target.value })
-//                   }
-//                   className="w-full border border-gray-300 rounded-md p-2 text-sm"
-//                 />
-//               </div>
-//               {/* Upazila */}
-//               <div>
-//                 <label className="block text-sm font-medium text-gray-700 mb-1">
-//                   Upazila
-//                 </label>
-//                 <input
-//                   type="text"
-//                   value={currentUser.upazila || ""}
-//                   onChange={(e) =>
-//                     setCurrentUser({ ...currentUser, upazila: e.target.value })
-//                   }
-//                   className="w-full border border-gray-300 rounded-md p-2 text-sm"
-//                 />
-//               </div>
-//             </div>
-
-//             {/* Buttons */}
-//             <div className="flex justify-end gap-2">
-//               <button
-//                 onClick={() => setIsEditing(false)}
-//                 className="flex items-center gap-2 bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors"
-//               >
-//                 <FiX /> Cancel
-//               </button>
-//               <button
-//                 onClick={handleUpdate}
-//                 className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-//               >
-//                 <FiCheck /> Update User
-//               </button>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-
-//       {/* User Table */}
-//       <div className="overflow-x-auto">
-//         <table className="min-w-full divide-y divide-gray-200">
-//           <thead className="bg-gray-50">
-//             <tr>
-//               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-//                 Name
-//               </th>
-//               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-//                 Email
-//               </th>
-//               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-//                 Role
-//               </th>
-//               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-//                 Station
-//               </th>
-//               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-//                 Location
-//               </th>
-//               <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-//                 Actions
-//               </th>
-//             </tr>
-//           </thead>
-//           <tbody className="bg-white divide-y divide-gray-100">
-//             {loading ? (
-//               <tr>
-//                 <td
-//                   colSpan={6}
-//                   className="text-center py-6 text-gray-500 text-sm"
-//                 >
-//                   Loading users...
-//                 </td>
-//               </tr>
-//             ) : filteredUsers.length > 0 ? (
-//               filteredUsers.map((user) => (
-//                 <tr key={user.id} className="hover:bg-gray-50">
-//                   <td className="px-4 py-2 text-sm text-gray-900">
-//                     {user.name || "-"}
-//                   </td>
-//                   <td className="px-4 py-2 text-sm text-gray-600">
-//                     {user.email}
-//                   </td>
-//                   <td className="px-4 py-2 text-sm text-blue-700 font-medium capitalize">
-//                     {user.role}
-//                   </td>
-//                   <td className="px-4 py-2 text-sm text-gray-700">
-//                     {user.stationId || "N/A"}
-//                   </td>
-//                   <td className="px-4 py-2 text-sm text-gray-700">
-//                     {[user.upazila, user.district, user.division]
-//                       .filter(Boolean)
-//                       .join(", ")}
-//                   </td>
-//                   <td className="px-4 py-2 text-sm text-gray-700">
-//                     <div className="flex gap-2">
-//                       <button
-//                         onClick={() => handleEdit(user)}
-//                         className="text-blue-600 hover:text-blue-800"
-//                         title="Edit"
-//                       >
-//                         <FiEdit2 />
-//                       </button>
-//                       <button
-//                         onClick={() => handleDelete(user.id)}
-//                         className="text-red-600 hover:text-red-800"
-//                         title="Delete"
-//                       >
-//                         <FiTrash2 />
-//                       </button>
-//                     </div>
-//                   </td>
-//                 </tr>
-//               ))
-//             ) : (
-//               <tr>
-//                 <td
-//                   colSpan={6}
-//                   className="text-center py-6 text-gray-500 text-sm"
-//                 >
-//                   No users found.
-//                 </td>
-//               </tr>
-//             )}
-//           </tbody>
-//         </table>
-//       </div>
-//     </div>
-//   );
-// }
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -417,12 +14,76 @@ import { toast } from "sonner";
 import { signUp } from "@/lib/auth-client";
 import { useLocation } from "@/contexts/divisionContext";
 
+const stations = [
+  { name: "Dhaka", id: "41923" },
+  { name: "Joydebpur", id: "41700" },
+  { name: "Mymensingh", id: "41886" },
+  { name: "Tangail", id: "41909" },
+  { name: "Faridpur", id: "41929" },
+  { name: "Madaripur", id: "41939" },
+  { name: "Chittagong", id: "41978" },
+  { name: "Sandwip", id: "41964" },
+  { name: "Sitakunda", id: "41965" },
+  { name: "Rangamati", id: "41966" },
+  { name: "Comilla", id: "41933" },
+  { name: "Chandpur", id: "41941" },
+  { name: "M.Court", id: "41953" },
+  { name: "Feni", id: "41943" },
+  { name: "Hatiya", id: "41963" },
+  { name: "Coxs_Bazar", id: "41992" },
+  { name: "Kutubdia", id: "41989" },
+  { name: "Teknaf", id: "41998" },
+  { name: "Sylhet", id: "41891" },
+  { name: "Srimangal", id: "41915" },
+  { name: "Rajshahi", id: "41895" },
+  { name: "Ishurdi", id: "41907" },
+  { name: "Bogra", id: "41883" },
+  { name: "Rangpur", id: "41859" },
+  { name: "Dinajpur", id: "41863" },
+  { name: "Sayedpur", id: "41858" },
+  { name: "Khulna", id: "41947" },
+  { name: "Mongla", id: "41958" },
+  { name: "Satkhira", id: "41946" },
+  { name: "Jessore", id: "41936" },
+  { name: "Chuadanga", id: "41926" },
+  { name: "Barisal", id: "41950" },
+  { name: "Patuakhali", id: "41960" },
+  { name: "Khepupara", id: "41984" },
+  { name: "Bhola", id: "41951" },
+  { name: "Tetulia", id: "41850" },
+  { name: "Saint Martin", id: "41955" },
+  { name: "Bandarban", id: "41980" },
+  { name: "Dighinala", id: "41944" },
+  { name: "Nikli", id: "41902" },
+  { name: "Dimla", id: "41851" },
+  { name: "Badalgachhi", id: "41881" },
+  { name: "Rajarhat", id: "41856" },
+  { name: "Kumarkhali", id: "41927" },
+  { name: "Gopalganj", id: "41938" },
+  { name: "Tarash", id: "41897" },
+  { name: "Netrokona", id: "41888" },
+  { name: "Aricha_Manikganj", id: "41930" },
+  { name: "Mawa_Munshiganj", id: "41940" },
+  { name: "Narsingdi", id: "41924" },
+  { name: "Ashuganj_Brahmanbaria", id: "41916" },
+  { name: "Monpura_Bhola", id: "41981" },
+  { name: "Kawkhali_Pirojpur", id: "41979" },
+  { name: "Koyra_Khulna", id: "41948" },
+  { name: "Ramgati_Lakshmipur", id: "41961" },
+  { name: "Narayanganj", id: "41925" },
+  { name: "Hijla_Barishal", id: "41962" },
+  { name: "Baghabari_Sirajganj", id: "41906" },
+  { name: "Joydebpur", id: "99999" },
+  { name: "Ambagan", id: "41977" },
+];
+
 interface User {
   id: string;
   name?: string;
   email: string;
   role: string;
   stationId?: string;
+  stationName?: string;
   division?: string;
   district?: string;
   upazila?: string;
@@ -435,7 +96,6 @@ export default function UserTable() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
-
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -446,6 +106,7 @@ export default function UserTable() {
       password: "",
       role: "dataentry",
       stationId: "",
+      stationName: "",
       division: "",
       district: "",
       upazila: "",
@@ -499,7 +160,7 @@ export default function UserTable() {
   const handleAddUser = async () => {
     setFormError("");
 
-    const { name, email, password, role, stationId } = newUser;
+    const { name, email, password, role, stationId, stationName } = newUser;
     const division = selectedDivision?.name;
     const district = selectedDistrict?.name;
     const upazila = selectedUpazila?.name;
@@ -521,6 +182,7 @@ export default function UserTable() {
           district,
           upazila,
           stationId,
+          stationName: stationName || "", // Make sure to include stationName
         },
         {
           onRequest: () => {},
@@ -544,8 +206,15 @@ export default function UserTable() {
     }
   };
 
+  const getStationName = (id: string) => {
+    return stations.find((s) => s.id === id)?.name || "";
+  };
+
   const handleEditUser = (user: User) => {
-    setCurrentUser(user);
+    setCurrentUser({
+      ...user,
+      stationName: getStationName(user.stationId || ""),
+    });
     setShowEditModal(true);
 
     // Find and set the location selections based on user data
@@ -631,6 +300,7 @@ export default function UserTable() {
       password: "",
       role: "dataentry",
       stationId: "",
+      stationName: "",
       division: "",
       district: "",
       upazila: "",
@@ -695,9 +365,7 @@ export default function UserTable() {
             >
               <option value="all">All Roles</option>
               <option value="superadmin">Super Admin</option>
-              <option value="divisionadmin">Division Admin</option>
-              <option value="districtadmin">District Admin</option>
-              <option value="upazilaadmin">Upazila Admin</option>
+              <option value="stationadmin">Station Admin</option>
               <option value="dataentry">Data Entry</option>
             </select>
           </div>
@@ -723,8 +391,12 @@ export default function UserTable() {
                 Role
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Location
+                Station Name
               </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Station ID
+              </th>
+
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
@@ -756,25 +428,16 @@ export default function UserTable() {
                     <div className="text-sm text-gray-600">{user.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full font-medium ${getRoleBadgeColor(
-                        user.role
-                      )}`}
-                    >
-                      {user.role === "superadmin" && "Super Admin"}
-                      {user.role === "divisionadmin" && "Division Admin"}
-                      {user.role === "districtadmin" && "District Admin"}
-                      {user.role === "upazilaadmin" && "Upazila Admin"}
-                      {user.role === "dataentry" && "Data Entry"}
-                    </span>
+                    <div className="text-sm text-gray-600">{user.role}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-600">
-                      {[user.upazila, user.district, user.division]
-                        .filter(Boolean)
-                        .join(", ") || (
-                        <span className="text-gray-400">Not specified</span>
-                      )}
+                      {user.stationName || "No Station Name Found"}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-600">
+                      {user.stationId || "No Station ID Found"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -857,10 +520,7 @@ export default function UserTable() {
                   type: "select",
                   required: true,
                   options: [
-                    { value: "superadmin", label: "Super Admin" },
-                    { value: "divisionadmin", label: "Division Admin" },
-                    { value: "districtadmin", label: "District Admin" },
-                    { value: "upazilaadmin", label: "Upazila Admin" },
+                    { value: "stationadmin", label: "Station Admin" },
                     { value: "dataentry", label: "Data Entry" },
                   ],
                 },
@@ -869,12 +529,6 @@ export default function UserTable() {
                   key: "password",
                   type: "password",
                   required: true,
-                },
-                {
-                  label: "Station ID",
-                  key: "stationId",
-                  type: "text",
-                  required: false,
                 },
               ].map((field) => (
                 <div key={field.key}>
@@ -920,6 +574,46 @@ export default function UserTable() {
                   )}
                 </div>
               ))}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Station Name
+              </label>
+              <select
+                value={newUser.stationName || ""}
+                onChange={(e) => {
+                  const selectedName = e.target.value;
+                  const selectedStation = stations.find(
+                    (s) => s.name === selectedName
+                  );
+                  setNewUser({
+                    ...newUser,
+                    stationName: selectedName,
+                    stationId: selectedStation?.id || "",
+                  });
+                }}
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              >
+                <option value="">Select Station</option>
+                {stations.map((station) => (
+                  <option key={station.id} value={station.name}>
+                    {station.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Station ID
+              </label>
+              <input
+                type="text"
+                value={newUser.stationId || ""}
+                disabled
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm bg-gray-100 cursor-not-allowed"
+              />
             </div>
 
             {/* Location Selects */}
@@ -1091,28 +785,49 @@ export default function UserTable() {
                   className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                 >
                   <option value="superadmin">Super Admin</option>
-                  <option value="divisionadmin">Division Admin</option>
-                  <option value="districtadmin">District Admin</option>
-                  <option value="upazilaadmin">Upazila Admin</option>
+                  <option value="stationadmin">Station Admin</option>
                   <option value="dataentry">Data Entry</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Station ID
-                </label>
-                <input
-                  type="text"
-                  value={currentUser.stationId || ""}
-                  onChange={(e) =>
-                    setCurrentUser({
-                      ...currentUser,
-                      stationId: e.target.value,
-                    })
-                  }
-                  className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                />
-              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Station Name
+              </label>
+              <select
+                value={currentUser.stationName || ""}
+                onChange={(e) => {
+                  const selectedName = e.target.value;
+                  const selectedStation = stations.find(
+                    (s) => s.name === selectedName
+                  );
+                  setCurrentUser({
+                    ...currentUser,
+                    stationName: selectedName,
+                    stationId: selectedStation?.id || "",
+                  });
+                }}
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+              >
+                <option value="">Select Station</option>
+                {stations.map((station) => (
+                  <option key={station.id} value={station.name}>
+                    {station.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Station ID
+              </label>
+              <input
+                type="text"
+                value={currentUser.stationId || ""}
+                disabled
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm bg-gray-100 cursor-not-allowed"
+              />
             </div>
 
             {/* Location Selects */}

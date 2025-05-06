@@ -256,8 +256,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.6.0
-   * Query Engine version: f676762280b54cd07c770017ed3711ddde35f37a
+   * Prisma Client JS version: 6.7.0
+   * Query Engine version: 3cff47a7f5d65c3ea74883f1d736e41d68ce91ed
    */
   export type PrismaVersion = {
     client: string
@@ -1214,6 +1214,7 @@ export namespace Prisma {
     division: string | null
     district: string | null
     upazila: string | null
+    stationName: string | null
     stationId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -1232,6 +1233,7 @@ export namespace Prisma {
     division: string | null
     district: string | null
     upazila: string | null
+    stationName: string | null
     stationId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -1250,6 +1252,7 @@ export namespace Prisma {
     division: number
     district: number
     upazila: number
+    stationName: number
     stationId: number
     createdAt: number
     updatedAt: number
@@ -1278,6 +1281,7 @@ export namespace Prisma {
     division?: true
     district?: true
     upazila?: true
+    stationName?: true
     stationId?: true
     createdAt?: true
     updatedAt?: true
@@ -1296,6 +1300,7 @@ export namespace Prisma {
     division?: true
     district?: true
     upazila?: true
+    stationName?: true
     stationId?: true
     createdAt?: true
     updatedAt?: true
@@ -1314,6 +1319,7 @@ export namespace Prisma {
     division?: true
     district?: true
     upazila?: true
+    stationName?: true
     stationId?: true
     createdAt?: true
     updatedAt?: true
@@ -1419,6 +1425,7 @@ export namespace Prisma {
     division: string
     district: string
     upazila: string
+    stationName: string | null
     stationId: string | null
     createdAt: Date
     updatedAt: Date
@@ -1456,6 +1463,7 @@ export namespace Prisma {
     division?: boolean
     district?: boolean
     upazila?: boolean
+    stationName?: boolean
     stationId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -1477,6 +1485,7 @@ export namespace Prisma {
     division?: boolean
     district?: boolean
     upazila?: boolean
+    stationName?: boolean
     stationId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -1495,6 +1504,7 @@ export namespace Prisma {
     division?: boolean
     district?: boolean
     upazila?: boolean
+    stationName?: boolean
     stationId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -1513,12 +1523,13 @@ export namespace Prisma {
     division?: boolean
     district?: boolean
     upazila?: boolean
+    stationName?: boolean
     stationId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "emailVerified" | "image" | "role" | "banned" | "banReason" | "banExpires" | "division" | "district" | "upazila" | "stationId" | "createdAt" | "updatedAt", ExtArgs["result"]["users"]>
+  export type usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "emailVerified" | "image" | "role" | "banned" | "banReason" | "banExpires" | "division" | "district" | "upazila" | "stationName" | "stationId" | "createdAt" | "updatedAt", ExtArgs["result"]["users"]>
   export type usersInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | users$sessionsArgs<ExtArgs>
     accounts?: boolean | users$accountsArgs<ExtArgs>
@@ -1546,6 +1557,7 @@ export namespace Prisma {
       division: string
       district: string
       upazila: string
+      stationName: string | null
       stationId: string | null
       createdAt: Date
       updatedAt: Date
@@ -1986,6 +1998,7 @@ export namespace Prisma {
     readonly division: FieldRef<"users", 'String'>
     readonly district: FieldRef<"users", 'String'>
     readonly upazila: FieldRef<"users", 'String'>
+    readonly stationName: FieldRef<"users", 'String'>
     readonly stationId: FieldRef<"users", 'String'>
     readonly createdAt: FieldRef<"users", 'DateTime'>
     readonly updatedAt: FieldRef<"users", 'DateTime'>
@@ -5786,6 +5799,7 @@ export namespace Prisma {
     division: 'division',
     district: 'district',
     upazila: 'upazila',
+    stationName: 'stationName',
     stationId: 'stationId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -5959,6 +5973,7 @@ export namespace Prisma {
     division?: StringFilter<"users"> | string
     district?: StringFilter<"users"> | string
     upazila?: StringFilter<"users"> | string
+    stationName?: StringNullableFilter<"users"> | string | null
     stationId?: StringNullableFilter<"users"> | string | null
     createdAt?: DateTimeFilter<"users"> | Date | string
     updatedAt?: DateTimeFilter<"users"> | Date | string
@@ -5979,6 +5994,7 @@ export namespace Prisma {
     division?: SortOrder
     district?: SortOrder
     upazila?: SortOrder
+    stationName?: SortOrderInput | SortOrder
     stationId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -6002,6 +6018,7 @@ export namespace Prisma {
     division?: StringFilter<"users"> | string
     district?: StringFilter<"users"> | string
     upazila?: StringFilter<"users"> | string
+    stationName?: StringNullableFilter<"users"> | string | null
     stationId?: StringNullableFilter<"users"> | string | null
     createdAt?: DateTimeFilter<"users"> | Date | string
     updatedAt?: DateTimeFilter<"users"> | Date | string
@@ -6022,6 +6039,7 @@ export namespace Prisma {
     division?: SortOrder
     district?: SortOrder
     upazila?: SortOrder
+    stationName?: SortOrderInput | SortOrder
     stationId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -6048,6 +6066,7 @@ export namespace Prisma {
     division?: StringWithAggregatesFilter<"users"> | string
     district?: StringWithAggregatesFilter<"users"> | string
     upazila?: StringWithAggregatesFilter<"users"> | string
+    stationName?: StringNullableWithAggregatesFilter<"users"> | string | null
     stationId?: StringNullableWithAggregatesFilter<"users"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"users"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"users"> | Date | string
@@ -6293,6 +6312,7 @@ export namespace Prisma {
     division: string
     district: string
     upazila: string
+    stationName?: string | null
     stationId?: string | null
     createdAt: Date | string
     updatedAt: Date | string
@@ -6313,6 +6333,7 @@ export namespace Prisma {
     division: string
     district: string
     upazila: string
+    stationName?: string | null
     stationId?: string | null
     createdAt: Date | string
     updatedAt: Date | string
@@ -6333,6 +6354,7 @@ export namespace Prisma {
     division?: StringFieldUpdateOperationsInput | string
     district?: StringFieldUpdateOperationsInput | string
     upazila?: StringFieldUpdateOperationsInput | string
+    stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6353,6 +6375,7 @@ export namespace Prisma {
     division?: StringFieldUpdateOperationsInput | string
     district?: StringFieldUpdateOperationsInput | string
     upazila?: StringFieldUpdateOperationsInput | string
+    stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6373,6 +6396,7 @@ export namespace Prisma {
     division: string
     district: string
     upazila: string
+    stationName?: string | null
     stationId?: string | null
     createdAt: Date | string
     updatedAt: Date | string
@@ -6391,6 +6415,7 @@ export namespace Prisma {
     division?: StringFieldUpdateOperationsInput | string
     district?: StringFieldUpdateOperationsInput | string
     upazila?: StringFieldUpdateOperationsInput | string
+    stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6409,6 +6434,7 @@ export namespace Prisma {
     division?: StringFieldUpdateOperationsInput | string
     district?: StringFieldUpdateOperationsInput | string
     upazila?: StringFieldUpdateOperationsInput | string
+    stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -6771,6 +6797,7 @@ export namespace Prisma {
     division?: SortOrder
     district?: SortOrder
     upazila?: SortOrder
+    stationName?: SortOrder
     stationId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -6793,6 +6820,7 @@ export namespace Prisma {
     division?: SortOrder
     district?: SortOrder
     upazila?: SortOrder
+    stationName?: SortOrder
     stationId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -6811,6 +6839,7 @@ export namespace Prisma {
     division?: SortOrder
     district?: SortOrder
     upazila?: SortOrder
+    stationName?: SortOrder
     stationId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -7525,6 +7554,7 @@ export namespace Prisma {
     division: string
     district: string
     upazila: string
+    stationName?: string | null
     stationId?: string | null
     createdAt: Date | string
     updatedAt: Date | string
@@ -7544,6 +7574,7 @@ export namespace Prisma {
     division: string
     district: string
     upazila: string
+    stationName?: string | null
     stationId?: string | null
     createdAt: Date | string
     updatedAt: Date | string
@@ -7579,6 +7610,7 @@ export namespace Prisma {
     division?: StringFieldUpdateOperationsInput | string
     district?: StringFieldUpdateOperationsInput | string
     upazila?: StringFieldUpdateOperationsInput | string
+    stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7598,6 +7630,7 @@ export namespace Prisma {
     division?: StringFieldUpdateOperationsInput | string
     district?: StringFieldUpdateOperationsInput | string
     upazila?: StringFieldUpdateOperationsInput | string
+    stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7617,6 +7650,7 @@ export namespace Prisma {
     division: string
     district: string
     upazila: string
+    stationName?: string | null
     stationId?: string | null
     createdAt: Date | string
     updatedAt: Date | string
@@ -7636,6 +7670,7 @@ export namespace Prisma {
     division: string
     district: string
     upazila: string
+    stationName?: string | null
     stationId?: string | null
     createdAt: Date | string
     updatedAt: Date | string
@@ -7671,6 +7706,7 @@ export namespace Prisma {
     division?: StringFieldUpdateOperationsInput | string
     district?: StringFieldUpdateOperationsInput | string
     upazila?: StringFieldUpdateOperationsInput | string
+    stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7690,6 +7726,7 @@ export namespace Prisma {
     division?: StringFieldUpdateOperationsInput | string
     district?: StringFieldUpdateOperationsInput | string
     upazila?: StringFieldUpdateOperationsInput | string
+    stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
