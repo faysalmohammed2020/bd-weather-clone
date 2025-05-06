@@ -1,0 +1,144 @@
+[
+  {
+    "clouds": {
+      "low": {
+        "direction": "1",
+        "height": "1",
+        "form": "1",
+        "amount": "1"
+      },
+      "medium": {
+        "direction": "1",
+        "height": "1",
+        "form": "1",
+        "amount": "1"
+      },
+      "high": {
+        "direction": "1",
+        "height": "1",
+        "form": "1",
+        "amount": "1"
+      }
+    },
+    "significantClouds": {
+      "layer1": {
+        "height": "1",
+        "form": "1",
+        "amount": "1"
+      },
+      "layer2": {
+        "height": "1",
+        "form": "1",
+        "amount": "1"
+      },
+      "layer3": {
+        "height": "1",
+        "form": "1",
+        "amount": "1"
+      },
+      "layer4": {
+        "height": "1",
+        "form": "1",
+        "amount": "1"
+      }
+    },
+    "rainfall": {
+      "time-start": "1",
+      "time-end": "1",
+      "since-previous": "1",
+      "during-previous": "1",
+      "last-24-hours": "1"
+    },
+    "wind": {
+      "first-anemometer": "1",
+      "second-anemometer": "1",
+      "speed": "1",
+      "wind-direction": "1",
+      "direction": "1"
+    },
+    "observer": {
+      "observer-initial": "1",
+      "observation-time": "2025-05-06T11:01",
+      "station-id": "1",
+      "total-cloud-amount": "1"
+    },
+    "metadata": {
+      "submittedAt": "2025-05-06T05:01:16.371Z",
+      "stationId": "1",
+      "tabActiveAtSubmission": "observer",
+      "createdAt": "2025-05-06T05:01:16.576Z",
+      "id": "1746507676576"
+    }
+  },
+  {
+    "clouds": {
+      "low": {
+        "direction": "10",
+        "height": "10",
+        "form": "10",
+        "amount": "10"
+      },
+      "medium": {
+        "direction": "10",
+        "height": "10",
+        "form": "10",
+        "amount": "10"
+      },
+      "high": {
+        "direction": "10",
+        "height": "10",
+        "form": "10",
+        "amount": "10"
+      }
+    },
+    "significantClouds": {
+      "layer1": {
+        "height": "10",
+        "form": "10",
+        "amount": "10"
+      },
+      "layer2": {
+        "height": "10",
+        "form": "10",
+        "amount": "10"
+      },
+      "layer3": {
+        "height": "10",
+        "form": "10",
+        "amount": "10"
+      },
+      "layer4": {
+        "height": "10",
+        "form": "10",
+        "amount": "10"
+      }
+    },
+    "rainfall": {
+      "time-start": "10",
+      "time-end": "10",
+      "since-previous": "10",
+      "during-previous": "10",
+      "last-24-hours": "10"
+    },
+    "wind": {
+      "first-anemometer": "10",
+      "second-anemometer": "10",
+      "speed": "10",
+      "wind-direction": "10",
+      "direction": "10"
+    },
+    "observer": {
+      "observer-initial": "10",
+      "observation-time": "2025-05-06T11:03",
+      "station-id": "100",
+      "total-cloud-amount": "10"
+    },
+    "metadata": {
+      "submittedAt": "2025-05-06T05:03:50.354Z",
+      "stationId": "100",
+      "tabActiveAtSubmission": "observer",
+      "createdAt": "2025-05-06T05:03:50.457Z",
+      "id": "1746507830457"
+    }
+  }
+]
