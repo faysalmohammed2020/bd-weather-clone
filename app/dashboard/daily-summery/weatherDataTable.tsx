@@ -221,14 +221,30 @@ export default function WeatherDataTable() {
         doc.text(`Station: ${station?.name || selectedStation}`, 14, 30);
       }
 
-      // Create table data
+      // Get the table element
+      const table = document.getElementById("weather-data-table");
+
+      if (!table) {
+        toast.error("Table not found for export");
+        return;
+      }
+
       // @ts-ignore - jspdf-autotable types are not included
       doc.autoTable({
-        html: "#weather-data-table",
+        html: table,
         startY: 35,
         theme: "grid",
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0] },
+        styles: {
+          fontSize: 8,
+          cellPadding: 2,
+          overflow: "linebreak",
+        },
+        headStyles: {
+          fillColor: [220, 220, 220],
+          textColor: [0, 0, 0],
+          fontStyle: "bold",
+        },
+        margin: { top: 35 },
       });
 
       doc.save("weather-data-report.pdf");

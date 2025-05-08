@@ -152,7 +152,7 @@ export function MeteorologicalDataForm() {
     const roundedDryBulb = Math.round(dryBulbValue);
   
     // Validate ranges
-    if (roundedDryBulb < 1 || roundedDryBulb > 25 || difference > 1.9) {
+    if (roundedDryBulb < 0 || roundedDryBulb > 50 || difference > 30.0) {
       toast.error("Temperature values are outside the range of the hygrometric table");
       return;
     }
@@ -320,56 +320,126 @@ export function MeteorologicalDataForm() {
 
   
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   setIsSubmitting(true);
+  
+  //   try {
+  //     // Add timestamp to the form data
+  //     const submissionData = {
+  //       ...formData,
+  //       timestamp: new Date().toISOString(),
+  //       stationInfo: {
+  //         stationName: formData.stationName,
+  //         stationNo: formData.stationNo,
+  //         year: formData.year
+  //       }
+  //     };
+  
+  //     const response = await fetch("/api/first-card-data", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify(submissionData),
+  //     });
+  
+  //     const result = await response.json();
+  
+  //     if (!response.ok) {
+  //       throw new Error(result.message || "Failed to save data");
+  //     }
+  
+  //     toast.success("Meteorological data saved successfully!", {
+  //       description: `Entry #${result.dataCount} saved at ${new Date().toLocaleTimeString()}`,
+  //       action: {
+  //         label: "View All",
+  //         onClick: () => {
+  //           // Optional: Add navigation to view all data
+  //           console.log("View all data clicked");
+  //         },
+  //       },
+  //     });
+  
+  //     // Reset form after successful submission if needed
+  //     setFormData({
+  //       // Keep station info but clear measurements
+  //       ...(formData.stationName && { stationName: formData.stationName }),
+  //       ...(formData.stationNo && { stationNo: formData.stationNo }),
+  //       ...(formData.year && { year: formData.year }),
+  //     });
+  
+  //     // Reset hygrometric data
+  //     setHygrometricData({
+  //       dryBulb: "",
+  //       wetBulb: "",
+  //       difference: "",
+  //       dewPoint: "",
+  //       relativeHumidity: "",
+  //     });
+  
+  //   } catch (error) {
+  //     console.error("Error saving data:", error);
+  //     toast.error("Failed to save data", {
+  //       description: error instanceof Error ? error.message : "Please check your connection and try again.",
+  //       action: {
+  //         label: "Retry",
+  //         onClick: () => handleSubmit(e),
+  //       },
+  //     });
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent duplicate submissions
+    if (isSubmitting) return;
+    
     setIsSubmitting(true);
   
     try {
-      // Add timestamp to the form data
+      // Prepare data (removed redundant stationInfo nesting)
       const submissionData = {
         ...formData,
-        timestamp: new Date().toISOString(),
-        stationInfo: {
-          stationName: formData.stationName,
-          stationNo: formData.stationNo,
-          year: formData.year
-        }
+        ...hygrometricData, // Include hygrometric data directly
+        timestamp: new Date().toISOString()
       };
   
       const response = await fetch("/api/first-card-data", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submissionData),
       });
   
-      const result = await response.json();
-  
       if (!response.ok) {
-        throw new Error(result.message || "Failed to save data");
+        const error = await response.json();
+        throw new Error(error.message || "Failed to save data");
       }
   
-      toast.success("Meteorological data saved successfully!", {
-        description: `Entry #${result.dataCount} saved at ${new Date().toLocaleTimeString()}`,
+      const result = await response.json();
+  
+      toast.success("Data saved successfully!", {
+        description: `Entry #${result.dataCount} saved`,
         action: {
           label: "View All",
-          onClick: () => {
-            // Optional: Add navigation to view all data
-            console.log("View all data clicked");
-          },
+          onClick: () => router.push("/data"), // Example: Navigate to data view
         },
       });
   
-      // Reset form after successful submission if needed
-      setFormData({
-        // Keep station info but clear measurements
-        ...(formData.stationName && { stationName: formData.stationName }),
-        ...(formData.stationNo && { stationNo: formData.stationNo }),
-        ...(formData.year && { year: formData.year }),
-      });
+      // Reset only measurement fields (preserves station info)
+      setFormData(prev => ({
+        stationName: prev.stationName,
+        stationNo: prev.stationNo,
+        year: prev.year,
+        // Clear other fields
+        cloudCover: "",
+        visibility: "",
+        // ... other fields to reset
+      }));
   
-      // Reset hygrometric data
       setHygrometricData({
         dryBulb: "",
         wetBulb: "",
@@ -379,19 +449,14 @@ export function MeteorologicalDataForm() {
       });
   
     } catch (error) {
-      console.error("Error saving data:", error);
-      toast.error("Failed to save data", {
-        description: error instanceof Error ? error.message : "Please check your connection and try again.",
-        action: {
-          label: "Retry",
-          onClick: () => handleSubmit(e),
-        },
+      console.error("Submission error:", error);
+      toast.error("Submission failed", {
+        description: error instanceof Error ? error.message : "Network error",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));

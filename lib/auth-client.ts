@@ -16,6 +16,10 @@ export const { signIn, signUp, signOut, useSession, admin } = createAuthClient({
         upazila: {
           type: "string",
         },
+        stationName: {
+          required: false,
+          type: "string",
+        },
         stationId: {
           required: false,
           type: "string",
