@@ -186,7 +186,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "D:\\BD WEATHER\\weather-forecast-bd\\prisma\\generated\\client",
+      "value": "F:\\weather-forecast-bd\\prisma\\generated\\client",
       "fromEnvVar": null
     },
     "config": {
@@ -203,7 +203,7 @@ const config = {
     "previewFeatures": [
       "relationJoins"
     ],
-    "sourceFilePath": "D:\\BD WEATHER\\weather-forecast-bd\\prisma\\schema.prisma",
+    "sourceFilePath": "F:\\weather-forecast-bd\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -217,12 +217,11 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
-  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": null
+        "value": "postgresql://postgres:Faysal2023@@localhost:5432/weatherBD?schema=public"
       }
     }
   },
