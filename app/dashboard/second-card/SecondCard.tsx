@@ -263,7 +263,7 @@ export default function WeatherObservationForm() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-xl">
+    <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
       <Toaster position="top-right" richColors />
 
       <div className="max-w-7xl mx-auto">
@@ -731,7 +731,7 @@ function CloudLevelSection({
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onSelectChange: (name: string, value: string) => void
 }) {
-  // Cloud form options based on the provided image
+ 
   const cloudFormOptions = [
     { value: "0", label: "0 - No Sc, St, Cu or Cb" },
     { value: "1", label: "1 - Cu with little vertical extent" },
@@ -746,18 +746,60 @@ function CloudLevelSection({
     { value: "/", label: "/ - Not visible" },
   ]
 
+  const cloudDirectionOptions = [
+    { value: "0", label: "0 - Stationary or no direction" },
+    { value: "1", label: "1 - Cloud coming from NE" },
+    { value: "2", label: "2 - Cloud coming from E" },
+    { value: "3", label: "3 - Cloud coming from SE" },
+    { value: "4", label: "4 - Cloud coming from S" },
+    { value: "5", label: "5 - Cloud coming from SW" },
+    { value: "6", label: "6 - Cloud coming from W" },
+    { value: "7", label: "7 - Cloud coming from NW" },
+    { value: "8", label: "8 - Cloud coming from N" },
+    { value: "9", label: "9 - No definite direction or direction unknown" },
+  ]
+
+  const cloudHeightOptions = [
+    { value: "0", label: "0 - 0 to 50 m" },
+    { value: "1", label: "1 - 50 to 100 m" },
+    { value: "2", label: "2 - 100 to 200 m" },
+    { value: "3", label: "3 - 200 to 300 m" },
+    { value: "4", label: "4 - 300 to 600 m" },
+    { value: "5", label: "5 - 600 to 1000 m" },
+    { value: "6", label: "6 - 1000 to 1500 m" },
+    { value: "7", label: "7 - 1500 to 2000 m" },
+    { value: "8", label: "8 - 2000 to 2500 m" },
+    { value: "9", label: "9 - 2500 m or more or no cloud" },
+    { value: "/", label: "/ - Height of base of cloud not known" },
+  ]
+
+
+  const cloudAmountOptions = [
+    { value: "0", label: "0 - No cloud" },
+    { value: "1", label: "1 - 1 octa or less (1/10 or less but not zero)" },
+    { value: "2", label: "2 - 2 octas (2/10 to 3/10)" },
+    { value: "3", label: "3 - 3 octas (4/10)" },
+    { value: "4", label: "4 - 4 octas (5/10)" },
+    { value: "5", label: "5 - 5 octas (6/10)" },
+    { value: "6", label: "6 - 6 octas (7/10 to 8/10)" },
+    { value: "7", label: "7 - 7 octas (9/10 or more but not 10/10)" },
+    { value: "8", label: "8 - 8 octas (10/10)" },
+    { value: "/", label: "/ - Key obscured or cloud amount cannot be estimated" },
+  ]
+
   return (
     <div className="bg-gradient-to-r from-white to-gray-50 p-4 rounded-lg border border-gray-200">
       <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>{title}</h3>
       <div className="grid gap-4 md:grid-cols-2">
-        <SelectField
+      <SelectField
           id={`${prefix}-direction`}
           name={`${prefix}-direction`}
           label="Direction (Code)"
           accent={color}
           value={data["direction"] || ""}
           onValueChange={(value) => onSelectChange(`${prefix}-direction`, value)}
-          options={Array.from({ length: 10 }, (_, i) => i.toString())}
+          options={cloudDirectionOptions.map(opt => opt.value)}
+          optionLabels={cloudDirectionOptions.map(opt => opt.label)}
         />
         <SelectField
           id={`${prefix}-height`}
@@ -766,7 +808,8 @@ function CloudLevelSection({
           accent={color}
           value={data["height"] || ""}
           onValueChange={(value) => onSelectChange(`${prefix}-height`, value)}
-          options={[...Array.from({ length: 9 }, (_, i) => i.toString()), "/"]}
+          options={cloudHeightOptions.map(opt => opt.value)}
+          optionLabels={cloudHeightOptions.map(opt => opt.label)}
         />
         <SelectField
           id={`${prefix}-form`}
@@ -778,14 +821,15 @@ function CloudLevelSection({
           options={cloudFormOptions.map(opt => opt.value)}
           optionLabels={cloudFormOptions.map(opt => opt.label)}
         />
-        <SelectField
+       <SelectField
           id={`${prefix}-amount`}
           name={`${prefix}-amount`}
           label="Amount (Octa)"
           accent={color}
           value={data["amount"] || ""}
           onValueChange={(value) => onSelectChange(`${prefix}-amount`, value)}
-          options={Array.from({ length: 9 }, (_, i) => i.toString())}
+          options={cloudAmountOptions.map(opt => opt.value)}
+          optionLabels={cloudAmountOptions.map(opt => opt.label)}
         />
       </div>
     </div>
