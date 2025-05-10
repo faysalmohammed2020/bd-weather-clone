@@ -546,7 +546,7 @@ export function generateSynopticCode(): SynopticFormValues {
   const pressureChange = Number.parseFloat(firstCard.pressureChange24h || "0")
   const pressureChangeIndicator = pressureChange >= 0 ? "58" : "59"
   const absPressureChange = pad(Math.abs(Math.round(pressureChange * 10)), 3)
-  measurements[16] = `${pressureChangeIndicator}${absPressureChange}/${pressureChangeIndicator.slice(0, 1)}9${absPressureChange}`
+  measurements[16] = `${pressureChangeIndicator}${absPressureChange}`
 
   // 18. (6RRRtR)/7R24R24R24 (24-28) - Precipitation
   measurements[17] = `(${measurements[7]})/7${pad(precipitation, 3)}`
