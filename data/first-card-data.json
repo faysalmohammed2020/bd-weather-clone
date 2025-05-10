@@ -211,5 +211,54 @@
     "difference": "1",
     "dewPoint": "29",
     "timestamp": "2025-05-06T07:19:46.154Z"
+  },
+  {
+    "dataType": {
+      "0": "1",
+      "1": "1"
+    },
+    "stationNo": {
+      "0": "1",
+      "1": "2",
+      "2": "3",
+      "3": "4",
+      "4": "5"
+    },
+    "stationName": "Dhaka",
+    "year": {
+      "0": "2",
+      "1": "5"
+    },
+    "dryBulbAsRead": "25",
+    "wetBulbAsRead": "24",
+    "Td": "23",
+    "relativeHumidity": "91",
+    "maxMinTempAsRead": "30",
+    "barAsRead": "1006",
+    "heightDifference": "0.96",
+    "stationLevelPressure": "1006.96",
+    "seaLevelReduction": "0.96",
+    "correctedSeaLevelPressure": "1007.92",
+    "subIndicator": "1",
+    "alteredThermometer": "00",
+    "correctedForIndex": "00",
+    "correctionForTemp": "00",
+    "afternoonReading": "00",
+    "pressureChange24h": "15",
+    "squallForce": "00",
+    "squallDirection": "15",
+    "squallTime": "12.00",
+    "horizontalVisibility": "5",
+    "miscMeteors": "0",
+    "pastWeatherW1": "8",
+    "pastWeatherW2": "8",
+    "presentWeatherWW": "88",
+    "c2Indicator": "2",
+    "observationTime": "14:57",
+    "dryBulb": "25",
+    "wetBulb": "24",
+    "difference": "1",
+    "dewPoint": "23",
+    "timestamp": "2025-05-10T08:57:31.195Z"
   }
 ]
