@@ -261,7 +261,18 @@ export default function WeatherObservationForm() {
     wind: "bg-green-100 hover:bg-green-200 data-[state=active]:bg-green-500",
     observer: "bg-orange-100 hover:bg-orange-200 data-[state=active]:bg-orange-500",
   }
-
+  const cloudAmountOptions = [
+    { value: "0", label: "0 - No cloud" },
+    { value: "1", label: "1 - 1 octa or less (1/10 or less but not zero)" },
+    { value: "2", label: "2 - 2 octas (2/10 to 3/10)" },
+    { value: "3", label: "3 - 3 octas (4/10)" },
+    { value: "4", label: "4 - 4 octas (5/10)" },
+    { value: "5", label: "5 - 5 octas (6/10)" },
+    { value: "6", label: "6 - 6 octas (7/10 to 8/10)" },
+    { value: "7", label: "7 - 7 octas (9/10 or more but not 10/10)" },
+    { value: "8", label: "8 - 8 octas (10/10)" },
+    { value: "/", label: "/ - Key obscured or cloud amount cannot be estimated" },
+  ]
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
       <Toaster position="top-right" richColors />
@@ -355,7 +366,8 @@ export default function WeatherObservationForm() {
                       accent="yellow"
                       value={formData.totalCloud["total-cloud-amount"] || ""}
                       onValueChange={(value) => handleSelectChange("total-cloud-amount", value)}
-                      options={Array.from({ length: 10 }, (_, i) => i.toString())}
+                      options={cloudAmountOptions.map(opt => opt.value)}
+                      optionLabels={cloudAmountOptions.map(opt => opt.label)}
                     />
                   </div>
                 </SectionCard>
@@ -852,6 +864,33 @@ function SignificantCloudSection({
   // Generate height options from 0 to 99
   const heightOptions = Array.from({ length: 100 }, (_, i) => i.toString())
 
+  const cloudFormOptions = [
+    { value: "0", label: "0 - Cirrus (Ci)" },
+    { value: "1", label: "1 - Cirrocumulus (Cc)" },
+    { value: "2", label: "2 - Cirrostratus (Cs)" },
+    { value: "3", label: "3 - Altocumulus (Ac)" },
+    { value: "4", label: "4 - Altostratus (As)" },
+    { value: "5", label: "5 - Nimbostratus (Ns)" },
+    { value: "6", label: "6 - Stratocumulus (Sc)" },
+    { value: "7", label: "7 - Stratus (St)" },
+    { value: "8", label: "8 - Cumulus (Cu)" },
+    { value: "9", label: "9 - Cumulonimbus (Cb)" },
+    { value: "/", label: "/ - Clouds not visible (darkness, fog, etc.)" },
+  ]
+
+  const SigcloudAmountOptions = [
+    { value: "0", label: "0 - No cloud" },
+    { value: "1", label: "1 - 1 octa or less (1/10 or less but not zero)" },
+    { value: "2", label: "2 - 2 octas (2/10 to 3/10)" },
+    { value: "3", label: "3 - 3 octas (4/10)" },
+    { value: "4", label: "4 - 4 octas (5/10)" },
+    { value: "5", label: "5 - 5 octas (6/10)" },
+    { value: "6", label: "6 - 6 octas (7/10 to 8/10)" },
+    { value: "7", label: "7 - 7 octas (9/10 or more but not 10/10)" },
+    { value: "8", label: "8 - 8 octas (10/10)" },
+    { value: "/", label: "/ - Key obscured or cloud amount cannot be estimated" },
+  ]
+
   return (
     <div className="bg-gradient-to-r from-white to-gray-50 p-4 rounded-lg border border-gray-200">
       <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>{title}</h3>
@@ -872,7 +911,8 @@ function SignificantCloudSection({
           accent={color}
           value={data["form"] || ""}
           onValueChange={(value) => onSelectChange(`${prefix}-form`, value)}
-          options={[...Array.from({ length: 10 }, (_, i) => i.toString()), "/"]}
+          options={cloudFormOptions.map(opt => opt.value)}
+          optionLabels={cloudFormOptions.map(opt => opt.label)}
         />
         <SelectField
           id={`${prefix}-amount`}
@@ -881,7 +921,8 @@ function SignificantCloudSection({
           accent={color}
           value={data["amount"] || ""}
           onValueChange={(value) => onSelectChange(`${prefix}-amount`, value)}
-          options={Array.from({ length: 9 }, (_, i) => i.toString())}
+          options={SigcloudAmountOptions.map(opt => opt.value)}
+          optionLabels={SigcloudAmountOptions.map(opt => opt.label)}
         />
       </div>
     </div>
