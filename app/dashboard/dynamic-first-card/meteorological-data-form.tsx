@@ -1000,54 +1000,111 @@ export function MeteorologicalDataForm() {
 
               {/* Squall Tab */}
               <TabsContent
-                value="squall"
-                className="mt-6 transition-all duration-500"
-              >
-                <Card className={cn("overflow-hidden", tabStyles.squall.card)}>
-                  <div className="p-4 bg-gradient-to-r from-amber-200 to-amber-300 text-amber-800">
-                    <h3 className="text-lg font-semibold flex items-center">
-                      <Wind className="mr-2" /> Squall Measurements
-                    </h3>
-                  </div>
-                  <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="squallForce">Force (KTS)</Label>
-                      <Input
-                        id="squallForce"
-                        name="squallForce"
-                        value={formData.squallForce || ""}
-                        onChange={handleChange}
-                        className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
-                      />
-                    </div>
+  value="squall"
+  className="mt-6 transition-all duration-500"
+>
+  <Card className={cn("overflow-hidden", tabStyles.squall.card)}>
+    <div className="p-4 bg-gradient-to-r from-amber-200 to-amber-300 text-amber-800">
+      <h3 className="text-lg font-semibold flex items-center">
+        <Wind className="mr-2" /> Squall Measurements
+      </h3>
+    </div>
+    <CardContent className="pt-6 space-y-4">
+      {formData.squallConfirmed === undefined ? (
+        <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
+          <p className="text-amber-800 font-medium mb-3">Are you sure you want to fill up squall measurements?</p>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="border-amber-500 text-amber-700 hover:bg-amber-50"
+              onClick={() => {
+                setFormData(prev => ({
+                  ...prev,
+                  squallConfirmed: false,
+                  squallForce: "",
+                  squallDirection: "",
+                  squallTime: ""
+                }));
+                // Skip to next tab (replace "next-tab-value" with your actual next tab value)
+                setTabValue("next-tab-value");
+              }}
+            >
+              No, Skip
+            </Button>
+            <Button
+              type="button"
+              className="bg-amber-500 hover:bg-amber-600"
+              onClick={() => {
+                setFormData(prev => ({
+                  ...prev,
+                  squallConfirmed: true
+                }));
+              }}
+            >
+              Yes, Continue
+            </Button>
+          </div>
+        </div>
+      ) : formData.squallConfirmed ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="squallForce">Force (KTS)</Label>
+            <Input
+              id="squallForce"
+              name="squallForce"
+              value={formData.squallForce || ""}
+              onChange={handleChange}
+              className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
+            />
+          </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="squallDirection">Direction (°d)</Label>
-                      <Input
-                        id="squallDirection"
-                        name="squallDirection"
-                        type="number"
-                        min="0"
-                        max="360"
-                        value={formData.squallDirection || ""}
-                        onChange={handleChange}
-                        className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
-                      />
-                    </div>
+          <div className="space-y-2">
+            <Label htmlFor="squallDirection">Direction (°d)</Label>
+            <Input
+              id="squallDirection"
+              name="squallDirection"
+              type="number"
+              min="0"
+              max="360"
+              value={formData.squallDirection || ""}
+              onChange={handleChange}
+              className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
+            />
+          </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="squallTime">Time (qt)</Label>
-                      <Input
-                        id="squallTime"
-                        name="squallTime"
-                        value={formData.squallTime || ""}
-                        onChange={handleChange}
-                        className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
+          <div className="space-y-2">
+            <Label htmlFor="squallTime">Time (qt)</Label>
+            <Input
+              id="squallTime"
+              name="squallTime"
+              value={formData.squallTime || ""}
+              onChange={handleChange}
+              className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="p-4 bg-slate-50 border border-slate-200 rounded-md flex justify-between items-center">
+          <p className="text-slate-600">Squall measurements skipped</p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setFormData(prev => ({
+                ...prev,
+                squallConfirmed: true
+              }));
+            }}
+          >
+            Fill Measurements
+          </Button>
+        </div>
+      )}
+    </CardContent>
+  </Card>
+</TabsContent>
 
               {/* VV Tab */}
               <TabsContent
