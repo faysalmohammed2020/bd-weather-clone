@@ -7,10 +7,10 @@ import Profile from "@/components/profile";
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
-      <div className="flex h-screen">
+      <div className="flex fixed size-full">
         <Sidebar />
 
-        <div className="grow overflow-y-auto">
+        <div className="flex w-full flex-col overflow-hidden">
           <div className="flex flex-col">
             <div className="bg-blue-400 px-6 py-2 flex items-center justify-between">
               <Tabs defaultValue="current" className="w-full">
@@ -38,7 +38,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               <Profile />
             </div>
           </div>
-          <div className="grow">
+          <div className="growgrow overflow-y-auto">
             <LocationProvider>{children}</LocationProvider>
           </div>
         </div>

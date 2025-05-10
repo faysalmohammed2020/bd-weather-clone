@@ -4,7 +4,7 @@ import WeatherObservationForm from "./SecondCard";
 
 export default function Home() {
   return (
-    <main className="container mx-auto py-8 px-4">
+    <main className="w-full py-4 px-4">
       <WeatherObservationForm />
     </main>
   );

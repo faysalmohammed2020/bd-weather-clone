@@ -263,7 +263,7 @@ export default function WeatherObservationForm() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
+    <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-4 rounded-xl">
       <Toaster position="top-right" richColors />
 
       <div className="max-w-7xl mx-auto">
