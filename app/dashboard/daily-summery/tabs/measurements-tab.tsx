@@ -516,13 +516,7 @@ export default function MeasurementsTab() {
                       id={`measurement-${item.id}`}
                       value={values.measurements?.[item.id] || ""}
                       className="border-green-200 focus:border-green-500"
-                      onChange={(e) => {
-                        const newMeasurements = [
-                          ...(values.measurements || Array(16).fill("")),
-                        ];
-                        newMeasurements[item.id] = e.target.value;
-                        setFieldValue("measurements", newMeasurements);
-                      }}
+                      readOnly
                     />
                   </div>
                 </div>
@@ -561,13 +555,7 @@ export default function MeasurementsTab() {
                       id={`measurement-${item.id}`}
                       value={values.measurements?.[item.id] || ""}
                       className="border-green-200 focus:border-green-500"
-                      onChange={(e) => {
-                        const newMeasurements = [
-                          ...(values.measurements || Array(16).fill("")),
-                        ];
-                        newMeasurements[item.id] = e.target.value;
-                        setFieldValue("measurements", newMeasurements);
-                      }}
+                      readOnly
                     />
                   </div>
                 </div>
