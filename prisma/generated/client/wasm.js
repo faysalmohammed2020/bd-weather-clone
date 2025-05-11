@@ -145,6 +145,14 @@ exports.Prisma.RelationLoadStrategy = {
   join: 'join'
 };
 
+exports.Prisma.StationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  securityCode: 'securityCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SessionsScalarFieldEnum = {
   id: 'id',
   expiresAt: 'expiresAt',
@@ -200,6 +208,7 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   users: 'users',
+  Station: 'Station',
   sessions: 'sessions',
   accounts: 'accounts',
   verifications: 'verifications'

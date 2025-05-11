@@ -38,6 +38,14 @@ model users {
   accounts      accounts[]
 }
 
+model Station {
+  id           String   @id
+  name         String
+  securityCode String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 model sessions {
   id             String   @id @default(cuid())
   expiresAt      DateTime
