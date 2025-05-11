@@ -433,5 +433,151 @@
       "createdAt": "2025-05-10T08:54:46.788Z",
       "id": "1746867286788"
     }
+  },
+  {
+    "clouds": {
+      "low": {
+        "direction": "1",
+        "height": "1",
+        "form": "1",
+        "amount": "1"
+      },
+      "medium": {
+        "direction": "2",
+        "height": "2",
+        "form": "2",
+        "amount": "2"
+      },
+      "high": {
+        "direction": "3",
+        "height": "3",
+        "form": "3",
+        "amount": "3"
+      }
+    },
+    "totalCloud": {
+      "total-cloud-amount": "6"
+    },
+    "significantClouds": {
+      "layer1": {
+        "height": "1",
+        "form": "1",
+        "amount": "1"
+      },
+      "layer2": {
+        "height": "2",
+        "form": "2",
+        "amount": "2"
+      },
+      "layer3": {
+        "height": "3",
+        "form": "3",
+        "amount": "3"
+      },
+      "layer4": {
+        "height": "4",
+        "form": "4",
+        "amount": "4"
+      }
+    },
+    "rainfall": {
+      "time-start": "12.00",
+      "time-end": "13.00",
+      "since-previous": "10",
+      "during-previous": "50",
+      "last-24-hours": "100"
+    },
+    "wind": {
+      "first-anemometer": "15",
+      "second-anemometer": "20",
+      "speed": "50",
+      "wind-direction": "N",
+      "direction": "N"
+    },
+    "observer": {
+      "observer-initial": "Jewel",
+      "observation-time": "2025-05-11T10:29",
+      "station-id": "41222"
+    },
+    "metadata": {
+      "submittedAt": "2025-05-11T04:29:26.831Z",
+      "stationId": "41222",
+      "tabActiveAtSubmission": "observer",
+      "createdAt": "2025-05-11T04:29:28.019Z",
+      "id": "1746937768019"
+    }
+  },
+  {
+    "clouds": {
+      "low": {
+        "direction": "2",
+        "height": "2",
+        "form": "2",
+        "amount": "2"
+      },
+      "medium": {
+        "direction": "4",
+        "height": "4",
+        "form": "4",
+        "amount": "4"
+      },
+      "high": {
+        "direction": "6",
+        "height": "6",
+        "form": "6",
+        "amount": "6"
+      }
+    },
+    "totalCloud": {
+      "total-cloud-amount": "6"
+    },
+    "significantClouds": {
+      "layer1": {
+        "height": "2",
+        "form": "2",
+        "amount": "2"
+      },
+      "layer2": {
+        "height": "4",
+        "form": "4",
+        "amount": "4"
+      },
+      "layer3": {
+        "height": "6",
+        "form": "6",
+        "amount": "6"
+      },
+      "layer4": {
+        "height": "8",
+        "form": "8",
+        "amount": "8"
+      }
+    },
+    "rainfall": {
+      "time-start": "10.00",
+      "time-end": "12.00",
+      "since-previous": "10",
+      "during-previous": "10",
+      "last-24-hours": "50"
+    },
+    "wind": {
+      "first-anemometer": "30",
+      "second-anemometer": "35",
+      "speed": "70",
+      "wind-direction": "S",
+      "direction": "S"
+    },
+    "observer": {
+      "observer-initial": "Jewel",
+      "observation-time": "2025-05-11T12:17",
+      "station-id": "41222"
+    },
+    "metadata": {
+      "submittedAt": "2025-05-11T06:17:25.238Z",
+      "stationId": "41222",
+      "tabActiveAtSubmission": "observer",
+      "createdAt": "2025-05-11T06:17:25.341Z",
+      "id": "1746944245341"
+    }
   }
 ]
