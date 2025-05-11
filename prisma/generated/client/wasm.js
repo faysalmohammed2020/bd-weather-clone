@@ -135,6 +135,7 @@ exports.Prisma.UsersScalarFieldEnum = {
   upazila: 'upazila',
   stationName: 'stationName',
   stationId: 'stationId',
+  securityCode: 'securityCode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -142,6 +143,14 @@ exports.Prisma.UsersScalarFieldEnum = {
 exports.Prisma.RelationLoadStrategy = {
   query: 'query',
   join: 'join'
+};
+
+exports.Prisma.StationScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  securityCode: 'securityCode',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SessionsScalarFieldEnum = {
@@ -199,6 +208,7 @@ exports.Prisma.NullsOrder = {
 
 exports.Prisma.ModelName = {
   users: 'users',
+  Station: 'Station',
   sessions: 'sessions',
   accounts: 'accounts',
   verifications: 'verifications'

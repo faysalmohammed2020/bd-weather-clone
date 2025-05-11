@@ -13,6 +13,7 @@ import {
   Binoculars,
   CloudHail,
   Users,
+  CloudFog,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 
@@ -60,6 +61,12 @@ const Sidebar = () => {
       href: "/dashboard/user",
       icon: <Users className="w-5 h-5" />,
       label: "User Management",
+      roles: ["super_admin"],
+    },
+    {
+      href: "/dashboard/stations",
+      icon: <CloudFog className="w-5 h-5" />,
+      label: "Station Management",
       roles: ["super_admin"],
     },
   ];

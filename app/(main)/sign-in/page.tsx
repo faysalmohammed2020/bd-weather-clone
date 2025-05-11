@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Mail,
   Lock,
@@ -10,68 +10,155 @@ import {
   CloudRain,
   Sun,
   Droplets,
+  Shield,
+  ChevronRight,
+  ArrowLeft,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { motion } from "framer-motion";
 import { signIn } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { FormError } from "@/components/ui/form-error";
+import { stations } from "@/data/stations";
+
+// Available roles
+const roles = [
+  { value: "super_admin", label: "Super Admin" },
+  { value: "station_admin", label: "Station Admin" },
+  { value: "data_admin", label: "Data Admin" },
+];
 
 export default function SignInForm() {
+  const [step, setStep] = useState("station"); // "station" | "security" | "credentials"
+  const [selectedStation, setSelectedStation] = useState("");
+  const [securityCode, setSecurityCode] = useState("");
+  const [role, setRole] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formError, setFormError] = useState<string>("");
+  const [formError, setFormError] = useState("");
   const router = useRouter();
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleStationSubmit = (e) => {
     e.preventDefault();
+    if (!selectedStation) {
+      setFormError("Please select a station");
+      return;
+    }
+    setStep("security");
+    setFormError("");
+  };
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
+  const handleSecurityCodeSubmit = (e) => {
+    e.preventDefault();
+    setLoading(true);
 
-    await signIn.email(
-      {
-        email,
-        password,
-      },
-      {
-        onRequest: () => {
-          setLoading(true);
-          setFormError("");
-        },
-        onSuccess: () => {
-          toast.success("Login successful");
-          router.push("/dashboard");
-          router.refresh();
-        },
-        onError: (ctx) => {
-          setFormError(ctx.error.message);
-        },
+    // Find the selected station
+    const station = stations.find((s) => s.name === selectedStation);
+
+    if (!station) {
+      setFormError("Invalid station selection");
+      setLoading(false);
+      return;
+    }
+
+    // Check if security code matches
+    if (securityCode === station.securityCode) {
+      setStep("credentials");
+      setFormError("");
+      // Default to first role
+      if (roles.length > 0) {
+        setRole(roles[0].value);
       }
-    );
+    } else {
+      setFormError("Invalid security code. Please try again.");
+    }
 
     setLoading(false);
   };
 
-  // Animation variants
+  const handleCredentialsSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!role) {
+      setFormError("Please select a role");
+      return;
+    }
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email");
+    const password = formData.get("password");
+
+    setLoading(true);
+
+    try {
+      // Here we're simulating the sign-in process
+      // In a real application, you would use your authentication system
+      await signIn.email(
+        {
+          email,
+          password,
+          role,
+          securityCode,
+          stationId: stations.find((s) => s.name === selectedStation)?.id,
+        },
+        {
+          onRequest: () => {
+            setLoading(true);
+            setFormError("");
+          },
+          onSuccess: () => {
+            toast.success("Login successful");
+            router.push("/dashboard");
+            router.refresh();
+          },
+          onError: (ctx) => {
+            let errorMessage = ctx.error.message;
+            if (
+              errorMessage.includes("permission") ||
+              errorMessage.includes("role")
+            ) {
+              errorMessage =
+                "The selected role doesn't match your account permissions";
+            } else if (errorMessage.includes("security code")) {
+              errorMessage = "The security code doesn't match your account";
+            }
+
+            setFormError(errorMessage);
+          },
+        }
+      );
+    } catch (error) {
+      setFormError("An error occurred during sign in. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      {/* Animated background elements with deeper colors */}
+  // Background animations and decorations
+  const BackgroundDecorations = () => (
+    <>
       <div className="absolute inset-0 overflow-hidden -z-10">
         <motion.div
           className="absolute top-20 left-10 w-64 h-64 rounded-full bg-cyan-300/30 dark:bg-cyan-700/20 blur-3xl"
@@ -111,7 +198,6 @@ export default function SignInForm() {
         />
       </div>
 
-      {/* Floating weather icons with enhanced animations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-5">
         <motion.div
           className="absolute top-[15%] left-[10%]"
@@ -174,29 +260,233 @@ export default function SignInForm() {
           <Droplets className="h-10 w-10 text-cyan-500/40 dark:text-cyan-400/30" />
         </motion.div>
       </div>
-      <form
-        onSubmit={handleSubmit}
+    </>
+  );
+
+  // Logo and Header
+  const LogoHeader = () => (
+    <>
+      <div className="flex justify-center mb-4">
+        <div className="relative h-12 w-12">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 animate-pulse"></div>
+          <Cloud className="h-12 w-12 text-white absolute inset-0" />
+        </div>
+      </div>
+
+      <motion.h1
+        className="text-4xl text-center font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400"
+        variants={fadeIn}
+      >
+        BD Weather
+      </motion.h1>
+    </>
+  );
+
+  // Station Selection Form (Step 1)
+  if (step === "station") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <BackgroundDecorations />
+
+        <motion.form
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+          onSubmit={handleStationSubmit}
+          className="w-full max-w-sm space-y-6 rounded-lg bg-white p-8 shadow-lg"
+        >
+          <LogoHeader />
+          <p className="text-center text-sm text-gray-500">
+            Select your weather station to continue.
+          </p>
+
+          <div className="space-y-4">
+            <div className="relative">
+              <Label
+                htmlFor="station"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Weather Station
+              </Label>
+              <Select
+                value={selectedStation}
+                onValueChange={setSelectedStation}
+                required
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select your station" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {stations.map((station) => (
+                    <SelectItem key={station.id} value={station.name}>
+                      {station.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <FormError message={formError} />
+
+          <Button
+            type="submit"
+            className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
+          >
+            Continue
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+
+          <p className="text-center text-sm text-gray-600">
+            Don't have an account?{" "}
+            <Link
+              href="/sign-up"
+              className="font-medium text-blue-700 hover:underline"
+            >
+              Create an account
+            </Link>
+          </p>
+        </motion.form>
+      </div>
+    );
+  }
+
+  // Security Code Form (Step 2)
+  if (step === "security") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <BackgroundDecorations />
+
+        <motion.form
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+          onSubmit={handleSecurityCodeSubmit}
+          className="w-full max-w-sm space-y-6 rounded-lg bg-white p-8 shadow-lg"
+        >
+          <LogoHeader />
+          <p className="text-center text-sm text-gray-500">
+            Enter security code for{" "}
+            <span className="font-semibold">{selectedStation}</span> station.
+          </p>
+
+          <div className="space-y-4">
+            <div className="relative">
+              <Label htmlFor="securityCode" className="sr-only">
+                Security Code
+              </Label>
+              <Shield className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                id="securityCode"
+                name="securityCode"
+                type="text"
+                placeholder="Enter your station security code"
+                className="pl-10"
+                value={securityCode}
+                onChange={(e) => setSecurityCode(e.target.value)}
+                required
+              />
+            </div>
+          </div>
+
+          <FormError message={formError} />
+
+          <div className="flex flex-col space-y-3">
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
+              disabled={loading}
+            >
+              {loading ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    ></path>
+                  </svg>
+                  Verifying...
+                </>
+              ) : (
+                <>
+                  Continue
+                  <ChevronRight className="h-4 w-4" />
+                </>
+              )}
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2"
+              onClick={() => {
+                setStep("station");
+                setFormError("");
+              }}
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Station Selection
+            </Button>
+          </div>
+        </motion.form>
+      </div>
+    );
+  }
+
+  // Credentials Form (Step 3)
+  return (
+    <div className="min-h-screen flex items-center justify-center">
+      <BackgroundDecorations />
+
+      <motion.form
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        onSubmit={handleCredentialsSubmit}
         className="w-full max-w-sm space-y-6 rounded-lg bg-white p-8 shadow-lg"
       >
-        <div className="flex justify-center mb-4">
-          <div className="relative h-12 w-12">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 animate-pulse"></div>
-            <Cloud className="h-12 w-12 text-white absolute inset-0" />
-          </div>
-        </div>
-
-        {/* <h2 className="text-center text-2xl font-semibold text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">Weather Forecast BD!</h2> */}
-        <motion.h1
-          className="text-4xl text-center font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400"
-          variants={fadeIn}
-        >
-          BD Weather
-        </motion.h1>
+        <LogoHeader />
         <p className="text-center text-sm text-gray-500">
-          Enter email & password to continue.
+          Enter your credentials to sign in to{" "}
+          <span className="font-semibold">{selectedStation}</span>.
         </p>
 
         <div className="space-y-4">
+          <div className="relative">
+            <Label
+              htmlFor="role"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Role
+            </Label>
+            <Select value={role} onValueChange={setRole} required>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select your role" />
+              </SelectTrigger>
+              <SelectContent>
+                {roles.map((role) => (
+                  <SelectItem key={role.value} value={role.value}>
+                    {role.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="relative">
             <Label htmlFor="email" className="sr-only">
               Email
@@ -251,46 +541,51 @@ export default function SignInForm() {
 
         <FormError message={formError} />
 
-        <Button
-          type="submit"
-          className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
-          disabled={loading}
-        >
-          {loading && (
-            <svg
-              className="animate-spin h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              ></path>
-            </svg>
-          )}
-          {loading ? "Signing..." : "Sign In"}
-        </Button>
-
-        <p className="text-center text-sm text-gray-600">
-          Don’t have an account?{" "}
-          <Link
-            href="/sign-up"
-            className="font-medium text-blue-700 hover:underline"
+        <div className="flex flex-col space-y-3">
+          <Button
+            type="submit"
+            className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
+            disabled={loading}
           >
-            Create an account
-          </Link>
-        </p>
-      </form>
+            {loading && (
+              <svg
+                className="animate-spin h-5 w-5 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                ></path>
+              </svg>
+            )}
+            {loading ? "Signing in..." : "Sign In"}
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full flex items-center justify-center gap-2"
+            onClick={() => {
+              setStep("security");
+              setFormError("");
+            }}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Security Code
+          </Button>
+        </div>
+      </motion.form>
     </div>
   );
 }

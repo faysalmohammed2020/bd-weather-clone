@@ -19,8 +19,8 @@ const Profile = () => {
             <span className="whitespace-nowrap font-medium text-white uppercase text-shadow">
               {session?.user.name} ({session?.user.role})
             </span>
-            <span className="uppercase text-xs text-white text-shadow">
-              {session?.user.district}
+            <span className="uppercase text-md text-white text-shadow">
+              {session?.user.stationName} ({session?.user.stationId})
             </span>
           </div>
         </>
