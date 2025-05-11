@@ -135,6 +135,7 @@ exports.Prisma.UsersScalarFieldEnum = {
   upazila: 'upazila',
   stationName: 'stationName',
   stationId: 'stationId',
+  securityCode: 'securityCode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

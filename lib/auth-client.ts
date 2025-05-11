@@ -24,6 +24,11 @@ export const { signIn, signUp, signOut, useSession, admin } = createAuthClient({
           required: false,
           type: "string",
         },
+        securityCode: {
+          // Changed from stationCode to securityCode to match your schema
+          required: false,
+          type: "string",
+        },
         role: {
           required: true,
           type: "string",

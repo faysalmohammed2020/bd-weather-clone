@@ -1216,6 +1216,7 @@ export namespace Prisma {
     upazila: string | null
     stationName: string | null
     stationId: string | null
+    securityCode: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1235,6 +1236,7 @@ export namespace Prisma {
     upazila: string | null
     stationName: string | null
     stationId: string | null
+    securityCode: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1254,6 +1256,7 @@ export namespace Prisma {
     upazila: number
     stationName: number
     stationId: number
+    securityCode: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1283,6 +1286,7 @@ export namespace Prisma {
     upazila?: true
     stationName?: true
     stationId?: true
+    securityCode?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1302,6 +1306,7 @@ export namespace Prisma {
     upazila?: true
     stationName?: true
     stationId?: true
+    securityCode?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1321,6 +1326,7 @@ export namespace Prisma {
     upazila?: true
     stationName?: true
     stationId?: true
+    securityCode?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -1427,6 +1433,7 @@ export namespace Prisma {
     upazila: string
     stationName: string | null
     stationId: string | null
+    securityCode: string | null
     createdAt: Date
     updatedAt: Date
     _count: UsersCountAggregateOutputType | null
@@ -1465,6 +1472,7 @@ export namespace Prisma {
     upazila?: boolean
     stationName?: boolean
     stationId?: boolean
+    securityCode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     sessions?: boolean | users$sessionsArgs<ExtArgs>
@@ -1487,6 +1495,7 @@ export namespace Prisma {
     upazila?: boolean
     stationName?: boolean
     stationId?: boolean
+    securityCode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["users"]>
@@ -1506,6 +1515,7 @@ export namespace Prisma {
     upazila?: boolean
     stationName?: boolean
     stationId?: boolean
+    securityCode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["users"]>
@@ -1525,11 +1535,12 @@ export namespace Prisma {
     upazila?: boolean
     stationName?: boolean
     stationId?: boolean
+    securityCode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "emailVerified" | "image" | "role" | "banned" | "banReason" | "banExpires" | "division" | "district" | "upazila" | "stationName" | "stationId" | "createdAt" | "updatedAt", ExtArgs["result"]["users"]>
+  export type usersOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "emailVerified" | "image" | "role" | "banned" | "banReason" | "banExpires" | "division" | "district" | "upazila" | "stationName" | "stationId" | "securityCode" | "createdAt" | "updatedAt", ExtArgs["result"]["users"]>
   export type usersInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     sessions?: boolean | users$sessionsArgs<ExtArgs>
     accounts?: boolean | users$accountsArgs<ExtArgs>
@@ -1559,6 +1570,7 @@ export namespace Prisma {
       upazila: string
       stationName: string | null
       stationId: string | null
+      securityCode: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["users"]>
@@ -2000,6 +2012,7 @@ export namespace Prisma {
     readonly upazila: FieldRef<"users", 'String'>
     readonly stationName: FieldRef<"users", 'String'>
     readonly stationId: FieldRef<"users", 'String'>
+    readonly securityCode: FieldRef<"users", 'String'>
     readonly createdAt: FieldRef<"users", 'DateTime'>
     readonly updatedAt: FieldRef<"users", 'DateTime'>
   }
@@ -5801,6 +5814,7 @@ export namespace Prisma {
     upazila: 'upazila',
     stationName: 'stationName',
     stationId: 'stationId',
+    securityCode: 'securityCode',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -5975,6 +5989,7 @@ export namespace Prisma {
     upazila?: StringFilter<"users"> | string
     stationName?: StringNullableFilter<"users"> | string | null
     stationId?: StringNullableFilter<"users"> | string | null
+    securityCode?: StringNullableFilter<"users"> | string | null
     createdAt?: DateTimeFilter<"users"> | Date | string
     updatedAt?: DateTimeFilter<"users"> | Date | string
     sessions?: SessionsListRelationFilter
@@ -5996,6 +6011,7 @@ export namespace Prisma {
     upazila?: SortOrder
     stationName?: SortOrderInput | SortOrder
     stationId?: SortOrderInput | SortOrder
+    securityCode?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     sessions?: sessionsOrderByRelationAggregateInput
@@ -6020,6 +6036,7 @@ export namespace Prisma {
     upazila?: StringFilter<"users"> | string
     stationName?: StringNullableFilter<"users"> | string | null
     stationId?: StringNullableFilter<"users"> | string | null
+    securityCode?: StringNullableFilter<"users"> | string | null
     createdAt?: DateTimeFilter<"users"> | Date | string
     updatedAt?: DateTimeFilter<"users"> | Date | string
     sessions?: SessionsListRelationFilter
@@ -6041,6 +6058,7 @@ export namespace Prisma {
     upazila?: SortOrder
     stationName?: SortOrderInput | SortOrder
     stationId?: SortOrderInput | SortOrder
+    securityCode?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: usersCountOrderByAggregateInput
@@ -6068,6 +6086,7 @@ export namespace Prisma {
     upazila?: StringWithAggregatesFilter<"users"> | string
     stationName?: StringNullableWithAggregatesFilter<"users"> | string | null
     stationId?: StringNullableWithAggregatesFilter<"users"> | string | null
+    securityCode?: StringNullableWithAggregatesFilter<"users"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"users"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"users"> | Date | string
   }
@@ -6314,6 +6333,7 @@ export namespace Prisma {
     upazila: string
     stationName?: string | null
     stationId?: string | null
+    securityCode?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     sessions?: sessionsCreateNestedManyWithoutUserInput
@@ -6335,6 +6355,7 @@ export namespace Prisma {
     upazila: string
     stationName?: string | null
     stationId?: string | null
+    securityCode?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     sessions?: sessionsUncheckedCreateNestedManyWithoutUserInput
@@ -6356,6 +6377,7 @@ export namespace Prisma {
     upazila?: StringFieldUpdateOperationsInput | string
     stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
+    securityCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: sessionsUpdateManyWithoutUserNestedInput
@@ -6377,6 +6399,7 @@ export namespace Prisma {
     upazila?: StringFieldUpdateOperationsInput | string
     stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
+    securityCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: sessionsUncheckedUpdateManyWithoutUserNestedInput
@@ -6398,6 +6421,7 @@ export namespace Prisma {
     upazila: string
     stationName?: string | null
     stationId?: string | null
+    securityCode?: string | null
     createdAt: Date | string
     updatedAt: Date | string
   }
@@ -6417,6 +6441,7 @@ export namespace Prisma {
     upazila?: StringFieldUpdateOperationsInput | string
     stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
+    securityCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6436,6 +6461,7 @@ export namespace Prisma {
     upazila?: StringFieldUpdateOperationsInput | string
     stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
+    securityCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -6799,6 +6825,7 @@ export namespace Prisma {
     upazila?: SortOrder
     stationName?: SortOrder
     stationId?: SortOrder
+    securityCode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6822,6 +6849,7 @@ export namespace Prisma {
     upazila?: SortOrder
     stationName?: SortOrder
     stationId?: SortOrder
+    securityCode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -6841,6 +6869,7 @@ export namespace Prisma {
     upazila?: SortOrder
     stationName?: SortOrder
     stationId?: SortOrder
+    securityCode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -7556,6 +7585,7 @@ export namespace Prisma {
     upazila: string
     stationName?: string | null
     stationId?: string | null
+    securityCode?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     accounts?: accountsCreateNestedManyWithoutUserInput
@@ -7576,6 +7606,7 @@ export namespace Prisma {
     upazila: string
     stationName?: string | null
     stationId?: string | null
+    securityCode?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     accounts?: accountsUncheckedCreateNestedManyWithoutUserInput
@@ -7612,6 +7643,7 @@ export namespace Prisma {
     upazila?: StringFieldUpdateOperationsInput | string
     stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
+    securityCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: accountsUpdateManyWithoutUserNestedInput
@@ -7632,6 +7664,7 @@ export namespace Prisma {
     upazila?: StringFieldUpdateOperationsInput | string
     stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
+    securityCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     accounts?: accountsUncheckedUpdateManyWithoutUserNestedInput
@@ -7652,6 +7685,7 @@ export namespace Prisma {
     upazila: string
     stationName?: string | null
     stationId?: string | null
+    securityCode?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     sessions?: sessionsCreateNestedManyWithoutUserInput
@@ -7672,6 +7706,7 @@ export namespace Prisma {
     upazila: string
     stationName?: string | null
     stationId?: string | null
+    securityCode?: string | null
     createdAt: Date | string
     updatedAt: Date | string
     sessions?: sessionsUncheckedCreateNestedManyWithoutUserInput
@@ -7708,6 +7743,7 @@ export namespace Prisma {
     upazila?: StringFieldUpdateOperationsInput | string
     stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
+    securityCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: sessionsUpdateManyWithoutUserNestedInput
@@ -7728,6 +7764,7 @@ export namespace Prisma {
     upazila?: StringFieldUpdateOperationsInput | string
     stationName?: NullableStringFieldUpdateOperationsInput | string | null
     stationId?: NullableStringFieldUpdateOperationsInput | string | null
+    securityCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     sessions?: sessionsUncheckedUpdateManyWithoutUserNestedInput

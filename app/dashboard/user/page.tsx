@@ -14,67 +14,130 @@ import { toast } from "sonner";
 import { signUp } from "@/lib/auth-client";
 import { useLocation } from "@/contexts/divisionContext";
 
+// const stations = [
+//   { name: "Dhaka", id: "41923" },
+//   { name: "Joydebpur", id: "41700" },
+//   { name: "Mymensingh", id: "41886" },
+//   { name: "Tangail", id: "41909" },
+//   { name: "Faridpur", id: "41929" },
+//   { name: "Madaripur", id: "41939" },
+//   { name: "Chittagong", id: "41978" },
+//   { name: "Sandwip", id: "41964" },
+//   { name: "Sitakunda", id: "41965" },
+//   { name: "Rangamati", id: "41966" },
+//   { name: "Comilla", id: "41933" },
+//   { name: "Chandpur", id: "41941" },
+//   { name: "M.Court", id: "41953" },
+//   { name: "Feni", id: "41943" },
+//   { name: "Hatiya", id: "41963" },
+//   { name: "Coxs_Bazar", id: "41992" },
+//   { name: "Kutubdia", id: "41989" },
+//   { name: "Teknaf", id: "41998" },
+//   { name: "Sylhet", id: "41891" },
+//   { name: "Srimangal", id: "41915" },
+//   { name: "Rajshahi", id: "41895" },
+//   { name: "Ishurdi", id: "41907" },
+//   { name: "Bogra", id: "41883" },
+//   { name: "Rangpur", id: "41859" },
+//   { name: "Dinajpur", id: "41863" },
+//   { name: "Sayedpur", id: "41858" },
+//   { name: "Khulna", id: "41947" },
+//   { name: "Mongla", id: "41958" },
+//   { name: "Satkhira", id: "41946" },
+//   { name: "Jessore", id: "41936" },
+//   { name: "Chuadanga", id: "41926" },
+//   { name: "Barisal", id: "41950" },
+//   { name: "Patuakhali", id: "41960" },
+//   { name: "Khepupara", id: "41984" },
+//   { name: "Bhola", id: "41951" },
+//   { name: "Tetulia", id: "41850" },
+//   { name: "Saint Martin", id: "41955" },
+//   { name: "Bandarban", id: "41980" },
+//   { name: "Dighinala", id: "41944" },
+//   { name: "Nikli", id: "41902" },
+//   { name: "Dimla", id: "41851" },
+//   { name: "Badalgachhi", id: "41881" },
+//   { name: "Rajarhat", id: "41856" },
+//   { name: "Kumarkhali", id: "41927" },
+//   { name: "Gopalganj", id: "41938" },
+//   { name: "Tarash", id: "41897" },
+//   { name: "Netrokona", id: "41888" },
+//   { name: "Aricha_Manikganj", id: "41930" },
+//   { name: "Mawa_Munshiganj", id: "41940" },
+//   { name: "Narsingdi", id: "41924" },
+//   { name: "Ashuganj_Brahmanbaria", id: "41916" },
+//   { name: "Monpura_Bhola", id: "41981" },
+//   { name: "Kawkhali_Pirojpur", id: "41979" },
+//   { name: "Koyra_Khulna", id: "41948" },
+//   { name: "Ramgati_Lakshmipur", id: "41961" },
+//   { name: "Narayanganj", id: "41925" },
+//   { name: "Hijla_Barishal", id: "41962" },
+//   { name: "Baghabari_Sirajganj", id: "41906" },
+//   { name: "Joydebpur", id: "99999" },
+//   { name: "Ambagan", id: "41977" },
+// ];
+
 const stations = [
-  { name: "Dhaka", id: "41923" },
-  { name: "Joydebpur", id: "41700" },
-  { name: "Mymensingh", id: "41886" },
-  { name: "Tangail", id: "41909" },
-  { name: "Faridpur", id: "41929" },
-  { name: "Madaripur", id: "41939" },
-  { name: "Chittagong", id: "41978" },
-  { name: "Sandwip", id: "41964" },
-  { name: "Sitakunda", id: "41965" },
-  { name: "Rangamati", id: "41966" },
-  { name: "Comilla", id: "41933" },
-  { name: "Chandpur", id: "41941" },
-  { name: "M.Court", id: "41953" },
-  { name: "Feni", id: "41943" },
-  { name: "Hatiya", id: "41963" },
-  { name: "Coxs_Bazar", id: "41992" },
-  { name: "Kutubdia", id: "41989" },
-  { name: "Teknaf", id: "41998" },
-  { name: "Sylhet", id: "41891" },
-  { name: "Srimangal", id: "41915" },
-  { name: "Rajshahi", id: "41895" },
-  { name: "Ishurdi", id: "41907" },
-  { name: "Bogra", id: "41883" },
-  { name: "Rangpur", id: "41859" },
-  { name: "Dinajpur", id: "41863" },
-  { name: "Sayedpur", id: "41858" },
-  { name: "Khulna", id: "41947" },
-  { name: "Mongla", id: "41958" },
-  { name: "Satkhira", id: "41946" },
-  { name: "Jessore", id: "41936" },
-  { name: "Chuadanga", id: "41926" },
-  { name: "Barisal", id: "41950" },
-  { name: "Patuakhali", id: "41960" },
-  { name: "Khepupara", id: "41984" },
-  { name: "Bhola", id: "41951" },
-  { name: "Tetulia", id: "41850" },
-  { name: "Saint Martin", id: "41955" },
-  { name: "Bandarban", id: "41980" },
-  { name: "Dighinala", id: "41944" },
-  { name: "Nikli", id: "41902" },
-  { name: "Dimla", id: "41851" },
-  { name: "Badalgachhi", id: "41881" },
-  { name: "Rajarhat", id: "41856" },
-  { name: "Kumarkhali", id: "41927" },
-  { name: "Gopalganj", id: "41938" },
-  { name: "Tarash", id: "41897" },
-  { name: "Netrokona", id: "41888" },
-  { name: "Aricha_Manikganj", id: "41930" },
-  { name: "Mawa_Munshiganj", id: "41940" },
-  { name: "Narsingdi", id: "41924" },
-  { name: "Ashuganj_Brahmanbaria", id: "41916" },
-  { name: "Monpura_Bhola", id: "41981" },
-  { name: "Kawkhali_Pirojpur", id: "41979" },
-  { name: "Koyra_Khulna", id: "41948" },
-  { name: "Ramgati_Lakshmipur", id: "41961" },
-  { name: "Narayanganj", id: "41925" },
-  { name: "Hijla_Barishal", id: "41962" },
-  { name: "Baghabari_Sirajganj", id: "41906" },
-  { name: "Joydebpur", id: "99999" },
-  { name: "Ambagan", id: "41977" },
+  { name: "Dhaka", id: "41923", securityCode: "BlueComet" },
+  { name: "Joydebpur", id: "41700", securityCode: "DaringForest" },
+  { name: "Mymensingh", id: "41886", securityCode: "FuzzyLion" },
+  { name: "Tangail", id: "41909", securityCode: "GloriousTiger" },
+  { name: "Faridpur", id: "41929", securityCode: "SilentStorm" },
+  { name: "Madaripur", id: "41939", securityCode: "LuckyWizard" },
+  { name: "Chittagong", id: "41978", securityCode: "HappyWizard" },
+  { name: "Sandwip", id: "41964", securityCode: "FastFalcon" },
+  { name: "Sitakunda", id: "41965", securityCode: "NimbleShadow" },
+  { name: "Rangamati", id: "41966", securityCode: "BraveStorm" },
+  { name: "Comilla", id: "41933", securityCode: "GentleStar" },
+  { name: "Chandpur", id: "41941", securityCode: "SwiftEagle" },
+  { name: "M.Court", id: "41953", securityCode: "BoldShadow" },
+  { name: "Feni", id: "41943", securityCode: "BraveWizard" },
+  { name: "Hatiya", id: "41963", securityCode: "SwiftBlizzard" },
+  { name: "Coxs_Bazar", id: "41992", securityCode: "HappyRiver" },
+  { name: "Kutubdia", id: "41989", securityCode: "BlueOcean" },
+  { name: "Teknaf", id: "41998", securityCode: "SilentMeteor" },
+  { name: "Sylhet", id: "41891", securityCode: "BraveLion" },
+  { name: "Srimangal", id: "41915", securityCode: "BlueMountain" },
+  { name: "Rajshahi", id: "41895", securityCode: "FastOcean" },
+  { name: "Ishurdi", id: "41907", securityCode: "NimbleMountain" },
+  { name: "Bogra", id: "41883", securityCode: "BraveShadow" },
+  { name: "Rangpur", id: "41859", securityCode: "BrightSky" },
+  { name: "Dinajpur", id: "41863", securityCode: "GentleBlizzard" },
+  { name: "Sayedpur", id: "41858", securityCode: "HappyGlacier" },
+  { name: "Khulna", id: "41947", securityCode: "GentleMeteor" },
+  { name: "Mongla", id: "41958", securityCode: "CleverMeteor" },
+  { name: "Satkhira", id: "41946", securityCode: "LuckyLion" },
+  { name: "Jessore", id: "41936", securityCode: "SmartFalcon" },
+  { name: "Chuadanga", id: "41926", securityCode: "ShinyPhoenix" },
+  { name: "Barisal", id: "41950", securityCode: "DaringFalcon" },
+  { name: "Patuakhali", id: "41960", securityCode: "CalmStorm" },
+  { name: "Khepupara", id: "41984", securityCode: "BlueWolf" },
+  { name: "Bhola", id: "41951", securityCode: "SilentLion" },
+  { name: "Tetulia", id: "41850", securityCode: "CleverPhoenix" },
+  { name: "Saint Martin", id: "41955", securityCode: "CleverStorm" },
+  { name: "Bandarban", id: "41980", securityCode: "SmartEagle" },
+  { name: "Dighinala", id: "41944", securityCode: "MightyForest" },
+  { name: "Nikli", id: "41902", securityCode: "LuckyMeteor" },
+  { name: "Dimla", id: "41851", securityCode: "ShinyFalcon" },
+  { name: "Badalgachhi", id: "41881", securityCode: "BoldForest" },
+  { name: "Rajarhat", id: "41856", securityCode: "CleverMountain" },
+  { name: "Kumarkhali", id: "41927", securityCode: "ValiantSky" },
+  { name: "Gopalganj", id: "41938", securityCode: "DaringWolf" },
+  { name: "Tarash", id: "41897", securityCode: "DaringGlacier" },
+  { name: "Netrokona", id: "41888", securityCode: "BrightTiger" },
+  { name: "Aricha_Manikganj", id: "41930", securityCode: "GentleGlacier" },
+  { name: "Mawa_Munshiganj", id: "41940", securityCode: "NimbleEagle" },
+  { name: "Narsingdi", id: "41924", securityCode: "BrightGlacier" },
+  { name: "Ashuganj_Brahmanbaria", id: "41916", securityCode: "SwiftSky" },
+  { name: "Monpura_Bhola", id: "41981", securityCode: "DaringWizard" },
+  { name: "Kawkhali_Pirojpur", id: "41979", securityCode: "NimblePhoenix" },
+  { name: "Koyra_Khulna", id: "41948", securityCode: "HappyMeteor" },
+  { name: "Ramgati_Lakshmipur", id: "41961", securityCode: "MightyMountain" },
+  { name: "Narayanganj", id: "41925", securityCode: "FuzzyWolf" },
+  { name: "Hijla_Barishal", id: "41962", securityCode: "CalmFalcon" },
+  { name: "Baghabari_Sirajganj", id: "41906", securityCode: "ShinyComet" },
+  { name: "Joydebpur", id: "99999", securityCode: "CalmComet" },
+  { name: "Ambagan", id: "41977", securityCode: "HappyPhoenix" },
 ];
 
 interface User {
@@ -83,6 +146,7 @@ interface User {
   email: string;
   role: string;
   stationId?: string;
+  securityCode: string;
   stationName?: string;
   division?: string;
   district?: string;
@@ -106,6 +170,7 @@ export default function UserTable() {
       password: "",
       role: "dataentry",
       stationId: "",
+      securityCode: "",
       stationName: "",
       division: "",
       district: "",
@@ -160,13 +225,42 @@ export default function UserTable() {
   const handleAddUser = async () => {
     setFormError("");
 
-    const { name, email, password, role, stationId, stationName } = newUser;
+    const {
+      name,
+      email,
+      password,
+      role,
+      stationId,
+      stationName,
+      securityCode,
+    } = newUser;
     const division = selectedDivision?.name;
     const district = selectedDistrict?.name;
     const upazila = selectedUpazila?.name;
 
     if (!email || !password || !role || !division || !district || !upazila) {
       setFormError("All fields are required.");
+      return;
+    }
+
+    // Check for super_admin limit
+    if (role === "super_admin") {
+      const superAdminCount = users.filter(
+        (u) => u.role === "super_admin"
+      ).length;
+      if (superAdminCount >= 3) {
+        setFormError("Maximum limit of 3 Super Admins reached");
+        return;
+      }
+    }
+
+    // Validate password length based on role
+    const requiredLength =
+      role === "super_admin" ? 12 : role === "station_admin" ? 11 : 10;
+    if (password.length < requiredLength) {
+      setFormError(
+        `Password must be at least ${requiredLength} characters for ${role} role.`
+      );
       return;
     }
 
@@ -182,7 +276,8 @@ export default function UserTable() {
           district,
           upazila,
           stationId,
-          stationName: stationName || "", // Make sure to include stationName
+          securityCode: securityCode, // Use the correct field name from the schema
+          stationName: stationName || "",
         },
         {
           onRequest: () => {},
@@ -252,6 +347,7 @@ export default function UserTable() {
           division,
           district,
           upazila,
+          securityCode: currentUser.securityCode, // Use the correct field name from the schema
         }),
       });
 
@@ -300,6 +396,7 @@ export default function UserTable() {
       password: "",
       role: "dataentry",
       stationId: "",
+      securityCode: "",
       stationName: "",
       division: "",
       district: "",
@@ -364,9 +461,9 @@ export default function UserTable() {
               className="border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
             >
               <option value="all">All Roles</option>
-              <option value="superadmin">Super Admin</option>
-              <option value="stationadmin">Station Admin</option>
-              <option value="dataentry">Data Entry</option>
+              <option value="super_admin">Super Admin</option>
+              <option value="station_admin">Station Admin</option>
+              <option value="data_admin">Data Entry</option>
             </select>
           </div>
 
@@ -520,8 +617,9 @@ export default function UserTable() {
                   type: "select",
                   required: true,
                   options: [
-                    { value: "stationadmin", label: "Station Admin" },
-                    { value: "dataentry", label: "Data Entry" },
+                    { value: "super_admin", label: "Super Admin" },
+                    { value: "station_admin", label: "Station Admin" },
+                    { value: "data_admin", label: "Data Admin" },
                   ],
                 },
                 {
@@ -591,6 +689,7 @@ export default function UserTable() {
                     ...newUser,
                     stationName: selectedName,
                     stationId: selectedStation?.id || "",
+                    securityCode: selectedStation?.securityCode || "",
                   });
                 }}
                 className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
@@ -611,6 +710,18 @@ export default function UserTable() {
               <input
                 type="text"
                 value={newUser.stationId || ""}
+                disabled
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm bg-gray-100 cursor-not-allowed"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Station Code (Security Code)
+              </label>
+              <input
+                type="text"
+                value={newUser.securityCode || ""}
                 disabled
                 className="w-full border border-gray-300 rounded-lg p-2 text-sm bg-gray-100 cursor-not-allowed"
               />
@@ -784,9 +895,9 @@ export default function UserTable() {
                   }
                   className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                 >
-                  <option value="superadmin">Super Admin</option>
-                  <option value="stationadmin">Station Admin</option>
-                  <option value="dataentry">Data Entry</option>
+                  <option value="super_admin">Super Admin</option>
+                  <option value="station_admin">Station Admin</option>
+                  <option value="data_admin">Data Admin</option>
                 </select>
               </div>
             </div>
@@ -806,6 +917,7 @@ export default function UserTable() {
                     ...currentUser,
                     stationName: selectedName,
                     stationId: selectedStation?.id || "",
+                    securityCode: selectedStation?.securityCode || "", // Keep this for UI display
                   });
                 }}
                 className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
@@ -826,6 +938,18 @@ export default function UserTable() {
                 type="text"
                 value={currentUser.stationId || ""}
                 disabled
+                className="w-full border border-gray-300 rounded-lg p-2 text-sm bg-gray-100 cursor-not-allowed"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Station Code (Security Code)
+              </label>
+              <input
+                type="text"
+                value={currentUser.securityCode || ""}
+                readOnly
                 className="w-full border border-gray-300 rounded-lg p-2 text-sm bg-gray-100 cursor-not-allowed"
               />
             </div>
