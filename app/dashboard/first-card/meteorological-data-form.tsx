@@ -77,37 +77,42 @@ export function MeteorologicalDataForm() {
     console.log("Form data updated:", formData);
   }, [formData]);
 
-
   const calculateDewPointAndHumidity = (dryBulb, wetBulb) => {
     if (!dryBulb || !wetBulb) return;
-  
+
     const dryBulbValue = Number.parseFloat(dryBulb);
     const wetBulbValue = Number.parseFloat(wetBulb);
     const difference = Number(Math.abs(dryBulbValue - wetBulbValue).toFixed(1));
     const roundedDryBulb = Math.round(dryBulbValue);
-  
+
     // Validate ranges
     if (roundedDryBulb < 0 || roundedDryBulb > 50 || difference > 30.0) {
-      toast.error("Temperature values are outside the range of the hygrometric table");
+      toast.error(
+        "Temperature values are outside the range of the hygrometric table"
+      );
       return;
     }
-  
+
     // Find index of the difference in 'differences'
     const diffIndex = hygrometricTable.differences.indexOf(difference);
     if (diffIndex === -1) {
       toast.error("Invalid temperature difference for lookup");
       return;
     }
-  
+
     // Find the dbT entry
-    const dbtEntry = hygrometricTable.data.find(entry => entry.dbT === roundedDryBulb);
+    const dbtEntry = hygrometricTable.data.find(
+      (entry) => entry.dbT === roundedDryBulb
+    );
     if (!dbtEntry || !dbtEntry.values || !dbtEntry.values[diffIndex]) {
-      toast.error("Could not find matching dry bulb temperature or difference in the table");
+      toast.error(
+        "Could not find matching dry bulb temperature or difference in the table"
+      );
       return;
     }
-  
+
     const { DpT, RH } = dbtEntry.values[diffIndex];
-  
+
     // Update state
     setHygrometricData({
       dryBulb: dryBulbValue.toString(),
@@ -116,16 +121,15 @@ export function MeteorologicalDataForm() {
       dewPoint: DpT.toString(),
       relativeHumidity: RH.toString(),
     });
-  
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
       Td: DpT.toString(),
       relativeHumidity: RH.toString(),
     }));
-  
+
     toast.success("Dew point and relative humidity calculated successfully");
   };
-  
 
   // Update the handleSubmit function to save the JSON file on the server
 
@@ -253,109 +257,37 @@ export function MeteorologicalDataForm() {
     }
   };
 
-  
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setIsSubmitting(true);
-  
-  //   try {
-  //     // Add timestamp to the form data
-  //     const submissionData = {
-  //       ...formData,
-  //       timestamp: new Date().toISOString(),
-  //       stationInfo: {
-  //         stationName: formData.stationName,
-  //         stationNo: formData.stationNo,
-  //         year: formData.year
-  //       }
-  //     };
-  
-  //     const response = await fetch("/api/first-card-data", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(submissionData),
-  //     });
-  
-  //     const result = await response.json();
-  
-  //     if (!response.ok) {
-  //       throw new Error(result.message || "Failed to save data");
-  //     }
-  
-  //     toast.success("Meteorological data saved successfully!", {
-  //       description: `Entry #${result.dataCount} saved at ${new Date().toLocaleTimeString()}`,
-  //       action: {
-  //         label: "View All",
-  //         onClick: () => {
-  //           // Optional: Add navigation to view all data
-  //           console.log("View all data clicked");
-  //         },
-  //       },
-  //     });
-  
-  //     // Reset form after successful submission if needed
-  //     setFormData({
-  //       // Keep station info but clear measurements
-  //       ...(formData.stationName && { stationName: formData.stationName }),
-  //       ...(formData.stationNo && { stationNo: formData.stationNo }),
-  //       ...(formData.year && { year: formData.year }),
-  //     });
-  
-  //     // Reset hygrometric data
-  //     setHygrometricData({
-  //       dryBulb: "",
-  //       wetBulb: "",
-  //       difference: "",
-  //       dewPoint: "",
-  //       relativeHumidity: "",
-  //     });
-  
-  //   } catch (error) {
-  //     console.error("Error saving data:", error);
-  //     toast.error("Failed to save data", {
-  //       description: error instanceof Error ? error.message : "Please check your connection and try again.",
-  //       action: {
-  //         label: "Retry",
-  //         onClick: () => handleSubmit(e),
-  //       },
-  //     });
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Prevent duplicate submissions
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
-  
+
     try {
       // Prepare data (removed redundant stationInfo nesting)
       const submissionData = {
         ...formData,
         ...hygrometricData, // Include hygrometric data directly
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-  
+
       const response = await fetch("/api/first-card-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submissionData),
       });
-  
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Failed to save data");
       }
-  
+
       const result = await response.json();
-  
+
       toast.success("Data saved successfully!", {
         description: `Entry #${result.dataCount} saved`,
         action: {
@@ -363,9 +295,9 @@ export function MeteorologicalDataForm() {
           onClick: () => router.push("/data"), // Example: Navigate to data view
         },
       });
-  
+
       // Reset only measurement fields (preserves station info)
-      setFormData(prev => ({
+      setFormData((prev) => ({
         stationName: prev.stationName,
         stationNo: prev.stationNo,
         year: prev.year,
@@ -374,7 +306,7 @@ export function MeteorologicalDataForm() {
         visibility: "",
         // ... other fields to reset
       }));
-  
+
       setHygrometricData({
         dryBulb: "",
         wetBulb: "",
@@ -382,7 +314,6 @@ export function MeteorologicalDataForm() {
         dewPoint: "",
         relativeHumidity: "",
       });
-  
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("Submission failed", {
@@ -392,6 +323,7 @@ export function MeteorologicalDataForm() {
       setIsSubmitting(false);
     }
   };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -877,7 +809,8 @@ export function MeteorologicalDataForm() {
                         <div className="mt-6 space-y-4">
                           <div className="p-4 bg-gradient-to-r from-blue-200 to-blue-300 text-blue-800">
                             <h3 className="text-lg font-semibold flex items-center">
-                              <Thermometer className="mr-2" /> Dew-Point & Humidity
+                              <Thermometer className="mr-2" /> Dew-Point &
+                              Humidity
                             </h3>
                           </div>
                           <div className="grid gap-4 sm:grid-cols-2">
@@ -935,111 +868,117 @@ export function MeteorologicalDataForm() {
 
               {/* Squall Tab */}
               <TabsContent
-  value="squall"
-  className="mt-6 transition-all duration-500"
->
-  <Card className={cn("overflow-hidden", tabStyles.squall.card)}>
-    <div className="p-4 bg-gradient-to-r from-amber-200 to-amber-300 text-amber-800">
-      <h3 className="text-lg font-semibold flex items-center">
-        <Wind className="mr-2" /> Squall Measurements
-      </h3>
-    </div>
-    <CardContent className="pt-6 space-y-4">
-      {formData.squallConfirmed === undefined ? (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
-          <p className="text-amber-800 font-medium mb-3">Are you sure you want to fill up squall measurements?</p>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="border-amber-500 text-amber-700 hover:bg-amber-50"
-              onClick={() => {
-                setFormData(prev => ({
-                  ...prev,
-                  squallConfirmed: false,
-                  squallForce: "",
-                  squallDirection: "",
-                  squallTime: ""
-                }));
-                // Skip to next tab (replace "next-tab-value" with your actual next tab value)
-                setTabValue("next-tab-value");
-              }}
-            >
-              No, Skip
-            </Button>
-            <Button
-              type="button"
-              className="bg-amber-500 hover:bg-amber-600"
-              onClick={() => {
-                setFormData(prev => ({
-                  ...prev,
-                  squallConfirmed: true
-                }));
-              }}
-            >
-              Yes, Continue
-            </Button>
-          </div>
-        </div>
-      ) : formData.squallConfirmed ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="squallForce">Force (KTS)</Label>
-            <Input
-              id="squallForce"
-              name="squallForce"
-              value={formData.squallForce || ""}
-              onChange={handleChange}
-              className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
-            />
-          </div>
+                value="squall"
+                className="mt-6 transition-all duration-500"
+              >
+                <Card className={cn("overflow-hidden", tabStyles.squall.card)}>
+                  <div className="p-4 bg-gradient-to-r from-amber-200 to-amber-300 text-amber-800">
+                    <h3 className="text-lg font-semibold flex items-center">
+                      <Wind className="mr-2" /> Squall Measurements
+                    </h3>
+                  </div>
+                  <CardContent className="pt-6 space-y-4">
+                    {formData.squallConfirmed === undefined ? (
+                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
+                        <p className="text-amber-800 font-medium mb-3">
+                          Are you sure you want to fill up squall measurements?
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="border-amber-500 text-amber-700 hover:bg-amber-50"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                squallConfirmed: false,
+                                squallForce: "",
+                                squallDirection: "",
+                                squallTime: "",
+                              }));
+                              // Skip to next tab (replace "next-tab-value" with your actual next tab value)
+                              setTabValue("next-tab-value");
+                            }}
+                          >
+                            No, Skip
+                          </Button>
+                          <Button
+                            type="button"
+                            className="bg-amber-500 hover:bg-amber-600"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                squallConfirmed: true,
+                              }));
+                            }}
+                          >
+                            Yes, Continue
+                          </Button>
+                        </div>
+                      </div>
+                    ) : formData.squallConfirmed ? (
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="squallForce">Force (KTS)</Label>
+                          <Input
+                            id="squallForce"
+                            name="squallForce"
+                            value={formData.squallForce || ""}
+                            onChange={handleChange}
+                            className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
+                          />
+                        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="squallDirection">Direction (°d)</Label>
-            <Input
-              id="squallDirection"
-              name="squallDirection"
-              type="number"
-              min="0"
-              max="360"
-              value={formData.squallDirection || ""}
-              onChange={handleChange}
-              className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
-            />
-          </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="squallDirection">
+                            Direction (°d)
+                          </Label>
+                          <Input
+                            id="squallDirection"
+                            name="squallDirection"
+                            type="number"
+                            min="0"
+                            max="360"
+                            value={formData.squallDirection || ""}
+                            onChange={handleChange}
+                            className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
+                          />
+                        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="squallTime">Time (qt)</Label>
-            <Input
-              id="squallTime"
-              name="squallTime"
-              value={formData.squallTime || ""}
-              onChange={handleChange}
-              className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="p-4 bg-slate-50 border border-slate-200 rounded-md flex justify-between items-center">
-          <p className="text-slate-600">Squall measurements skipped</p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setFormData(prev => ({
-                ...prev,
-                squallConfirmed: true
-              }));
-            }}
-          >
-            Fill Measurements
-          </Button>
-        </div>
-      )}
-    </CardContent>
-  </Card>
-</TabsContent>
+                        <div className="space-y-2">
+                          <Label htmlFor="squallTime">Time (qt)</Label>
+                          <Input
+                            id="squallTime"
+                            name="squallTime"
+                            value={formData.squallTime || ""}
+                            onChange={handleChange}
+                            className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-slate-50 border border-slate-200 rounded-md flex justify-between items-center">
+                        <p className="text-slate-600">
+                          Squall measurements skipped
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              squallConfirmed: true,
+                            }));
+                          }}
+                        >
+                          Fill Measurements
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
               {/* VV Tab */}
               <TabsContent

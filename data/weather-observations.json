@@ -563,9 +563,9 @@
     "wind": {
       "first-anemometer": "30",
       "second-anemometer": "35",
-      "speed": "70",
-      "wind-direction": "S",
-      "direction": "S"
+      "speed": "107",
+      "wind-direction": "185",
+      "direction": "185"
     },
     "observer": {
       "observer-initial": "Jewel",

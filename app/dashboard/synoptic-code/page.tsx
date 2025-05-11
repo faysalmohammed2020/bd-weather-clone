@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Formik, Form } from "formik";
 import SynopticCodeForm from "./synoptic-code-form";
 import SynopticDataTable from "./SynopticDataTable";
+import SynopticTable from "./synoptic-components/synoptic-table";
 
 export interface SynopticFormValues {
   dataType: string;
@@ -71,7 +72,7 @@ export default function WeatherTabsPage() {
 
           <div className="bg-white p-4 rounded-lg shadow">
             {activeTab === "synoptic" && <SynopticCodeForm />}
-            {activeTab === "weather" && <SynopticDataTable />}
+            {activeTab === "weather" &&  <SynopticTable />}
           </div>
         </Form>
       </Formik>
