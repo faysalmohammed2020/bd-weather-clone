@@ -178,7 +178,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
       <CardHeader className="p-4 bg-sky-600 text-white">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <CardTitle className="text-xl font-bold">
-            First Card - Meteorological Data
+            First Card's Table
           </CardTitle>
 
           <div className="flex items-center gap-2">
@@ -326,10 +326,16 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                       TEMPERATURE
                     </th>
                     <th
-                      colSpan={2}
+                      colSpan={1}
                       className="border border-gray-400 bg-gray-100 text-xs p-1"
                     >
-                      Td & RH
+                      Td Td Td
+                    </th>
+                    <th
+                      colSpan={1}
+                      className="border border-gray-400 bg-gray-100 text-xs p-1"
+                    >
+                      R.H.
                     </th>
                     <th
                       colSpan={3}
@@ -338,11 +344,15 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                       SQUALL
                     </th>
                     <th
-                      colSpan={2}
+                      colSpan={1}
                       className="border border-gray-400 bg-gray-100 text-xs p-1"
                     >
                       VV
                     </th>
+                    <th
+                      colSpan={1}
+                      className="border border-gray-400 bg-gray-100 text-xs p-1"
+                    ></th>
                     <th
                       colSpan={3}
                       className="border border-gray-400 bg-gray-100 text-xs p-1"
@@ -368,7 +378,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     </th>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
                       <div className="writing-vertical h-16">
-                        Bar As Read (mb)
+                        Bar As Read (hPa)
                       </div>
                     </th>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
@@ -378,7 +388,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     </th>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
                       <div className="writing-vertical h-16">
-                        Height Difference Correction (mb)
+                        Height Difference Correction (hPa)
                       </div>
                     </th>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
@@ -393,7 +403,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     </th>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
                       <div className="writing-vertical h-16">
-                        Sea Level Pressure (QFF)
+                        Sea Level Pressure (QNH)
                       </div>
                     </th>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
@@ -413,7 +423,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                       <div className="writing-vertical h-16">Wet Bulb (°C)</div>
                     </th>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">MAX/MIN (��C)</div>
+                      <div className="writing-vertical h-16">MAX/MIN (°C)</div>
                     </th>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
                       <div className="writing-vertical h-16">Dry Bulb (°C)</div>
@@ -422,8 +432,11 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                       <div className="writing-vertical h-16">Wet Bulb (°C)</div>
                     </th>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
+                      <div className="writing-vertical h-16">MAX/MIN (°C)</div>
+                    </th>
+                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
                       <div className="writing-vertical h-16">
-                        Dew Point (°C)
+                        Dew Point Temperature (°C)
                       </div>
                     </th>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
@@ -436,11 +449,11 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     </th>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
                       <div className="writing-vertical h-16">
-                        Direction (Deg)
+                        Direction (dq)
                       </div>
                     </th>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">Time</div>
+                      <div className="writing-vertical h-16">Time (q1)</div>
                     </th>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
                       <div className="writing-vertical h-16">
