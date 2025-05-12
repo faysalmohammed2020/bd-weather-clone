@@ -32,6 +32,12 @@ export const auth = betterAuth({
         required: false,
         type: "string",
       },
+      securityCode: {
+        // Changed from stationCode to securityCode to match your schema
+        nullable: true,
+        required: false,
+        type: "string",
+      },
     },
   },
   session: {
@@ -46,9 +52,5 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  plugins: [
-    admin({
-      defaultRole: "admin",
-    }),
-  ],
+  plugins: [admin()],
 });
