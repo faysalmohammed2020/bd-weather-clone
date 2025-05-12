@@ -453,5 +453,54 @@
     "difference": "1.5",
     "dewPoint": "22",
     "timestamp": "2025-05-12T04:00:52.523Z"
+  },
+  {
+    "dataType": {
+      "0": "1",
+      "1": "2"
+    },
+    "stationNo": {
+      "0": "1",
+      "1": "2",
+      "2": "3",
+      "3": "4",
+      "4": "5"
+    },
+    "stationName": "Dhaka Mirpur",
+    "year": {
+      "0": "2",
+      "1": "5"
+    },
+    "dryBulbAsRead": "24.3",
+    "wetBulbAsRead": "22.8",
+    "Td": "22",
+    "relativeHumidity": "87",
+    "maxMinTempAsRead": "30.6",
+    "barAsRead": "1015",
+    "heightDifference": "0.97",
+    "stationLevelPressure": "1015.97",
+    "seaLevelReduction": "0.97",
+    "correctedSeaLevelPressure": "1016.94",
+    "subIndicator": "1",
+    "alteredThermometer": "1",
+    "correctedForIndex": "1",
+    "afternoonReading": "1",
+    "pressureChange24h": "1",
+    "squallConfirmed": false,
+    "squallForce": "",
+    "squallDirection": "",
+    "squallTime": "",
+    "horizontalVisibility": "5",
+    "miscMeteors": "5",
+    "pastWeatherW1": "5",
+    "pastWeatherW2": "5",
+    "presentWeatherWW": "55",
+    "c2Indicator": "2",
+    "observationTime": "14:25",
+    "dryBulb": "24.3",
+    "wetBulb": "22.8",
+    "difference": "1.5",
+    "dewPoint": "22",
+    "timestamp": "2025-05-12T08:25:27.146Z"
   }
 ]
