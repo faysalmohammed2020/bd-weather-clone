@@ -409,19 +409,5 @@
     "difference": "1",
     "dewPoint": "18",
     "timestamp": "2025-05-11T09:06:59.838Z"
-  },
-  {
-    "subIndicator": "12",
-    "alteredThermometer": "12",
-    "correctedForIndex": "12",
-    "barAsRead": "12",
-    "correctionForTemp": "12",
-    "dryBulb": "",
-    "wetBulb": "",
-    "difference": "",
-    "dewPoint": "",
-    "relativeHumidity": "",
-    "timestamp": "2025-05-12T06:52:25.662Z"
   }
-
 ]
