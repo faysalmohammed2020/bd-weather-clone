@@ -37,13 +37,13 @@ const Sidebar = () => {
       href: "/dashboard/first-card",
       icon: <CloudHail className="w-5 h-5" />,
       label: "First Card",
-      roles: ["observer", "station_admin"],
+      roles: ["observer", "station_admin", "super_admin"],
     },
     {
       href: "/dashboard/second-card",
       icon: <Binoculars className="w-5 h-5" />,
       label: "Second Card",
-      roles: ["observer", "station_admin"],
+      roles: ["observer", "station_admin", "super_admin"],
     },
     {
       href: "/dashboard/daily-summery",
