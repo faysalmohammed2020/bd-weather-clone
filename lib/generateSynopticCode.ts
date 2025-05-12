@@ -66,8 +66,8 @@ export function generateSynopticCode(): SynopticFormValues {
 
   // 3. iRiXhvv (22-26) - 32 + low cloud height (2 digits) + visibility (1 digit)
   // "iRiXhW 22-26" field data will come from : 32 is constant + "clouds>low>height" fields+ "horizontalVisibility" of "first-card-data.json"
-  const lowCloudHeight = pad(weatherObs.clouds?.low?.height || 0, 2);
-  const visibility = firstCard.horizontalVisibility?.toString()?.[0] || "0";
+  const lowCloudHeight = (weatherObs.clouds?.low?.height || 0);
+  const visibility = pad((Number(firstCard.horizontalVisibility?.toString()?.[0]) || 0) * 10, 2);
   measurements[2] = `32${lowCloudHeight}${visibility}`;
   // 4. Nddff (27-31) - Total cloud (1 digit) + wind direction (2 digits) + wind speed (2 digits)
 const totalCloud = weatherObs.totalCloud?.["total-cloud-amount"] || "0";
@@ -149,7 +149,18 @@ measurements[3] = `${totalCloud}${dd}${ff}`;
 
   // 11. 2SnTnTnTn/InInInIn (62-66) - Min temperature / ground state
   const minTemp = Number.parseFloat(firstCard.maxMinTempAsRead || "0");
-  measurements[10] = `2${getTempValue(minTemp)}/0000`;
+  console.log("minTemp", minTemp);
+  let sN, x;
+  if(minTemp>=0){
+    sN = 0;
+    x = 1;
+  }
+  else{
+    sN = 1;
+    x = 2;
+  }
+  let conVertMinTemp = pad(Math.abs(Math.round(minTemp * 10)), 3);
+  measurements[10] = `${x}${sN}${conVertMinTemp}`;
 
   // 12. 56DlDmDh (67-71) - Cloud directions
   // "56DlDmDh 67-71" field data come from: 56 is constant+ low cloud direction "clouds>low>direction" from "weather-obserbations.json" + medium cloud direction "clouds>medium>direction" from "weather-obserbations.json" + high cloud direction "clouds>high>direction" "weather-obserbations.json"
@@ -191,7 +202,19 @@ measurements[3] = `${totalCloud}${dd}${ff}`;
   measurements[17] = `(${measurements[7]})/7${pad(precipitation, 3)}`;
 
   // 19. 8N5Ch5h5 (29-33) - Cloud information
-  measurements[18] = `8${totalCloud}${lowForm}00`;
+  let lowFormSig = weatherObs.significantClouds?.layer1?.form || "0";
+  let mediumFormSig = weatherObs.significantClouds?.layer2?.form || "0";
+  let highFormSig = weatherObs.significantClouds?.layer3?.form || "0";
+
+  let lowAmountSig = weatherObs.significantClouds?.layer1?.amount || "0";
+  let mediumAmountSig = weatherObs.significantClouds?.layer2?.amount || "0";
+  let highAmountSig = weatherObs.significantClouds?.layer3?.amount || "0";
+
+  let lowHeightSig = pad((Number(weatherObs.significantClouds?.layer1?.height) || 0) * 10, 2);
+  let mediumHeightSig = pad((Number(weatherObs.significantClouds?.layer2?.height) || 0) * 10,2);
+  let highHeightSig = pad((Number(weatherObs.significantClouds?.layer3?.height) || 0) * 10,2);
+
+  measurements[18] = `8${lowAmountSig}${lowFormSig}${lowHeightSig} / 8${mediumAmountSig}${mediumFormSig}${mediumHeightSig} / 8${highAmountSig}${highFormSig}${highHeightSig}`;
 
   // 20. 90dqqqt (34-38) - Dew point depression
   const dewDepression = dryBulb - dewPoint;
