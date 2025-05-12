@@ -737,4 +737,4 @@ export const weatherData: WeatherData[] = [
 ];
 
 // Mock user role - in a real app, this would come from authentication
-export const userRole = "super_admin"; // or "data_admin" or "viewer"
+export const userRole = "super_admin"; // or "observer" or "viewer"

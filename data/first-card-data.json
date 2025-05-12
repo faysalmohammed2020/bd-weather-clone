@@ -416,6 +416,7 @@
       "1": "1"
     },
     "stationNo": {
+<<<<<<< HEAD
       "0": "1",
       "1": "1",
       "2": "1",
@@ -467,10 +468,20 @@
       "4": "5"
     },
     "stationName": "Dhaka Mirpur",
+=======
+      "0": "2",
+      "1": "5",
+      "2": "6",
+      "3": "5",
+      "4": "1"
+    },
+    "stationName": "Dhaka",
+>>>>>>> estiak
     "year": {
       "0": "2",
       "1": "5"
     },
+<<<<<<< HEAD
     "dryBulbAsRead": "24.3",
     "wetBulbAsRead": "22.8",
     "Td": "22",
@@ -502,5 +513,59 @@
     "difference": "1.5",
     "dewPoint": "22",
     "timestamp": "2025-05-12T08:25:27.146Z"
+=======
+    "dryBulbAsRead": "35",
+    "maxMinTempAsRead": "36",
+    "wetBulbAsRead": "32",
+    "Td": "31",
+    "relativeHumidity": "78",
+    "dryBulb": "35",
+    "wetBulb": "32",
+    "difference": "3",
+    "dewPoint": "31",
+    "timestamp": "2025-05-12T06:52:08.478Z"
+  },
+  {
+    "subIndicator": "12",
+    "alteredThermometer": "12",
+    "correctedForIndex": "12",
+    "barAsRead": "12",
+    "correctionForTemp": "12",
+    "dryBulb": "",
+    "wetBulb": "",
+    "difference": "",
+    "dewPoint": "",
+    "relativeHumidity": "",
+    "timestamp": "2025-05-12T06:52:25.662Z"
+  },
+  {
+    "dataType": {
+      "0": "1",
+      "1": "1"
+    },
+    "stationNo": {
+      "0": "4",
+      "1": "1",
+      "2": "9",
+      "3": "3",
+      "4": "3"
+    },
+    "stationName": "Dhaka",
+    "year": {
+      "0": "2",
+      "1": "5"
+    },
+    "dryBulbAsRead": "35",
+    "wetBulbAsRead": "32",
+    "Td": "31",
+    "relativeHumidity": "78",
+    "maxMinTempAsRead": "36",
+    "dryBulb": "35",
+    "wetBulb": "32",
+    "difference": "3",
+    "dewPoint": "31",
+    "timestamp": "2025-05-12T07:13:30.948Z",
+    "userId": "KBB645YSP3zTJfqyEIDfLKnPpb8r50V5"
+>>>>>>> estiak
   }
 ]
