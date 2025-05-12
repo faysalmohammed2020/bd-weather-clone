@@ -103,7 +103,7 @@ export default function WeatherDataTable() {
 
     if (userRole === "super_admin") return true;
 
-    if (userRole === "data_admin") {
+    if (userRole === "observer") {
       const today = new Date();
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);

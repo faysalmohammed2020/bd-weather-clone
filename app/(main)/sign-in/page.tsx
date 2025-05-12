@@ -38,7 +38,7 @@ import { stations } from "@/data/stations";
 const roles = [
   { value: "super_admin", label: "Super Admin" },
   { value: "station_admin", label: "Station Admin" },
-  { value: "data_admin", label: "Data Admin" },
+  { value: "observer", label: "Observer" },
 ];
 
 export default function SignInForm() {
@@ -82,10 +82,6 @@ export default function SignInForm() {
     if (securityCode === station.securityCode) {
       setStep("credentials");
       setFormError("");
-      // Default to first role
-      if (roles.length > 0) {
-        setRole(roles[0].value);
-      }
     } else {
       setFormError("Invalid security code. Please try again.");
     }
@@ -108,15 +104,23 @@ export default function SignInForm() {
     setLoading(true);
 
     try {
-      // Here we're simulating the sign-in process
-      // In a real application, you would use your authentication system
+      // Find the selected station
+      const station = stations.find((s) => s.name === selectedStation);
+
+      if (!station) {
+        setFormError("Invalid station selection");
+        setLoading(false);
+        return;
+      }
+
       await signIn.email(
         {
           email,
           password,
           role,
           securityCode,
-          stationId: stations.find((s) => s.name === selectedStation)?.id,
+          stationId: station.id,
+          stationName: station.name,
         },
         {
           onRequest: () => {
@@ -130,14 +134,20 @@ export default function SignInForm() {
           },
           onError: (ctx) => {
             let errorMessage = ctx.error.message;
-            if (
+
+            // Enhanced error messages
+            if (errorMessage.includes("credentials")) {
+              errorMessage = "Invalid email or password";
+            } else if (
               errorMessage.includes("permission") ||
               errorMessage.includes("role")
             ) {
               errorMessage =
-                "The selected role doesn't match your account permissions";
+                "You don't have permission to access this station with the selected role";
             } else if (errorMessage.includes("security code")) {
               errorMessage = "The security code doesn't match your account";
+            } else if (errorMessage.includes("station")) {
+              errorMessage = "Your account is not associated with this station";
             }
 
             setFormError(errorMessage);
@@ -149,6 +159,13 @@ export default function SignInForm() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Filter roles based on station (you can customize this logic)
+  const getAvailableRoles = () => {
+    // For demo purposes, all roles are available
+    // In a real app, you might filter based on station type or other criteria
+    return roles;
   };
 
   const fadeIn = {
@@ -319,7 +336,10 @@ export default function SignInForm() {
                 <SelectContent className="max-h-60">
                   {stations.map((station) => (
                     <SelectItem key={station.id} value={station.name}>
-                      {station.name}
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        {station.name}
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -478,7 +498,7 @@ export default function SignInForm() {
                 <SelectValue placeholder="Select your role" />
               </SelectTrigger>
               <SelectContent>
-                {roles.map((role) => (
+                {getAvailableRoles().map((role) => (
                   <SelectItem key={role.value} value={role.value}>
                     {role.label}
                   </SelectItem>
