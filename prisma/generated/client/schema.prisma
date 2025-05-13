@@ -39,7 +39,8 @@ model users {
 }
 
 model Station {
-  id           String   @id
+  id           String   @id @default(cuid())
+  stationId    String
   name         String
   securityCode String
   createdAt    DateTime @default(now())

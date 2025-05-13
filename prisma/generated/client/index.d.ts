@@ -2581,6 +2581,7 @@ export namespace Prisma {
 
   export type StationMinAggregateOutputType = {
     id: string | null
+    stationId: string | null
     name: string | null
     securityCode: string | null
     createdAt: Date | null
@@ -2589,6 +2590,7 @@ export namespace Prisma {
 
   export type StationMaxAggregateOutputType = {
     id: string | null
+    stationId: string | null
     name: string | null
     securityCode: string | null
     createdAt: Date | null
@@ -2597,6 +2599,7 @@ export namespace Prisma {
 
   export type StationCountAggregateOutputType = {
     id: number
+    stationId: number
     name: number
     securityCode: number
     createdAt: number
@@ -2607,6 +2610,7 @@ export namespace Prisma {
 
   export type StationMinAggregateInputType = {
     id?: true
+    stationId?: true
     name?: true
     securityCode?: true
     createdAt?: true
@@ -2615,6 +2619,7 @@ export namespace Prisma {
 
   export type StationMaxAggregateInputType = {
     id?: true
+    stationId?: true
     name?: true
     securityCode?: true
     createdAt?: true
@@ -2623,6 +2628,7 @@ export namespace Prisma {
 
   export type StationCountAggregateInputType = {
     id?: true
+    stationId?: true
     name?: true
     securityCode?: true
     createdAt?: true
@@ -2704,6 +2710,7 @@ export namespace Prisma {
 
   export type StationGroupByOutputType = {
     id: string
+    stationId: string
     name: string
     securityCode: string
     createdAt: Date
@@ -2729,6 +2736,7 @@ export namespace Prisma {
 
   export type StationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    stationId?: boolean
     name?: boolean
     securityCode?: boolean
     createdAt?: boolean
@@ -2737,6 +2745,7 @@ export namespace Prisma {
 
   export type StationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    stationId?: boolean
     name?: boolean
     securityCode?: boolean
     createdAt?: boolean
@@ -2745,6 +2754,7 @@ export namespace Prisma {
 
   export type StationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    stationId?: boolean
     name?: boolean
     securityCode?: boolean
     createdAt?: boolean
@@ -2753,19 +2763,21 @@ export namespace Prisma {
 
   export type StationSelectScalar = {
     id?: boolean
+    stationId?: boolean
     name?: boolean
     securityCode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type StationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "securityCode" | "createdAt" | "updatedAt", ExtArgs["result"]["station"]>
+  export type StationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stationId" | "name" | "securityCode" | "createdAt" | "updatedAt", ExtArgs["result"]["station"]>
 
   export type $StationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Station"
     objects: {}
     scalars: $Extensions.GetPayloadResult<{
       id: string
+      stationId: string
       name: string
       securityCode: string
       createdAt: Date
@@ -3194,6 +3206,7 @@ export namespace Prisma {
    */
   interface StationFieldRefs {
     readonly id: FieldRef<"Station", 'String'>
+    readonly stationId: FieldRef<"Station", 'String'>
     readonly name: FieldRef<"Station", 'String'>
     readonly securityCode: FieldRef<"Station", 'String'>
     readonly createdAt: FieldRef<"Station", 'DateTime'>
@@ -6927,6 +6940,7 @@ export namespace Prisma {
 
   export const StationScalarFieldEnum: {
     id: 'id',
+    stationId: 'stationId',
     name: 'name',
     securityCode: 'securityCode',
     createdAt: 'createdAt',
@@ -7202,6 +7216,7 @@ export namespace Prisma {
     OR?: StationWhereInput[]
     NOT?: StationWhereInput | StationWhereInput[]
     id?: StringFilter<"Station"> | string
+    stationId?: StringFilter<"Station"> | string
     name?: StringFilter<"Station"> | string
     securityCode?: StringFilter<"Station"> | string
     createdAt?: DateTimeFilter<"Station"> | Date | string
@@ -7210,6 +7225,7 @@ export namespace Prisma {
 
   export type StationOrderByWithRelationInput = {
     id?: SortOrder
+    stationId?: SortOrder
     name?: SortOrder
     securityCode?: SortOrder
     createdAt?: SortOrder
@@ -7221,6 +7237,7 @@ export namespace Prisma {
     AND?: StationWhereInput | StationWhereInput[]
     OR?: StationWhereInput[]
     NOT?: StationWhereInput | StationWhereInput[]
+    stationId?: StringFilter<"Station"> | string
     name?: StringFilter<"Station"> | string
     securityCode?: StringFilter<"Station"> | string
     createdAt?: DateTimeFilter<"Station"> | Date | string
@@ -7229,6 +7246,7 @@ export namespace Prisma {
 
   export type StationOrderByWithAggregationInput = {
     id?: SortOrder
+    stationId?: SortOrder
     name?: SortOrder
     securityCode?: SortOrder
     createdAt?: SortOrder
@@ -7243,6 +7261,7 @@ export namespace Prisma {
     OR?: StationScalarWhereWithAggregatesInput[]
     NOT?: StationScalarWhereWithAggregatesInput | StationScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Station"> | string
+    stationId?: StringWithAggregatesFilter<"Station"> | string
     name?: StringWithAggregatesFilter<"Station"> | string
     securityCode?: StringWithAggregatesFilter<"Station"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Station"> | Date | string
@@ -7625,7 +7644,8 @@ export namespace Prisma {
   }
 
   export type StationCreateInput = {
-    id: string
+    id?: string
+    stationId: string
     name: string
     securityCode: string
     createdAt?: Date | string
@@ -7633,7 +7653,8 @@ export namespace Prisma {
   }
 
   export type StationUncheckedCreateInput = {
-    id: string
+    id?: string
+    stationId: string
     name: string
     securityCode: string
     createdAt?: Date | string
@@ -7642,6 +7663,7 @@ export namespace Prisma {
 
   export type StationUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    stationId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     securityCode?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7650,6 +7672,7 @@ export namespace Prisma {
 
   export type StationUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    stationId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     securityCode?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7657,7 +7680,8 @@ export namespace Prisma {
   }
 
   export type StationCreateManyInput = {
-    id: string
+    id?: string
+    stationId: string
     name: string
     securityCode: string
     createdAt?: Date | string
@@ -7666,6 +7690,7 @@ export namespace Prisma {
 
   export type StationUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
+    stationId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     securityCode?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -7674,6 +7699,7 @@ export namespace Prisma {
 
   export type StationUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
+    stationId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     securityCode?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -8176,6 +8202,7 @@ export namespace Prisma {
 
   export type StationCountOrderByAggregateInput = {
     id?: SortOrder
+    stationId?: SortOrder
     name?: SortOrder
     securityCode?: SortOrder
     createdAt?: SortOrder
@@ -8184,6 +8211,7 @@ export namespace Prisma {
 
   export type StationMaxOrderByAggregateInput = {
     id?: SortOrder
+    stationId?: SortOrder
     name?: SortOrder
     securityCode?: SortOrder
     createdAt?: SortOrder
@@ -8192,6 +8220,7 @@ export namespace Prisma {
 
   export type StationMinOrderByAggregateInput = {
     id?: SortOrder
+    stationId?: SortOrder
     name?: SortOrder
     securityCode?: SortOrder
     createdAt?: SortOrder

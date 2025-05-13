@@ -25,12 +25,12 @@ export function StationManagement({ initialStations }: StationManagementProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newStation, setNewStation] = useState<Partial<Station>>({
     name: "",
-    id: "",
+    stationId: "",
     securityCode: "",
   });
   const [isAdding, setIsAdding] = useState(false);
   const [editData, setEditData] = useState<Station>({
-    id: "",
+    stationId: "",
     name: "",
     securityCode: "",
   });
@@ -88,7 +88,7 @@ export function StationManagement({ initialStations }: StationManagementProps) {
     }
 
     try {
-      const response = await fetch(`/api/stations/${editData.id}`, {
+      const response = await fetch(`/api/stations/${editData.stationId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -100,7 +100,7 @@ export function StationManagement({ initialStations }: StationManagementProps) {
         const updatedStation = await response.json();
         setStations(
           stations.map((station) =>
-            station.id === updatedStation.id ? updatedStation : station
+            station.stationId === updatedStation.id ? updatedStation : station
           )
         );
         setEditingId(null);
@@ -114,16 +114,18 @@ export function StationManagement({ initialStations }: StationManagementProps) {
     }
   };
 
-  const handleDeleteStation = async (id: string) => {
+  const handleDeleteStation = async (stationId: string) => {
     if (!confirm("Are you sure you want to delete this station?")) return;
 
     try {
-      const response = await fetch(`/api/stations/${id}`, {
+      const response = await fetch(`/api/stations/${stationId}`, {
         method: "DELETE",
       });
 
       if (response.ok) {
-        setStations(stations.filter((station) => station.id !== id));
+        setStations(
+          stations.filter((station) => station.stationId !== stationId)
+        );
         toast.success("Station deleted successfully");
       } else {
         throw new Error("Failed to delete station");
@@ -135,7 +137,7 @@ export function StationManagement({ initialStations }: StationManagementProps) {
   };
 
   const startEditing = (station: Station) => {
-    setEditingId(station.id);
+    setEditingId(station.stationId);
     setEditData({ ...station });
   };
 
@@ -169,9 +171,9 @@ export function StationManagement({ initialStations }: StationManagementProps) {
             <div>
               <label className="block text-sm font-medium mb-1">ID</label>
               <Input
-                value={newStation.id || ""}
+                value={newStation.stationId || ""}
                 onChange={(e) =>
-                  setNewStation({ ...newStation, id: e.target.value })
+                  setNewStation({ ...newStation, stationId: e.target.value })
                 }
                 placeholder="Station ID (optional)"
               />
@@ -214,9 +216,9 @@ export function StationManagement({ initialStations }: StationManagementProps) {
           </TableHeader>
           <TableBody>
             {stations.map((station) => (
-              <TableRow key={station.id}>
+              <TableRow key={station.stationId}>
                 <TableCell>
-                  {editingId === station.id ? (
+                  {editingId === station.stationId ? (
                     <Input
                       value={editData.name}
                       onChange={(e) =>
@@ -228,19 +230,19 @@ export function StationManagement({ initialStations }: StationManagementProps) {
                   )}
                 </TableCell>
                 <TableCell>
-                  {editingId === station.id ? (
+                  {editingId === station.stationId ? (
                     <Input
-                      value={editData.id}
+                      value={editData.stationId}
                       onChange={(e) =>
-                        setEditData({ ...editData, id: e.target.value })
+                        setEditData({ ...editData, stationId: e.target.value })
                       }
                     />
                   ) : (
-                    station.id
+                    station.stationId
                   )}
                 </TableCell>
                 <TableCell>
-                  {editingId === station.id ? (
+                  {editingId === station.stationId ? (
                     <Input
                       value={editData.securityCode}
                       onChange={(e) =>
@@ -255,7 +257,7 @@ export function StationManagement({ initialStations }: StationManagementProps) {
                   )}
                 </TableCell>
                 <TableCell>
-                  {editingId === station.id ? (
+                  {editingId === station.stationId ? (
                     <div className="flex gap-2">
                       <Button size="sm" onClick={handleUpdateStation}>
                         <FiCheck className="mr-1" />
@@ -283,7 +285,7 @@ export function StationManagement({ initialStations }: StationManagementProps) {
                       <Button
                         size="sm"
                         variant="destructive"
-                        onClick={() => handleDeleteStation(station.id)}
+                        onClick={() => handleDeleteStation(station.stationId)}
                       >
                         <FiTrash2 className="mr-1" />
                         Delete

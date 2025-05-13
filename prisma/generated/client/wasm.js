@@ -147,6 +147,7 @@ exports.Prisma.RelationLoadStrategy = {
 
 exports.Prisma.StationScalarFieldEnum = {
   id: 'id',
+  stationId: 'stationId',
   name: 'name',
   securityCode: 'securityCode',
   createdAt: 'createdAt',

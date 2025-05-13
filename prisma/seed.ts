@@ -1,8 +1,7 @@
 // prisma/seed.ts
-import { PrismaClient } from "@prisma/client";
-import { stations } from "../data/stations";
 
-const prisma = new PrismaClient();
+import prisma from "../lib/prisma";
+import { stations } from "../data/stations";
 
 async function main() {
   console.log("🌱 Starting seed...");
@@ -12,12 +11,9 @@ async function main() {
   console.log("🧹 Cleared existing stations data");
 
   // Create stations in batches
-  for (const station of stations) {
-    await prisma.station.create({
-      data: station,
-    });
-    console.log(`✅ Created station: ${station.name}`);
-  }
+  await prisma.station.createMany({
+    data: stations,
+  });
 
   console.log(`🎉 Successfully seeded ${stations.length} stations`);
 }
