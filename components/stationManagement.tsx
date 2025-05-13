@@ -209,7 +209,7 @@ export function StationManagement({ initialStations }: StationManagementProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>ID</TableHead>
+              <TableHead>Station ID</TableHead>
               <TableHead>Security Code</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
