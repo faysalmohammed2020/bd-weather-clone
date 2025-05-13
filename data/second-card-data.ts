@@ -31,6 +31,7 @@ export interface ObserverData {
   "observer-initial": string;
   "observation-time": string;
   "station-id": string;
+  id?: string;
   "total-cloud-amount"?: string;
 }
 
