@@ -8,7 +8,7 @@ export async function POST() {
   try {
     const data = await resend.emails.send({
       from: 'onboarding@resend.dev',
-      to: 'faysalmohammed.shah@gmail.com',
+      to: 'birdsofeden.av@gmail.com ',
       subject: 'OTP For Sign In',
       react: Welcome(),
     });
