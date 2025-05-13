@@ -5,8 +5,6 @@ import { twoFactorClient } from "better-auth/client/plugins";
 
 export const { signIn, signUp, signOut, useSession, admin } = createAuthClient({
   plugins: [
-    twoFactorClient(),
-    adminClient(),
     inferAdditionalFields({
       user: {
         district: {
@@ -37,5 +35,7 @@ export const { signIn, signUp, signOut, useSession, admin } = createAuthClient({
         },
       },
     }),
+    twoFactorClient(),
+    adminClient(),
   ],
 });

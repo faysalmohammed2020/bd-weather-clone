@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { admin } from "better-auth/plugins";
+import { admin, twoFactor } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import prisma from "@/lib/prisma";
@@ -54,5 +54,5 @@ export const auth = betterAuth({
     enabled: true,
   },
   appName: "BD Weather",
-  plugins: [admin(), nextCookies()],
+  plugins: [admin(), twoFactor(), nextCookies()],
 });
