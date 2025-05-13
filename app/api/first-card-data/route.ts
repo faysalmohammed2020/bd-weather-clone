@@ -217,11 +217,18 @@
 
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { getSession } from "@/lib/getSession";
 
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
+    const session = await getSession();
+    if (!session || !session.user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+    const userId = session.user.id;
+    
     const data = await req.json();
 
     // Convert segmented fields (objects) to full strings
@@ -231,11 +238,11 @@ export async function POST(req: Request) {
 
     const savedEntry = await prisma.meteorologicalEntry.create({
       data: {
+        userId,
         dataType,
         stationNo,
         stationName: data.stationName || "",
         year,
-
         subIndicator: data.subIndicator || "",
         alteredThermometer: data.alteredThermometer || "",
         barAsRead: data.barAsRead || "",
