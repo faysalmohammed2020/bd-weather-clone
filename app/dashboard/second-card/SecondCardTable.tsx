@@ -12,13 +12,51 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, ChevronLeft, ChevronRight, Download } from "lucide-react";
-import { format, parseISO } from "date-fns";
-import { SecondCardData } from "@/data/second-card-data";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Save,
+  X,
+} from "lucide-react";
+import { differenceInDays, format, parseISO } from "date-fns";
+import type { SecondCardData } from "@/data/second-card-data";
 import { useSession } from "@/lib/auth-client";
 
 interface SecondCardTableProps {
   refreshTrigger?: number;
+}
+
+function canEditObservation(record: SecondCardData, sessionUser: any) {
+  if (!sessionUser || !record.observer["observation-time"]) return false;
+
+  const observationDate = parseISO(record.observer["observation-time"]);
+  const now = new Date();
+  const daysDifference = differenceInDays(now, observationDate);
+
+  const role = sessionUser.role;
+  const userId = sessionUser.id;
+  const stationId = sessionUser.stationId;
+  const recordStationId = record.metadata.stationId;
+
+  if (role === "super_admin") return daysDifference <= 365;
+  if (role === "station_admin")
+    return (
+      daysDifference <= 30 &&
+      stationId &&
+      recordStationId &&
+      stationId === recordStationId
+    );
+  if (role === "observer")
+    return (
+      daysDifference <= 2 &&
+      userId &&
+      record.observer?.id &&
+      userId === record.observer.id
+    );
+
+  return false;
 }
 
 export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
@@ -30,6 +68,11 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
   );
   const [stationFilter, setStationFilter] = useState("all");
   const [stationNames, setStationNames] = useState<string[]>([]);
+
+  // Add edit mode state
+  const [editRowId, setEditRowId] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState<Partial<SecondCardData>>({});
+  const [saveLoading, setSaveLoading] = useState(false);
 
   // Fetch data from API
   const fetchData = async () => {
@@ -89,6 +132,55 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
     const nextDay = new Date(currentDate);
     nextDay.setDate(currentDate.getDate() + 1);
     setSelectedDate(format(nextDay, "yyyy-MM-dd"));
+  };
+
+  // Edit handlers
+  const handleEditClick = (record: SecondCardData) => {
+    setEditRowId(record.metadata.id);
+    setEditFormData({ ...record }); // clone current row data
+  };
+
+  const handleEditChange = (
+    section: keyof SecondCardData,
+    field: string,
+    value: string
+  ) => {
+    setEditFormData((prev) => ({
+      ...prev,
+      [section]: {
+        ...(prev[section] as any),
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      setSaveLoading(true);
+      const response = await fetch("/api/save-observation", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editRowId,
+          ...editFormData,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Update failed");
+
+      await fetchData();
+      setEditRowId(null);
+      setEditFormData({});
+    } catch (error) {
+      console.error("Error saving changes:", error);
+    } finally {
+      setSaveLoading(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditRowId(null);
+    setEditFormData({});
   };
 
   // Export to CSV
@@ -296,6 +388,9 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
                       OBSERVER
                     </th>
+                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
+                      ACTIONS
+                    </th>
                   </tr>
                   <tr>
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
@@ -412,6 +507,9 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
                       Init
                     </th>
+                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
+                      EDIT
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -449,62 +547,288 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                         record.observer["total-cloud-amount"] ||
                         "--";
 
+                      const isEditing = editRowId === record.metadata.id;
+
                       return (
                         <tr
                           key={index}
-                          className="text-center font-mono hover:bg-gray-50"
+                          className={`text-center font-mono hover:bg-gray-50 ${isEditing ? "bg-blue-50" : ""}`}
                         >
                           <td className="border border-gray-400 p-1">{time}</td>
                           <td className="border border-gray-400 p-1">
                             {record.metadata.stationId || "--"}
                           </td>
+
+                          {/* Total Cloud Amount - Editable */}
                           <td className="border border-gray-400 p-1">
-                            {totalCloudAmount}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.totalCloud?.[
+                                    "total-cloud-amount"
+                                  ] as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "totalCloud",
+                                    "total-cloud-amount",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              totalCloudAmount
+                            )}
                           </td>
 
-                          {/* Low Cloud */}
+                          {/* Low Cloud - Editable */}
                           <td className="border border-gray-400 p-1">
-                            {record.clouds.low.direction || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.clouds?.low
+                                    ?.direction as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "clouds",
+                                    "low.direction",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.clouds.low.direction || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.clouds.low.height || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.clouds?.low
+                                    ?.height as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "clouds",
+                                    "low.height",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.clouds.low.height || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.clouds.low.form || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.clouds?.low?.form as string) ??
+                                  ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "clouds",
+                                    "low.form",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.clouds.low.form || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.clouds.low.amount || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.clouds?.low
+                                    ?.amount as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "clouds",
+                                    "low.amount",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.clouds.low.amount || "--"
+                            )}
                           </td>
 
-                          {/* Medium Cloud */}
+                          {/* Medium Cloud - Editable */}
                           <td className="border border-gray-400 p-1">
-                            {record.clouds.medium.direction || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.clouds?.medium
+                                    ?.direction as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "clouds",
+                                    "medium.direction",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.clouds.medium.direction || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.clouds.medium.height || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.clouds?.medium
+                                    ?.height as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "clouds",
+                                    "medium.height",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.clouds.medium.height || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.clouds.medium.form || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.clouds?.medium
+                                    ?.form as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "clouds",
+                                    "medium.form",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.clouds.medium.form || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.clouds.medium.amount || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.clouds?.medium
+                                    ?.amount as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "clouds",
+                                    "medium.amount",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.clouds.medium.amount || "--"
+                            )}
                           </td>
 
-                          {/* High Cloud */}
+                          {/* High Cloud - Editable */}
                           <td className="border border-gray-400 p-1">
-                            {record.clouds.high.direction || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.clouds?.high
+                                    ?.direction as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "clouds",
+                                    "high.direction",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.clouds.high.direction || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.clouds.high.height || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.clouds?.high
+                                    ?.height as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "clouds",
+                                    "high.height",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.clouds.high.height || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.clouds.high.form || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.clouds?.high?.form as string) ??
+                                  ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "clouds",
+                                    "high.form",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.clouds.high.form || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.clouds.high.amount || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.clouds?.high
+                                    ?.amount as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "clouds",
+                                    "high.amount",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.clouds.high.amount || "--"
+                            )}
                           </td>
 
-                          {/* Significant Clouds */}
+                          {/* Significant Clouds - Non-editable for simplicity */}
                           <td className="border border-gray-400 p-1">
                             {record.significantClouds.layer1.height || "--"}
                           </td>
@@ -542,43 +866,278 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                             {record.significantClouds.layer4.amount || "--"}
                           </td>
 
-                          {/* Rainfall */}
+                          {/* Rainfall - Editable */}
                           <td className="border border-gray-400 p-1">
-                            {record.rainfall["time-start"] || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.rainfall?.[
+                                    "time-start"
+                                  ] as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "rainfall",
+                                    "time-start",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.rainfall["time-start"] || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.rainfall["time-end"] || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.rainfall?.[
+                                    "time-end"
+                                  ] as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "rainfall",
+                                    "time-end",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.rainfall["time-end"] || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.rainfall["since-previous"] || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.rainfall?.[
+                                    "since-previous"
+                                  ] as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "rainfall",
+                                    "since-previous",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.rainfall["since-previous"] || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.rainfall["during-previous"] || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.rainfall?.[
+                                    "during-previous"
+                                  ] as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "rainfall",
+                                    "during-previous",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.rainfall["during-previous"] || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.rainfall["last-24-hours"] || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.rainfall?.[
+                                    "last-24-hours"
+                                  ] as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "rainfall",
+                                    "last-24-hours",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.rainfall["last-24-hours"] || "--"
+                            )}
                           </td>
 
-                          {/* Wind */}
+                          {/* Wind - Editable */}
                           <td className="border border-gray-400 p-1">
-                            {record.wind["first-anemometer"] || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.wind?.[
+                                    "first-anemometer"
+                                  ] as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "wind",
+                                    "first-anemometer",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.wind["first-anemometer"] || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.wind["second-anemometer"] || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.wind?.[
+                                    "second-anemometer"
+                                  ] as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "wind",
+                                    "second-anemometer",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.wind["second-anemometer"] || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.wind.speed || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.wind?.speed as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "wind",
+                                    "speed",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.wind.speed || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.wind["wind-direction"] || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.wind?.[
+                                    "wind-direction"
+                                  ] as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "wind",
+                                    "wind-direction",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.wind["wind-direction"] || "--"
+                            )}
                           </td>
                           <td className="border border-gray-400 p-1">
-                            {record.wind.direction || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.wind?.direction as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "wind",
+                                    "direction",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.wind.direction || "--"
+                            )}
                           </td>
 
                           {/* Observer */}
                           <td className="border border-gray-400 p-1">
-                            {record.observer["observer-initial"] || "--"}
+                            {isEditing ? (
+                              <Input
+                                className="h-8 text-xs p-1"
+                                value={
+                                  (editFormData.observer?.[
+                                    "observer-initial"
+                                  ] as string) ?? ""
+                                }
+                                onChange={(e) =>
+                                  handleEditChange(
+                                    "observer",
+                                    "observer-initial",
+                                    e.target.value
+                                  )
+                                }
+                              />
+                            ) : (
+                              record.observer["observer-initial"] || "--"
+                            )}
+                          </td>
+
+                          {/* Edit/Save/Cancel Buttons */}
+                          <td className="border border-gray-400 p-1">
+                            {isEditing ? (
+                              <div className="flex gap-1 justify-center">
+                                <Button
+                                  size="sm"
+                                  onClick={handleSaveEdit}
+                                  className="text-xs h-7 bg-green-600 hover:bg-green-700 text-white"
+                                  disabled={saveLoading}
+                                >
+                                  {saveLoading ? (
+                                    <div className="animate-spin h-4 w-4 border-2 border-white rounded-full border-t-transparent" />
+                                  ) : (
+                                    <Save className="h-3 w-3 mr-1" />
+                                  )}
+                                  Save
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={handleCancelEdit}
+                                  className="text-xs h-7"
+                                  disabled={saveLoading}
+                                >
+                                  <X className="h-3 w-3 mr-1" />
+                                  Cancel
+                                </Button>
+                              </div>
+                            ) : canEditObservation(record, session?.user) ? (
+                              <Button
+                                size="sm"
+                                className="text-xs h-7 bg-yellow-500 hover:bg-yellow-600 text-white"
+                                onClick={() => handleEditClick(record)}
+                              >
+                                Edit
+                              </Button>
+                            ) : (
+                              "--"
+                            )}
                           </td>
                         </tr>
                       );

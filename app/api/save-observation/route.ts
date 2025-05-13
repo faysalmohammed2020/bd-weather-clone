@@ -101,26 +101,35 @@ export async function GET() {
   try {
     const session = await getSession();
 
-    if (!session || !session.user?.id) {
+    if (!session || !session.user) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    const observations = await prisma.weatherObservation.findMany({
-      where: { userId: session.user.id },
-      include: {
-        user: {
-          select: {
-            name: true,
-            email: true,
-            role: true,
-          },
-        },
-      },
-      orderBy: { observationTime: "desc" },
-    });
+    const { role, stationId, id: userId } = session.user;
+
+    let observations;
+
+    if (role === "super_admin") {
+      observations = await prisma.weatherObservation.findMany({
+        include: { user: true },
+        orderBy: { observationTime: "desc" },
+      });
+    } else if (role === "station_admin") {
+      observations = await prisma.weatherObservation.findMany({
+        where: { stationId: stationId?.toString() },
+        include: { user: true },
+        orderBy: { observationTime: "desc" },
+      });
+    } else {
+      observations = await prisma.weatherObservation.findMany({
+        where: { userId },
+        include: { user: true },
+        orderBy: { observationTime: "desc" },
+      });
+    }
 
     const formatted = observations.map((obs) => ({
       metadata: {
@@ -193,7 +202,7 @@ export async function GET() {
         "second-anemometer": obs.windSecondAnemometer,
         speed: obs.windSpeed,
         "wind-direction": obs.windDirection,
-        direction: obs.windDirection, // for CSV compatibility
+        direction: obs.windDirection,
       },
     }));
 
@@ -201,11 +210,100 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching observations:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
+      { success: false, error: "Server Error" },
       { status: 500 }
     );
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const session = await getSession();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id, clouds, rainfall, wind, totalCloud, observer } =
+      await request.json();
+
+    const observation = await prisma.weatherObservation.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        userId: true,
+        stationId: true,
+        observationTime: true,
+      },
+    });
+
+    if (!observation) {
+      return NextResponse.json(
+        { error: "Observation not found" },
+        { status: 404 }
+      );
+    }
+
+    const now = new Date();
+    const obsTime = new Date(observation.observationTime || now);
+    const daysDiff = Math.floor((+now - +obsTime) / (1000 * 60 * 60 * 24));
+    const { role, id: userId, stationId } = session.user;
+
+    const canEdit =
+      (role === "super_admin" && daysDiff <= 365) ||
+      (role === "station_admin" &&
+        observation.stationId === stationId &&
+        daysDiff <= 30) ||
+      (role === "observer" && observation.userId === userId && daysDiff <= 1);
+
+    if (!canEdit) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const updatePayload = {
+      // Flat cloud values
+      lowCloudForm: clouds?.low?.form || null,
+      lowCloudHeight: clouds?.low?.height || null,
+      lowCloudAmount: clouds?.low?.amount || null,
+      lowCloudDirection: clouds?.low?.direction || null,
+
+      mediumCloudForm: clouds?.medium?.form || null,
+      mediumCloudHeight: clouds?.medium?.height || null,
+      mediumCloudAmount: clouds?.medium?.amount || null,
+      mediumCloudDirection: clouds?.medium?.direction || null,
+
+      highCloudForm: clouds?.high?.form || null,
+      highCloudHeight: clouds?.high?.height || null,
+      highCloudAmount: clouds?.high?.amount || null,
+      highCloudDirection: clouds?.high?.direction || null,
+
+      // Total cloud
+      totalCloudAmount: totalCloud?.["total-cloud-amount"] || null,
+
+      // Rainfall
+      rainfallTimeStart: rainfall?.["time-start"] || null,
+      rainfallTimeEnd: rainfall?.["time-end"] || null,
+      rainfallSincePrevious: rainfall?.["since-previous"] || null,
+      rainfallDuringPrevious: rainfall?.["during-previous"] || null,
+      rainfallLast24Hours: rainfall?.["last-24-hours"] || null,
+
+      // Wind
+      windFirstAnemometer: wind?.["first-anemometer"] || null,
+      windSecondAnemometer: wind?.["second-anemometer"] || null,
+      windSpeed: wind?.speed || null,
+      windDirection: wind?.["wind-direction"] || null,
+
+      // Observer
+      observerInitial: observer?.["observer-initial"] || null,
+    };
+
+    const updated = await prisma.weatherObservation.update({
+      where: { id },
+      data: updatePayload,
+    });
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    console.error("Error updating observation:", error);
+    return NextResponse.json({ error: "Server Error" }, { status: 500 });
   }
 }

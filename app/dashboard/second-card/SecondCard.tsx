@@ -678,7 +678,6 @@ export default function WeatherObservationForm() {
                       accent="orange"
                       value={formData.observer["observation-time"] || ""}
                       onChange={handleInputChange}
-                      disabled
                     />
                     <InputField
                       id="station-id"
