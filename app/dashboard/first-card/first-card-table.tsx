@@ -1,622 +1,3 @@
-// "use client";
-
-// import { useState, useEffect } from "react";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
-// import { Calendar, ChevronLeft, ChevronRight, Download } from "lucide-react";
-// import { format } from "date-fns";
-// import type { FirstCardData } from "@/data/first-card-data";
-
-// interface FirstCardTableProps {
-//   refreshTrigger?: number;
-// }
-
-// export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
-//   const [data, setData] = useState<FirstCardData[]>([]);
-//   const [loading, setLoading] = useState(true);
-//   const [selectedDate, setSelectedDate] = useState(
-//     format(new Date(), "yyyy-MM-dd")
-//   );
-//   const [stationFilter, setStationFilter] = useState("all");
-//   const [stationNames, setStationNames] = useState<string[]>([]);
-
-//   // Fetch data from API
-//   const fetchData = async () => {
-//     try {
-//       setLoading(true);
-//       const response = await fetch("/api/first-card-data");
-//       if (!response.ok) {
-//         throw new Error("Failed to fetch data");
-//       }
-//       const result = await response.json();
-//       setData(result);
-
-//       // Extract unique station names
-//       const names = new Set<string>();
-//       result.forEach((item: FirstCardData) => {
-//         if (item.stationName) {
-//           names.add(item.stationName);
-//         }
-//       });
-//       setStationNames(Array.from(names));
-//     } catch (error) {
-//       console.error("Error fetching data:", error);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   // Fetch data on component mount and when refreshTrigger changes
-//   useEffect(() => {
-//     fetchData();
-//   }, [refreshTrigger]);
-
-//   // Filter data based on selected date and station
-//   const filteredData = data.filter((item) => {
-//     if (!item.timestamp) return false;
-
-//     const itemDate = format(new Date(item.timestamp), "yyyy-MM-dd");
-//     const matchesDate = itemDate === selectedDate;
-//     const matchesStation =
-//       stationFilter === "all" || item.stationName === stationFilter;
-
-//     return matchesDate && matchesStation;
-//   });
-
-//   // Navigate to previous day
-//   const goToPreviousDay = () => {
-//     const currentDate = new Date(selectedDate);
-//     const previousDay = new Date(currentDate);
-//     previousDay.setDate(currentDate.getDate() - 1);
-//     setSelectedDate(format(previousDay, "yyyy-MM-dd"));
-//   };
-
-//   // Navigate to next day
-//   const goToNextDay = () => {
-//     const currentDate = new Date(selectedDate);
-//     const nextDay = new Date(currentDate);
-//     nextDay.setDate(currentDate.getDate() + 1);
-//     setSelectedDate(format(nextDay, "yyyy-MM-dd"));
-//   };
-
-//   // Format data type for display
-//   const formatDataType = (dataType?: { "0": string; "1": string }) => {
-//     if (!dataType) return "--";
-//     return `${dataType["0"] || "-"}${dataType["1"] || "-"}`;
-//   };
-
-//   // Format station number for display
-//   const formatStationNo = (stationNo?: { [key: string]: string }) => {
-//     if (!stationNo) return "-----";
-//     let result = "";
-//     for (let i = 0; i < 5; i++) {
-//       result += stationNo[i.toString()] || "-";
-//     }
-//     return result;
-//   };
-
-//   // Format year for display
-//   const formatYear = (year?: { "0": string; "1": string }) => {
-//     if (!year) return "--";
-//     return `${year["0"] || "-"}${year["1"] || "-"}`;
-//   };
-
-//   // Export to CSV
-//   const exportToCSV = () => {
-//     // Create CSV content
-//     const headers = [
-//       "Time",
-//       "Station",
-//       "Bar As Read",
-//       "Corrected For Index",
-//       "Height Difference",
-//       "Station Level Pressure",
-//       "Sea Level Reduction",
-//       "Sea Level Pressure",
-//       "Dry Bulb As Read",
-//       "Wet Bulb As Read",
-//       "Max/Min Temp As Read",
-//       "Dry Bulb Corrected",
-//       "Wet Bulb Corrected",
-//       "Dew Point",
-//       "Relative Humidity",
-//       "Horizontal Visibility",
-//       "Present Weather",
-//     ];
-
-//     const csvRows = [
-//       headers.join(","),
-//       ...filteredData.map((item) => {
-//         const time = item.observationTime || "N/A";
-
-//         return [
-//           time,
-//           item.stationName || "N/A",
-//           item.barAsRead || "N/A",
-//           item.correctedForIndex || "N/A",
-//           item.heightDifference || "N/A",
-//           item.stationLevelPressure || "N/A",
-//           item.seaLevelReduction || "N/A",
-//           item.correctedSeaLevelPressure || "N/A",
-//           item.dryBulbAsRead || "N/A",
-//           item.wetBulbAsRead || "N/A",
-//           item.maxMinTempAsRead || "N/A",
-//           item.dryBulb || "N/A",
-//           item.wetBulb || "N/A",
-//           item.Td || "N/A",
-//           item.relativeHumidity || "N/A",
-//           item.horizontalVisibility || "N/A",
-//           item.presentWeatherWW || "N/A",
-//         ].join(",");
-//       }),
-//     ];
-
-//     const csvContent = csvRows.join("\n");
-
-//     // Create and download the CSV file
-//     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-//     const url = URL.createObjectURL(blob);
-//     const link = document.createElement("a");
-//     link.setAttribute("href", url);
-//     link.setAttribute("download", `first-card-data-${selectedDate}.csv`);
-//     document.body.appendChild(link);
-//     link.click();
-//     document.body.removeChild(link);
-//   };
-
-//   return (
-//     <Card className="shadow-lg border-none">
-//       <CardHeader className="p-4 bg-sky-600 text-white">
-//         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-//           <CardTitle className="text-xl font-bold">
-//             First Card's Table
-//           </CardTitle>
-
-//           <div className="flex items-center gap-2">
-//             <Button
-//               onClick={exportToCSV}
-//               className="gap-1 bg-green-600 hover:bg-green-700"
-//             >
-//               <Download size={16} /> Export CSV
-//             </Button>
-//           </div>
-//         </div>
-//       </CardHeader>
-
-//       <CardContent className="p-6">
-//         {/* Date and Station Filters */}
-//         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-//           <div className="flex items-center gap-2">
-//             <Button variant="outline" size="icon" onClick={goToPreviousDay}>
-//               <ChevronLeft className="h-4 w-4" />
-//             </Button>
-
-//             <div className="relative">
-//               <Calendar className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-//               <Input
-//                 type="date"
-//                 className="pl-8 w-40"
-//                 value={selectedDate}
-//                 onChange={(e) => setSelectedDate(e.target.value)}
-//               />
-//             </div>
-
-//             <Button variant="outline" size="icon" onClick={goToNextDay}>
-//               <ChevronRight className="h-4 w-4" />
-//             </Button>
-//           </div>
-
-//           <div className="flex items-center gap-2">
-//             <Label htmlFor="stationFilter" className="whitespace-nowrap">
-//               Station:
-//             </Label>
-//             <Select value={stationFilter} onValueChange={setStationFilter}>
-//               <SelectTrigger className="w-[200px]">
-//                 <SelectValue placeholder="All Stations" />
-//               </SelectTrigger>
-//               <SelectContent>
-//                 <SelectItem value="all">All Stations</SelectItem>
-//                 {stationNames.map((name) => (
-//                   <SelectItem key={name} value={name}>
-//                     {name}
-//                   </SelectItem>
-//                 ))}
-//               </SelectContent>
-//             </Select>
-//           </div>
-//         </div>
-
-//         {/* Form View */}
-//         <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-//           {/* Header Section */}
-//           <div className="p-4 bg-gray-100 border-b border-gray-300">
-//             <div className="grid grid-cols-4 gap-4">
-//               <div>
-//                 <div className="text-xs font-bold uppercase text-gray-600">
-//                   DATA TYPE
-//                 </div>
-//                 <div className="flex mt-1">
-//                   <div className="w-8 h-8 border border-gray-400 flex items-center justify-center bg-white font-mono">
-//                     {filteredData[0]?.dataType?.["0"] || "-"}
-//                   </div>
-//                   <div className="w-8 h-8 border-t border-r border-b border-gray-400 flex items-center justify-center bg-white font-mono">
-//                     {filteredData[0]?.dataType?.["1"] || "-"}
-//                   </div>
-//                 </div>
-//               </div>
-//               <div>
-//                 <div className="text-xs font-bold uppercase text-gray-600">
-//                   STATION NO
-//                 </div>
-//                 <div className="flex mt-1">
-//                   {[0, 1, 2, 3, 4].map((i) => (
-//                     <div
-//                       key={i}
-//                       className="w-8 h-8 border-t border-b border-gray-400 flex items-center justify-center bg-white font-mono"
-//                       style={{
-//                         borderLeft: i === 0 ? "1px solid #9ca3af" : "none",
-//                         borderRight: "1px solid #9ca3af",
-//                       }}
-//                     >
-//                       {filteredData[0]?.stationNo?.[i.toString()] || "-"}
-//                     </div>
-//                   ))}
-//                 </div>
-//               </div>
-//               <div>
-//                 <div className="text-xs font-bold uppercase text-gray-600">
-//                   STATION NAME
-//                 </div>
-//                 <div className="mt-1 h-8 border border-gray-400 px-2 flex items-center bg-white font-mono">
-//                   {filteredData[0]?.stationName || "-----"}
-//                 </div>
-//               </div>
-//               <div>
-//                 <div className="text-xs font-bold uppercase text-gray-600">
-//                   YEAR
-//                 </div>
-//                 <div className="flex mt-1">
-//                   <div className="w-8 h-8 border border-gray-400 flex items-center justify-center bg-white font-mono">
-//                     {filteredData[0]?.year?.["0"] || "-"}
-//                   </div>
-//                   <div className="w-8 h-8 border-t border-r border-b border-gray-400 flex items-center justify-center bg-white font-mono">
-//                     {filteredData[0]?.year?.["1"] || "-"}
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-
-//           {/* Main Table Section */}
-//           <div className="p-4">
-//             <div className="text-center font-bold text-lg border-b-2 border-gray-800 pb-2 mb-4">
-//               FIRST CARD
-//             </div>
-
-//             <div className="overflow-x-auto">
-//               <table className="w-full border-collapse">
-//                 {/* Table Header */}
-//                 <thead>
-//                   <tr>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       GG
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       CI
-//                     </th>
-//                     <th
-//                       colSpan={9}
-//                       className="border border-gray-400 bg-gray-100 text-xs p-1"
-//                     >
-//                       BAR PRESSURE
-//                     </th>
-//                     <th
-//                       colSpan={6}
-//                       className="border border-gray-400 bg-gray-100 text-xs p-1"
-//                     >
-//                       TEMPERATURE
-//                     </th>
-//                     <th
-//                       colSpan={1}
-//                       className="border border-gray-400 bg-gray-100 text-xs p-1"
-//                     >
-//                       Td Td Td
-//                     </th>
-//                     <th
-//                       colSpan={1}
-//                       className="border border-gray-400 bg-gray-100 text-xs p-1"
-//                     >
-//                       R.H.
-//                     </th>
-//                     <th
-//                       colSpan={3}
-//                       className="border border-gray-400 bg-gray-100 text-xs p-1"
-//                     >
-//                       SQUALL
-//                     </th>
-//                     <th
-//                       colSpan={1}
-//                       className="border border-gray-400 bg-gray-100 text-xs p-1"
-//                     >
-//                       VV
-//                     </th>
-//                     <th
-//                       colSpan={1}
-//                       className="border border-gray-400 bg-gray-100 text-xs p-1"
-//                     ></th>
-//                     <th
-//                       colSpan={3}
-//                       className="border border-gray-400 bg-gray-100 text-xs p-1"
-//                     >
-//                       WEATHER
-//                     </th>
-//                   </tr>
-//                   <tr>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Time of Observation (GMT)
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         1st Card Indicator
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Attached Thermometer (°C)
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Bar As Read (hPa)
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Corrected for Index
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Height Difference Correction (hPa)
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Station Level Pressure (QFE)
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Sea Level Reduction
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Sea Level Pressure (QNH)
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Afternoon Reading
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         24-Hour Change
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">Dry Bulb (°C)</div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">Wet Bulb (°C)</div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">MAX/MIN (°C)</div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">Dry Bulb (°C)</div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">Wet Bulb (°C)</div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">MAX/MIN (°C)</div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Dew Point Temperature (°C)
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Relative Humidity (%)
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">Force (KTS)</div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Direction (dq)
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">Time (q1)</div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Horizontal Visibility (km)
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">
-//                         Misc. Meteors (Code)
-//                       </div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">Past W₁W₂</div>
-//                     </th>
-//                     <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-//                       <div className="writing-vertical h-16">Present ww</div>
-//                     </th>
-//                   </tr>
-//                 </thead>
-//                 <tbody>
-//                   {loading ? (
-//                     <tr>
-//                       <td colSpan={25} className="text-center py-8">
-//                         <div className="flex justify-center items-center">
-//                           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-slate-800"></div>
-//                           <span className="ml-2">Loading data...</span>
-//                         </div>
-//                       </td>
-//                     </tr>
-//                   ) : filteredData.length === 0 ? (
-//                     <tr>
-//                       <td colSpan={25} className="text-center py-8">
-//                         <div className="flex flex-col items-center justify-center text-muted-foreground">
-//                           <p>No data found for this date</p>
-//                           <p className="text-sm">
-//                             Try selecting a different date
-//                           </p>
-//                         </div>
-//                       </td>
-//                     </tr>
-//                   ) : (
-//                     filteredData.map((record, index) => {
-//                       const time = record.observationTime || "--:--";
-
-//                       return (
-//                         <tr
-//                           key={index}
-//                           className="text-center font-mono hover:bg-gray-50"
-//                         >
-//                           <td className="border border-gray-400 p-1">
-//                             {time.split(":")[0] || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.c2Indicator || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.alteredThermometer || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.barAsRead || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.correctedForIndex || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.heightDifference || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.stationLevelPressure || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.seaLevelReduction || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.correctedSeaLevelPressure || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.afternoonReading || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.pressureChange24h || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.dryBulbAsRead || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.wetBulbAsRead || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.maxMinTempAsRead || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.dryBulb || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.wetBulb || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.Td || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.relativeHumidity || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.squallForce || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.squallDirection || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.squallTime || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.horizontalVisibility || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.miscMeteors || "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.pastWeatherW1 && record.pastWeatherW2
-//                               ? `${record.pastWeatherW1}/${record.pastWeatherW2}`
-//                               : "--"}
-//                           </td>
-//                           <td className="border border-gray-400 p-1">
-//                             {record.presentWeatherWW || "--"}
-//                           </td>
-//                         </tr>
-//                       );
-//                     })
-//                   )}
-//                 </tbody>
-//               </table>
-//             </div>
-
-//             <div className="mt-4 text-sm text-muted-foreground">
-//               <div className="flex justify-between items-center">
-//                 <div>
-//                   Date:{" "}
-//                   <span className="font-medium">
-//                     {format(new Date(selectedDate), "MMMM d, yyyy")}
-//                   </span>
-//                 </div>
-//                 <div>
-//                   <span>Showing {filteredData.length} record(s)</span>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       </CardContent>
-//     </Card>
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -631,8 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Calendar, ChevronLeft, ChevronRight, Download } from "lucide-react";
+import {
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  CloudSun,
+  Filter,
+  RefreshCw,
+} from "lucide-react";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
+import { useSession } from "@/lib/auth-client";
 
 interface MeteorologicalEntry {
   id: string;
@@ -686,6 +77,9 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   );
   const [stationFilter, setStationFilter] = useState("all");
   const [stationNames, setStationNames] = useState<string[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const { data: session } = useSession();
+  const user = session?.user;
 
   // Fetch data from API
   const fetchData = async () => {
@@ -710,7 +104,14 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
+  };
+
+  // Refresh data manually
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    fetchData();
   };
 
   // Fetch data on component mount and when refreshTrigger changes
@@ -809,10 +210,22 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     document.body.removeChild(link);
   };
 
+  // Get weather status color based on relative humidity
+  const getWeatherStatusColor = (humidity: string) => {
+    const humidityValue = Number.parseInt(humidity || "0");
+    if (humidityValue >= 80) return "bg-blue-500";
+    if (humidityValue >= 60) return "bg-green-500";
+    if (humidityValue >= 40) return "bg-yellow-500";
+    if (humidityValue >= 20) return "bg-orange-500";
+    return "bg-red-500";
+  };
+
   // Format data type for display (assuming it's stored as a string like "AB")
   const formatDataType = (dataType?: string) => {
     if (!dataType) return "--";
-    return dataType.length >= 2 ? `${dataType[0] || "-"}${dataType[1] || "-"}` : "--";
+    return dataType.length >= 2
+      ? `${dataType[0] || "-"}${dataType[1] || "-"}`
+      : "--";
   };
 
   // Format station number for display (assuming it's stored as a string like "12345")
@@ -827,18 +240,38 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     return year.length >= 2 ? `${year[0] || "-"}${year[1] || "-"}` : "--";
   };
 
+  const filteredYear = filteredData[0]?.timestamp
+    ? new Date(filteredData[0].timestamp).getFullYear().toString().slice(-2)
+    : new Date().getFullYear().toString().slice(-2);
+
   return (
-    <Card className="shadow-lg border-none">
-      <CardHeader className="p-4 bg-sky-600 text-white">
+    <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
+      <CardHeader className="p-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <CardTitle className="text-xl font-bold">
-            Meteorological Data Table
-          </CardTitle>
+          <div className="flex items-center gap-3">
+            <CloudSun size={24} className="text-yellow-300" />
+            <CardTitle className="text-xl font-bold">
+              Meteorological Data Dashboard
+            </CardTitle>
+          </div>
 
           <div className="flex items-center gap-2">
             <Button
+              onClick={handleRefresh}
+              variant="outline"
+              size="sm"
+              className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+            >
+              <RefreshCw
+                size={16}
+                className={isRefreshing ? "animate-spin" : ""}
+              />
+              <span className="ml-1">Refresh</span>
+            </Button>
+            <Button
               onClick={exportToCSV}
-              className="gap-1 bg-green-600 hover:bg-green-700"
+              className="gap-1 bg-emerald-500 hover:bg-emerald-600 text-white"
+              size="sm"
             >
               <Download size={16} /> Export CSV
             </Button>
@@ -848,33 +281,47 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
 
       <CardContent className="p-6">
         {/* Date and Station Filters */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 bg-slate-100 p-4 rounded-lg">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={goToPreviousDay}>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={goToPreviousDay}
+              className="hover:bg-slate-200"
+            >
               <ChevronLeft className="h-4 w-4" />
             </Button>
 
             <div className="relative">
-              <Calendar className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Calendar className="absolute left-2 top-2.5 h-4 w-4 text-purple-500" />
               <Input
                 type="date"
-                className="pl-8 w-40"
+                className="pl-8 w-40 border-slate-300 focus:border-purple-500 focus:ring-purple-500"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
               />
             </div>
 
-            <Button variant="outline" size="icon" onClick={goToNextDay}>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={goToNextDay}
+              className="hover:bg-slate-200"
+            >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
 
           <div className="flex items-center gap-2">
-            <Label htmlFor="stationFilter" className="whitespace-nowrap">
+            <Filter size={16} className="text-purple-500" />
+            <Label
+              htmlFor="stationFilter"
+              className="whitespace-nowrap font-medium text-slate-700"
+            >
               Station:
             </Label>
             <Select value={stationFilter} onValueChange={setStationFilter}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger className="w-[200px] border-slate-300 focus:ring-purple-500">
                 <SelectValue placeholder="All Stations" />
               </SelectTrigger>
               <SelectContent>
@@ -890,60 +337,53 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
         </div>
 
         {/* Form View */}
-        <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
           {/* Header Section */}
-          <div className="p-4 bg-gray-100 border-b border-gray-300">
-            <div className="grid grid-cols-4 gap-4">
-              <div>
-                <div className="text-xs font-bold uppercase text-gray-600">
+          <div className="p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300">
+            <div className="flex justify-around gap-4">
+              <div className="flex flex-col">
+                <Label
+                  htmlFor="dataType"
+                  className="text-sm font-medium text-slate-900 mb-2"
+                >
                   DATA TYPE
-                </div>
-                <div className="flex mt-1">
-                  <div className="w-8 h-8 border border-gray-400 flex items-center justify-center bg-white font-mono">
-                    {data[0]?.dataType?.[0] || "-"}
-                  </div>
-                  <div className="w-8 h-8 border-t border-r border-b border-gray-400 flex items-center justify-center bg-white font-mono">
-                    {data[0]?.dataType?.[1] || "-"}
-                  </div>
-                </div>
-              </div>
-              <div>
-                <div className="text-xs font-bold uppercase text-gray-600">
-                  STATION NO
-                </div>
-                <div className="flex mt-1">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="w-8 h-8 border-t border-b border-gray-400 flex items-center justify-center bg-white font-mono"
-                      style={{
-                        borderLeft: i === 0 ? "1px solid #9ca3af" : "none",
-                        borderRight: "1px solid #9ca3af",
-                      }}
-                    >
-                      {data[0]?.stationNo?.[i] || "-"}
-                    </div>
+                </Label>
+                <div className="flex gap-1">
+                  {["S", "Y"].map((char, i) => (
+                    <Input
+                      key={`dataType-${i}`}
+                      id={`dataType-${i}`}
+                      className="w-12 text-center p-2 bg-slate-100 border border-slate-400 shadow-sm"
+                      value={char}
+                    />
                   ))}
                 </div>
               </div>
               <div>
-                <div className="text-xs font-bold uppercase text-gray-600">
-                  STATION NAME
+                <div className="font-bold uppercase text-slate-600 ">
+                  STATION NO
                 </div>
-                <div className="mt-1 h-8 border border-gray-400 px-2 flex items-center bg-white font-mono">
-                  {data[0]?.stationName || "-----"}
+                <div className="flex border border-slate-400 rounded-l p-2 mx-auto">
+                  {user?.stationId || "N/A"}
                 </div>
               </div>
               <div>
-                <div className="text-xs font-bold uppercase text-gray-600">
-                  YEAR
+                <div className="font-bold uppercase text-slate-600">
+                  STATION NAME
                 </div>
+                <div className="mt-1 h-8 border border-slate-400 px-2 flex items-center bg-white font-mono rounded-md">
+                  {user?.stationName || "N/A"}
+                </div>
+              </div>
+
+              <div>
+                <div className="font-bold uppercase text-slate-600">YEAR</div>
                 <div className="flex mt-1">
-                  <div className="w-8 h-8 border border-gray-400 flex items-center justify-center bg-white font-mono">
-                    {data[0]?.year?.[0] || "-"}
+                  <div className="w-8 h-8 border border-slate-400 flex items-center justify-center bg-white font-mono rounded-l-md">
+                    {filteredYear[0]}
                   </div>
-                  <div className="w-8 h-8 border-t border-r border-b border-gray-400 flex items-center justify-center bg-white font-mono">
-                    {data[0]?.year?.[1] || "-"}
+                  <div className="w-8 h-8 border-t border-r border-b border-slate-400 flex items-center justify-center bg-white font-mono rounded-r-md">
+                    {filteredYear[1]}
                   </div>
                 </div>
               </div>
@@ -952,7 +392,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
 
           {/* Main Table Section */}
           <div className="p-4">
-            <div className="text-center font-bold text-lg border-b-2 border-gray-800 pb-2 mb-4">
+            <div className="text-center font-bold text-xl border-b-2 border-indigo-600 pb-2 mb-4 text-indigo-800">
               METEOROLOGICAL DATA
             </div>
 
@@ -961,169 +401,166 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                 {/* Table Header */}
                 <thead>
                   <tr>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
                       GG
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
                       CI
                     </th>
                     <th
                       colSpan={9}
-                      className="border border-gray-400 bg-gray-100 text-xs p-1"
+                      className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 p-1 text-purple-800"
                     >
                       BAR PRESSURE
                     </th>
                     <th
                       colSpan={6}
-                      className="border border-gray-400 bg-gray-100 text-xs p-1"
+                      className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 p-1 text-cyan-800"
                     >
                       TEMPERATURE
                     </th>
                     <th
                       colSpan={1}
-                      className="border border-gray-400 bg-gray-100 text-xs p-1"
+                      className="border border-slate-300 bg-gradient-to-b from-teal-50 to-teal-100 p-1 text-teal-800"
                     >
                       Td
                     </th>
                     <th
                       colSpan={1}
-                      className="border border-gray-400 bg-gray-100 text-xs p-1"
+                      className="border border-slate-300 bg-gradient-to-b from-teal-50 to-teal-100 p-1 text-teal-800"
                     >
                       R.H.
                     </th>
                     <th
                       colSpan={3}
-                      className="border border-gray-400 bg-gray-100 text-xs p-1"
+                      className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 p-1 text-amber-800"
                     >
                       SQUALL
                     </th>
                     <th
                       colSpan={1}
-                      className="border border-gray-400 bg-gray-100 text-xs p-1"
+                      className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 p-1 text-blue-800"
                     >
                       VV
                     </th>
                     <th
                       colSpan={1}
-                      className="border border-gray-400 bg-gray-100 text-xs p-1"
+                      className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 p-1 text-blue-800"
                     ></th>
                     <th
                       colSpan={3}
-                      className="border border-gray-400 bg-gray-100 text-xs p-1"
+                      className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 p-1 text-emerald-800"
                     >
                       WEATHER
                     </th>
                   </tr>
                   <tr>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
+                      <div className="h-16 text-indigo-800">
                         Time of Observation (GMT)
                       </div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
-                        Indicator
-                      </div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
+                      <div className="h-16 text-indigo-800">Indicator</div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
+                    <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
+                      <div className="h-16 text-purple-800">
                         Attached Thermometer (°C)
                       </div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
+                    <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
+                      <div className="h-16 text-purple-800">
                         Bar As Read (hPa)
                       </div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
+                    <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
+                      <div className="h-16 text-purple-800">
                         Corrected for Index
                       </div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
+                    <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
+                      <div className="h-16 text-purple-800">
                         Height Difference Correction (hPa)
                       </div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
+                    <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
+                      <div className="h-16 text-purple-800">
                         Station Level Pressure (QFE)
                       </div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
+                    <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
+                      <div className="h-16 text-purple-800">
                         Sea Level Reduction
                       </div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
+                    <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
+                      <div className="h-16 text-purple-800">
                         Sea Level Pressure (QNH)
                       </div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
+                    <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
+                      <div className="h-16 text-purple-800">
                         Afternoon Reading
                       </div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
-                        24-Hour Change
-                      </div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
+                      <div className="h-16 text-purple-800">24-Hour Change</div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">Dry Bulb (°C)</div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 text-xs p-1">
+                      <div className="h-16 text-cyan-800">Dry Bulb (°C)</div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">Wet Bulb (°C)</div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 text-xs p-1">
+                      <div className="h-16 text-cyan-800">Wet Bulb (°C)</div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">MAX/MIN (°C)</div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 text-xs p-1">
+                      <div className="h-16 text-cyan-800">MAX/MIN (°C)</div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">Dry Bulb (°C)</div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 text-xs p-1">
+                      <div className="h-16 text-cyan-800">Dry Bulb (°C)</div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">Wet Bulb (°C)</div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 text-xs p-1">
+                      <div className="h-16 text-cyan-800">Wet Bulb (°C)</div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">MAX/MIN (°C)</div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 text-xs p-1">
+                      <div className="h-16 text-cyan-800">MAX/MIN (°C)</div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
+                    <th className="border border-slate-300 bg-gradient-to-b from-teal-50 to-teal-100 text-xs p-1">
+                      <div className="h-16 text-teal-800">
                         Dew Point Temperature (°C)
                       </div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
+                    <th className="border border-slate-300 bg-gradient-to-b from-teal-50 to-teal-100 text-xs p-1">
+                      <div className="h-16 text-teal-800">
                         Relative Humidity (%)
                       </div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">Force (KTS)</div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 text-xs p-1">
+                      <div className="h-16 text-amber-800">Force (KTS)</div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
-                        Direction (dq)
-                      </div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 text-xs p-1">
+                      <div className="h-16 text-amber-800">Direction (dq)</div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">Time (q1)</div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 text-xs p-1">
+                      <div className="h-16 text-amber-800">Time (q1)</div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
+                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1">
+                      <div className="h-16 text-blue-800">
                         Horizontal Visibility (km)
                       </div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">
+                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1">
+                      <div className="h-16 text-blue-800">
                         Misc. Meteors (Code)
                       </div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">Past W₁W₂</div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 text-xs p-1">
+                      <div className="h-16 text-emerald-800">Past W₁</div>
                     </th>
-                    <th className="border border-gray-400 bg-gray-100 text-xs p-1">
-                      <div className="writing-vertical h-16">Present ww</div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 text-xs p-1">
+                      <div className="h-16 text-emerald-800">Past W2</div>
+                    </th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 text-xs p-1">
+                      <div className="h-16 text-emerald-800">Present ww</div>
                     </th>
                   </tr>
                 </thead>
@@ -1132,18 +569,23 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     <tr>
                       <td colSpan={25} className="text-center py-8">
                         <div className="flex justify-center items-center">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-slate-800"></div>
-                          <span className="ml-2">Loading data...</span>
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                          <span className="ml-3 text-indigo-600 font-medium">
+                            Loading data...
+                          </span>
                         </div>
                       </td>
                     </tr>
                   ) : filteredData.length === 0 ? (
                     <tr>
-                      <td colSpan={25} className="text-center py-8">
-                        <div className="flex flex-col items-center justify-center text-muted-foreground">
-                          <p>No data found for this date</p>
+                      <td colSpan={25} className="text-center py-12">
+                        <div className="flex flex-col items-center justify-center text-slate-500">
+                          <CloudSun size={48} className="text-slate-400 mb-3" />
+                          <p className="text-lg font-medium">
+                            No meteorological data found
+                          </p>
                           <p className="text-sm">
-                            Try selecting a different date
+                            Try selecting a different date or station
                           </p>
                         </div>
                       </td>
@@ -1151,90 +593,103 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                   ) : (
                     filteredData.map((record, index) => {
                       const time = record.observationTime || "--:--";
+                      const humidityClass = getWeatherStatusColor(
+                        record.relativeHumidity
+                      );
 
                       return (
                         <tr
                           key={record.id}
-                          className="text-center font-mono hover:bg-gray-50"
+                          className="text-center font-mono hover:bg-slate-50 transition-colors"
                         >
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1 font-medium text-indigo-700">
                             {time.split(":")[0] || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.c2Indicator || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.alteredThermometer || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1 font-medium text-purple-700">
                             {record.barAsRead || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.correctedForIndex || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.heightDifference || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1 font-medium text-purple-700">
                             {record.stationLevelPressure || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.seaLevelReduction || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1 font-medium text-purple-700">
                             {record.correctedSeaLevelPressure || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.afternoonReading || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.pressureChange24h || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1 font-medium text-cyan-700">
                             {record.dryBulbAsRead || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.wetBulbAsRead || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.maxMinTempAsRead || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1 font-medium text-cyan-700">
                             {record.dryBulbCorrected || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.wetBulbCorrected || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.maxMinTempCorrected || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1 font-medium text-teal-700">
                             {record.Td || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
-                            {record.relativeHumidity || "--"}
+                          <td className="border border-slate-300 p-1">
+                            <Badge
+                              variant="outline"
+                              className={`${humidityClass} text-white`}
+                            >
+                              {record.relativeHumidity || "--"}
+                            </Badge>
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1 font-medium text-amber-700">
                             {record.squallForce || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.squallDirection || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.squallTime || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1 font-medium text-blue-700">
                             {record.horizontalVisibility || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.miscMeteors || "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.pastWeatherW1 && record.pastWeatherW2
-                              ? `${record.pastWeatherW1}/${record.pastWeatherW2}`
+                              ? `${record.pastWeatherW1}`
                               : "--"}
                           </td>
-                          <td className="border border-gray-400 p-1">
+                          <td className="border border-slate-300 p-1">
+                            {record.pastWeatherW1 && record.pastWeatherW2
+                              ? `${record.pastWeatherW2}`
+                              : "--"}
+                          </td>
+                          <td className="border border-slate-300 p-1 font-medium text-emerald-700">
                             {record.presentWeatherWW || "--"}
                           </td>
                         </tr>
@@ -1245,21 +700,46 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
               </table>
             </div>
 
-            <div className="mt-4 text-sm text-muted-foreground">
-              <div className="flex justify-between items-center">
-                <div>
+            <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-purple-500" />
+                <span className="text-sm text-slate-600">
                   Date:{" "}
-                  <span className="font-medium">
+                  <span className="font-medium text-slate-800">
                     {format(new Date(selectedDate), "MMMM d, yyyy")}
                   </span>
-                </div>
-                <div>
-                  <span>Showing {filteredData.length} record(s)</span>
-                </div>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className="bg-indigo-100 text-indigo-800 hover:bg-indigo-200"
+                >
+                  {filteredData.length} record(s)
+                </Badge>
+                {stationFilter !== "all" && (
+                  <Badge
+                    variant="outline"
+                    className="bg-purple-100 text-purple-800 hover:bg-purple-200"
+                  >
+                    Station: {stationFilter}
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Add custom CSS for vertical text */}
+        <style jsx global>{`
+          .writing-vertical {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            text-align: center;
+            margin: 0 auto;
+            white-space: nowrap;
+          }
+        `}</style>
       </CardContent>
     </Card>
   );

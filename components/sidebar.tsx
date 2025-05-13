@@ -35,7 +35,7 @@ const Sidebar = () => {
       roles: ["super_admin", "observer", "station_admin"],
     },
     {
-      href: "/dashboard/dynamic-first-card",
+      href: "/dashboard/first-card",
       icon: <CloudHail className="w-5 h-5" />,
       label: "First Card",
       roles: ["observer", "station_admin", "super_admin"],

@@ -2,16 +2,32 @@
 
 import type React from "react";
 import { useState, useRef, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { Thermometer, Wind, Eye, Cloud, Clock, BarChart3, ChevronRight, ChevronLeft } from 'lucide-react';
+import {
+  Thermometer,
+  Wind,
+  Eye,
+  Cloud,
+  Clock,
+  BarChart3,
+  ChevronRight,
+  ChevronLeft,
+} from "lucide-react";
 import { toast, Toaster } from "sonner";
 import { hygrometricTable } from "../../../data/hygrometric-table"; // Import the hygrometric table data
 import { stationPressure } from "../../../data/station-pressure"; // Import the station pressure data
+import { useSession } from "@/lib/auth-client";
 
 export function MeteorologicalDataForm({ onDataSubmitted }) {
   const [formData, setFormData] = useState({});
@@ -27,11 +43,24 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
   // Refs for multi-box inputs to handle auto-focus
   const dataTypeRefs = [useRef(null), useRef(null)];
-  const stationNoRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
+  const stationNoRefs = [
+    useRef(null),
+    useRef(null),
+    useRef(null),
+    useRef(null),
+    useRef(null),
+  ];
   const yearRefs = [useRef(null), useRef(null)];
 
   // Tab order for navigation
-  const tabOrder = ["temperature", "pressure", "squall", "V.V", "weather", "indicators"];
+  const tabOrder = [
+    "temperature",
+    "pressure",
+    "squall",
+    "V.V",
+    "weather",
+    "indicators",
+  ];
 
   // Tab styles with gradients and more vibrant colors
   const tabStyles = {
@@ -125,6 +154,14 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
     toast.success("Dew point and relative humidity calculated successfully");
   };
+
+  useEffect(() => {
+    const year = new Date().getFullYear().toString(); // e.g., "2025"
+    setFormData((prev) => ({
+      ...prev,
+      year: year.slice(2), // only "25" for last two digits
+    }));
+  }, []);
 
   const calculatePressureValues = (dryBulb, barAsRead) => {
     if (!dryBulb || !barAsRead) return;
@@ -306,7 +343,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       if (onDataSubmitted) {
         onDataSubmitted();
       }
-      
+
       // Reset to first tab after submission
       setActiveTab("temperature");
     } catch (error) {
@@ -353,29 +390,22 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     e: React.ChangeEvent<HTMLInputElement>,
     index: number,
     refs: React.RefObject<HTMLInputElement>[],
-    fieldName: string
+    key: string
   ) => {
-    const { value } = e.target;
+    const value = e.target.value.slice(0, 1); // ensure single digit
+    const updated = (formData[key] || "").split("");
+    updated[index] = value;
 
-    // Update form data with the specific segment
-    setFormData((prev) => {
-      const updatedField = {
-        ...(prev[fieldName] || {}),
-        [index]: value,
-      };
+    setFormData((prev) => ({
+      ...prev,
+      [key]: updated.join(""),
+    }));
 
-      return {
-        ...prev,
-        [fieldName]: updatedField,
-      };
-    });
-
-    // Auto-focus to next input if value is entered and not the last box
-    if (value && index < refs.length - 1) {
-      refs[index + 1].current?.focus();
+    // Auto-focus next input
+    if (value && refs[index + 1]) {
+      refs[index + 1]?.current?.focus();
     }
   };
-
   // Reset form function
   const handleReset = () => {
     // Clear all form data
@@ -390,11 +420,11 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
     // Show toast notification
     toast.info("All form data has been cleared.");
-    
+
     // Reset to first tab
     setActiveTab("temperature");
   };
-  
+
   // Navigation functions
   const nextTab = () => {
     const currentIndex = tabOrder.indexOf(activeTab);
@@ -402,17 +432,19 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       setActiveTab(tabOrder[currentIndex + 1]);
     }
   };
-  
+
   const prevTab = () => {
     const currentIndex = tabOrder.indexOf(activeTab);
     if (currentIndex > 0) {
       setActiveTab(tabOrder[currentIndex - 1]);
     }
   };
-  
+
   // Check if current tab is the last one
   const isLastTab = tabOrder.indexOf(activeTab) === tabOrder.length - 1;
   const isFirstTab = tabOrder.indexOf(activeTab) === 0;
+
+  const { data: session } = useSession();
 
   return (
     <>
@@ -430,18 +462,13 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                 >
                   DATA TYPE
                 </Label>
-                <div className="flex gap-1">
-                  {[0, 1].map((i) => (
+                <div className="flex gap-1 ">
+                  {["S", "Y"].map((char, i) => (
                     <Input
                       key={`dataType-${i}`}
                       id={`dataType-${i}`}
-                      ref={dataTypeRefs[i]}
-                      className="w-12 text-center p-2 bg-white border border-slate-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
-                      maxLength={1}
-                      value={formData.dataType?.[i] || ""}
-                      onChange={(e) =>
-                        handleSegmentedInput(e, i, dataTypeRefs, "dataType")
-                      }
+                      className="w-12 text-center text-black p-2 bg-slate-100 border border-slate-900 shadow-sm"
+                      value={char}
                     />
                   ))}
                 </div>
@@ -456,14 +483,14 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                   STATION NO.
                 </Label>
                 <div className="flex gap-1">
-                  {[0, 1, 2, 3, 4].map((i) => (
+                  {[0].map((i) => (
                     <Input
                       key={`stationNo-${i}`}
                       id={`stationNo-${i}`}
                       ref={stationNoRefs[i]}
                       className="w-12 text-center p-2 bg-white border border-slate-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                       maxLength={1}
-                      value={formData.stationNo?.[i] || ""}
+                      value={session?.user.stationId || ""}
                       onChange={(e) =>
                         handleSegmentedInput(e, i, stationNoRefs, "stationNo")
                       }
@@ -483,7 +510,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                 <Input
                   id="stationName"
                   name="stationName"
-                  value={formData.stationName || ""}
+                  value={session?.user?.stationName || ""}
                   onChange={handleChange}
                   className="p-2 bg-white border border-slate-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                 />
@@ -704,17 +731,17 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     </div>
                   </CardContent>
                   <CardFooter className="flex justify-between p-6">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
+                    <Button
+                      type="button"
+                      variant="outline"
                       onClick={prevTab}
                       disabled={isFirstTab}
                     >
                       <ChevronLeft className="mr-2 h-4 w-4" /> Previous
                     </Button>
-                    <Button 
-                      type="button" 
-                      onClick={nextTab} 
+                    <Button
+                      type="button"
+                      onClick={nextTab}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
                       Next <ChevronRight className="ml-2 h-4 w-4" />
@@ -903,9 +930,9 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     </Tabs>
                   </CardContent>
                   <CardFooter className="flex justify-end p-6">
-                    <Button 
-                      type="button" 
-                      onClick={nextTab} 
+                    <Button
+                      type="button"
+                      onClick={nextTab}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
                       Next <ChevronRight className="ml-2 h-4 w-4" />
@@ -1025,16 +1052,12 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     )}
                   </CardContent>
                   <CardFooter className="flex justify-between p-6">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={prevTab}
-                    >
+                    <Button type="button" variant="outline" onClick={prevTab}>
                       <ChevronLeft className="mr-2 h-4 w-4" /> Previous
                     </Button>
-                    <Button 
-                      type="button" 
-                      onClick={nextTab} 
+                    <Button
+                      type="button"
+                      onClick={nextTab}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
                       Next <ChevronRight className="ml-2 h-4 w-4" />
@@ -1080,16 +1103,12 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     </div>
                   </CardContent>
                   <CardFooter className="flex justify-between p-6">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={prevTab}
-                    >
+                    <Button type="button" variant="outline" onClick={prevTab}>
                       <ChevronLeft className="mr-2 h-4 w-4" /> Previous
                     </Button>
-                    <Button 
-                      type="button" 
-                      onClick={nextTab} 
+                    <Button
+                      type="button"
+                      onClick={nextTab}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
                       Next <ChevronRight className="ml-2 h-4 w-4" />
@@ -1225,16 +1244,12 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     </Tabs>
                   </CardContent>
                   <CardFooter className="flex justify-between p-6">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={prevTab}
-                    >
+                    <Button type="button" variant="outline" onClick={prevTab}>
                       <ChevronLeft className="mr-2 h-4 w-4" /> Previous
                     </Button>
-                    <Button 
-                      type="button" 
-                      onClick={nextTab} 
+                    <Button
+                      type="button"
+                      onClick={nextTab}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
                       Next <ChevronRight className="ml-2 h-4 w-4" />
@@ -1285,11 +1300,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     </div>
                   </CardContent>
                   <CardFooter className="flex justify-between p-6">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={prevTab}
-                    >
+                    <Button type="button" variant="outline" onClick={prevTab}>
                       <ChevronLeft className="mr-2 h-4 w-4" /> Previous
                     </Button>
                     <div className="flex gap-4">

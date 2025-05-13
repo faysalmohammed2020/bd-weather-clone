@@ -1,7 +1,7 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
 import {
   CloudIcon,
@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSession } from "@/lib/auth-client";
 
 // Define the form data structure
 interface FormData {
@@ -48,6 +49,7 @@ export default function WeatherObservationForm() {
   const [activeTab, setActiveTab] = useState("cloud");
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 6;
+  const { data: session } = useSession();
 
   const handleNext = () => {
     // Add validation for current step before proceeding
@@ -335,6 +337,36 @@ export default function WeatherObservationForm() {
       setIsSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    async function fetchUserInfo() {
+      try {
+        const res = await fetch("/api/users"); // same route
+        if (!res.ok) {
+          throw new Error("Unauthorized or failed to fetch user");
+        }
+
+        const users = await res.json();
+        const currentUser = users[0]; // or use your own filtering logic if multiple users
+
+        const now = new Date().toISOString().slice(0, 16); // for datetime-local
+
+        setFormData((prev) => ({
+          ...prev,
+          observer: {
+            ...prev.observer,
+            "observer-initial": currentUser.name || "",
+            "station-id": currentUser.stationId || "",
+            "observation-time": now,
+          },
+        }));
+      } catch (err) {
+        console.error("Failed to fetch user info:", err);
+      }
+    }
+
+    fetchUserInfo();
+  }, []);
 
   const tabColors: Record<string, string> = {
     cloud: "bg-blue-100 hover:bg-blue-200 data-[state=active]:bg-blue-500",
@@ -635,7 +667,7 @@ export default function WeatherObservationForm() {
                       name="observer-initial"
                       label="Initial of Observer"
                       accent="orange"
-                      value={formData.observer["observer-initial"] || ""}
+                      value={session?.user?.name || ""}
                       onChange={handleInputChange}
                     />
                     <InputField
@@ -652,7 +684,7 @@ export default function WeatherObservationForm() {
                       name="station-id"
                       label="Station ID"
                       accent="orange"
-                      value={formData.observer["station-id"] || ""}
+                      value={session?.user?.stationId || ""}
                       onChange={handleInputChange}
                     />
                   </div>
@@ -779,6 +811,7 @@ function InputField({
   type = "text",
   accent = "blue",
   value,
+  disabled,
   onChange,
 }: {
   id: string;
@@ -787,6 +820,7 @@ function InputField({
   type?: string;
   accent?: string;
   value: string;
+  disabled?: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   const focusClasses: Record<string, string> = {
@@ -813,6 +847,7 @@ function InputField({
         value={value}
         onChange={onChange}
         className={`${focusClasses[accent]} border-gray-300 rounded-lg py-2 px-3`}
+        disabled={disabled}
       />
     </div>
   );
