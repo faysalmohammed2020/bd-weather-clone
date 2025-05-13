@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
+import { useSession } from "@/lib/auth-client";
 
 interface MeteorologicalEntry {
   id: string;
@@ -77,6 +78,8 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   const [stationFilter, setStationFilter] = useState("all");
   const [stationNames, setStationNames] = useState<string[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { data: session } = useSession();
+  const user = session?.user;
 
   // Fetch data from API
   const fetchData = async () => {
@@ -237,6 +240,10 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     return year.length >= 2 ? `${year[0] || "-"}${year[1] || "-"}` : "--";
   };
 
+  const filteredYear = filteredData[0]?.timestamp
+    ? new Date(filteredData[0].timestamp).getFullYear().toString().slice(-2)
+    : new Date().getFullYear().toString().slice(-2);
+
   return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
       <CardHeader className="p-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
@@ -334,34 +341,30 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
           {/* Header Section */}
           <div className="p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300">
             <div className="flex justify-around gap-4">
-              <div>
-                <div className="text-md font-bold uppercase text-slate-600">
+              <div className="flex flex-col">
+                <Label
+                  htmlFor="dataType"
+                  className="text-sm font-medium text-slate-900 mb-2"
+                >
                   DATA TYPE
-                </div>
-                <div className="flex mt-1">
-                  <div className="w-8 h-8 border border-slate-400 flex items-center justify-center bg-white font-mono rounded-l-md">
-                    {data[0]?.dataType?.[0] || "-"}
-                  </div>
-                  <div className="w-8 h-8 border-t border-r border-b border-slate-400 flex items-center justify-center bg-white font-mono rounded-r-md">
-                    {data[0]?.dataType?.[1] || "-"}
-                  </div>
+                </Label>
+                <div className="flex gap-1">
+                  {["S", "Y"].map((char, i) => (
+                    <Input
+                      key={`dataType-${i}`}
+                      id={`dataType-${i}`}
+                      className="w-12 text-center p-2 bg-slate-100 border border-slate-400 shadow-sm"
+                      value={char}
+                    />
+                  ))}
                 </div>
               </div>
               <div>
-                <div className="font-bold uppercase text-slate-600">
+                <div className="font-bold uppercase text-slate-600 ">
                   STATION NO
                 </div>
-                <div className="flex mt-1">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className={`w-8 h-8 border-t border-b border-slate-400 flex items-center justify-center bg-white font-mono ${
-                        i === 0 ? "rounded-l-md border-l" : ""
-                      } ${i === 4 ? "rounded-r-md border-r" : "border-r"}`}
-                    >
-                      {data[0]?.stationNo?.[i] || "-"}
-                    </div>
-                  ))}
+                <div className="flex border border-slate-400 rounded-l p-2 mx-auto">
+                  {user?.stationId || "N/A"}
                 </div>
               </div>
               <div>
@@ -369,19 +372,18 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                   STATION NAME
                 </div>
                 <div className="mt-1 h-8 border border-slate-400 px-2 flex items-center bg-white font-mono rounded-md">
-                  {data[0]?.stationName || "-----"}
+                  {user?.stationName || "N/A"}
                 </div>
               </div>
+
               <div>
-                <div className="font-bold uppercase text-slate-600">
-                  YEAR
-                </div>
+                <div className="font-bold uppercase text-slate-600">YEAR</div>
                 <div className="flex mt-1">
                   <div className="w-8 h-8 border border-slate-400 flex items-center justify-center bg-white font-mono rounded-l-md">
-                    {data[0]?.year?.[0] || "-"}
+                    {filteredYear[0]}
                   </div>
                   <div className="w-8 h-8 border-t border-r border-b border-slate-400 flex items-center justify-center bg-white font-mono rounded-r-md">
-                    {data[0]?.year?.[1] || "-"}
+                    {filteredYear[1]}
                   </div>
                 </div>
               </div>
@@ -682,7 +684,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                               ? `${record.pastWeatherW1}`
                               : "--"}
                           </td>
-                           <td className="border border-slate-300 p-1">
+                          <td className="border border-slate-300 p-1">
                             {record.pastWeatherW1 && record.pastWeatherW2
                               ? `${record.pastWeatherW2}`
                               : "--"}
