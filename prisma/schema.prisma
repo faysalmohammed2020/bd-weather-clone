@@ -7,8 +7,6 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["relationJoins"]
-  output          = "generated/client"
-  moduleFormat    = "esm"
 }
 
 datasource db {
