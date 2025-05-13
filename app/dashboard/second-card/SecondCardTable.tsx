@@ -15,6 +15,7 @@ import {
 import { Calendar, ChevronLeft, ChevronRight, Download } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { SecondCardData } from "@/data/second-card-data";
+import { useSession } from "@/lib/auth-client";
 
 interface SecondCardTableProps {
   refreshTrigger?: number;
@@ -23,6 +24,7 @@ interface SecondCardTableProps {
 export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
   const [data, setData] = useState<SecondCardData[]>([]);
   const [loading, setLoading] = useState(true);
+  const { data: session } = useSession();
   const [selectedDate, setSelectedDate] = useState(
     format(new Date(), "yyyy-MM-dd")
   );
@@ -210,25 +212,26 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-
-          <div className="flex items-center gap-2">
-            <Label htmlFor="stationFilter" className="whitespace-nowrap">
-              Station:
-            </Label>
-            <Select value={stationFilter} onValueChange={setStationFilter}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="All Stations" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Stations</SelectItem>
-                {stationNames.map((id) => (
-                  <SelectItem key={id} value={id}>
-                    Station {id}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {session?.user?.role === "super_admin" && (
+            <div className="flex items-center gap-2">
+              <Label htmlFor="stationFilter" className="whitespace-nowrap">
+                Station:
+              </Label>
+              <Select value={stationFilter} onValueChange={setStationFilter}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="All Stations" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Stations</SelectItem>
+                  {stationNames.map((id) => (
+                    <SelectItem key={id} value={id}>
+                      Station {id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         {/* Main Table Section */}
