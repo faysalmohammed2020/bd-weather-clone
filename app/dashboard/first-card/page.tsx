@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MeteorologicalDataForm } from "@/app/dashboard/first-card/meteorological-data-form";
-import { MeteorologicalDataTable } from "./meteorological-data-table";
 import { FirstCardTable } from "./first-card-table";
 
 export default function FirstCardPage() {
