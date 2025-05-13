@@ -2,18 +2,16 @@
 
 import type React from "react";
 import { useState, useRef, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { Thermometer, Wind, Eye, Cloud, Clock, BarChart3 } from "lucide-react";
+import { Thermometer, Wind, Eye, Cloud, Clock, BarChart3, ChevronRight, ChevronLeft } from 'lucide-react';
 import { toast, Toaster } from "sonner";
 import { hygrometricTable } from "../../../data/hygrometric-table"; // Import the hygrometric table data
 import { stationPressure } from "../../../data/station-pressure"; // Import the station pressure data
-
-// Add this after the imports but before the component definition
 
 export function MeteorologicalDataForm({ onDataSubmitted }) {
   const [formData, setFormData] = useState({});
@@ -29,14 +27,11 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
   // Refs for multi-box inputs to handle auto-focus
   const dataTypeRefs = [useRef(null), useRef(null)];
-  const stationNoRefs = [
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-  ];
+  const stationNoRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
   const yearRefs = [useRef(null), useRef(null)];
+
+  // Tab order for navigation
+  const tabOrder = ["temperature", "pressure", "squall", "V.V", "weather", "indicators"];
 
   // Tab styles with gradients and more vibrant colors
   const tabStyles = {
@@ -130,8 +125,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
     toast.success("Dew point and relative humidity calculated successfully");
   };
-
-  // Update the handleSubmit function to save the JSON file on the server
 
   const calculatePressureValues = (dryBulb, barAsRead) => {
     if (!dryBulb || !barAsRead) return;
@@ -257,8 +250,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     }
   };
 
-  const [tabValue, setTabValue] = useState("temperature");
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -315,6 +306,9 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       if (onDataSubmitted) {
         onDataSubmitted();
       }
+      
+      // Reset to first tab after submission
+      setActiveTab("temperature");
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("Submission failed", {
@@ -396,7 +390,29 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
     // Show toast notification
     toast.info("All form data has been cleared.");
+    
+    // Reset to first tab
+    setActiveTab("temperature");
   };
+  
+  // Navigation functions
+  const nextTab = () => {
+    const currentIndex = tabOrder.indexOf(activeTab);
+    if (currentIndex < tabOrder.length - 1) {
+      setActiveTab(tabOrder[currentIndex + 1]);
+    }
+  };
+  
+  const prevTab = () => {
+    const currentIndex = tabOrder.indexOf(activeTab);
+    if (currentIndex > 0) {
+      setActiveTab(tabOrder[currentIndex - 1]);
+    }
+  };
+  
+  // Check if current tab is the last one
+  const isLastTab = tabOrder.indexOf(activeTab) === tabOrder.length - 1;
+  const isFirstTab = tabOrder.indexOf(activeTab) === 0;
 
   return (
     <>
@@ -505,7 +521,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
         <Card className="border-none shadow-xl overflow-hidden">
           <CardContent className="p-6">
             <Tabs
-              defaultValue="temperature"
               value={activeTab}
               onValueChange={setActiveTab}
               className="w-full"
@@ -688,6 +703,23 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       />
                     </div>
                   </CardContent>
+                  <CardFooter className="flex justify-between p-6">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={prevTab}
+                      disabled={isFirstTab}
+                    >
+                      <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                    </Button>
+                    <Button 
+                      type="button" 
+                      onClick={nextTab} 
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Next <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
                 </Card>
               </TabsContent>
 
@@ -870,6 +902,15 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       </TabsContent>
                     </Tabs>
                   </CardContent>
+                  <CardFooter className="flex justify-end p-6">
+                    <Button 
+                      type="button" 
+                      onClick={nextTab} 
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Next <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
                 </Card>
               </TabsContent>
 
@@ -903,8 +944,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                                 squallDirection: "",
                                 squallTime: "",
                               }));
-                              // Skip to next tab (replace "next-tab-value" with your actual next tab value)
-                              setTabValue("next-tab-value");
+                              nextTab();
                             }}
                           >
                             No, Skip
@@ -984,6 +1024,22 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       </div>
                     )}
                   </CardContent>
+                  <CardFooter className="flex justify-between p-6">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={prevTab}
+                    >
+                      <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                    </Button>
+                    <Button 
+                      type="button" 
+                      onClick={nextTab} 
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Next <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
                 </Card>
               </TabsContent>
 
@@ -1023,6 +1079,22 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       />
                     </div>
                   </CardContent>
+                  <CardFooter className="flex justify-between p-6">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={prevTab}
+                    >
+                      <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                    </Button>
+                    <Button 
+                      type="button" 
+                      onClick={nextTab} 
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Next <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
                 </Card>
               </TabsContent>
 
@@ -1152,6 +1224,22 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       </TabsContent>
                     </Tabs>
                   </CardContent>
+                  <CardFooter className="flex justify-between p-6">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={prevTab}
+                    >
+                      <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                    </Button>
+                    <Button 
+                      type="button" 
+                      onClick={nextTab} 
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Next <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
                 </Card>
               </TabsContent>
 
@@ -1196,27 +1284,35 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       />
                     </div>
                   </CardContent>
+                  <CardFooter className="flex justify-between p-6">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={prevTab}
+                    >
+                      <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                    </Button>
+                    <div className="flex gap-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-slate-600 hover:bg-slate-100 transition-all duration-300"
+                        onClick={handleReset}
+                      >
+                        Reset
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Saving..." : "Submit Data"}
+                      </Button>
+                    </div>
+                  </CardFooter>
                 </Card>
               </TabsContent>
             </Tabs>
-
-            <div className="flex justify-end gap-4 mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                className="border-slate-600 hover:bg-slate-100 transition-all duration-300"
-                onClick={handleReset}
-              >
-                Reset
-              </Button>
-              <Button
-                type="submit"
-                className="bg-gradient-to-r from-slate-400 to-slate-500 hover:from-slate-500 hover:to-slate-600 transition-all duration-300 shadow-sm"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Saving..." : "Submit Data"}
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </form>
