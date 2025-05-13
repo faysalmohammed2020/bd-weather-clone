@@ -17,25 +17,28 @@ datasource db {
 }
 
 model users {
-  id            String     @id @default(cuid())
-  email         String     @unique
-  name          String?
-  emailVerified Boolean
-  image         String?
-  role          String?
-  banned        Boolean?
-  banReason     String?
-  banExpires    Int?
-  division      String
-  district      String
-  upazila       String
-  stationName   String?
-  stationId     String?
-  securityCode  String?
-  createdAt     DateTime
-  updatedAt     DateTime
-  sessions      sessions[]
-  accounts      accounts[]
+  id               String     @id @default(cuid())
+  email            String     @unique
+  name             String?
+  emailVerified    Boolean
+  image            String?
+  role             String?
+  banned           Boolean?
+  banReason        String?
+  banExpires       Int?
+  division         String
+  district         String
+  upazila          String
+  stationName      String?
+  stationId        String?
+  securityCode     String?
+  createdAt        DateTime
+  updatedAt        DateTime
+  twoFactorEnabled Boolean    @default(false)
+  twoFactorSecret  String?
+  backupCodes      String[]   @default([])
+  sessions         sessions[]
+  accounts         accounts[]
 }
 
 model Station {
