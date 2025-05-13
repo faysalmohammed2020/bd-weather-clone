@@ -55,7 +55,7 @@ const Sidebar = () => {
       href: "/dashboard/synoptic-code",
       icon: <Codesandbox className="w-5 h-5" />,
       label: "Synoptic Code",
-      roles: ["observer", "station_admin"],
+      roles: ["super_admin", "observer", "station_admin"],
     },
     {
       href: "/dashboard/user",
