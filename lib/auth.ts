@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { admin } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import prisma from "@/lib/prisma";
+import { twoFactor } from "better-auth/plugins";
 
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
@@ -52,5 +53,6 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  plugins: [admin()],
+  appName: "BD Weather",
+  plugins: [admin(), twoFactor()],
 });

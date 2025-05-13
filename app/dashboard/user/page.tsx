@@ -338,7 +338,7 @@ export default function UserTable() {
               <option value="all">All Roles</option>
               <option value="super_admin">Super Admin</option>
               <option value="station_admin">Station Admin</option>
-              <option value="observer">Data Entry</option>
+              <option value="observer">Observer</option>
             </select>
           </div>
 
@@ -494,7 +494,7 @@ export default function UserTable() {
                   options: [
                     { value: "super_admin", label: "Super Admin" },
                     { value: "station_admin", label: "Station Admin" },
-                    { value: "observer", label: "Data Admin" },
+                    { value: "observer", label: "Observer" },
                   ],
                 },
                 {
