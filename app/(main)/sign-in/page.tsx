@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Mail,
   Lock,
@@ -335,7 +335,7 @@ export default function SignInForm() {
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
                   {stations.map((station) => (
-                    <SelectItem key={station.id} value={station.name}>
+                    <SelectItem key={station.stationId} value={station.name}>
                       <div className="flex items-center gap-2">
                         <MapPin className="h-4 w-4" />
                         {station.name}
