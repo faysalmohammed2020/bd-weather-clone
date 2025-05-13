@@ -15,28 +15,25 @@ datasource db {
 }
 
 model users {
-  id                 String               @id @default(cuid())
-  email              String               @unique
-  name               String?
-  emailVerified      Boolean
-  image              String?
-  role               String?
-  banned             Boolean?
-  banReason          String?
-  banExpires         Int?
-  division           String
-  district           String
-  upazila            String
-  stationName        String?
-  stationId          String?
-  securityCode       String?
-  createdAt          DateTime
-  updatedAt          DateTime
-  twoFactorEnabled   Boolean              @default(false)
-  twoFactorSecret    String?
-  backupCodes        String[]             @default([])
-  sessions           sessions[]
-  accounts           accounts[]
+  id            String     @id @default(cuid())
+  email         String     @unique
+  name          String?
+  emailVerified Boolean
+  image         String?
+  role          String?
+  banned        Boolean?
+  banReason     String?
+  banExpires    Int?
+  division      String
+  district      String
+  upazila       String
+  stationName   String?
+  stationId     String?
+  securityCode  String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  sessions      sessions[]
+  accounts      accounts[]
   WeatherObservation WeatherObservation[]
 }
 
@@ -92,6 +89,47 @@ model verifications {
   updatedAt  DateTime?
 
   @@index([identifier])
+}
+
+model MeteorologicalEntry {
+  id                        String   @id @default(cuid())
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+  dataType                  String
+  stationNo                 String
+  stationName               String
+  year                      String
+  subIndicator              String
+  alteredThermometer        String
+  barAsRead                 String
+  correctedForIndex         String
+  heightDifference          String
+  correctionForTemp         String
+  stationLevelPressure      String
+  seaLevelReduction         String
+  correctedSeaLevelPressure String
+  afternoonReading          String
+  pressureChange24h         String
+  dryBulbAsRead             String
+  wetBulbAsRead             String
+  maxMinTempAsRead          String
+  dryBulbCorrected          String
+  wetBulbCorrected          String
+  maxMinTempCorrected       String
+  Td                        String
+  relativeHumidity          String
+  squallConfirmed           String
+  squallForce               String
+  squallDirection           String
+  squallTime                String
+  horizontalVisibility      String
+  miscMeteors               String
+  pastWeatherW1             String
+  pastWeatherW2             String
+  presentWeatherWW          String
+  c2Indicator               String
+  observationTime           String
+  timestamp                 String
 }
 
 model WeatherObservation {
