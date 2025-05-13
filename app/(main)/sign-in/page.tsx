@@ -158,6 +158,11 @@ export default function SignInForm() {
 
       const data = await response.json();
 
+      if(data.twoFactorRedirect){
+        router.push("/2fa");
+        return;
+      }
+
       // If the response is successful, redirect to dashboard
       if (response.ok) {
         // Success - show toast and redirect to dashboard
@@ -168,7 +173,7 @@ export default function SignInForm() {
       }
 
       // Handle error responses
-      let errorMessage = data.error || "An error occurred during sign in";
+      let errorMessage = data.error || data.message || "An error occurred during sign in";
 
       // Provide user-friendly error messages
       if (errorMessage.includes("credentials")) {
@@ -187,8 +192,7 @@ export default function SignInForm() {
 
       setFormError(errorMessage);
     } catch (error) {
-      console.error("Sign-in error:", error);
-      setFormError("An error occurred during sign in. Please try again.");
+      setFormError(error?.message as string);
     } finally {
       setLoading(false);
     }

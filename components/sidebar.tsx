@@ -14,6 +14,7 @@ import {
   CloudHail,
   Users,
   CloudFog,
+  Settings,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 
@@ -67,6 +68,12 @@ const Sidebar = () => {
       href: "/dashboard/stations",
       icon: <CloudFog className="w-5 h-5" />,
       label: "Station Management",
+      roles: ["super_admin"],
+    },
+    {
+      href: "/dashboard/settings",
+      icon: <Settings className="w-5 h-5" />,
+      label: "Settings",
       roles: ["super_admin"],
     },
   ];

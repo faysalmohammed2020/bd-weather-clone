@@ -66,9 +66,10 @@ export async function POST(request: NextRequest) {
     }
 
     // 4. Authenticate the user using better-auth
-    try {
+
       // Use the official better-auth API as per documentation
-      await auth.api.signInEmail({
+      const response = await auth.api.signInEmail({
+        asResponse: true,
         body: {
           email,
           password
@@ -77,19 +78,11 @@ export async function POST(request: NextRequest) {
       
       // Return a success response
       // better-auth will automatically handle setting the cookies
-      return NextResponse.json({ success: true });
-    } catch (authError) {
-      console.error("Authentication error:", authError);
+      return response;
+    } catch {
       return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
-    }
-  } catch (error) {
-    console.error("Sign-in error:", error);
-    return NextResponse.json(
-      { error: "An error occurred during sign in" },
-      { status: 500 }
+        { error: "An error occurred during sign in" },
+        { status: 500 }
     );
   }
 }
