@@ -37,6 +37,7 @@ model users {
   accounts           accounts[]
   WeatherObservation WeatherObservation[]
   twoFactor          twoFactor[]
+  MeteorologicalEntry MeteorologicalEntry[]
 }
 
 model sessions {
@@ -108,6 +109,8 @@ model MeteorologicalEntry {
   id                        String   @id @default(cuid())
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
+  userId                    String   // NEW: Foreign key
+  user                      users    @relation(fields: [userId], references: [id], onDelete: Cascade) // NEW: Relation
   dataType                  String
   stationNo                 String
   stationName               String

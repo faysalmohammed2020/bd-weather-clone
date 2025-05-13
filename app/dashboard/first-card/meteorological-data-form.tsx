@@ -12,6 +12,7 @@ import { Thermometer, Wind, Eye, Cloud, Clock, BarChart3, ChevronRight, ChevronL
 import { toast, Toaster } from "sonner";
 import { hygrometricTable } from "../../../data/hygrometric-table"; // Import the hygrometric table data
 import { stationPressure } from "../../../data/station-pressure"; // Import the station pressure data
+import { useSession } from "@/lib/auth-client";
 
 export function MeteorologicalDataForm({ onDataSubmitted }) {
   const [formData, setFormData] = useState({});
@@ -414,6 +415,9 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
   const isLastTab = tabOrder.indexOf(activeTab) === tabOrder.length - 1;
   const isFirstTab = tabOrder.indexOf(activeTab) === 0;
 
+  const {data:session} = useSession();
+  
+
   return (
     <>
       <Toaster position="top-right" richColors />
@@ -463,7 +467,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       ref={stationNoRefs[i]}
                       className="w-12 text-center p-2 bg-white border border-slate-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                       maxLength={1}
-                      value={formData.stationNo?.[i] || ""}
+                      value={session?.user.stationId || ""}
                       onChange={(e) =>
                         handleSegmentedInput(e, i, stationNoRefs, "stationNo")
                       }
@@ -483,7 +487,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                 <Input
                   id="stationName"
                   name="stationName"
-                  value={formData.stationName || ""}
+                  value={session?.user?.stationName || ""}
                   onChange={handleChange}
                   className="p-2 bg-white border border-slate-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                 />
