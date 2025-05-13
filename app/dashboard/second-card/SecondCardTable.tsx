@@ -33,7 +33,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/second-card-data");
+      const response = await fetch("/api/save-observation");
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
