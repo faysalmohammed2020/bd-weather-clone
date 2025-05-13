@@ -46,6 +46,49 @@ interface FormData {
 export default function WeatherObservationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("cloud");
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 6;
+
+  const handleNext = () => {
+    // Add validation for current step before proceeding
+    if (validateStep(currentStep)) {
+      setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
+      setActiveTab(getTabForStep(currentStep + 1));
+    }
+  };
+
+  const handlePrevious = () => {
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
+    setActiveTab(getTabForStep(currentStep - 1));
+  };
+
+  const getTabForStep = (step: number) => {
+    const steps = [
+      "cloud",
+      "n",
+      "significant-cloud",
+      "rainfall",
+      "wind",
+      "observer",
+    ];
+    return steps[step - 1] || "cloud";
+  };
+
+  const validateStep = (step: number) => {
+    switch (step) {
+      case 1: // Cloud
+        return (
+          !!formData.clouds.low.form ||
+          !!formData.clouds.medium.form ||
+          !!formData.clouds.high.form
+        );
+      case 2: // Total Cloud
+        return !!formData.totalCloud["total-cloud-amount"];
+      // Add validation for other steps as needed
+      default:
+        return true;
+    }
+  };
 
   // Initialize form data state to store values across tab changes
   const [formData, setFormData] = useState<FormData>({
@@ -617,8 +660,7 @@ export default function WeatherObservationForm() {
               </TabsContent>
             </div>
           </Tabs>
-
-          <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 flex justify-end">
+          {/* <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 flex justify-end">
             <Button
               type="submit"
               className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
@@ -636,6 +678,45 @@ export default function WeatherObservationForm() {
                 </>
               )}
             </Button>
+          </div> */}
+
+          <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 flex justify-between">
+            <Button
+              type="button"
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+              className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
+            >
+              Previous
+            </Button>
+
+            {currentStep < totalSteps ? (
+              <Button
+                type="button"
+                onClick={handleNext}
+                className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
+              >
+                Next
+              </Button>
+            ) : (
+              <Button
+                type="submit"
+                className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    <CloudIcon className="h-5 w-5 mr-2" />
+                    Submit Observation
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         </form>
       </div>

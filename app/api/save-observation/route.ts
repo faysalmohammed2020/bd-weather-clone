@@ -79,68 +79,73 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
 
-    // Transform the form data structure to match the Prisma model
+    // Basic validation
+    if (!data.observer || !data.observer["station-id"]) {
+      throw new Error("Station ID is required");
+    }
+
+    // Transform and validate data
     const observationData = {
       tabActive: data.metadata?.tabActiveAtSubmission || "unknown",
-      stationId: data.observer["station-id"] || "unknown",
+      stationId: data.observer["station-id"],
 
-      // Cloud data
-      lowCloudForm: data.clouds.low.form,
-      lowCloudHeight: data.clouds.low.height,
-      lowCloudAmount: data.clouds.low.amount,
-      lowCloudDirection: data.clouds.low.direction,
+      // Cloud data with null checks
+      lowCloudForm: data.clouds?.low?.form || null,
+      lowCloudHeight: data.clouds?.low?.height || null,
+      lowCloudAmount: data.clouds?.low?.amount || null,
+      lowCloudDirection: data.clouds?.low?.direction || null,
 
-      mediumCloudForm: data.clouds.medium.form,
-      mediumCloudHeight: data.clouds.medium.height,
-      mediumCloudAmount: data.clouds.medium.amount,
-      mediumCloudDirection: data.clouds.medium.direction,
+      mediumCloudForm: data.clouds?.medium?.form || null,
+      mediumCloudHeight: data.clouds?.medium?.height || null,
+      mediumCloudAmount: data.clouds?.medium?.amount || null,
+      mediumCloudDirection: data.clouds?.medium?.direction || null,
 
-      highCloudForm: data.clouds.high.form,
-      highCloudHeight: data.clouds.high.height,
-      highCloudAmount: data.clouds.high.amount,
-      highCloudDirection: data.clouds.high.direction,
+      highCloudForm: data.clouds?.high?.form || null,
+      highCloudHeight: data.clouds?.high?.height || null,
+      highCloudAmount: data.clouds?.high?.amount || null,
+      highCloudDirection: data.clouds?.high?.direction || null,
 
       // Total cloud
-      totalCloudAmount: data.totalCloud["total-cloud-amount"],
+      totalCloudAmount: data.totalCloud?.["total-cloud-amount"] || null,
 
       // Significant clouds
-      layer1Form: data.significantClouds.layer1.form,
-      layer1Height: data.significantClouds.layer1.height,
-      layer1Amount: data.significantClouds.layer1.amount,
+      layer1Form: data.significantClouds?.layer1?.form || null,
+      layer1Height: data.significantClouds?.layer1?.height || null,
+      layer1Amount: data.significantClouds?.layer1?.amount || null,
 
-      layer2Form: data.significantClouds.layer2.form,
-      layer2Height: data.significantClouds.layer2.height,
-      layer2Amount: data.significantClouds.layer2.amount,
+      layer2Form: data.significantClouds?.layer2?.form || null,
+      layer2Height: data.significantClouds?.layer2?.height || null,
+      layer2Amount: data.significantClouds?.layer2?.amount || null,
 
-      layer3Form: data.significantClouds.layer3.form,
-      layer3Height: data.significantClouds.layer3.height,
-      layer3Amount: data.significantClouds.layer3.amount,
+      layer3Form: data.significantClouds?.layer3?.form || null,
+      layer3Height: data.significantClouds?.layer3?.height || null,
+      layer3Amount: data.significantClouds?.layer3?.amount || null,
 
-      layer4Form: data.significantClouds.layer4.form,
-      layer4Height: data.significantClouds.layer4.height,
-      layer4Amount: data.significantClouds.layer4.amount,
+      layer4Form: data.significantClouds?.layer4?.form || null,
+      layer4Height: data.significantClouds?.layer4?.height || null,
+      layer4Amount: data.significantClouds?.layer4?.amount || null,
 
       // Rainfall
-      rainfallTimeStart: data.rainfall["time-start"],
-      rainfallTimeEnd: data.rainfall["time-end"],
-      rainfallSincePrevious: data.rainfall["since-previous"],
-      rainfallDuringPrevious: data.rainfall["during-previous"],
-      rainfallLast24Hours: data.rainfall["last-24-hours"],
+      rainfallTimeStart: data.rainfall?.["time-start"] || null,
+      rainfallTimeEnd: data.rainfall?.["time-end"] || null,
+      rainfallSincePrevious: data.rainfall?.["since-previous"] || null,
+      rainfallDuringPrevious: data.rainfall?.["during-previous"] || null,
+      rainfallLast24Hours: data.rainfall?.["last-24-hours"] || null,
 
       // Wind
-      windFirstAnemometer: data.wind["first-anemometer"],
-      windSecondAnemometer: data.wind["second-anemometer"],
-      windSpeed: data.wind["speed"],
-      windDirection: data.wind["wind-direction"],
+      windFirstAnemometer: data.wind?.["first-anemometer"] || null,
+      windSecondAnemometer: data.wind?.["second-anemometer"] || null,
+      windSpeed: data.wind?.speed || null,
+      windDirection: data.wind?.["wind-direction"] || null,
 
       // Observer
-      observerInitial: data.observer["observer-initial"],
-      observationTime: data.observer["observation-time"]
+      observerInitial: data.observer?.["observer-initial"] || null,
+      observationTime: data.observer?.["observation-time"]
         ? new Date(data.observer["observation-time"])
         : null,
 
-      // Note: You'll need to add user authentication to set the userId
-      userId: "temp-user-id", // Replace with actual user ID from session
+      // Temporary user ID - replace with actual auth later
+      userId: "temp-user-id",
     };
 
     // Save to database
@@ -150,7 +155,11 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      data: observation,
+      data: {
+        id: observation.id,
+        stationId: observation.stationId,
+        observationTime: observation.observationTime,
+      },
       message: "Observation saved successfully",
     });
   } catch (error) {
@@ -158,7 +167,8 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : "Database error",
+        details: process.env.NODE_ENV === "development" ? error : undefined,
       },
       { status: 500 }
     );
