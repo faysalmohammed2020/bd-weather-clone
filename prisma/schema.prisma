@@ -15,28 +15,29 @@ datasource db {
 }
 
 model users {
-  id               String     @id @default(cuid())
-  email            String     @unique
-  name             String?
-  emailVerified    Boolean
-  image            String?
-  role             String?
-  banned           Boolean?
-  banReason        String?
-  banExpires       Int?
-  division         String
-  district         String
-  upazila          String
-  stationName      String?
-  stationId        String?
-  securityCode     String?
-  createdAt        DateTime
-  updatedAt        DateTime
-  twoFactorEnabled Boolean    @default(false)
-  twoFactorSecret  String?
-  backupCodes      String[]   @default([])
-  sessions         sessions[]
-  accounts         accounts[]
+  id                 String               @id @default(cuid())
+  email              String               @unique
+  name               String?
+  emailVerified      Boolean
+  image              String?
+  role               String?
+  banned             Boolean?
+  banReason          String?
+  banExpires         Int?
+  division           String
+  district           String
+  upazila            String
+  stationName        String?
+  stationId          String?
+  securityCode       String?
+  createdAt          DateTime
+  updatedAt          DateTime
+  twoFactorEnabled   Boolean              @default(false)
+  twoFactorSecret    String?
+  backupCodes        String[]             @default([])
+  sessions           sessions[]
+  accounts           accounts[]
+  WeatherObservation WeatherObservation[]
 }
 
 model Station {
@@ -91,4 +92,70 @@ model verifications {
   updatedAt  DateTime?
 
   @@index([identifier])
+}
+
+model WeatherObservation {
+  id          String   @id @default(cuid())
+  submittedAt DateTime @default(now())
+  tabActive   String
+  stationId   String
+
+  // Link to user (observer)
+  userId String
+  user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // LOW CLOUD
+  lowCloudForm      String?
+  lowCloudHeight    String?
+  lowCloudAmount    String?
+  lowCloudDirection String?
+
+  // MEDIUM CLOUD
+  mediumCloudForm      String?
+  mediumCloudHeight    String?
+  mediumCloudAmount    String?
+  mediumCloudDirection String?
+
+  // HIGH CLOUD
+  highCloudForm      String?
+  highCloudHeight    String?
+  highCloudAmount    String?
+  highCloudDirection String?
+
+  // TOTAL CLOUD
+  totalCloudAmount String?
+
+  // SIGNIFICANT CLOUD LAYERS
+  layer1Form   String?
+  layer1Height String?
+  layer1Amount String?
+
+  layer2Form   String?
+  layer2Height String?
+  layer2Amount String?
+
+  layer3Form   String?
+  layer3Height String?
+  layer3Amount String?
+
+  layer4Form   String?
+  layer4Height String?
+  layer4Amount String?
+
+  // RAINFALL
+  rainfallTimeStart      String?
+  rainfallTimeEnd        String?
+  rainfallSincePrevious  String?
+  rainfallDuringPrevious String?
+  rainfallLast24Hours    String?
+
+  // WIND
+  windFirstAnemometer  String?
+  windSecondAnemometer String?
+  windSpeed            String?
+  windDirection        String?
+
+  // OBSERVER METADATA
+  observerInitial String?
+  observationTime DateTime?
 }
