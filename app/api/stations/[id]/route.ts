@@ -19,7 +19,7 @@ export async function PUT(
     });
 
     return NextResponse.json(updatedStation);
-  } catch (error) {
+  } catch  {
     return NextResponse.json(
       { error: "Failed to update station" },
       { status: 500 }
@@ -38,7 +38,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch  {
     return NextResponse.json(
       { error: "Failed to delete station" },
       { status: 500 }
