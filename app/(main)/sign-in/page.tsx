@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Mail,
   Lock,
@@ -27,12 +27,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { signIn } from "@/lib/auth-client";
+// Authentication is now handled by our custom API route
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { FormError } from "@/components/ui/form-error";
-import { stations } from "@/data/stations";
+import { Station } from "@/data/stations";
 
 // Available roles
 const roles = [
@@ -49,13 +49,33 @@ export default function SignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
+  const [stations, setStations] = useState<Station[]>([]);
+  const [fetchError, setFetchError] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const response = await fetch('/api/stations');
+        if (!response.ok) {
+          throw new Error('Failed to fetch stations');
+        }
+        const data = await response.json();
+        setStations(data);
+      } catch (err) {
+        console.error('Error fetching stations:', err);
+        setFetchError('Could not load stations. Please try again later.');
+      }
+    };
+
+    fetchStations();
+  }, []);
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
 
-  const handleStationSubmit = (e) => {
+  const handleStationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedStation) {
       setFormError("Please select a station");
@@ -65,7 +85,7 @@ export default function SignInForm() {
     setFormError("");
   };
 
-  const handleSecurityCodeSubmit = (e) => {
+  const handleSecurityCodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
@@ -89,72 +109,85 @@ export default function SignInForm() {
     setLoading(false);
   };
 
-  const handleCredentialsSubmit = async (e) => {
+  const handleCredentialsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Client-side validation first
     if (!role) {
       setFormError("Please select a role");
       return;
     }
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email");
-    const password = formData.get("password");
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    if (!email || !password) {
+      setFormError("Please enter both email and password");
+      return;
+    }
+
+    // Find the selected station
+    const station = stations.find((s) => s.name === selectedStation);
+    if (!station) {
+      setFormError("Invalid station selection");
+      return;
+    }
 
     setLoading(true);
+    setFormError("");
 
     try {
-      // Find the selected station
-      const station = stations.find((s) => s.name === selectedStation);
-
-      if (!station) {
-        setFormError("Invalid station selection");
-        setLoading(false);
-        return;
-      }
-
-      await signIn.email(
-        {
+      // Call our custom API route for comprehensive authentication
+      const response = await fetch('/api/auth/sign-in', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           email,
           password,
           role,
           securityCode,
-          stationId: station.id,
+          stationId: station.stationId,
           stationName: station.name,
-        },
-        {
-          onRequest: () => {
-            setLoading(true);
-            setFormError("");
-          },
-          onSuccess: () => {
-            toast.success("Login successful");
-            router.push("/dashboard");
-            router.refresh();
-          },
-          onError: (ctx) => {
-            let errorMessage = ctx.error.message;
+        }),
+        // Important: include credentials to allow cookies to be set
+        credentials: 'include'
+      });
 
-            // Enhanced error messages
-            if (errorMessage.includes("credentials")) {
-              errorMessage = "Invalid email or password";
-            } else if (
-              errorMessage.includes("permission") ||
-              errorMessage.includes("role")
-            ) {
-              errorMessage =
-                "You don't have permission to access this station with the selected role";
-            } else if (errorMessage.includes("security code")) {
-              errorMessage = "The security code doesn't match your account";
-            } else if (errorMessage.includes("station")) {
-              errorMessage = "Your account is not associated with this station";
-            }
+      const data = await response.json();
 
-            setFormError(errorMessage);
-          },
-        }
-      );
+      // If the response is successful, redirect to dashboard
+      if (response.ok) {
+        // Success - show toast and redirect to dashboard
+        toast.success("Login successful");
+        router.push("/dashboard");
+        router.refresh();
+        return;
+      }
+
+      // Handle error responses
+      let errorMessage = data.error || "An error occurred during sign in";
+
+      // Provide user-friendly error messages
+      if (errorMessage.includes("credentials")) {
+        errorMessage = "Invalid email or password";
+      } else if (
+        errorMessage.includes("permission") ||
+        errorMessage.includes("role")
+      ) {
+        errorMessage =
+          "You don't have permission to access this station with the selected role";
+      } else if (errorMessage.includes("security code")) {
+        errorMessage = "The security code doesn't match your account";
+      } else if (errorMessage.includes("station")) {
+        errorMessage = "Your account is not associated with this station";
+      }
+
+      setFormError(errorMessage);
     } catch (error) {
+      console.error("Sign-in error:", error);
       setFormError("An error occurred during sign in. Please try again.");
     } finally {
       setLoading(false);
@@ -325,13 +358,17 @@ export default function SignInForm() {
               >
                 Weather Station
               </Label>
+              {fetchError ? (
+                <div className="text-red-500 text-sm mb-2">{fetchError}</div>
+              ) : null}
               <Select
                 value={selectedStation}
                 onValueChange={setSelectedStation}
                 required
+                disabled={stations.length === 0}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select your station" />
+                  <SelectValue placeholder={stations.length === 0 ? "Loading stations..." : "Select your station"} />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
                   {stations.map((station) => (
@@ -358,7 +395,7 @@ export default function SignInForm() {
           </Button>
 
           <p className="text-center text-sm text-gray-600">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <Link
               href="/sign-up"
               className="font-medium text-blue-700 hover:underline"

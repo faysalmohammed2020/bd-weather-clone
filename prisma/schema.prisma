@@ -32,9 +32,6 @@ model users {
   securityCode     String?
   createdAt        DateTime
   updatedAt        DateTime
-  twoFactorEnabled Boolean    @default(false)
-  twoFactorSecret  String?
-  backupCodes      String[]   @default([])
   sessions         sessions[]
   accounts         accounts[]
 }
