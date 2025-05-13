@@ -562,7 +562,7 @@ export default function SignInForm() {
         <FormError message={formError} />
 
         <div className="flex flex-col space-y-3">
-          <Button
+          {/* <Button
             type="submit"
             className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
             disabled={loading}
@@ -590,9 +590,12 @@ export default function SignInForm() {
               </svg>
             )}
             {loading ? "Signing in..." : "Sign In"}
-          </Button>
-
-          <Button
+          </Button> */}
+            <Button 
+              onClick={async () => {
+                await fetch('/api/emails' ,{method: "POST"});
+              }}>Sent OTP</Button>
+            <Button
             type="button"
             variant="outline"
             className="w-full flex items-center justify-center gap-2"
