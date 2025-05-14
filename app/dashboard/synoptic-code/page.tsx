@@ -66,7 +66,7 @@ export default function WeatherTabsPage() {
               }`}
               onClick={() => setActiveTab("weather")}
             >
-              Weather Data
+              Synoptic Table
             </button>
           </div>
 

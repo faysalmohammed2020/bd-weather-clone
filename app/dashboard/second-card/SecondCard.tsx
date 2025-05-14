@@ -48,7 +48,7 @@ export default function WeatherObservationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("cloud");
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 6;
+  const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
   const { data: session } = useSession();
 
   const handleNext = () => {
@@ -712,26 +712,7 @@ export default function WeatherObservationForm() {
               </TabsContent>
             </div>
           </Tabs>
-          {/* <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 flex justify-end">
-            <Button
-              type="submit"
-              className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <CloudIcon className="h-5 w-5 mr-2" />
-                  Submit Observation
-                </>
-              )}
-            </Button>
-          </div> */}
-
+          
           <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 flex justify-between">
             <Button
               type="button"
