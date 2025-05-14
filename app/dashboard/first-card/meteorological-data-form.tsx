@@ -29,8 +29,31 @@ import { hygrometricTable } from "../../../data/hygrometric-table"; // Import th
 import { stationPressure } from "../../../data/station-pressure"; // Import the station pressure data
 import { useSession } from "@/lib/auth-client";
 
-export function MeteorologicalDataForm({ onDataSubmitted }) {
-  const [formData, setFormData] = useState({});
+interface MeteorologicalDataFormProps {
+  onDataSubmitted?: () => void;
+}
+
+export function MeteorologicalDataForm({ onDataSubmitted }: MeteorologicalDataFormProps) {
+  // Get user session data at the component level
+  const { data: session } = useSession();
+  
+  // Define FormData interface to properly type the form data
+  interface FormData {
+    stationName?: string;
+    stationNo?: string;
+    stationId?: string;
+    year?: Record<number, string>;
+    dataType?: Record<number, string>;
+    cloudCover?: string;
+    visibility?: string;
+    dryBulbAsRead?: string;
+    wetBulbAsRead?: string;
+    maxMinTempAsRead?: string;
+    barAsRead?: string;
+    [key: string]: any; // Allow other fields
+  }
+
+  const [formData, setFormData] = useState<FormData>({});
   const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hygrometricData, setHygrometricData] = useState({
@@ -42,15 +65,15 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
   });
 
   // Refs for multi-box inputs to handle auto-focus
-  const dataTypeRefs = [useRef(null), useRef(null)];
+  const dataTypeRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
   const stationNoRefs = [
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
-    useRef(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
   ];
-  const yearRefs = [useRef(null), useRef(null)];
+  const yearRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
 
   // Tab order for navigation
   const tabOrder = [
@@ -101,7 +124,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     console.log("Form data updated:", formData);
   }, [formData]);
 
-  const calculateDewPointAndHumidity = (dryBulb, wetBulb) => {
+  const calculateDewPointAndHumidity = (dryBulb: string, wetBulb: string) => {
     if (!dryBulb || !wetBulb) return;
 
     const dryBulbValue = Number.parseFloat(dryBulb);
@@ -163,7 +186,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     }));
   }, []);
 
-  const calculatePressureValues = (dryBulb, barAsRead) => {
+  const calculatePressureValues = (dryBulb: string, barAsRead: string) => {
     if (!dryBulb || !barAsRead) return;
 
     try {
@@ -287,6 +310,8 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     }
   };
 
+  // Session is already declared at the top level of the component
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -296,10 +321,18 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     setIsSubmitting(true);
 
     try {
-      // Prepare data (removed redundant stationInfo nesting)
+      // Check if user session exists
+      if (!session?.user) {
+        throw new Error("User session not found. Please log in again.");
+      }
+
+      // Prepare data with user and station information
       const submissionData = {
         ...formData,
         ...hygrometricData, // Include hygrometric data directly
+        userId: session.user.id, // Add user ID from session
+        stationId: session.user.stationId, // Add station ID from session
+        stationName: session.user.stationName, // Add station name from session
         timestamp: new Date().toISOString(),
       };
 
@@ -322,8 +355,9 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
       // Reset only measurement fields (preserves station info)
       setFormData((prev) => ({
-        stationName: prev.stationName,
-        stationNo: prev.stationNo,
+        // Keep station info from session
+        stationName: session?.user?.stationName || prev.stationName,
+        stationNo: session?.user?.stationId || prev.stationNo,
         year: prev.year,
         // Clear other fields
         cloudCover: "",
@@ -444,8 +478,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
   const isLastTab = tabOrder.indexOf(activeTab) === tabOrder.length - 1;
   const isFirstTab = tabOrder.indexOf(activeTab) === 0;
 
-  const { data: session } = useSession();
-
   return (
     <>
       <form onSubmit={handleSubmit} className="w-full mx-auto">
@@ -487,7 +519,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       key={`stationNo-${i}`}
                       id={`stationNo-${i}`}
                       ref={stationNoRefs[i]}
-                      className="w-12 text-center p-2 bg-white border border-slate-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                      className=" text-center p-2 bg-white border border-slate-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                       maxLength={1}
                       value={session?.user.stationId || ""}
                       onChange={(e) =>
