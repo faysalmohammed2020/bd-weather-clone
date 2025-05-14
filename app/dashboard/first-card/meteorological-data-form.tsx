@@ -29,31 +29,8 @@ import { hygrometricTable } from "../../../data/hygrometric-table"; // Import th
 import { stationPressure } from "../../../data/station-pressure"; // Import the station pressure data
 import { useSession } from "@/lib/auth-client";
 
-interface MeteorologicalDataFormProps {
-  onDataSubmitted?: () => void;
-}
-
-export function MeteorologicalDataForm({ onDataSubmitted }: MeteorologicalDataFormProps) {
-  // Get user session data at the component level
-  const { data: session } = useSession();
-  
-  // Define FormData interface to properly type the form data
-  interface FormData {
-    stationName?: string;
-    stationNo?: string;
-    stationId?: string;
-    year?: Record<number, string>;
-    dataType?: Record<number, string>;
-    cloudCover?: string;
-    visibility?: string;
-    dryBulbAsRead?: string;
-    wetBulbAsRead?: string;
-    maxMinTempAsRead?: string;
-    barAsRead?: string;
-    [key: string]: any; // Allow other fields
-  }
-
-  const [formData, setFormData] = useState<FormData>({});
+export function MeteorologicalDataForm({ onDataSubmitted }) {
+  const [formData, setFormData] = useState({});
   const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hygrometricData, setHygrometricData] = useState({
@@ -65,15 +42,15 @@ export function MeteorologicalDataForm({ onDataSubmitted }: MeteorologicalDataFo
   });
 
   // Refs for multi-box inputs to handle auto-focus
-  const dataTypeRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
+  const dataTypeRefs = [useRef(null), useRef(null)];
   const stationNoRefs = [
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
+    useRef(null),
+    useRef(null),
+    useRef(null),
+    useRef(null),
+    useRef(null),
   ];
-  const yearRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
+  const yearRefs = [useRef(null), useRef(null)];
 
   // Tab order for navigation
   const tabOrder = [
@@ -124,59 +101,119 @@ export function MeteorologicalDataForm({ onDataSubmitted }: MeteorologicalDataFo
     console.log("Form data updated:", formData);
   }, [formData]);
 
-  const calculateDewPointAndHumidity = (dryBulb: string, wetBulb: string) => {
-    if (!dryBulb || !wetBulb) return;
+  // const calculateDewPointAndHumidity = (dryBulb, wetBulb) => {
+  //   if (!dryBulb || !wetBulb) return;
 
-    const dryBulbValue = Number.parseFloat(dryBulb);
-    const wetBulbValue = Number.parseFloat(wetBulb);
-    const difference = Number(Math.abs(dryBulbValue - wetBulbValue).toFixed(1));
-    const roundedDryBulb = Math.round(dryBulbValue);
+  //   const dryBulbValue = Number.parseFloat(dryBulb);
+  //   const wetBulbValue = Number.parseFloat(wetBulb);
+  //   const difference = Number(Math.abs(dryBulbValue - wetBulbValue).toFixed(1));
+  //   const roundedDryBulb = Math.round(dryBulbValue);
 
-    // Validate ranges
-    if (roundedDryBulb < 0 || roundedDryBulb > 50 || difference > 30.0) {
-      toast.error(
-        "Temperature values are outside the range of the hygrometric table"
-      );
-      return;
-    }
+  //   // Validate ranges
+  //   if (roundedDryBulb < 0 || roundedDryBulb > 50 || difference > 30.0) {
+  //     toast.error(
+  //       "Temperature values are outside the range of the hygrometric table"
+  //     );
+  //     return;
+  //   }
 
-    // Find index of the difference in 'differences'
-    const diffIndex = hygrometricTable.differences.indexOf(difference);
-    if (diffIndex === -1) {
-      toast.error("Invalid temperature difference for lookup");
-      return;
-    }
+  //   // Find index of the difference in 'differences'
+  //   const diffIndex = hygrometricTable.differences.indexOf(difference);
+  //   if (diffIndex === -1) {
+  //     toast.error("Invalid temperature difference for lookup");
+  //     return;
+  //   }
 
-    // Find the dbT entry
-    const dbtEntry = hygrometricTable.data.find(
-      (entry) => entry.dbT === roundedDryBulb
+  //   // Find the dbT entry
+  //   const dbtEntry = hygrometricTable.data.find(
+  //     (entry) => entry.dbT === roundedDryBulb
+  //   );
+  //   if (!dbtEntry || !dbtEntry.values || !dbtEntry.values[diffIndex]) {
+  //     toast.error(
+  //       "Could not find matching dry bulb temperature or difference in the table"
+  //     );
+  //     return;
+  //   }
+
+  //   const { DpT, RH } = dbtEntry.values[diffIndex];
+
+  //   // Update state
+  //   setHygrometricData({
+  //     dryBulb: dryBulbValue.toString(),
+  //     wetBulb: wetBulbValue.toString(),
+  //     difference: difference.toString(),
+  //     dewPoint: DpT.toString(),
+  //     relativeHumidity: RH.toString(),
+  //   });
+
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     Td: DpT.toString(),
+  //     relativeHumidity: RH.toString(),
+  //   }));
+
+  //   toast.success("Dew point and relative humidity calculated successfully");
+  // };
+
+  const calculateDewPointAndHumidity = (dryBulbInput, wetBulbInput) => {
+  if (!dryBulbInput || !wetBulbInput) return;
+
+  // Convert 3-digit inputs like "256" => 25.6
+  const dryBulbValue = Number.parseFloat(
+    `${dryBulbInput.slice(0, 2)}.${dryBulbInput.slice(2)}`
+  );
+  const wetBulbValue = Number.parseFloat(
+    `${wetBulbInput.slice(0, 2)}.${wetBulbInput.slice(2)}`
+  );
+
+  const difference = Number(Math.abs(dryBulbValue - wetBulbValue).toFixed(1));
+  const roundedDryBulb = Math.round(dryBulbValue);
+
+  // Validate ranges
+  if (roundedDryBulb < 0 || roundedDryBulb > 50 || difference > 30.0) {
+    toast.error(
+      "Temperature values are outside the range of the hygrometric table"
     );
-    if (!dbtEntry || !dbtEntry.values || !dbtEntry.values[diffIndex]) {
-      toast.error(
-        "Could not find matching dry bulb temperature or difference in the table"
-      );
-      return;
-    }
+    return;
+  }
 
-    const { DpT, RH } = dbtEntry.values[diffIndex];
+  // Find index of the difference in 'differences'
+  const diffIndex = hygrometricTable.differences.indexOf(difference);
+  if (diffIndex === -1) {
+    toast.error("Invalid temperature difference for lookup");
+    return;
+  }
 
-    // Update state
-    setHygrometricData({
-      dryBulb: dryBulbValue.toString(),
-      wetBulb: wetBulbValue.toString(),
-      difference: difference.toString(),
-      dewPoint: DpT.toString(),
-      relativeHumidity: RH.toString(),
-    });
+  // Find the dbT entry
+  const dbtEntry = hygrometricTable.data.find(
+    (entry) => entry.dbT === roundedDryBulb
+  );
+  if (!dbtEntry || !dbtEntry.values || !dbtEntry.values[diffIndex]) {
+    toast.error(
+      "Could not find matching dry bulb temperature or difference in the table"
+    );
+    return;
+  }
 
-    setFormData((prev) => ({
-      ...prev,
-      Td: DpT.toString(),
-      relativeHumidity: RH.toString(),
-    }));
+  const { DpT, RH } = dbtEntry.values[diffIndex];
 
-    toast.success("Dew point and relative humidity calculated successfully");
-  };
+  // Update state
+  setHygrometricData({
+    dryBulb: dryBulbValue.toFixed(1),
+    wetBulb: wetBulbValue.toFixed(1),
+    difference: difference.toString(),
+    dewPoint: DpT.toString(),
+    relativeHumidity: RH.toString(),
+  });
+
+  setFormData((prev) => ({
+    ...prev,
+    Td: DpT.toString(),
+    relativeHumidity: RH.toString(),
+  }));
+
+  toast.success("Dew point and relative humidity calculated successfully");
+};
 
   useEffect(() => {
     const year = new Date().getFullYear().toString(); // e.g., "2025"
@@ -186,12 +223,12 @@ export function MeteorologicalDataForm({ onDataSubmitted }: MeteorologicalDataFo
     }));
   }, []);
 
-  const calculatePressureValues = (dryBulb: string, barAsRead: string) => {
+  const calculatePressureValues = (dryBulb, barAsRead) => {
     if (!dryBulb || !barAsRead) return;
 
     try {
       // Parse input values to numbers
-      const dryBulbValue = Number.parseFloat(dryBulb);
+      const dryBulbValue = Number.parseFloat(dryBulb)/10;
       const barAsReadValue = Number.parseFloat(barAsRead);
 
       // Round dry bulb to nearest integer
@@ -310,8 +347,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }: MeteorologicalDataFo
     }
   };
 
-  // Session is already declared at the top level of the component
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -321,18 +356,10 @@ export function MeteorologicalDataForm({ onDataSubmitted }: MeteorologicalDataFo
     setIsSubmitting(true);
 
     try {
-      // Check if user session exists
-      if (!session?.user) {
-        throw new Error("User session not found. Please log in again.");
-      }
-
-      // Prepare data with user and station information
+      // Prepare data (removed redundant stationInfo nesting)
       const submissionData = {
         ...formData,
         ...hygrometricData, // Include hygrometric data directly
-        userId: session.user.id, // Add user ID from session
-        stationId: session.user.stationId, // Add station ID from session
-        stationName: session.user.stationName, // Add station name from session
         timestamp: new Date().toISOString(),
       };
 
@@ -355,9 +382,8 @@ export function MeteorologicalDataForm({ onDataSubmitted }: MeteorologicalDataFo
 
       // Reset only measurement fields (preserves station info)
       setFormData((prev) => ({
-        // Keep station info from session
-        stationName: session?.user?.stationName || prev.stationName,
-        stationNo: session?.user?.stationId || prev.stationNo,
+        stationName: prev.stationName,
+        stationNo: prev.stationNo,
         year: prev.year,
         // Clear other fields
         cloudCover: "",
@@ -478,6 +504,8 @@ export function MeteorologicalDataForm({ onDataSubmitted }: MeteorologicalDataFo
   const isLastTab = tabOrder.indexOf(activeTab) === tabOrder.length - 1;
   const isFirstTab = tabOrder.indexOf(activeTab) === 0;
 
+  const { data: session } = useSession();
+
   return (
     <>
       <form onSubmit={handleSubmit} className="w-full mx-auto">
@@ -519,7 +547,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }: MeteorologicalDataFo
                       key={`stationNo-${i}`}
                       id={`stationNo-${i}`}
                       ref={stationNoRefs[i]}
-                      className=" text-center p-2 bg-white border border-slate-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                      className="w-12 text-center p-2 bg-white border border-slate-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                       maxLength={1}
                       value={session?.user.stationId || ""}
                       onChange={(e) =>

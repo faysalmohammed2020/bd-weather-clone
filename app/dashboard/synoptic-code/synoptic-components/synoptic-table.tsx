@@ -24,56 +24,15 @@ const TIME_SLOTS = [
 const fetchSynopticDataForTimeSlot = async (
   timeSlot: string
 ): Promise<SynopticFormValues | null> => {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 300));
-
-  // For demonstration purposes, create a pattern of available data
-  // In a real app, this would be determined by your actual data source
-  const slotHour = Number.parseInt(timeSlot);
-
-  // Simulate a pattern where some time slots have data and others don't
-  // For example: 00:00, 06:00, 12:00, 18:00 have data, others don't
-  const hasData = slotHour % 3 === 0; // All slots have data for demo purposes
-
-  if (!hasData) {
-    return null; // No data for this time slot
+  try {
+    const res = await fetch(`/api/synoptic?time=${timeSlot}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data as SynopticFormValues;
+  } catch (error) {
+    console.error(`Failed to fetch data for time slot ${timeSlot}:`, error);
+    return null;
   }
-
-  // Get base data
-  const baseData = generateSynopticCode();
-
-  // Modify the data slightly for different time slots to simulate different readings
-  const data = { ...baseData };
-
-  // Set the time slot
-  data.measurements[15] = timeSlot;
-
-  // Slightly modify some values based on time slot to simulate different readings
-  const timeSlotNum = Number.parseInt(timeSlot);
-
-  // Modify temperature based on time of day (warmer in afternoon, cooler at night)
-  const tempModifier = timeSlotNum >= 9 && timeSlotNum <= 15 ? 1 : -1;
-  const currentTemp = data.measurements[4];
-  if (currentTemp.startsWith("1")) {
-    const tempSign = currentTemp[1];
-    const tempValue = Number.parseInt(currentTemp.substring(2));
-    const newTempValue = Math.max(0, tempValue + tempModifier * 5);
-    data.measurements[4] = `1${tempSign}${newTempValue
-      .toString()
-      .padStart(3, "0")}`;
-  }
-
-  // Modify cloud cover based on time (more clouds in afternoon)
-  const cloudModifier = timeSlotNum >= 12 && timeSlotNum <= 18 ? 1 : 0;
-  const currentCloud = data.measurements[3][0];
-  const newCloudValue = Math.min(
-    8,
-    Number.parseInt(currentCloud) + cloudModifier
-  );
-  data.measurements[3] = newCloudValue + data.measurements[3].substring(1);
-  data.measurements[13] = newCloudValue.toString();
-
-  return data;
 };
 
 export default function SynopticCodeTable() {

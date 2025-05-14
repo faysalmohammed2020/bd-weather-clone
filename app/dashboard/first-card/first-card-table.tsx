@@ -1,5 +1,3 @@
-
-
 "use client"
 
 import type React from "react"
@@ -23,7 +21,6 @@ interface MeteorologicalEntry {
   dataType: string
   stationNo: string
   stationName: string
-  stationId: string // Added stationId property
   year: string
   subIndicator: string
   alteredThermometer: string
@@ -78,22 +75,6 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   const [editFormData, setEditFormData] = useState<Partial<MeteorologicalEntry>>({})
   const [isSaving, setIsSaving] = useState(false)
 
-  // Fetch station names from API
-  const fetchStations = async () => {
-    try {
-      const response = await fetch("/api/stations")
-      if (!response.ok) {
-        throw new Error("Failed to fetch stations")
-      }
-      const stations = await response.json()
-      const stationNamesList = stations.map((station: { name: string }) => station.name)
-      setStationNames(stationNamesList)
-    } catch (error) {
-      console.error("Error fetching stations:", error)
-      toast.error("Failed to fetch station data")
-    }
-  }
-
   // Fetch data from API
   const fetchData = async () => {
     try {
@@ -104,9 +85,22 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
       }
       const result = await response.json()
       setData(result.entries)
+
+      // Extract unique station names
+      const names = new Set<string>()
+      result.entries.forEach((item: MeteorologicalEntry) => {
+        if (item.stationName) {
+          names.add(item.stationName)
+        }
+      })
+      setStationNames(Array.from(names))
     } catch (error) {
       console.error("Error fetching data:", error)
-      toast.error("Failed to fetch meteorological data")
+      toast({
+        title: "Error",
+        description: "Failed to fetch meteorological data",
+        variant: "destructive",
+      })
     } finally {
       setLoading(false)
       setIsRefreshing(false)
@@ -119,9 +113,8 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     fetchData()
   }
 
-  // Fetch data and stations on component mount and when refreshTrigger changes
+  // Fetch data on component mount and when refreshTrigger changes
   useEffect(() => {
-    fetchStations()
     fetchData()
   }, [refreshTrigger])
 
@@ -131,17 +124,9 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
 
     const itemDate = format(new Date(item.timestamp), "yyyy-MM-dd")
     const matchesDate = itemDate === selectedDate
-    
-    // Filter by station ID or station name
-    const matchesStation = 
-      stationFilter === "all" || 
-      item.stationName === stationFilter || 
-      item.stationId === stationFilter
+    const matchesStation = stationFilter === "all" || item.stationName === stationFilter
 
-    // Filter by user ID if user is not admin
-    const matchesUser = user?.role === "admin" || item.userId === user?.id
-
-    return matchesDate && matchesStation && matchesUser
+    return matchesDate && matchesStation
   })
 
   // Navigate to previous day
@@ -371,13 +356,11 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
               />
             </div>
 
-
             <Button variant="outline" size="icon" onClick={goToNextDay} className="hover:bg-slate-200">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
 
-          {session?.user?.role === "super_admin" && (
           <div className="flex items-center gap-2">
             <Filter size={16} className="text-purple-500" />
             <Label htmlFor="stationFilter" className="whitespace-nowrap font-medium text-slate-700">
@@ -397,8 +380,6 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
               </SelectContent>
             </Select>
           </div>
-          )}
-
         </div>
 
         {/* Form View */}
@@ -423,8 +404,8 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                 </div>
               </div>
               <div>
-                <div className="font-bold uppercase text-slate-600">STATION NO</div>
-                <div className="mt-1 h-8 border border-slate-400 px-2 flex items-center bg-white font-mono rounded-md">{user?.stationId || "N/A"}</div>
+                <div className="font-bold uppercase text-slate-600 ">STATION NO</div>
+                <div className="flex border border-slate-400 rounded-l p-2 mx-auto">{user?.stationId || "N/A"}</div>
               </div>
               <div>
                 <div className="font-bold uppercase text-slate-600">STATION NAME</div>

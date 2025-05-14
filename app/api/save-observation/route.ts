@@ -15,7 +15,7 @@ export async function POST(request: Request) {
 
     const data = await request.json();
 
-    const stationId = data?.observer?.["station-id"];
+    const stationId = data?.metadata?.stationId;
     if (!stationId) {
       throw new Error("Station ID is required");
     }
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       userId: session.user.id,
       stationId,
       tabActive: data.metadata?.tabActiveAtSubmission || "unknown",
-
+      
       // Observer info
       observerInitial: data.observer?.["observer-initial"] || null,
       observationTime: data.observer?.["observation-time"]
