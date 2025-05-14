@@ -8,6 +8,7 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
+  trustedOrigins: ["http://localhost:3000", "http://localhost:7999"],
   user: {
     modelName: "users",
     additionalFields: {
@@ -54,5 +55,8 @@ export const auth = betterAuth({
     enabled: true,
   },
   appName: "BD Weather",
-  plugins: [admin(), twoFactor(), nextCookies()],
+  plugins: [admin({
+    defaultRole: "observer",
+    adminRoles: ["super_admin"],
+  }), twoFactor(), nextCookies()],
 });
