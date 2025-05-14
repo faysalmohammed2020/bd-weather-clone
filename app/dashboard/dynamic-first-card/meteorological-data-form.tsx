@@ -9,11 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Thermometer, Wind, Eye, Cloud, Clock, BarChart3 } from "lucide-react";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { hygrometricTable } from "../../../data/hygrometric-table"; // Import the hygrometric table data
 import { stationPressure } from "../../../data/station-pressure"; // Import the station pressure data
-
-// Add this after the imports but before the component definition
 
 export function MeteorologicalDataForm() {
   const [formData, setFormData] = useState({});
@@ -467,7 +465,6 @@ export function MeteorologicalDataForm() {
 
   return (
     <>
-      <Toaster position="top-right" richColors />
       <form onSubmit={handleSubmit} className="w-full mx-auto">
         {/* Header Section - Single Line */}
         <Card className="mb-6 overflow-hidden border-none shadow-lg">

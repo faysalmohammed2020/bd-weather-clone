@@ -7,7 +7,7 @@
 // import { Button } from "@/components/ui/button"
 // import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 // import { Loader2, Save } from "lucide-react"
-// import { toast, Toaster } from "sonner"
+// import { toast } from "sonner"
 // import { useRouter } from "next/navigation"
 
 // // Import all form components
@@ -223,7 +223,6 @@
 
 //   return (
 //     <div className="container mx-auto py-8 px-4">
-//       <Toaster position="top-right" richColors />
 
 //       <h1 className="text-2xl font-bold mb-6 text-blue-800 text-center">Weather Data Management System</h1>
 
@@ -429,7 +428,7 @@
 // import { Button } from "@/components/ui/button"
 // import { TabsList, TabsTrigger } from "@/components/ui/tabs"
 // import { Loader2, Save } from "lucide-react"
-// import { toast, Toaster } from "sonner"
+// import { toast } from "sonner"
 // import { useRouter } from "next/navigation"
 
 // // Import all form components
@@ -650,7 +649,6 @@
 
 //   return (
 //     <div className="container mx-auto py-8 px-4">
-//       <Toaster position="top-right" richColors />
 
 //       <h1 className="text-2xl font-bold mb-6 text-blue-800 text-center">Weather Data Management System</h1>
 
@@ -856,7 +854,7 @@ import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Loader2, Save } from "lucide-react"
-import { toast, Toaster } from "sonner"
+import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
 // Import all form components
@@ -1078,8 +1076,6 @@ export default function WeatherFormPage() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <Toaster position="top-right" richColors />
-
       <h1 className="text-2xl font-bold mb-6 text-blue-800 text-center">Weather Data Management System</h1>
 
       <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
