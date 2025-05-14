@@ -29,6 +29,7 @@ import {
 import { toast } from "sonner";
 import { useLocation } from "@/contexts/divisionContext";
 import { Station } from "@/data/stations";
+import { useSession } from "@/lib/auth-client";
 
 // Define the User type
 interface User {
@@ -48,6 +49,9 @@ interface User {
 type UserRole = "super_admin" | "station_admin" | "observer";
 
 const UserManagement = () => {
+  // Get the current user session
+  const { data: session } = useSession();
+  
   // Use the location context for division, district, and upazila
   const { 
     divisions, 
@@ -67,6 +71,11 @@ const UserManagement = () => {
   const [pageSize] = useState(10);
   const [pageIndex, setPageIndex] = useState(0);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openRoleUpdateDialog, setOpenRoleUpdateDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<string | null>(null);
+  const [originalRole, setOriginalRole] = useState<string | null>(null);
+  const [newRole, setNewRole] = useState<string | null>(null);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [stations, setStations] = useState<Station[]>([]);
   const [formData, setFormData] = useState({
@@ -166,10 +175,30 @@ const UserManagement = () => {
 
   const handleCreateUser = async () => {
     try {
+      // First check if role is selected
+      if (!formData.role) {
+        toast.error("Please select a role first");
+        return;
+      }
+      
       // Validate required fields
-      if (!formData.email || !formData.password || !formData.role || 
+      if (!formData.email || !formData.password || 
           !formData.division || !formData.district || !formData.upazila) {
         toast.error("Please fill all required fields");
+        return;
+      }
+
+      // Validate password length based on role
+      const passwordMinLength = {
+        super_admin: 12,
+        station_admin: 11,
+        observer: 10
+      };
+      
+      const requiredLength = passwordMinLength[formData.role as UserRole];
+      
+      if (formData.password.length < requiredLength) {
+        toast.error(`Password must be at least ${requiredLength} characters for ${formData.role} role`);
         return;
       }
 
@@ -208,40 +237,127 @@ const UserManagement = () => {
     }
   };
 
+  // Function to confirm role changes before updating
+  const confirmRoleUpdate = () => {
+    if (!editUser) return;
+    
+    // First check if role is selected
+    if (!formData.role) {
+      toast.error("Please select a role first");
+      return;
+    }
+    
+    // Check if the role is actually changing
+    if (editUser.role === formData.role) {
+      // No role change, proceed with normal update
+      handleUpdateUser();
+      return;
+    }
+    
+    // Store the original and new roles for the confirmation dialog
+    setOriginalRole(editUser.role);
+    setNewRole(formData.role);
+    
+    // Open the confirmation dialog
+    setOpenRoleUpdateDialog(true);
+  };
+
   const handleUpdateUser = async () => {
     if (!editUser) return;
 
     try {
+      console.log("Starting update process for user:", editUser.id);
+      console.log("Current form data:", formData);
+      
+      // First check if role is selected
+      if (!formData.role) {
+        toast.error("Please select a role first");
+        return;
+      }
+
       // Validate required fields
-      if (!formData.email || !formData.role || !formData.division || !formData.district || !formData.upazila) {
+      if (!formData.email || 
+          !formData.division || !formData.district || !formData.upazila) {
         toast.error("Please fill all required fields");
         return;
       }
 
+      // Validate password length based on role if a new password is provided
+      if (formData.password && formData.password.trim() !== '') {
+        const passwordMinLength = {
+          super_admin: 12,
+          station_admin: 11,
+          observer: 10
+        };
+        
+        const requiredLength = passwordMinLength[formData.role as UserRole];
+        
+        if (formData.password.length < requiredLength) {
+          toast.error(`Password must be at least ${requiredLength} characters for ${formData.role} role`);
+          return;
+        }
+      }
+      
+      // Close the role update dialog if it's open
+      setOpenRoleUpdateDialog(false);
+
+      // Prepare the update data - ensure all values are properly formatted
+      const updateData = {
+        id: editUser.id,
+        name: formData.name || "",
+        email: formData.email,
+        password: formData.password && formData.password.trim() !== "" ? formData.password : undefined,
+        role: formData.role,
+        division: formData.division,
+        district: formData.district,
+        upazila: formData.upazila,
+        stationName: formData.stationName || null,
+        stationId: formData.stationId || null,
+        securityCode: formData.securityCode || null,
+      };
+      
+      // Remove any undefined values
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key as keyof typeof updateData] === undefined) {
+          delete updateData[key as keyof typeof updateData];
+        }
+      });
+      
+      console.log("Sending update request with data:", {
+        ...updateData,
+        password: formData.password && formData.password.trim() !== "" ? "[REDACTED]" : undefined, 
+      });
+      
       // Use the custom API endpoint for updating users
       const response = await fetch('/api/users', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          id: editUser.id,
-          name: formData.name,
-          email: formData.email,
-          password: formData.password, // Include password - API will only update if not empty
-          role: formData.role,
-          division: formData.division,
-          district: formData.district,
-          upazila: formData.upazila,
-          stationName: formData.stationName || null,
-          stationId: formData.stationId || null,
-          securityCode: formData.securityCode || null,
-        }),
+        body: JSON.stringify(updateData),
       });
 
+      console.log("Response status:", response.status);
+      
+      // Get the response text first
+      const responseText = await response.text();
+      console.log("Response text:", responseText);
+      
+      // Try to parse as JSON if possible
+      let responseData;
+      try {
+        responseData = responseText ? JSON.parse(responseText) : {};
+        console.log("Parsed response data:", responseData);
+      } catch (parseError) {
+        console.error("Error parsing response:", parseError);
+        responseData = {};
+      }
+      
+      // Check if the response was successful
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update user');
+        const errorMessage = responseData.error || 'Failed to update user';
+        console.error("API error response:", responseData);
+        throw new Error(errorMessage);
       }
 
       toast.success("User updated successfully");
@@ -254,12 +370,30 @@ const UserManagement = () => {
     }
   };
 
-  const handleDeleteUser = async (userId: string) => {
-    if (!confirm("Are you sure you want to delete this user?")) return;
+  const openDeleteConfirmation = (userId: string, userRole: string | null) => {
+    // Check if user is trying to delete themselves
+    if (session?.user?.id === userId) {
+      toast.error("You cannot delete your own account");
+      return;
+    }
+    
+    // Super admin accounts can never be deleted
+    if (userRole === "super_admin") {
+      toast.error("Super admin accounts cannot be deleted");
+      return;
+    }
+    
+    // For all other cases, show the confirmation dialog
+    setUserToDelete(userId);
+    setOpenDeleteDialog(true);
+  };
 
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+    
     try {
       // Use the API to delete a user
-      const response = await fetch(`/api/users?id=${userId}`, {
+      const response = await fetch(`/api/users?id=${userToDelete}`, {
         method: 'DELETE',
       });
 
@@ -269,6 +403,8 @@ const UserManagement = () => {
       }
 
       toast.success("User deleted successfully");
+      setOpenDeleteDialog(false);
+      setUserToDelete(null);
       fetchUsers();
     } catch (error) {
       console.error("Failed to delete user:", error);
@@ -292,8 +428,27 @@ const UserManagement = () => {
     setEditUser(null);
   };
 
-  const openEditDialog = (user: User) => {
+  const openEditDialog = async (user: User) => {
+    if (user.role === "super_admin") {
+      toast.error("Super admin roles cannot be modified");
+      return;
+    }
     setEditUser(user);
+    
+    // If the user has a stationId, fetch the station to get the security code
+    let securityCode = "";
+    if (user.stationId) {
+      try {
+        // Find the station in our existing stations list
+        const station = stations.find(s => s.stationId === user.stationId);
+        if (station) {
+          securityCode = station.securityCode;
+        }
+      } catch (error) {
+        console.error("Error fetching station details:", error);
+      }
+    }
+    
     setFormData({
       name: user.name || "",
       email: user.email,
@@ -304,7 +459,7 @@ const UserManagement = () => {
       upazila: user.upazila,
       stationName: user.stationName || "",
       stationId: user.stationId || "",
-      securityCode: "", // Security code is not returned in user data
+      securityCode: securityCode, // Set the security code from the station
     });
     setOpenDialog(true);
   };
@@ -342,18 +497,50 @@ const UserManagement = () => {
                 </DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
-                {/* Name and Email */}
+                {/* Name */}
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="name">Name</label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                  />
+                </div>
+                
+                {/* Role - Placed first for validation purposes */}
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="role">Role <span className="text-red-500">*</span></label>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(value) => {
+                      const role = value as UserRole;
+                      setFormData({ ...formData, role });
+                      
+                      // Display password requirement based on selected role
+                      const passwordMinLength = {
+                        super_admin: 12,
+                        station_admin: 11,
+                        observer: 10
+                      };
+                      
+                      toast.info(`Password must be at least ${passwordMinLength[role]} characters for ${role} role`);
+                    }}
+                  >
+                    <SelectTrigger id="role" className="w-full">
+                      <SelectValue placeholder="Select Role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="super_admin">Super Admin</SelectItem>
+                      <SelectItem value="station_admin">Station Admin</SelectItem>
+                      <SelectItem value="observer">Observer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {/* Email and Password */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="name">Name</label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                    />
-                  </div>
                   <div className="flex flex-col gap-2">
                     <label htmlFor="email">Email <span className="text-red-500">*</span></label>
                     <Input
@@ -366,42 +553,26 @@ const UserManagement = () => {
                       required
                     />
                   </div>
-                </div>
-                
-                {/* Role and Password */}
-                <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="role">Role <span className="text-red-500">*</span></label>
-                    <Select
-                      value={formData.role}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, role: value as UserRole })
-                      }
-                    >
-                      <SelectTrigger id="role" className="w-full">
-                        <SelectValue placeholder="Select Role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="super_admin">Super Admin</SelectItem>
-                        <SelectItem value="station_admin">Station Admin</SelectItem>
-                        <SelectItem value="observer">Observer</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="password">
-                      {editUser ? "New Password (leave blank to keep current)" : "Password"} 
+                    <label htmlFor="password" className="flex items-center gap-1">
+                      {editUser ? "New Password" : "Password"} 
                       {!editUser && <span className="text-red-500">*</span>}
+                      {formData.role && (
+                        <span className="text-xs text-blue-600 block">
+                          {`Min ${formData.role === 'super_admin' ? 12 : formData.role === 'station_admin' ? 11 : 10} characters`}
+                        </span>
+                      )}
                     </label>
                     <Input
                       id="password"
                       type="password"
-                      placeholder="Minimum 6 characters"
+                      placeholder={formData.role ? `Min ${formData.role === 'super_admin' ? 12 : formData.role === 'station_admin' ? 11 : 10} characters` : "Select a role first"}
                       value={formData.password}
                       onChange={(e) =>
                         setFormData({ ...formData, password: e.target.value })
                       }
                       required={!editUser}
+                      disabled={!formData.role} // Disable password field until role is selected
                     />
                   </div>
                 </div>
@@ -562,7 +733,7 @@ const UserManagement = () => {
                   Cancel
                 </Button>
                 <Button
-                  onClick={editUser ? handleUpdateUser : handleCreateUser}
+                  onClick={editUser ? confirmRoleUpdate : handleCreateUser}
                   className="bg-blue-600 hover:bg-blue-700"
                 >
                   {editUser ? "Update User" : "Create User"}
@@ -614,7 +785,7 @@ const UserManagement = () => {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => handleDeleteUser(user.id)}
+                        onClick={() => openDeleteConfirmation(user.id, user.role)}
                       >
                         Delete
                       </Button>
@@ -662,6 +833,47 @@ const UserManagement = () => {
           </Button>
         </div>
       </div>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">Confirm Deletion</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 text-center">
+            <p className="mb-4">Are you sure you want to delete this user? This action cannot be undone.</p>
+            <div className="flex justify-center space-x-4">
+              <Button variant="outline" onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={handleDeleteUser}>Delete</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Role Update Confirmation Dialog */}
+      <Dialog open={openRoleUpdateDialog} onOpenChange={setOpenRoleUpdateDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">Confirm Role Change</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 text-center">
+            <p className="mb-4">
+              Are you sure you want to change this user&apos;s role from <strong>{originalRole}</strong> to <strong>{newRole}</strong>?
+            </p>
+            <p className="mb-4 text-amber-600">
+              Changing user roles affects their permissions and access levels in the system.
+            </p>
+            <div className="flex justify-center space-x-4">
+              <Button variant="outline" onClick={() => setOpenRoleUpdateDialog(false)}>Cancel</Button>
+              <Button variant="default" onClick={() => {
+                setOpenRoleUpdateDialog(false);
+                // Small delay to ensure dialog closes before submitting
+                setTimeout(() => handleUpdateUser(), 100);
+              }}>Confirm Change</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

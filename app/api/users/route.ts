@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { hashPassword } from "better-auth/crypto";
+import { getSession } from "@/lib/getSession";
 
 // GET method for listing users with pagination
 export async function GET(request: NextRequest) {
@@ -53,7 +54,10 @@ export async function GET(request: NextRequest) {
 // PUT method for updating users
 export async function PUT(request: NextRequest) {
   try {
+    // Parse the request body and log it for debugging
     const body = await request.json();
+    console.log("Received update request with body:", { ...body, password: body.password ? "[REDACTED]" : undefined });
+    
     const { 
       id, 
       name, 
@@ -74,8 +78,52 @@ export async function PUT(request: NextRequest) {
         { status: 400 }
       );
     }
+    
+    // Get the current user session
+    const session = await getSession();
+    
+    // Check if user is authenticated
+    if (!session || !session.user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    
+    // Get the existing user to check their current role
+    const existingUser = await prisma.users.findUnique({
+      where: { id },
+      select: { role: true }
+    });
+    
+    if (!existingUser) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+    
+    // Prevent modifying super_admin role
+    if (existingUser.role === 'super_admin' && role !== 'super_admin') {
+      return NextResponse.json(
+        { error: "Super admin role cannot be changed" },
+        { status: 403 }
+      );
+    }
+    
+    // Only super_admin users can create other super_admin users
+    if (existingUser.role !== 'super_admin' && role === 'super_admin' && session.user.role !== 'super_admin') {
+      return NextResponse.json(
+        { error: "Only super admins can promote users to super admin role" },
+        { status: 403 }
+      );
+    }
+    
+    // Log the update operation for debugging
+    console.log("Updating user with role:", role, "Previous role:", existingUser.role);
+    console.log("Current session user role:", session.user.role);
 
-    // Prepare update data
+    // Prepare update data with proper null handling
     const updateData: {
       name?: string;
       email?: string;
@@ -83,42 +131,106 @@ export async function PUT(request: NextRequest) {
       division?: string;
       district?: string;
       upazila?: string;
-      stationName?: string;
-      stationId?: string;
-      securityCode?: string;
+      stationName?: string | null;
+      stationId?: string | null;
+      securityCode?: string | null;
       password?: string;
       updatedAt: Date;
     } = {
-      name,
-      email,
-      role,
-      division,
-      district,
-      upazila,
-      stationName,
-      stationId,
-      securityCode,
       updatedAt: new Date(),
     };
+    
+    // Only include fields that are defined
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+    if (role !== undefined) updateData.role = role;
+    if (division !== undefined) updateData.division = division;
+    if (district !== undefined) updateData.district = district;
+    if (upazila !== undefined) updateData.upazila = upazila;
+    
+    // Handle potentially null values
+    updateData.stationName = stationName;
+    updateData.stationId = stationId;
+    updateData.securityCode = securityCode;
 
-    // Only update password if provided
+    // Handle password separately if provided
+    let hashedPassword: string | undefined;
     if (password && password.trim() !== '') {
       // Hash the password using better-auth's hashPassword function
-      updateData.password = await hashPassword(password);
+      hashedPassword = await hashPassword(password);
+      // Note: password is not included in updateData as it's not in the Prisma schema
+      // We'll handle it separately in the transaction
     }
+    
+    console.log("Final update data:", { ...updateData, hashedPassword: hashedPassword ? "[REDACTED]" : undefined });
 
-    // Update user in the database
-    const updatedUser = await prisma.users.update({
-      where: {
-        id: id,
-      },
-      data: updateData,
-    });
-
-    return NextResponse.json(
-      { message: "User updated successfully", user: updatedUser },
-      { status: 200 }
-    );
+    try {
+      console.log("Attempting to update user with data:", updateData);
+      
+      // Use a transaction to update both the user and the password
+      const updatedUser = await prisma.$transaction(async (tx) => {
+        // First update the user
+        const user = await tx.users.update({
+          where: {
+            id: id,
+          },
+          data: updateData,
+        });
+        
+        // If password was provided, update it in the accounts table
+        if (hashedPassword) {
+          // Check if the account exists
+          const existingAccount = await tx.accounts.findFirst({
+            where: {
+              userId: id,
+              providerId: 'credential',
+            },
+          });
+          
+          if (existingAccount) {
+            // Update the existing account
+            await tx.accounts.update({
+              where: {
+                id: existingAccount.id,
+              },
+              data: {
+                password: hashedPassword,
+                updatedAt: new Date(),
+              },
+            });
+            console.log("Password updated successfully for user:", id);
+          } else {
+            // Create a new account if it doesn't exist
+            await tx.accounts.create({
+              data: {
+                accountId: id,
+                providerId: 'credential',
+                userId: id,
+                password: hashedPassword,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            });
+            console.log("New account created with password for user:", id);
+          }
+        }
+        
+        return user;
+      });
+      
+      console.log("User updated successfully:", updatedUser.id);
+      
+      return NextResponse.json(
+        { message: "User updated successfully", user: updatedUser },
+        { status: 200 }
+      );
+    } catch (error) {
+      console.error("Error updating user:", error);
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : "Failed to update user" },
+        { status: 500 }
+      );
+    }
   } catch (error) {
     console.error("Error updating user:", error);
     return NextResponse.json(
@@ -149,6 +261,30 @@ export async function POST(request: NextRequest) {
     if (!email || !password || !role || !division || !district || !upazila) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+    
+    // Validate password length based on role
+    const passwordMinLength = {
+      super_admin: 12,
+      station_admin: 11,
+      observer: 10
+    };
+    
+    // Check if role is valid
+    if (!['super_admin', 'station_admin', 'observer'].includes(role)) {
+      return NextResponse.json(
+        { error: "Invalid role" },
+        { status: 400 }
+      );
+    }
+    
+    const requiredLength = passwordMinLength[role as keyof typeof passwordMinLength];
+    
+    if (password.length < requiredLength) {
+      return NextResponse.json(
+        { error: `Password must be at least ${requiredLength} characters for ${role} role` },
         { status: 400 }
       );
     }
@@ -245,6 +381,46 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json(
         { error: "User ID is required" },
         { status: 400 }
+      );
+    }
+
+    // Get the current user session
+    const session = await getSession();
+    
+    // Check if user is authenticated
+    if (!session || !session.user) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    
+    // Prevent users from deleting their own account
+    if (session.user.id === userId) {
+      return NextResponse.json(
+        { error: "You cannot delete your own account" },
+        { status: 403 }
+      );
+    }
+    
+    // Get the user to be deleted to check their role
+    const userToDelete = await prisma.users.findUnique({
+      where: { id: userId },
+      select: { role: true }
+    });
+    
+    if (!userToDelete) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+    
+    // Super_admin users can never be deleted
+    if (userToDelete.role === 'super_admin') {
+      return NextResponse.json(
+        { error: "Super admin accounts cannot be deleted" },
+        { status: 403 }
       );
     }
 
