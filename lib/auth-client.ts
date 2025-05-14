@@ -33,6 +33,7 @@ export const { signIn, signUp, signOut, useSession, admin, twoFactor } = createA
         role: {
           required: true,
           type: "string",
+          enum: ["super_admin", "station_admin", "observer"],
         },
       },
     }),
