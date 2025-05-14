@@ -8,33 +8,112 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar, ChevronLeft, ChevronRight, Download, Edit, Loader2 } from "lucide-react"
 import { differenceInDays, format, parseISO } from "date-fns"
-import type { SecondCardData } from "@/data/second-card-data"
 import { useSession } from "@/lib/auth-client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { toast } from "sonner"
+import { WeatherObservation } from "@prisma/client"
+
+// Define the SecondCardData interface based on the database schema
+interface SecondCardData {
+  metadata: {
+    id: string;
+    stationId: string;
+  };
+  observer: {
+    id: string;
+    "observer-initial": string;
+    "observation-time": string;
+  };
+  totalCloud: {
+    "total-cloud-amount": string;
+  };
+  clouds: {
+    low: {
+      direction: string;
+      height: string;
+      form: string;
+      amount: string;
+    };
+    medium: {
+      direction: string;
+      height: string;
+      form: string;
+      amount: string;
+    };
+    high: {
+      direction: string;
+      height: string;
+      form: string;
+      amount: string;
+    };
+  };
+  significantClouds: {
+    layer1: {
+      height: string;
+      form: string;
+      amount: string;
+    };
+    layer2: {
+      height: string;
+      form: string;
+      amount: string;
+    };
+    layer3: {
+      height: string;
+      form: string;
+      amount: string;
+    };
+    layer4: {
+      height: string;
+      form: string;
+      amount: string;
+    };
+  };
+  rainfall: {
+    "time-start": string;
+    "time-end": string;
+    "since-previous": string;
+    "during-previous": string;
+    "last-24-hours": string;
+  };
+  wind: {
+    "first-anemometer": string;
+    "second-anemometer": string;
+    speed: string;
+    direction: string;
+    "wind-direction": string;
+  };
+}
 
 interface SecondCardTableProps {
   refreshTrigger?: number
 }
 
 function canEditObservation(record: SecondCardData, sessionUser: any) {
-  if (!sessionUser || !record.observer["observation-time"]) return false
+  try {
+    if (!sessionUser || !record?.observer?.["observation-time"]) return false
 
-  const observationDate = parseISO(record.observer["observation-time"])
-  const now = new Date()
-  const daysDifference = differenceInDays(now, observationDate)
+    const observationDate = parseISO(record.observer["observation-time"])
+    const now = new Date()
+    const daysDifference = differenceInDays(now, observationDate)
 
-  const role = sessionUser.role
-  const userId = sessionUser.id
-  const stationId = sessionUser.stationId
-  const recordStationId = record.metadata.stationId
+    const role = sessionUser?.role
+    const userId = String(sessionUser?.id || "")
+    const stationId = String(sessionUser?.stationId || "")
+    const recordStationId = String(record?.metadata?.stationId || "")
+    const recordUserId = String(record?.observer?.id || "")
 
-  if (role === "super_admin") return daysDifference <= 365
-  if (role === "station_admin")
-    return daysDifference <= 30 && stationId && recordStationId && stationId === recordStationId
-  if (role === "observer") return daysDifference <= 2 && userId && record.observer?.id && userId === record.observer.id
+    if (role === "super_admin") return daysDifference <= 365
+    if (role === "station_admin")
+      return daysDifference <= 30 && stationId && recordStationId && stationId === recordStationId
+    if (role === "observer")
+      return daysDifference <= 2 && userId && recordUserId && userId === recordUserId
 
-  return false
+    return false
+  } catch (error) {
+    console.error("Error in canEditObservation:", error)
+    return false
+  }
 }
 
 export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
@@ -60,8 +139,95 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
       if (!obsResponse.ok) {
         throw new Error("Failed to fetch observation data")
       }
+      
+      // The API already returns data in the correct format
+      // We just need to ensure all properties are properly set
       const obsResult = await obsResponse.json()
-      setData(obsResult)
+      
+      console.log("API Response:", obsResult) // Debug log to see what data is coming from the API
+      
+      // Make sure the data has the required structure
+      const transformedData = obsResult.map((obs: any) => {
+        // Ensure the observer ID is correctly set for permission checks
+        if (!obs.observer.id && obs.observer.userId) {
+          obs.observer.id = obs.observer.userId
+        }
+        
+        // Make sure all required properties exist
+        return {
+          metadata: {
+            id: obs.metadata?.id || "",
+            stationId: obs.metadata?.stationId || "",
+          },
+          observer: {
+            id: obs.observer?.id || obs.observer?.userId || "", // Ensure we have the observer ID
+            "observer-initial": obs.observer?.["observer-initial"] || "",
+            "observation-time": obs.observer?.["observation-time"] || new Date().toISOString(),
+          },
+          totalCloud: {
+            "total-cloud-amount": obs.totalCloud?.["total-cloud-amount"] || "",
+          },
+          clouds: {
+            low: {
+              direction: obs.clouds?.low?.direction || "",
+              height: obs.clouds?.low?.height || "",
+              form: obs.clouds?.low?.form || "",
+              amount: obs.clouds?.low?.amount || "",
+            },
+            medium: {
+              direction: obs.clouds?.medium?.direction || "",
+              height: obs.clouds?.medium?.height || "",
+              form: obs.clouds?.medium?.form || "",
+              amount: obs.clouds?.medium?.amount || "",
+            },
+            high: {
+              direction: obs.clouds?.high?.direction || "",
+              height: obs.clouds?.high?.height || "",
+              form: obs.clouds?.high?.form || "",
+              amount: obs.clouds?.high?.amount || "",
+            },
+          },
+          significantClouds: {
+            layer1: {
+              height: obs.significantClouds?.layer1?.height || "",
+              form: obs.significantClouds?.layer1?.form || "",
+              amount: obs.significantClouds?.layer1?.amount || "",
+            },
+            layer2: {
+              height: obs.significantClouds?.layer2?.height || "",
+              form: obs.significantClouds?.layer2?.form || "",
+              amount: obs.significantClouds?.layer2?.amount || "",
+            },
+            layer3: {
+              height: obs.significantClouds?.layer3?.height || "",
+              form: obs.significantClouds?.layer3?.form || "",
+              amount: obs.significantClouds?.layer3?.amount || "",
+            },
+            layer4: {
+              height: obs.significantClouds?.layer4?.height || "",
+              form: obs.significantClouds?.layer4?.form || "",
+              amount: obs.significantClouds?.layer4?.amount || "",
+            },
+          },
+          rainfall: {
+            "time-start": obs.rainfall?.["time-start"] || "",
+            "time-end": obs.rainfall?.["time-end"] || "",
+            "since-previous": obs.rainfall?.["since-previous"] || "",
+            "during-previous": obs.rainfall?.["during-previous"] || "",
+            "last-24-hours": obs.rainfall?.["last-24-hours"] || "",
+          },
+          wind: {
+            "first-anemometer": obs.wind?.["first-anemometer"] || "",
+            "second-anemometer": obs.wind?.["second-anemometer"] || "",
+            speed: obs.wind?.speed || "",
+            direction: obs.wind?.direction || "",
+            "wind-direction": obs.wind?.["wind-direction"] || obs.wind?.direction || "",
+          },
+        }
+      })
+      
+      console.log("Transformed Data:", transformedData) // Debug log to see the transformed data
+      setData(transformedData)
 
       // Fetch stations from the database
       const stationsResponse = await fetch("/api/stations")
@@ -72,6 +238,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
       setStations(stationsResult)
     } catch (error) {
       console.error("Error fetching data:", error)
+      toast.error("Failed to fetch data. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -215,7 +382,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
           ? format(parseISO(item.observer["observation-time"]), "HH:mm")
           : "N/A"
 
-        const totalCloudAmount = item.totalCloud?.["total-cloud-amount"] || item.observer["total-cloud-amount"] || "N/A"
+        const totalCloudAmount = item.totalCloud?.["total-cloud-amount"] !== undefined ? item.totalCloud["total-cloud-amount"] : "N/A"
 
         return [
           time,
@@ -319,7 +486,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
         {/* Main Table Section */}
         <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
           <div className="p-4 bg-gray-100 border-b border-gray-300">
-            <div className="text-center font-bold text-lg border-b-2 border-gray-800 pb-2 mb-4">SECOND CARD</div>
+            <div className="text-center font-bold text-lg border-b-2 border-gray-800 pb-2 mb-4">SECOND CARD </div>
           </div>
 
           <div className="p-4">
@@ -420,12 +587,12 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                         : "--:--"
 
                       const totalCloudAmount =
-                        record.totalCloud?.["total-cloud-amount"] || record.observer["total-cloud-amount"] || "--"
+                        record.totalCloud?.["total-cloud-amount"] || "--"
 
                       return (
                         <tr key={index} className="text-center font-mono hover:bg-gray-50">
                           <td className="border border-gray-400 p-1">{time}</td>
-                          <td className="border border-gray-400 p-1">{record.metadata.stationId || "--"}</td>
+                          <td className="border border-gray-400 p-1">{record.metadata.stationId || "XYZ"}</td>
                           <td className="border border-gray-400 p-1">{totalCloudAmount}</td>
 
                           {/* Low Cloud */}
