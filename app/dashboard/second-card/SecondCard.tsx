@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useEffect, useState } from "react";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import {
   CloudIcon,
   CloudRainIcon,
@@ -48,20 +48,22 @@ export default function WeatherObservationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("cloud");
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 6;
+  const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
   const { data: session } = useSession();
 
   const handleNext = () => {
     // Add validation for current step before proceeding
     if (validateStep(currentStep)) {
-      setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
-      setActiveTab(getTabForStep(currentStep + 1));
+      const nextStep = Math.min(currentStep + 1, totalSteps);
+      setCurrentStep(nextStep);
+      setActiveTab(getTabForStep(nextStep));
     }
   };
 
   const handlePrevious = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
-    setActiveTab(getTabForStep(currentStep - 1));
+    const prevStep = Math.max(currentStep - 1, 1);
+    setCurrentStep(prevStep);
+    setActiveTab(getTabForStep(prevStep));
   };
 
   const getTabForStep = (step: number) => {
@@ -393,10 +395,18 @@ export default function WeatherObservationForm() {
       label: "/ - Key obscured or cloud amount cannot be estimated",
     },
   ];
+  // Prevent form submission on Enter key and other unwanted submissions
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (currentStep < totalSteps) {
+        handleNext();
+      }
+    }
+  };
+
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
-      <Toaster position="top-right" richColors />
-
       <div className="max-w-7xl mx-auto">
         <header className="text-center py-6">
           <h1 className="text-3xl font-bold text-gray-800">
@@ -407,10 +417,20 @@ export default function WeatherObservationForm() {
           </p>
         </header>
 
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-xl shadow-lg overflow-hidden"
-        >
+        {/* Wrap in a div to prevent form submission issues */}
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+          <form
+            onSubmit={(e) => {
+              // Only allow submission when we're on the last step and the Submit button is clicked
+              if (activeTab !== "observer" || currentStep !== totalSteps) {
+                e.preventDefault();
+                return;
+              }
+              handleSubmit(e);
+            }}
+            onKeyDown={handleKeyDown}
+            className="w-full"
+          >
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
@@ -692,26 +712,7 @@ export default function WeatherObservationForm() {
               </TabsContent>
             </div>
           </Tabs>
-          {/* <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 flex justify-end">
-            <Button
-              type="submit"
-              className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  <CloudIcon className="h-5 w-5 mr-2" />
-                  Submit Observation
-                </>
-              )}
-            </Button>
-          </div> */}
-
+          
           <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 flex justify-between">
             <Button
               type="button"
@@ -732,7 +733,14 @@ export default function WeatherObservationForm() {
               </Button>
             ) : (
               <Button
-                type="submit"
+                type="button"
+                onClick={(e) => {
+                  // Only submit when we're on the last step and observer tab
+                  if (activeTab === "observer" && currentStep === totalSteps) {
+                    const form = e.currentTarget.closest('form');
+                    if (form) form.requestSubmit();
+                  }
+                }}
                 className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
                 disabled={isSubmitting}
               >
@@ -750,7 +758,8 @@ export default function WeatherObservationForm() {
               </Button>
             )}
           </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );

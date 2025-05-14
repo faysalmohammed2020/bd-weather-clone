@@ -24,7 +24,7 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 import { hygrometricTable } from "../../../data/hygrometric-table"; // Import the hygrometric table data
 import { stationPressure } from "../../../data/station-pressure"; // Import the station pressure data
 import { useSession } from "@/lib/auth-client";
@@ -448,7 +448,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
   return (
     <>
-      <Toaster position="top-right" richColors />
       <form onSubmit={handleSubmit} className="w-full mx-auto">
         {/* Header Section - Single Line */}
         <Card className="mb-6 border border-blue-200 bg-white shadow-sm rounded-xl">
