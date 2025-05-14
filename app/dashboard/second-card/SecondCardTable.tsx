@@ -67,7 +67,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
     format(new Date(), "yyyy-MM-dd")
   );
   const [stationFilter, setStationFilter] = useState("all");
-  const [stationNames, setStationNames] = useState<string[]>([]);
+  const [stations, setStations] = useState<{id: string, stationId: string, name: string}[]>([]);
 
   // Add edit mode state
   const [editRowId, setEditRowId] = useState<string | null>(null);
@@ -78,21 +78,21 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/save-observation");
-      if (!response.ok) {
-        throw new Error("Failed to fetch data");
+      // Fetch weather observations
+      const obsResponse = await fetch("/api/save-observation");
+      if (!obsResponse.ok) {
+        throw new Error("Failed to fetch observation data");
       }
-      const result = await response.json();
-      setData(result);
+      const obsResult = await obsResponse.json();
+      setData(obsResult);
 
-      // Extract unique station IDs
-      const stationIds = new Set<string>();
-      result.forEach((item: SecondCardData) => {
-        if (item.metadata.stationId) {
-          stationIds.add(item.metadata.stationId);
-        }
-      });
-      setStationNames(Array.from(stationIds));
+      // Fetch stations from the database
+      const stationsResponse = await fetch("/api/stations");
+      if (!stationsResponse.ok) {
+        throw new Error("Failed to fetch stations");
+      }
+      const stationsResult = await stationsResponse.json();
+      setStations(stationsResult);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -315,9 +315,9 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Stations</SelectItem>
-                  {stationNames.map((id) => (
-                    <SelectItem key={id} value={id}>
-                      Station {id}
+                  {stations.map((station) => (
+                    <SelectItem key={station.id} value={station.stationId}>
+                      {station.name} ({station.stationId})
                     </SelectItem>
                   ))}
                 </SelectContent>
