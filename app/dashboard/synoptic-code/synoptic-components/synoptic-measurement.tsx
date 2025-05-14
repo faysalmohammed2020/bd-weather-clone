@@ -4,11 +4,10 @@ import { useFormikContext } from "formik";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  type SynopticFormValues,
-  generateSynopticCode,
-} from "@/lib/generateSynopticCode";
+import { type SynopticFormValues } from "@/lib/generateSynopticCode";
 import { useEffect, useState } from "react";
+
+// ... (keep your existing measurements array exactly as is) ...
 
 const measurements = [
   { id: 0, label: "C1", range: "16" },
@@ -180,35 +179,84 @@ export default function SynopticMeasurementsTab() {
   const [dataStatus, setDataStatus] = useState<{
     hasToday: boolean;
     message: string;
-  }>({ hasToday: true, message: "" });
+    isLoading: boolean;
+    error?: string;
+  }>({ 
+    hasToday: true, 
+    message: "", 
+    isLoading: true 
+  });
 
   useEffect(() => {
-    const generatedValues = generateSynopticCode();
+    const fetchSynopticData = async () => {
+      try {
+        setDataStatus(prev => ({ ...prev, isLoading: true, error: undefined }));
+        
+        const response = await fetch('/api/synoptic');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-    // Check if today's date matches the generated values
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(
-      today.getMonth() + 1
-    ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-    const valuesDateStr = `${generatedValues.year}-${generatedValues.month}-${generatedValues.day}`;
+        const generatedValues = await response.json();
 
-    const isToday = todayStr === valuesDateStr;
+        // Check if today's date matches the generated values
+        const today = new Date();
+        const todayStr = `${today.getFullYear()}-${String(
+          today.getMonth() + 1
+        ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+        const valuesDateStr = `${generatedValues.year}-${generatedValues.month}-${generatedValues.day}`;
 
-    setDataStatus({
-      hasToday: isToday,
-      message: isToday
-        ? "Using today's weather data"
-        : "No data available for today, using most recent data",
-    });
+        const isToday = todayStr === valuesDateStr;
 
-    setFieldValue("measurements", generatedValues.measurements);
-    setFieldValue("stationNo", generatedValues.stationNo);
-    setFieldValue("weatherRemark", generatedValues.weatherRemark);
-    setFieldValue("dataType", generatedValues.dataType);
-    setFieldValue("year", generatedValues.year);
-    setFieldValue("month", generatedValues.month);
-    setFieldValue("day", generatedValues.day);
+        setDataStatus({
+          hasToday: isToday,
+          message: isToday
+            ? "Using today's weather data"
+            : "No data available for today, using most recent data",
+          isLoading: false,
+        });
+
+        // Update all form fields
+        setFieldValue("measurements", generatedValues.measurements);
+        setFieldValue("stationNo", generatedValues.stationNo);
+        setFieldValue("weatherRemark", generatedValues.weatherRemark);
+        setFieldValue("dataType", generatedValues.dataType);
+        setFieldValue("year", generatedValues.year);
+        setFieldValue("month", generatedValues.month);
+        setFieldValue("day", generatedValues.day);
+
+      } catch (error) {
+        console.error("Error fetching synoptic data:", error);
+        setDataStatus({
+          hasToday: false,
+          message: "Error loading weather data",
+          isLoading: false,
+          error: error instanceof Error ? error.message : "Unknown error",
+        });
+
+        // Set default values on error
+        const now = new Date();
+        setFieldValue("measurements", Array(21).fill(""));
+        setFieldValue("stationNo", "00000");
+        setFieldValue("weatherRemark", "");
+        setFieldValue("dataType", "SYNOP");
+        setFieldValue("year", now.getFullYear().toString());
+        setFieldValue("month", String(now.getMonth() + 1).padStart(2, "0"));
+        setFieldValue("day", String(now.getDate()).padStart(2, "0"));
+      }
+    };
+
+    fetchSynopticData();
   }, [setFieldValue]);
+
+  if (dataStatus.isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -233,52 +281,77 @@ export default function SynopticMeasurementsTab() {
         </span>
         Synoptic Code Measurements
       </h2>
-      {dataStatus.message && (
-        <div
-          className={`p-3 rounded-md text-sm ${
-            dataStatus.hasToday
-              ? "bg-green-100 text-green-800"
-              : "bg-amber-100 text-amber-800"
-          }`}
-        >
+
+      {dataStatus.error ? (
+        <div className="p-3 rounded-md bg-red-100 text-red-800 text-sm">
           <div className="flex items-center">
-            {dataStatus.hasToday ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mr-2"
-              >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="mr-2"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-              </svg>
-            )}
-            {dataStatus.message}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="mr-2"
+            >
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            Error: {dataStatus.error}
           </div>
         </div>
+      ) : (
+        dataStatus.message && (
+          <div
+            className={`p-3 rounded-md text-sm ${
+              dataStatus.hasToday
+                ? "bg-green-100 text-green-800"
+                : "bg-amber-100 text-amber-800"
+            }`}
+          >
+            <div className="flex items-center">
+              {dataStatus.hasToday ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mr-2"
+                >
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mr-2"
+                >
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+              )}
+              {dataStatus.message}
+            </div>
+          </div>
+        )
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -361,6 +434,7 @@ export default function SynopticMeasurementsTab() {
                 </div>
               ))}
             </div>
+            
             {/* Weather Remark Field */}
             <div className="mt-4">
               <Card className="border-none bg-white">
