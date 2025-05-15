@@ -29,9 +29,13 @@ import { hygrometricTable } from "../../../data/hygrometric-table"; // Import th
 import { stationPressure } from "../../../data/dhaka_station_level";
 import { seaLevelPressure } from "../../../data/dhaka_sea_level";
 import { useSession } from "@/lib/auth-client";
+import { useMeteorologicalForm } from "@/stores/useMeteorologicalForm";
 
 export function MeteorologicalDataForm({ onDataSubmitted }) {
-  const [formData, setFormData] = useState({});
+  // Get the persistent form store
+  const { formData, updateField, updateFields, resetForm, checkAndResetIfExpired } = useMeteorologicalForm();
+  
+  // Keep the original local state for UI management
   const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hygrometricData, setHygrometricData] = useState({
@@ -41,6 +45,14 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     dewPoint: "",
     relativeHumidity: "",
   });
+  
+  // Check for expired form data on component mount
+  useEffect(() => {
+    const wasReset = checkAndResetIfExpired();
+    if (wasReset) {
+      toast.info("Your form data was reset due to inactivity");
+    }
+  }, [checkAndResetIfExpired]);
 
   // Refs for multi-box inputs to handle auto-focus
   const dataTypeRefs = [useRef(null), useRef(null)];
@@ -153,22 +165,18 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       relativeHumidity: RH.toString(),
     });
 
-    setFormData((prev) => ({
-      ...prev,
+    updateFields({
       Td: DpT.toString(),
       relativeHumidity: RH.toString(),
-    }));
+    });
 
     toast.success("Dew point and relative humidity calculated successfully");
   };
 
   useEffect(() => {
     const year = new Date().getFullYear().toString(); // e.g., "2025"
-    setFormData((prev) => ({
-      ...prev,
-      year: year.slice(2), // only "25" for last two digits
-    }));
-  }, []);
+    updateField('year', year.slice(2)); // only "25" for last two digits
+  }, [updateField]);
 
   // STEP 1: Station Level Pressure Calculation
   const calculatePressureValues = (dryBulb, barAsRead) => {
@@ -212,18 +220,13 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       const stationLevelPressure = barAsReadValue + heightCorrection;
 
       // Update station-level values first
-      setFormData((prev) => {
-        const updated = {
-          ...prev,
-          heightDifference: heightCorrection.toFixed(2),
-          stationLevelPressure: stationLevelPressure.toFixed(2),
-        };
-
-        // Step 2: Sea level correction (calls separate function)
-        calculateSeaLevelPressure(dryBulb, stationLevelPressure.toFixed(2));
-
-        return updated;
+      updateFields({
+        heightDifference: heightCorrection.toFixed(2),
+        stationLevelPressure: stationLevelPressure.toFixed(2),
       });
+
+      // Step 2: Sea level correction (calls separate function)
+      calculateSeaLevelPressure(dryBulb, stationLevelPressure.toFixed(2));
 
       toast.success("Station pressure calculated");
     } catch (err) {
@@ -274,11 +277,10 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       const correctedSeaLevelPressure =
         stationLevelPressureValue + seaLevelCorrection;
 
-      setFormData((prev) => ({
-        ...prev,
+      updateFields({
         seaLevelReduction: seaLevelCorrection.toFixed(2),
         correctedSeaLevelPressure: correctedSeaLevelPressure.toFixed(2),
-      }));
+      });
 
       toast.success("Sea level pressure calculated");
     } catch (error) {
@@ -320,17 +322,19 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
         description: `Entry #${result.dataCount} saved`,
       });
 
-      // Reset only measurement fields (preserves station info)
-      setFormData((prev) => ({
-        stationName: prev.stationName,
-        stationNo: prev.stationNo,
-        year: prev.year,
-        // Clear other fields
-        cloudCover: "",
-        visibility: "",
-        // ... other fields to reset
-      }));
-
+      // Reset form data but preserve station info
+      const stationInfo = {
+        stationName: formData.stationName,
+        stationNo: formData.stationNo,
+        year: formData.year,
+      };
+      
+      resetForm();
+      
+      // Restore station info
+      updateFields(stationInfo);
+      
+      // Reset hygrometric data display
       setHygrometricData({
         dryBulb: "",
         wetBulb: "",
@@ -358,7 +362,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    updateField(name, value);
 
     // If dry-bulb or wet-bulb values change, calculate dew point and humidity
     if (name === "dryBulbAsRead" || name === "wetBulbAsRead") {
@@ -382,7 +386,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    updateField(name, value);
   };
 
   // Handle input for segmented boxes with auto-focus to next box
@@ -393,13 +397,12 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     key: string
   ) => {
     const value = e.target.value.slice(0, 1); // ensure single digit
-    const updated = (formData[key] || "").split("");
+    // Ensure we have a string value
+    const currentValue = typeof formData[key] === 'string' ? formData[key] as string : "";
+    const updated = currentValue.split("");
     updated[index] = value;
 
-    setFormData((prev) => ({
-      ...prev,
-      [key]: updated.join(""),
-    }));
+    updateField(key, updated.join(""));
 
     // Auto-focus next input
     if (value && refs[index + 1]) {
@@ -409,7 +412,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
   // Reset form function
   const handleReset = () => {
     // Clear all form data
-    setFormData({});
+    resetForm();
     setHygrometricData({
       dryBulb: "",
       wetBulb: "",
@@ -467,7 +470,8 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       key={`dataType-${i}`}
                       id={`dataType-${i}`}
                       className="w-12 text-center text-black p-2 bg-slate-100 border border-slate-900 shadow-sm"
-                      value={char}
+                      defaultValue={char}
+                      readOnly
                     />
                   ))}
                 </div>
