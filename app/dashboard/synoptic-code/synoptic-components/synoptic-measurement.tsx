@@ -149,7 +149,7 @@ const measurements = [
     id: 18,
     label: (
       <>
-        8 N<sub>s</sub>Ch<sub>s</sub>h<sub>s</sub>
+        8 N<sub>s</sub>C  h<sub>s</sub>h<sub>s</sub>
       </>
     ),
     range: "29-33",
