@@ -186,44 +186,45 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
   ) => {
     if (!dryBulb || !barAsRead || !stationId) return;
 
-    const userStationData = stationDataMap[stationId];
-    if (!userStationData) {
-      toast.error("Station data not found");
-      return;
-    }
+    try {
+      const userStationData = stationDataMap[stationId];
+      if (!userStationData) {
+        toast.error("Station data not found");
+        return;
+      }
 
-    const correctionTable = userStationData.station.correction_table;
-    const dryBulbValue = Number.parseFloat(dryBulb) / 10;
-    const roundedDryBulb = Math.round(dryBulbValue);
-    const dryBulbKey = roundedDryBulb;
+      const correctionTable = userStationData.station.correction_table;
+      const dryBulbValue = Number.parseFloat(dryBulb) / 10;
+      const roundedDryBulb = Math.round(dryBulbValue);
+      const dryBulbKey = roundedDryBulb;
 
-    const barAsReadValue = Number.parseFloat(barAsRead);
+      const barAsReadValue = Number.parseFloat(barAsRead);
 
-    const correctionEntry = correctionTable.find(
-      (entry) => entry.dry_bulb_temp_c === dryBulbKey
-    );
-
-    if (!correctionEntry) {
-      toast.error(
-        `Dry bulb temperature ${dryBulbKey}°C not found in correction table`
+      const correctionEntry = correctionTable.find(
+        (entry) => entry.dry_bulb_temp_c === dryBulbKey
       );
-      return;
-    }
 
-    const availablePressures = Object.keys(
-      correctionEntry.cistern_level_pressure
-    )
-      .map(Number)
-      .sort((a, b) => a - b);
-    let closestPressure = availablePressures.reduce((prev, curr) =>
-      Math.abs(curr - barAsReadValue) < Math.abs(prev - barAsReadValue)
-        ? curr
-        : prev
-    );
+      if (!correctionEntry) {
+        toast.error(
+          `Dry bulb temperature ${dryBulbKey}°C not found in correction table`
+        );
+        return;
+      }
 
-    const heightCorrection =
-      correctionEntry.cistern_level_pressure[closestPressure.toString()];
-    const stationLevelPressure = barAsReadValue + heightCorrection;
+      const availablePressures = Object.keys(
+        correctionEntry.cistern_level_pressure
+      )
+        .map(Number)
+        .sort((a, b) => a - b);
+      let closestPressure = availablePressures.reduce((prev, curr) =>
+        Math.abs(curr - barAsReadValue) < Math.abs(prev - barAsReadValue)
+          ? curr
+          : prev
+      );
+
+      const heightCorrection =
+        correctionEntry.cistern_level_pressure[closestPressure.toString()];
+      const stationLevelPressure = barAsReadValue + heightCorrection;
 
       // Update station-level values first
       updateFields({
@@ -248,38 +249,39 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     try {
       const dryBulbValue = parseFloat(dryBulb) / 10;
       const roundedDryBulb = Math.round(dryBulbValue);
-      const stationLevelPressureValue = parseFloat(stationLevelPressure);
+      const dryBulbKey = roundedDryBulb;
+      const stationPressureValue = parseFloat(stationLevelPressure);
 
-    const correctionEntry = seaCorrectionTable.find(
-      (entry) => entry.dry_bulb_temp_c === dryBulbKey
-    );
-
-    if (!correctionEntry) {
-      toast.error(
-        `Dry bulb temperature ${dryBulbKey}°C not found in sea level correction table`
+      const correctionEntry = seaCorrectionTable.find(
+        (entry) => entry.dry_bulb_temp_c === dryBulbKey
       );
-      return;
-    }
 
-    const availablePressures = Object.keys(
-      correctionEntry.station_level_pressure
-    )
-      .map(Number)
-      .sort((a, b) => a - b);
-    let closestPressure = availablePressures.reduce((prev, curr) =>
-      Math.abs(curr - stationPressureValue) <
-      Math.abs(prev - stationPressureValue)
-        ? curr
-        : prev
-    );
+      if (!correctionEntry) {
+        toast.error(
+          `Dry bulb temperature ${dryBulbKey}°C not found in sea level correction table`
+        );
+        return;
+      }
 
-    const seaLevelReduction =
-      correctionEntry.station_level_pressure[closestPressure.toString()];
-    const seaLevelPressure = stationPressureValue + seaLevelReduction;
+      const availablePressures = Object.keys(
+        correctionEntry.station_level_pressure
+      )
+        .map(Number)
+        .sort((a, b) => a - b);
+      const closestPressure = availablePressures.reduce((prev, curr) =>
+        Math.abs(curr - stationPressureValue) <
+        Math.abs(prev - stationPressureValue)
+          ? curr
+          : prev
+      );
+
+      const seaLevelReduction =
+        correctionEntry.station_level_pressure[closestPressure.toString()];
+      const seaLevelPressure = stationPressureValue + seaLevelReduction;
 
       updateFields({
-        seaLevelReduction: seaLevelCorrection.toFixed(2),
-        correctedSeaLevelPressure: correctedSeaLevelPressure.toFixed(2),
+        seaLevelReduction: seaLevelReduction.toFixed(2),
+        correctedSeaLevelPressure: seaLevelPressure.toFixed(2),
       });
 
       toast.success("Sea level pressure calculated");
