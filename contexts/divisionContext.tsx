@@ -230,10 +230,7 @@ export const LocationProvider = ({
         }
 
         const processedDivisions = elements.map((element) => {
-          const name =
-            element.tags.name ||
-            element.tags["name:en"] ||
-            `Division ${element.id}`;
+          const name = element.tags["name:en"];
           const geometry = processGeometry(element);
           const coordinates = calculateCenter(geometry);
 
@@ -281,10 +278,7 @@ export const LocationProvider = ({
         }
 
         const processedDistricts = elements.map((element) => {
-          const name =
-            element.tags.name ||
-            element.tags["name:en"] ||
-            `District ${element.id}`;
+          const name = element.tags["name:en"];
           const geometry = processGeometry(element);
           const coordinates = calculateCenter(geometry);
 
@@ -333,10 +327,7 @@ export const LocationProvider = ({
         }
 
         const processedUpazilas = elements.map((element) => {
-          const name =
-            element.tags.name ||
-            element.tags["name:en"] ||
-            `Upazila ${element.id}`;
+          const name = element.tags["name:en"];
           const geometry = processGeometry(element);
           const coordinates = calculateCenter(geometry);
 
