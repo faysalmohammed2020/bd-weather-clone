@@ -709,19 +709,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="correctionForTemp">
-                        Correction for Temp
-                      </Label>
-                      <Input
-                        id="correctionForTemp"
-                        name="correctionForTemp"
-                        value={formData.correctionForTemp || ""}
-                        onChange={handleChange}
-                        className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
                       <Label htmlFor="stationLevelPressure">
                         Station Level Pressure (P.P.P.P.hpa)
                       </Label>
