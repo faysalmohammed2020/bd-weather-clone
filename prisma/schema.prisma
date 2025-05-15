@@ -215,3 +215,32 @@ model WeatherObservation {
   observerInitial String?
   observationTime DateTime?
 }
+
+
+model DailySummary {
+  id                    String   @id @default(cuid())
+  userId                String?
+  dataType              String?
+  stationNo             String?
+  year                  Int?
+  month                 Int?
+  day                   Int?
+  avStationPressure     String?
+  avSeaLevelPressure    String?
+  avDryBulbTemperature  String?
+  avWetBulbTemperature  String?
+  maxTemperature        String?
+  minTemperature        String?
+  totalPrecipitation    String?
+  avDewPointTemperature String?
+  avRelativeHumidity    String?
+  windSpeed             String?
+  windDirectionCode     String?
+  maxWindSpeed          String?
+  maxWindDirection      String?
+  avTotalCloud          String?
+  lowestVisibility      String?
+  totalRainDuration     String?  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
