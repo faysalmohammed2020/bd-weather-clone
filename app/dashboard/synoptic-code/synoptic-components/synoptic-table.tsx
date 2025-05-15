@@ -36,11 +36,9 @@ const fetchSynopticDataForTimeSlot = async (
 };
 
 export default function SynopticCodeTable() {
-  const [synopticData, setSynopticData] = useState<
-    Record<string, SynopticFormValues | null>
-  >({});
+  const [currentData, setCurrentData] = useState<SynopticFormValues | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [refreshing, setRefreshing] = useState<Record<string, boolean>>({});
+  const [refreshing, setRefreshing] = useState<boolean>(false);
   const [headerInfo, setHeaderInfo] = useState({
     dataType: "SY",
     stationNo: "41953",
@@ -49,71 +47,57 @@ export default function SynopticCodeTable() {
     day: "03",
   });
 
-  // Load data for all time slots on component mount
-  useEffect(() => {
-    const loadAllData = async () => {
-      setLoading(true);
-      const dataPromises = TIME_SLOTS.map((slot) =>
-        fetchSynopticDataForTimeSlot(slot.value).then((data) => ({
-          slot: slot.value,
-          data,
-        }))
-      );
+  // Function to fetch the most recent data
+  const fetchLatestData = async () => {
+    setRefreshing(true);
+    try {
+      // Try to fetch data for the current hour's time slot
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentSlot = Math.floor(currentHour / 3) * 3;
+      const timeSlot = currentSlot.toString().padStart(2, '0');
 
-      const results = await Promise.all(dataPromises);
-      const newData: Record<string, SynopticFormValues | null> = {};
-
-      results.forEach(({ slot, data }) => {
-        if (data !== null) {
-          newData[slot] = data;
-
-          // Update header info from the first available data
-          if (Object.keys(newData).length === 1) {
-            setHeaderInfo({
-              dataType: data.dataType.substring(0, 2),
-              stationNo: data.stationNo,
-              year: data.year.substring(2),
-              month: data.month,
-              day: data.day,
-            });
-          }
-        }
-      });
-
-      setSynopticData(newData);
+      const data = await fetchSynopticDataForTimeSlot(timeSlot);
+      if (data) {
+        setCurrentData(data);
+        setHeaderInfo({
+          dataType: data.dataType.substring(0, 2),
+          stationNo: data.stationNo,
+          year: data.year.substring(2),
+          month: data.month,
+          day: data.day,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch latest data:", error);
+    } finally {
       setLoading(false);
-    };
+      setRefreshing(false);
+    }
+  };
 
-    loadAllData();
+  // Load data on component mount
+  useEffect(() => {
+    fetchLatestData();
   }, []);
 
   // Function to export data as CSV
   const exportToCSV = () => {
+    if (!currentData) return;
+
     // Create headers
-    let csvContent =
-      "Time,C1,Iliii,iRiXhvv,Nddff,1SnTTT,2SnTdTdTd,3PPP/4PPP,6RRRtR,7wwW1W2,8NhClCmCh,2SnTnTnTn/InInInIn,56DlDmDh,57CDaEc,C2,GG,58P24P24P24/59P24P24P24,(6RRRtR)/7R24R24R24,8N5Ch5h5,90dqqqt,91fqfqfq,Weather Remarks\n";
+    let csvContent = "Time,C1,Iliii,iRiXhvv,Nddff,1SnTTT,2SnTdTdTd,3PPP/4PPP,6RRRtR,7wwW1W2,8NhClCmCh,2SnTnTnTn/InInInIn,56DlDmDh,57CDaEc,C2,GG,58P24P24P24/59P24P24P24,(6RRRtR)/7R24R24R24,8N5Ch5h5,90dqqqt,91fqfqfq,Weather Remarks\n";
 
-    // Get time slots that have data
-    const slotsWithData = TIME_SLOTS.filter(
-      (slot) => synopticData[slot.value] !== undefined
-    ).sort((a, b) => Number.parseInt(a.value) - Number.parseInt(b.value));
-
-    // Add data rows
-    slotsWithData.forEach((slot) => {
-      const data = synopticData[slot.value];
-      if (data) {
-        let row = `${slot.label},`;
-
-        // Add measurements
-        data.measurements.forEach((measurement) => {
-          row += `${measurement},`;
-        });
-
-        // Add weather remark
-        row += `"${data.weatherRemark.replace(/"/g, '""')}"\n`;
-        csvContent += row;
-      }
+    // Add data row
+    const timeSlot = Math.floor(new Date().getHours() / 3) * 3;
+    const timeLabel = timeSlot.toString().padStart(2, '0');
+    
+    let row = `${timeLabel},`;
+    currentData.measurements.forEach((measurement) => {
+      row += `${measurement},`;
     });
+    row += `"${currentData.weatherRemark.replace(/"/g, '""')}"\n`;
+    csvContent += row;
 
     // Create download link
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -122,7 +106,7 @@ export default function SynopticCodeTable() {
     link.setAttribute("href", url);
     link.setAttribute(
       "download",
-      `synoptic_data_${headerInfo.year}${headerInfo.month}${headerInfo.day}.csv`
+      `synoptic_data_${headerInfo.year}${headerInfo.month}${headerInfo.day}_${timeLabel}.csv`
     );
     document.body.appendChild(link);
     link.click();
@@ -133,11 +117,6 @@ export default function SynopticCodeTable() {
   const printTable = () => {
     window.print();
   };
-
-  // Get time slots that have data, sorted by time
-  const slotsWithData = TIME_SLOTS.filter(
-    (slot) => synopticData[slot.value] !== undefined
-  ).sort((a, b) => Number.parseInt(a.value) - Number.parseInt(b.value));
 
   return (
     <div className="space-y-6 print:space-y-0">
@@ -167,8 +146,20 @@ export default function SynopticCodeTable() {
           <Button
             variant="outline"
             className="flex items-center gap-2 text-blue-700 border-blue-300 hover:bg-blue-50"
+            onClick={fetchLatestData}
+            disabled={refreshing}
+          >
+            {refreshing ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <span className="text-base">Refresh</span>
+            )}
+          </Button>
+          <Button
+            variant="outline"
+            className="flex items-center gap-2 text-blue-700 border-blue-300 hover:bg-blue-50"
             onClick={exportToCSV}
-            disabled={slotsWithData.length === 0}
+            disabled={!currentData}
           >
             <Download size={18} />
             <span className="text-base">Export CSV</span>
@@ -177,7 +168,7 @@ export default function SynopticCodeTable() {
             variant="outline"
             className="flex items-center gap-2 text-blue-700 border-blue-300 hover:bg-blue-50"
             onClick={printTable}
-            disabled={slotsWithData.length === 0}
+            disabled={!currentData}
           >
             <Printer size={18} />
             <span className="text-base">Print</span>
@@ -190,7 +181,7 @@ export default function SynopticCodeTable() {
           <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
           <span className="ml-3 text-lg text-gray-700">Loading synoptic data...</span>
         </div>
-      ) : slotsWithData.length === 0 ? (
+      ) : !currentData ? (
         <div className="flex justify-center items-center h-64 bg-blue-50/50 rounded-lg border-2 border-dashed border-blue-200">
           <div className="text-center p-8">
             <svg
@@ -216,14 +207,14 @@ export default function SynopticCodeTable() {
               No Data Available
             </h3>
             <p className="text-lg text-gray-600 mb-5">
-              There is no synoptic data available for any time slot today.
+              There is no synoptic data available for the current time slot.
             </p>
             <Button
               variant="outline"
               className="bg-white text-blue-700 border-blue-300 hover:bg-blue-50 text-base"
-              onClick={() => window.location.reload()}
+              onClick={fetchLatestData}
             >
-              Refresh Data
+              Try Again
             </Button>
           </div>
         </div>
@@ -386,36 +377,26 @@ export default function SynopticCodeTable() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-blue-100 text-center font-mono">
-                {TIME_SLOTS.map((slot, index) => {
-                  const data = synopticData[slot.value];
-                  if (!data) return null;
-
-                  return (
-                    <tr
-                      key={slot.value}
-                      className={`${
-                        index % 2 === 0 ? "bg-white" : "bg-blue-50/30"
-                      } hover:bg-blue-50 print:hover:bg-white`}
-                    >
-                      <td className="border border-blue-200 px-4 py-3 whitespace-nowrap font-semibold text-blue-700">
-                        {slot.label}
+                {currentData && (
+                  <tr className="bg-white hover:bg-blue-50 print:hover:bg-white">
+                    <td className="border border-blue-200 px-4 py-3 whitespace-nowrap font-semibold text-blue-700">
+                      {Math.floor(new Date().getHours() / 3) * 3}
+                    </td>
+                    {currentData.measurements.map((m, i) => (
+                      <td
+                        key={i}
+                        className={`border border-blue-200 px-4 py-3 whitespace-nowrap ${
+                          i % 3 === 0 ? "bg-blue-50/20" : ""
+                        }`}
+                      >
+                        {m}
                       </td>
-                      {data.measurements.map((m, i) => (
-                        <td
-                          key={i}
-                          className={`border border-blue-200 px-4 py-3 whitespace-nowrap ${
-                            i % 3 === 0 ? "bg-blue-50/20" : ""
-                          }`}
-                        >
-                          {m}
-                        </td>
-                      ))}
-                      <td className="border border-blue-200 px-4 py-3 whitespace-nowrap text-left text-gray-700">
-                        {data.weatherRemark}
-                      </td>
-                    </tr>
-                  );
-                })}
+                    ))}
+                    <td className="border border-blue-200 px-4 py-3 whitespace-nowrap text-left text-gray-700">
+                      {currentData.weatherRemark}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
 
