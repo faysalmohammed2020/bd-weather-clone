@@ -1,40 +1,17 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import { CloudIcon, CloudRainIcon, Wind, User, Sun, Loader2 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSession } from "@/lib/auth-client"
-
-// Define the form data structure
-interface FormData {
-  clouds: {
-    low: Record<string, string>
-    medium: Record<string, string>
-    high: Record<string, string>
-  }
-  significantClouds: {
-    layer1: Record<string, string>
-    layer2: Record<string, string>
-    layer3: Record<string, string>
-    layer4: Record<string, string>
-  }
-  rainfall: Record<string, string>
-  wind: Record<string, string>
-  observer: Record<string, string>
-  totalCloud: Record<string, string>
-  metadata?: {
-    stationId: string
-    submittedAt?: string
-    tabActiveAtSubmission?: string
-  }
-}
+import { useWeatherObservationForm } from "@/stores/useWeatherObservationForm"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 
 export default function WeatherObservationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -63,33 +40,84 @@ export default function WeatherObservationForm() {
     return steps[step - 1] || "cloud"
   }
 
+  // This section was removed to avoid duplicate declarations
+
   const validateStep = (step: number) => {
     switch (step) {
       case 1: // Cloud
-        return !!formData.clouds.low.form || !!formData.clouds.medium.form || !!formData.clouds.high.form
+        return !!safeFormData.clouds.low.form || !!safeFormData.clouds.medium.form || !!safeFormData.clouds.high.form
       case 2: // Total Cloud
-        return !!formData.totalCloud["total-cloud-amount"]
+        return !!safeFormData.totalCloud["total-cloud-amount"]
       // Add validation for other steps as needed
       default:
         return true
     }
   }
 
-  // Initialize form data state to store values across tab changes
-  const [formData, setFormData] = useState<FormData>({
-    clouds: { low: {}, medium: {}, high: {} },
-    significantClouds: { layer1: {}, layer2: {}, layer3: {}, layer4: {} },
-    rainfall: {},
-    wind: {},
-    observer: {
-      "observer-initial": session?.user?.name || "", // Initialize with user's name
-      "observation-time": new Date().toISOString().slice(0, 16), // Current datetime
+  // Get the persistent form store
+  const { formData, updateFields, resetForm, checkAndResetIfExpired } = useWeatherObservationForm()
+  
+  // Create a safe default value for form data to prevent TypeScript errors
+  const safeFormData = {
+    clouds: {
+      low: formData?.clouds?.low || {},
+      medium: formData?.clouds?.medium || {},
+      high: formData?.clouds?.high || {}
     },
-    totalCloud: {},
-    metadata: {
-      stationId: session?.user?.stationId || "", // Initialize with user's station ID
+    significantClouds: {
+      layer1: formData?.significantClouds?.layer1 || {},
+      layer2: formData?.significantClouds?.layer2 || {},
+      layer3: formData?.significantClouds?.layer3 || {},
+      layer4: formData?.significantClouds?.layer4 || {}
     },
-  })
+    rainfall: formData?.rainfall || {},
+    wind: formData?.wind || {},
+    observer: formData?.observer || {},
+    totalCloud: formData?.totalCloud || {},
+    metadata: formData?.metadata || {}
+  }
+  
+  // Check for expired form data on component mount
+  useEffect(() => {
+    const wasReset = checkAndResetIfExpired();
+    if (wasReset) {
+      toast.info("Your form data was reset due to inactivity");
+    }
+  }, [checkAndResetIfExpired]);
+  
+  // Initialize session-specific values when session is available
+  useEffect(() => {
+    if (session?.user) {
+      // Set the observer name from session if available
+      updateFields({
+        observer: {
+          ...(formData?.observer || {}),
+          "observer-initial": session.user.name || "",
+        },
+        metadata: {
+          ...(formData?.metadata || {}),
+          stationId: session.user.stationId || "",
+        },
+      });
+    }
+    // We intentionally omit formData from dependencies to prevent infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, updateFields]);
+  
+  // Set observation time on initial load (only runs once)
+  useEffect(() => {
+    // Only set the observation time if it doesn't exist
+    if (!formData?.observer || !formData?.observer["observation-time"]) {
+      updateFields({
+        observer: {
+          ...(formData?.observer || {}),
+          "observation-time": new Date().toISOString().slice(0, 16),
+        }
+      });
+    }
+    // We intentionally omit formData and updateFields from dependencies to prevent infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Handle input changes and update the form data state
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -98,83 +126,102 @@ export default function WeatherObservationForm() {
     // Update the appropriate section of the form data based on the input name
     if (name.startsWith("low-cloud-")) {
       const field = name.replace("low-cloud-", "")
-      setFormData((prev) => ({
-        ...prev,
+      // Ensure we have all required properties for clouds
+      updateFields({
         clouds: {
-          ...prev.clouds,
-          low: { ...prev.clouds.low, [field]: value },
+          low: { ...(safeFormData.clouds?.low || {}), [field]: value },
+          medium: { ...(safeFormData.clouds?.medium || {}) },
+          high: { ...(safeFormData.clouds?.high || {}) }
         },
-      }))
+      })
     } else if (name.startsWith("medium-cloud-")) {
       const field = name.replace("medium-cloud-", "")
-      setFormData((prev) => ({
-        ...prev,
+      // Ensure we have all required properties for clouds
+      updateFields({
         clouds: {
-          ...prev.clouds,
-          medium: { ...prev.clouds.medium, [field]: value },
+          low: { ...(safeFormData.clouds?.low || {}) },
+          medium: { ...(safeFormData.clouds?.medium || {}), [field]: value },
+          high: { ...(safeFormData.clouds?.high || {}) }
         },
-      }))
+      })
     } else if (name.startsWith("high-cloud-")) {
       const field = name.replace("high-cloud-", "")
-      setFormData((prev) => ({
-        ...prev,
+      // Ensure we have all required properties for clouds
+      updateFields({
         clouds: {
-          ...prev.clouds,
-          high: { ...prev.clouds.high, [field]: value },
+          low: { ...(safeFormData.clouds?.low || {}) },
+          medium: { ...(safeFormData.clouds?.medium || {}) },
+          high: { ...(safeFormData.clouds?.high || {}), [field]: value }
         },
-      }))
-    }
-    // Significant clouds
-    else if (name.startsWith("layer")) {
-      const [layer, field] = name.split("-").slice(0, 2)
-      setFormData((prev) => ({
-        ...prev,
+      })
+    } else if (name.startsWith("sig-cloud-layer1-")) {
+      const field = name.replace("sig-cloud-layer1-", "")
+      // Ensure we have all required properties for significantClouds
+      updateFields({
         significantClouds: {
-          ...prev.significantClouds,
-          [layer]: {
-            ...prev.significantClouds[layer as keyof typeof prev.significantClouds],
-            [field]: value,
-          },
+          layer1: { ...(safeFormData.significantClouds?.layer1 || {}), [field]: value },
+          layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
+          layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) }
         },
-      }))
-    }
-    // Total cloud
-    else if (name === "total-cloud-amount") {
-      setFormData((prev) => ({
-        ...prev,
-        totalCloud: { ...prev.totalCloud, [name]: value },
-      }))
-    }
-    // Rainfall
-    else if (["time-start", "time-end", "since-previous", "during-previous", "last-24-hours"].includes(name)) {
-      setFormData((prev) => ({
-        ...prev,
-        rainfall: { ...prev.rainfall, [name]: value },
-      }))
-    }
-    // Wind
-    else if (["first-anemometer", "second-anemometer", "speed", "wind-direction"].includes(name)) {
-      setFormData((prev) => ({
-        ...prev,
-        wind: { ...prev.wind, [name]: value },
-      }))
-    }
-    // Observer fields
-    else if (["observer-initial", "observation-time"].includes(name)) {
-      setFormData((prev) => ({
-        ...prev,
-        observer: { ...prev.observer, [name]: value },
-      }))
-    }
-    // Station ID (needs to go in metadata)
-    else if (name === "station-id") {
-      setFormData((prev) => ({
-        ...prev,
+      })
+    } else if (name.startsWith("sig-cloud-layer2-")) {
+      const field = name.replace("sig-cloud-layer2-", "")
+      // Ensure we have all required properties for significantClouds
+      updateFields({
+        significantClouds: {
+          layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
+          layer2: { ...(safeFormData.significantClouds?.layer2 || {}), [field]: value },
+          layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) }
+        },
+      })
+    } else if (name.startsWith("sig-cloud-layer3-")) {
+      const field = name.replace("sig-cloud-layer3-", "")
+      // Ensure we have all required properties for significantClouds
+      updateFields({
+        significantClouds: {
+          layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
+          layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
+          layer3: { ...(safeFormData.significantClouds?.layer3 || {}), [field]: value },
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) }
+        },
+      })
+    } else if (name.startsWith("sig-cloud-layer4-")) {
+      const field = name.replace("sig-cloud-layer4-", "")
+      // Ensure we have all required properties for significantClouds
+      updateFields({
+        significantClouds: {
+          layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
+          layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
+          layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}), [field]: value }
+        },
+      })
+    } else if (name.startsWith("rainfall-") || name.startsWith("time-") || name.startsWith("since-") || name.startsWith("during-") || name.startsWith("last-")) {
+      // Handle rainfall fields with or without the rainfall- prefix
+      const field = name.startsWith("rainfall-") ? name.replace("rainfall-", "") : name
+      updateFields({
+        rainfall: { ...(safeFormData.rainfall || {}), [field]: value },
+      })
+    } else if (name.startsWith("wind-") || name === "first-anemometer" || name === "second-anemometer" || name === "speed" || name === "direction") {
+      // Handle wind fields with or without the wind- prefix
+      const field = name.startsWith("wind-") ? name.replace("wind-", "") : name
+      updateFields({
+        wind: { ...(safeFormData.wind || {}), [field]: value },
+      })
+    } else if (name.startsWith("observer-")) {
+      const field = name.replace("observer-", "")
+      updateFields({
+        observer: { ...(safeFormData.observer || {}), [field]: value },
+      })
+    } else if (name === "station-id") {
+      updateFields({
         metadata: {
-          ...(prev.metadata || {}),
+          ...(safeFormData.metadata || {}),
           stationId: value,
         },
-      }))
+      })
     }
   }
 
@@ -182,151 +229,147 @@ export default function WeatherObservationForm() {
   const handleSelectChange = (name: string, value: string) => {
     if (name.startsWith("low-cloud-")) {
       const field = name.replace("low-cloud-", "")
-      setFormData((prev) => ({
-        ...prev,
+      updateFields({
         clouds: {
-          ...prev.clouds,
-          low: { ...prev.clouds.low, [field]: value },
+          low: { ...(safeFormData.clouds?.low || {}), [field]: value },
+          medium: { ...(safeFormData.clouds?.medium || {}) },
+          high: { ...(safeFormData.clouds?.high || {}) }
         },
-      }))
+      })
     } else if (name.startsWith("medium-cloud-")) {
       const field = name.replace("medium-cloud-", "")
-      setFormData((prev) => ({
-        ...prev,
+      updateFields({
         clouds: {
-          ...prev.clouds,
-          medium: { ...prev.clouds.medium, [field]: value },
+          low: { ...(safeFormData.clouds?.low || {}) },
+          medium: { ...(safeFormData.clouds?.medium || {}), [field]: value },
+          high: { ...(safeFormData.clouds?.high || {}) }
         },
-      }))
+      })
     } else if (name.startsWith("high-cloud-")) {
       const field = name.replace("high-cloud-", "")
-      setFormData((prev) => ({
-        ...prev,
+      updateFields({
         clouds: {
-          ...prev.clouds,
-          high: { ...prev.clouds.high, [field]: value },
+          low: { ...(safeFormData.clouds?.low || {}) },
+          medium: { ...(safeFormData.clouds?.medium || {}) },
+          high: { ...(safeFormData.clouds?.high || {}), [field]: value }
         },
-      }))
-    } else if (name.startsWith("layer")) {
-      const [layer, field] = name.split("-").slice(0, 2)
-      setFormData((prev) => ({
-        ...prev,
+      })
+    } else if (name.startsWith("layer1-")) {
+      // Handle significant cloud layer1
+      const field = name.replace("layer1-", "")
+      updateFields({
         significantClouds: {
-          ...prev.significantClouds,
-          [layer]: {
-            ...prev.significantClouds[layer as keyof typeof prev.significantClouds],
-            [field]: value,
-          },
+          layer1: { ...(safeFormData.significantClouds?.layer1 || {}), [field]: value },
+          layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
+          layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) }
         },
-      }))
+      })
+    } else if (name.startsWith("layer2-")) {
+      // Handle significant cloud layer2
+      const field = name.replace("layer2-", "")
+      updateFields({
+        significantClouds: {
+          layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
+          layer2: { ...(safeFormData.significantClouds?.layer2 || {}), [field]: value },
+          layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) }
+        },
+      })
+    } else if (name.startsWith("layer3-")) {
+      // Handle significant cloud layer3
+      const field = name.replace("layer3-", "")
+      updateFields({
+        significantClouds: {
+          layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
+          layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
+          layer3: { ...(safeFormData.significantClouds?.layer3 || {}), [field]: value },
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) }
+        },
+      })
+    } else if (name.startsWith("layer4-")) {
+      // Handle significant cloud layer4
+      const field = name.replace("layer4-", "")
+      updateFields({
+        significantClouds: {
+          layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
+          layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
+          layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}), [field]: value }
+        },
+      })
     } else if (name === "total-cloud-amount") {
-      setFormData((prev) => ({
-        ...prev,
-        totalCloud: { ...prev.totalCloud, [name]: value },
-      }))
+      updateFields({
+        totalCloud: { ...(safeFormData.totalCloud || {}), [name]: value },
+      })
+    } else if (name.startsWith("time-") || name.startsWith("since-") || name.startsWith("during-") || name.startsWith("last-")) {
+      // Handle rainfall fields
+      updateFields({
+        rainfall: { ...(safeFormData.rainfall || {}), [name]: value },
+      })
     }
   }
 
   // Update the handleSubmit function to ensure session values are included in the submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (currentStep < totalSteps) {
+      handleNext()
+      return
+    }
+    
     setIsSubmitting(true)
-
+    
     try {
-      // Prepare the data object from our state
-      const dataToSubmit = {
-        clouds: formData.clouds,
-        totalCloud: formData.totalCloud,
-        significantClouds: formData.significantClouds,
-        rainfall: formData.rainfall,
-        wind: {
-          ...formData.wind,
-          direction: formData.wind["wind-direction"], // Rename to match expected format
-        },
-        observer: {
-          ...formData.observer,
-          "observer-initial": session?.user?.name || formData.observer["observer-initial"] || "",
-        },
+      // Prepare the submission data with safe defaults to prevent null/undefined errors
+      const submissionData = {
+        clouds: safeFormData.clouds,
+        significantClouds: safeFormData.significantClouds,
+        rainfall: safeFormData.rainfall,
+        wind: safeFormData.wind,
+        observer: safeFormData.observer,
+        totalCloud: safeFormData.totalCloud,
         metadata: {
+          ...safeFormData.metadata,
           submittedAt: new Date().toISOString(),
-          stationId: session?.user?.stationId || formData.metadata?.stationId || "",
           tabActiveAtSubmission: activeTab,
-        },
+          stationId: safeFormData.metadata.stationId || session?.user?.stationId || ''
+        }
       }
-
-      console.log("Submitting data:", dataToSubmit)
-
-      const response = await fetch("/api/save-observation", {
-        method: "POST",
+      
+      // Send the data to the API
+      const response = await fetch('/api/save-observation', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
-          "X-Request-ID": crypto.randomUUID(),
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(dataToSubmit),
+        credentials: 'include', // Include credentials for authentication
+        body: JSON.stringify(submissionData),
       })
-
+      
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || `Server error: ${response.status}`)
+        throw new Error(`Error: ${response.status}`)
       }
-
-      const result = await response.json()
-
-      toast.success("Weather data saved successfully!", {
-        description: `Observation ID: ${result.data.id}`,
-        action: {
-          label: "View All",
-          onClick: () => (window.location.href = "/observations"),
-        },
-      })
-
-      // Reset form but preserve session values
-      setFormData({
-        clouds: { low: {}, medium: {}, high: {} },
-        significantClouds: { layer1: {}, layer2: {}, layer3: {}, layer4: {} },
-        rainfall: {},
-        wind: {},
-        observer: {
-          "observer-initial": session?.user?.name || "",
-          "observation-time": new Date().toISOString().slice(0, 16),
-        },
-        totalCloud: {},
-        metadata: {
-          stationId: session?.user?.stationId || "",
-        },
-      })
+      
+      // Process the response
+      await response.json()
+      
+      // Show success message and reset form
+      toast.success('Weather observation submitted successfully!')
+      resetForm()
+      
+      // Reset to first step
+      setCurrentStep(1)
+      setActiveTab('cloud')
     } catch (error) {
-      toast.error("Failed to save observation", {
-        description: error instanceof Error ? error.message : "Unknown error",
-        action: {
-          label: "Retry",
-          onClick: () => handleSubmit(e),
-        },
-      })
-      console.error("Submission error:", error)
+      console.error('Error submitting form:', error)
+      toast.error('Failed to submit weather observation. Please try again.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Add a useEffect to update the form when the session changes
-  useEffect(() => {
-    if (session?.user) {
-      setFormData((prev) => ({
-        ...prev,
-        observer: {
-          ...prev.observer,
-          "observer-initial": session.user.name || "",
-          "observation-time": prev.observer["observation-time"] || new Date().toISOString().slice(0, 16),
-        },
-        metadata: {
-          ...prev.metadata,
-          stationId: session.user.stationId || "",
-        },
-      }))
-    }
-  }, [session])
-
+  // Define tab colors for different sections
   const tabColors: Record<string, string> = {
     cloud: "bg-blue-100 hover:bg-blue-200 data-[state=active]:bg-blue-500",
     n: "bg-yellow-100 hover:bg-yellow-200 data-[state=active]:bg-yellow-500",
@@ -425,7 +468,7 @@ export default function WeatherObservationForm() {
                         title="Low Cloud"
                         prefix="low-cloud"
                         color="blue"
-                        data={formData.clouds.low}
+                        data={safeFormData.clouds.low}
                         onChange={handleInputChange}
                         onSelectChange={handleSelectChange}
                       />
@@ -433,7 +476,7 @@ export default function WeatherObservationForm() {
                         title="Medium Cloud"
                         prefix="medium-cloud"
                         color="purple"
-                        data={formData.clouds.medium}
+                        data={safeFormData.clouds.medium}
                         onChange={handleInputChange}
                         onSelectChange={handleSelectChange}
                       />
@@ -441,7 +484,7 @@ export default function WeatherObservationForm() {
                         title="High Cloud"
                         prefix="high-cloud"
                         color="cyan"
-                        data={formData.clouds.high}
+                        data={safeFormData.clouds.high}
                         onChange={handleInputChange}
                         onSelectChange={handleSelectChange}
                       />
