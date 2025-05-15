@@ -53,7 +53,7 @@ export default function MapControls({
       setLoading(true);
       setError(null);
       try {
-        const response = await fetch("/api/stations");
+        const response = await fetch("/api/stationlocation");
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`);
         }
