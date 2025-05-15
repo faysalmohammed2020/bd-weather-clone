@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import WeatherDataTable from "./weatherDataTable";
 import WeatherDataForm from "./weather-data-form";
+import WeatherDashboard from "@/components/msn-weather";
 
 export default function DailySummaryPage() {
   const [activeTab, setActiveTab] = useState<string>("form");
@@ -27,6 +28,7 @@ export default function DailySummaryPage() {
           <WeatherDataForm />
         </TabsContent>
       </Tabs>
+      <WeatherDashboard />
     </main>
   );
 }
