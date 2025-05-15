@@ -202,11 +202,6 @@
 //   );
 // }
 
-
-
-
-
-
 "use client";
 
 import { Formik, Form } from "formik";
@@ -257,24 +252,92 @@ export default function WeatherDataForm() {
     windTime: "",
   };
 
+  // const handleSubmit = async (
+  //   values: typeof initialValues,
+  //   { resetForm }: { resetForm: () => void }
+  // ) => {
+  //   try {
+  //     setSubmitting(true);
+  //     const result = await saveDailySummeryData(values);
+  //     setSubmitResult(result);
+
+  //     if (result.success) {
+  //       toast.success("✅ Weather data saved successfully");
+
+  //       // Reset form and go to dashboard
+  //       resetForm(); // clear all fields
+  //       setTimeout(() => router.push("/dashboard"), 1000); // redirect after toast
+  //     } else {
+  //       toast.error(result.message || "❌ Failed to save weather data");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error submitting form:", error);
+  //     toast.error("🚨 An unexpected error occurred while submitting the form.");
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
+
   const handleSubmit = async (
     values: typeof initialValues,
     { resetForm }: { resetForm: () => void }
   ) => {
     try {
       setSubmitting(true);
-      const result = await saveDailySummeryData(values);
-      setSubmitResult(result);
 
-      if (result.success) {
-        toast.success("✅ Weather data saved successfully");
+      const {
+        dataType,
+        stationNo,
+        year,
+        month,
+        day,
+        measurements,
+        windDirection,
+        characterCodes,
+      } = values;
 
-        // Reset form and go to dashboard
-        resetForm(); // clear all fields
-        setTimeout(() => router.push("/dashboard"), 1000); // redirect after toast
-      } else {
-        toast.error(result.message || "❌ Failed to save weather data");
+      const payload = {
+        dataType,
+        stationNo,
+        year,
+        month,
+        day,
+
+        avStationPressure: measurements?.[0] || "",
+        avSeaLevelPressure: measurements?.[1] || "",
+        avDryBulbTemperature: measurements?.[2] || "",
+        avWetBulbTemperature: measurements?.[3] || "",
+        maxTemperature: measurements?.[4] || "",
+        minTemperature: measurements?.[5] || "",
+        totalPrecipitation: measurements?.[6] || "",
+        avDewPointTemperature: measurements?.[7] || "",
+        avRelativeHumidity: measurements?.[8] || "",
+        windSpeed: measurements?.[9] || "",
+        windDirectionCode: windDirection || "",
+        maxWindSpeed: measurements?.[11] || "",
+        maxWindDirection: measurements?.[12] || "",
+        avTotalCloud: measurements?.[13] || "",
+        lowestVisibility: measurements?.[14] || "",
+        totalRainDuration: measurements?.[15] || "",
+      };
+
+      const response = await fetch("/api/daily-summery", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        toast.error(errorText || "❌ Failed to save weather data");
+        return;
       }
+
+      toast.success("✅ Weather data saved successfully");
+      resetForm();
+      setTimeout(() => router.push("/dashboard"), 1000);
     } catch (error) {
       console.error("Error submitting form:", error);
       toast.error("🚨 An unexpected error occurred while submitting the form.");
@@ -297,27 +360,6 @@ export default function WeatherDataForm() {
                 <MeasurementsTab />
               </div>
             </CardContent>
-            <CardFooter className="border-t pt-6 flex justify-between">
-              <div>
-                {Object.keys(errors).length > 0 && (
-                  <p className="text-sm text-destructive">
-                    Please fill the input fields before proceeding
-                  </p>
-                )}
-              </div>
-              <div className="space-x-2">
-                <Button variant="outline" type="reset">
-                  Reset
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {submitting ? "Saving..." : "Submit Data"}
-                </Button>
-              </div>
-            </CardFooter>
           </Card>
         </Form>
       )}

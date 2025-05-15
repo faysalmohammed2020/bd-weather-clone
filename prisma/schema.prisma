@@ -240,7 +240,7 @@ model DailySummary {
   maxWindDirection      String?
   avTotalCloud          String?
   lowestVisibility      String?
-  totalRainDuration     String?  // stored as "H-MM", e.g., "2-15"
+  totalRainDuration     String?  
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }

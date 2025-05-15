@@ -992,6 +992,9 @@ import { useFormikContext } from "formik";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { CalendarIcon, LineChart, AlertCircle, Loader2 } from "lucide-react";
 import BasicInfoTab from "@/components/basic-info-tab";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useSession } from "@/lib/auth-client";
 
 const categoryColors = {
   pressure: {
@@ -1049,6 +1052,8 @@ export default function MeasurementsTab() {
   const [isLoading, setIsLoading] = useState(false);
   const [tableData, setTableData] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  const { data: session } = useSession();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -1316,6 +1321,38 @@ export default function MeasurementsTab() {
     });
   };
 
+  const handleSaveMeasurements = async () => {
+    try {
+      const payload = {
+        userId: session?.user.id, // Replace with actual user ID
+        dataType: "SY", // Replace or dynamically set from BasicInfoTab if needed
+        stationNo: session?.user.stationId, // Replace with selected station
+        year: new Date(selectedDate).getFullYear().toString(),
+        month: (new Date(selectedDate).getMonth() + 1).toString(),
+        day: new Date(selectedDate).getDate().toString(),
+        measurements: tableData.map((item) => item.value),
+        windDirection: tableData[10]?.value || "",
+      };
+
+      const res = await fetch("/api/daily-summery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.message || "Failed to save");
+      }
+
+      toast.success("✅ Measurements saved successfully!");
+    } catch (error) {
+      console.error("❌ Save error:", error);
+      toast.error("Failed to save measurements");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-gray-100">
@@ -1477,6 +1514,14 @@ export default function MeasurementsTab() {
           </Card>
         </div>
       )}
+      <div className="flex justify-end">
+        <Button
+          className="bg-blue-600 text-white mt-2 px-4 py-2"
+          onClick={handleSaveMeasurements}
+        >
+          Submit Data
+        </Button>
+      </div>
     </div>
   );
 }
