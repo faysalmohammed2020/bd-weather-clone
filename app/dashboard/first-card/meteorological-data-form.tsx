@@ -505,7 +505,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       key={`stationNo-${i}`}
                       id={`stationNo-${i}`}
                       ref={stationNoRefs[i]}
-                      className="w-12 text-center p-2 bg-white border border-slate-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
+                      className="w-full text-center p-2 bg-white border border-slate-400 shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                       maxLength={1}
                       value={session?.user.stationId || ""}
                       onChange={(e) =>
