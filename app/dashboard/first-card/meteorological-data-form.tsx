@@ -26,7 +26,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { hygrometricTable } from "../../../data/hygrometric-table"; // Import the hygrometric table data
-import { stationPressure } from "../../../data/station-pressure"; // Import the station pressure data
+import { stationPressure } from "../../../data/dhaka_station_level"; // Import the station pressure data
+import { seaLevelPressure } from "../../../data/sea_level_pressure"; // Import the sea level pressure data
 import { useSession } from "@/lib/auth-client";
 
 export function MeteorologicalDataForm({ onDataSubmitted }) {
@@ -101,119 +102,65 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     console.log("Form data updated:", formData);
   }, [formData]);
 
-  // const calculateDewPointAndHumidity = (dryBulb, wetBulb) => {
-  //   if (!dryBulb || !wetBulb) return;
-
-  //   const dryBulbValue = Number.parseFloat(dryBulb);
-  //   const wetBulbValue = Number.parseFloat(wetBulb);
-  //   const difference = Number(Math.abs(dryBulbValue - wetBulbValue).toFixed(1));
-  //   const roundedDryBulb = Math.round(dryBulbValue);
-
-  //   // Validate ranges
-  //   if (roundedDryBulb < 0 || roundedDryBulb > 50 || difference > 30.0) {
-  //     toast.error(
-  //       "Temperature values are outside the range of the hygrometric table"
-  //     );
-  //     return;
-  //   }
-
-  //   // Find index of the difference in 'differences'
-  //   const diffIndex = hygrometricTable.differences.indexOf(difference);
-  //   if (diffIndex === -1) {
-  //     toast.error("Invalid temperature difference for lookup");
-  //     return;
-  //   }
-
-  //   // Find the dbT entry
-  //   const dbtEntry = hygrometricTable.data.find(
-  //     (entry) => entry.dbT === roundedDryBulb
-  //   );
-  //   if (!dbtEntry || !dbtEntry.values || !dbtEntry.values[diffIndex]) {
-  //     toast.error(
-  //       "Could not find matching dry bulb temperature or difference in the table"
-  //     );
-  //     return;
-  //   }
-
-  //   const { DpT, RH } = dbtEntry.values[diffIndex];
-
-  //   // Update state
-  //   setHygrometricData({
-  //     dryBulb: dryBulbValue.toString(),
-  //     wetBulb: wetBulbValue.toString(),
-  //     difference: difference.toString(),
-  //     dewPoint: DpT.toString(),
-  //     relativeHumidity: RH.toString(),
-  //   });
-
-  //   setFormData((prev) => ({
-  //     ...prev,
-  //     Td: DpT.toString(),
-  //     relativeHumidity: RH.toString(),
-  //   }));
-
-  //   toast.success("Dew point and relative humidity calculated successfully");
-  // };
-
   const calculateDewPointAndHumidity = (dryBulbInput, wetBulbInput) => {
-  if (!dryBulbInput || !wetBulbInput) return;
+    if (!dryBulbInput || !wetBulbInput) return;
 
-  // Convert 3-digit inputs like "256" => 25.6
-  const dryBulbValue = Number.parseFloat(
-    `${dryBulbInput.slice(0, 2)}.${dryBulbInput.slice(2)}`
-  );
-  const wetBulbValue = Number.parseFloat(
-    `${wetBulbInput.slice(0, 2)}.${wetBulbInput.slice(2)}`
-  );
-
-  const difference = Number(Math.abs(dryBulbValue - wetBulbValue).toFixed(1));
-  const roundedDryBulb = Math.round(dryBulbValue);
-
-  // Validate ranges
-  if (roundedDryBulb < 0 || roundedDryBulb > 50 || difference > 30.0) {
-    toast.error(
-      "Temperature values are outside the range of the hygrometric table"
+    // Convert 3-digit inputs like "256" => 25.6
+    const dryBulbValue = Number.parseFloat(
+      `${dryBulbInput.slice(0, 2)}.${dryBulbInput.slice(2)}`
     );
-    return;
-  }
-
-  // Find index of the difference in 'differences'
-  const diffIndex = hygrometricTable.differences.indexOf(difference);
-  if (diffIndex === -1) {
-    toast.error("Invalid temperature difference for lookup");
-    return;
-  }
-
-  // Find the dbT entry
-  const dbtEntry = hygrometricTable.data.find(
-    (entry) => entry.dbT === roundedDryBulb
-  );
-  if (!dbtEntry || !dbtEntry.values || !dbtEntry.values[diffIndex]) {
-    toast.error(
-      "Could not find matching dry bulb temperature or difference in the table"
+    const wetBulbValue = Number.parseFloat(
+      `${wetBulbInput.slice(0, 2)}.${wetBulbInput.slice(2)}`
     );
-    return;
-  }
 
-  const { DpT, RH } = dbtEntry.values[diffIndex];
+    const difference = Number(Math.abs(dryBulbValue - wetBulbValue).toFixed(1));
+    const roundedDryBulb = Math.round(dryBulbValue);
 
-  // Update state
-  setHygrometricData({
-    dryBulb: dryBulbValue.toFixed(1),
-    wetBulb: wetBulbValue.toFixed(1),
-    difference: difference.toString(),
-    dewPoint: DpT.toString(),
-    relativeHumidity: RH.toString(),
-  });
+    // Validate ranges
+    if (roundedDryBulb < 0 || roundedDryBulb > 50 || difference > 30.0) {
+      toast.error(
+        "Temperature values are outside the range of the hygrometric table"
+      );
+      return;
+    }
 
-  setFormData((prev) => ({
-    ...prev,
-    Td: DpT.toString(),
-    relativeHumidity: RH.toString(),
-  }));
+    // Find index of the difference in 'differences'
+    const diffIndex = hygrometricTable.differences.indexOf(difference);
+    if (diffIndex === -1) {
+      toast.error("Invalid temperature difference for lookup");
+      return;
+    }
 
-  toast.success("Dew point and relative humidity calculated successfully");
-};
+    // Find the dbT entry
+    const dbtEntry = hygrometricTable.data.find(
+      (entry) => entry.dbT === roundedDryBulb
+    );
+    if (!dbtEntry || !dbtEntry.values || !dbtEntry.values[diffIndex]) {
+      toast.error(
+        "Could not find matching dry bulb temperature or difference in the table"
+      );
+      return;
+    }
+
+    const { DpT, RH } = dbtEntry.values[diffIndex];
+
+    // Update state
+    setHygrometricData({
+      dryBulb: dryBulbValue.toFixed(1),
+      wetBulb: wetBulbValue.toFixed(1),
+      difference: difference.toString(),
+      dewPoint: DpT.toString(),
+      relativeHumidity: RH.toString(),
+    });
+
+    setFormData((prev) => ({
+      ...prev,
+      Td: DpT.toString(),
+      relativeHumidity: RH.toString(),
+    }));
+
+    toast.success("Dew point and relative humidity calculated successfully");
+  };
 
   useEffect(() => {
     const year = new Date().getFullYear().toString(); // e.g., "2025"
@@ -223,127 +170,250 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     }));
   }, []);
 
-  const calculatePressureValues = (dryBulb, barAsRead) => {
+  // const calculatePressureValues = (dryBulb, barAsRead) => {
+  //   if (!dryBulb || !barAsRead) return;
+
+  //   try {
+  //     // Parse input values to numbers
+  //     const dryBulbValue = Number.parseFloat(dryBulb) / 10;
+  //     const barAsReadValue = Number.parseFloat(barAsRead) / 10;
+
+  //     // Round dry bulb to nearest integer
+  //     const roundedDryBulb = Math.round(dryBulbValue);
+  //     // const dryBulbKey = `${roundedDryBulb}.0`;
+
+  //     const dryBulbKey = stationPressure.correction_table.find(
+  //       (bulbKey) => bulbKey.dry_bulb_temp_c === roundedDryBulb
+  //     );
+  //     if (!dryBulbKey) {
+  //       toast.error(
+  //         `Temperature ${roundedDryBulb}°C not found in station pressure table`
+  //       );
+  //       return;
+  //     }
+
+  //     // Check if the rounded dry bulb temperature exists in the table
+  //     // if (!stationPressure.correction_table["dry_bulb_temp_c"]) {
+  //     //   toast.error(
+  //     //     `Temperature ${roundedDryBulb}°C not found in station pressure table`
+  //     //   );
+  //     //   return;
+  //     // }
+
+  //     // Get all available pressure values for this temperature
+  //     // const availablePressures = Object.keys(
+  //     //   stationPressure.correction_table.
+  //     // )
+  //     //   .map(Number)
+  //     //   .sort((a, b) => a - b);
+  //     const availablePressures = dryBulbKey.cistern_level_pressure;
+
+  //     console.log("Available Pressures:", availablePressures);
+
+  //     // return;
+
+  //     const pressureFirstKey = Object.keys(availablePressures)[0];
+
+  //     // Find the closest pressure to barAsReadValue for height difference correction
+  //     let closestPressureForCorrection = pressureFirstKey;
+  //     console.log(
+  //       "Closest Pressure for Correction:",
+  //       closestPressureForCorrection
+  //     );
+
+  //     let minDiff = Math.abs(Number(pressureFirstKey) - barAsReadValue).toFixed(
+  //       2
+  //     );
+  //     console.log("Min Diff:", minDiff);
+
+  //     for (let pressure in availablePressures) {
+  //       const diff = Math.abs(pressure - barAsReadValue);
+  //       if (diff < minDiff) {
+  //         minDiff = diff;
+  //         closestPressureForCorrection = pressure;
+  //       }
+  //     }
+
+  //     console.log("closest", closestPressureForCorrection);
+
+  //     // Now use the closest pressure to get the height difference correction
+  //     // const heightDifferenceCorrection =
+  //     //   stationPressure[dryBulbKey][closestPressureForCorrection.toString()];
+  //     const heightDifferenceCorrection =
+  //       availablePressures[closestPressureForCorrection];
+  //     console.log("Height Difference Correction:", heightDifferenceCorrection);
+
+  //     if (!heightDifferenceCorrection) {
+  //       toast.error(
+  //         "Could not find temperature difference in hygrometric table"
+  //       );
+  //       return;
+  //     }
+
+  //     // Calculate Station Level Pressure
+  //     const stationLevelPressure = barAsReadValue + heightDifferenceCorrection;
+
+  //     // Round station level pressure to nearest 5 for lookup
+  //     const roundedStationPressure = Math.round(stationLevelPressure / 5) * 5;
+  //     console.log("Rounded Station Pressure:", roundedStationPressure);
+
+  //     // Find the closest available pressure in the table for sea level reduction
+  //     let closestPressure = availablePressures[availablePressures.length - 1]; // Default to highest
+  //     for (const pressure of availablePressures) {
+  //       if (pressure >= roundedStationPressure) {
+  //         closestPressure = pressure;
+  //         break;
+  //       }
+  //     }
+
+  //     // Look up Sea Level Reduction Constant in the table
+  //     let seaLevelReductionConstant = 0;
+  //     if (stationPressure[dryBulbKey][closestPressure.toString()]) {
+  //       seaLevelReductionConstant =
+  //         stationPressure[dryBulbKey][closestPressure.toString()];
+  //     } else {
+  //       toast.error("Could not find sea level reduction constant in table");
+  //       return;
+  //     }
+  //     console.log("Sea Level Reduction Constant:", seaLevelReductionConstant);
+
+  //     // Calculate Sea-Level Pressure
+  //     const seaLevelPressure = stationLevelPressure + seaLevelReductionConstant;
+
+  //     // Format values for display
+  //     // const heightDifferenceStr = heightDifferenceCorrection.toFixed(2);
+  //     const heightDifferenceStr =
+  //       Math.floor(Number(heightDifferenceCorrection) * 100) % 100;
+
+  //     // const stationLevelPressureStr = stationLevelPressure.toFixed(2);
+  //     // const stationLevelPressureStr = stationLevelPressure.toFixed(2).replace(".", "").slice(0, 5);
+  //     const raw = stationLevelPressure.toFixed(2); // e.g., "1007.06"
+  //     const [intPart, decimalPart] = raw.split(".");
+
+  //     let firstDecimalDigit = Number(decimalPart[0]) || 0;
+  //     const secondDecimalDigit = Number(decimalPart[1]) || 0;
+
+  //     // Custom rounding
+  //     if (secondDecimalDigit >= 5) {
+  //       firstDecimalDigit += 1;
+  //     }
+
+  //     // Combine into final 5-digit string
+  //     const stationLevelPressureStr = `${intPart}${firstDecimalDigit}`;
+
+  //     const seaLevelReductionStr = seaLevelReductionConstant.toFixed(2);
+  //     const seaLevelPressureStr = seaLevelPressure.toFixed(2);
+
+  //     console.log("Calculated pressure values:", {
+  //       heightDifference: heightDifferenceStr,
+  //       stationLevelPressure: stationLevelPressureStr,
+  //       seaLevelReduction: seaLevelReductionStr,
+  //       correctedSeaLevelPressure: seaLevelPressureStr,
+  //     });
+
+  //     // Update the form data with a new object to ensure state change is detected
+  //     setFormData((prev) => {
+  //       const newData = {
+  //         ...prev,
+  //         heightDifference: heightDifferenceStr,
+  //         stationLevelPressure: stationLevelPressureStr,
+  //         seaLevelReduction: seaLevelReductionStr,
+  //         correctedSeaLevelPressure: seaLevelPressureStr,
+  //       };
+  //       return newData;
+  //     });
+
+  //     // Show success message
+  //     toast.success("Pressure values calculated successfully");
+  //   } catch (error) {
+  //     console.error("Error calculating pressure values:", error);
+  //     toast.error(
+  //       "Failed to calculate pressure values. Please check your inputs."
+  //     );
+  //   }
+  // };
+  
+
+    const calculatePressureValues = (dryBulb, barAsRead) => {
     if (!dryBulb || !barAsRead) return;
 
     try {
-      // Parse input values to numbers
-      const dryBulbValue = Number.parseFloat(dryBulb)/10;
-      const barAsReadValue = Number.parseFloat(barAsRead);
+      const dryBulbValue = parseFloat(dryBulb) / 10; // e.g., 256 => 25.6
+      const roundedDryBulb = Math.round(dryBulbValue); // 25.6 => 26
 
-      // Round dry bulb to nearest integer
-      const roundedDryBulb = Math.round(dryBulbValue);
-      const dryBulbKey = `${roundedDryBulb}.0`;
+      const barAsReadValue = Math.round(parseFloat(barAsRead) / 10 ); // user input e.g., 1003
 
-      // Check if the rounded dry bulb temperature exists in the table
-      if (!stationPressure[dryBulbKey]) {
+      // Find matching correction entry from the table
+      const correctionEntry = stationPressure.correction_table.find(
+        (entry) => entry.dry_bulb_temp_c === roundedDryBulb
+      );
+
+
+      const correctionSeaPressure = seaLevelPressure.correction_table.find(
+        (entry) => entry.dry_bulb_temp_c === roundedDryBulb
+      );
+
+      if (!correctionEntry) {
         toast.error(
-          `Temperature ${roundedDryBulb}°C not found in station pressure table`
+          `No correction data found for dry bulb ${roundedDryBulb}°C`
         );
         return;
       }
 
-      // Get all available pressure values for this temperature
-      const availablePressures = Object.keys(stationPressure[dryBulbKey])
+      // Find the closest pressure key
+      const pressureKeys = Object.keys(correctionEntry.cistern_level_pressure)
         .map(Number)
         .sort((a, b) => a - b);
-      console.log("Available Pressures:", availablePressures);
 
-      // Find the closest pressure to barAsReadValue for height difference correction
-      let closestPressureForCorrection = availablePressures[0];
-      console.log(
-        "Closest Pressure for Correction:",
-        closestPressureForCorrection
-      );
+      let closestPressure = pressureKeys[0];
+      let minDiff = Math.abs(barAsReadValue - closestPressure);
 
-      let minDiff = Math.abs(availablePressures[0] - barAsReadValue);
-
-      for (const pressure of availablePressures) {
-        const diff = Math.abs(pressure - barAsReadValue);
+      for (const p of pressureKeys) {
+        const diff = Math.abs(barAsReadValue - p);
         if (diff < minDiff) {
+          closestPressure = p;
           minDiff = diff;
-          closestPressureForCorrection = pressure;
         }
       }
 
-      // Now use the closest pressure to get the height difference correction
-      const heightDifferenceCorrection =
-        stationPressure[dryBulbKey][closestPressureForCorrection.toString()];
-      console.log(
-        "Closest Pressure for Correction:",
-        closestPressureForCorrection
-      );
-      console.log("Height Difference Correction:", heightDifferenceCorrection);
+      const heightCorrection =
+        correctionEntry.cistern_level_pressure[closestPressure.toString()];
 
-      if (!heightDifferenceCorrection) {
-        toast.error(
-          "Could not find temperature difference in hygrometric table"
-        );
+      if (heightCorrection === undefined) {
+        toast.error("No correction value found for matching pressure");
         return;
       }
 
-      // Calculate Station Level Pressure
-      const stationLevelPressure = barAsReadValue + heightDifferenceCorrection;
+       const heightDifferenceStr =
+        Math.floor(Number(heightCorrection) * 100) % 100;
 
-      // Round station level pressure to nearest 5 for lookup
+      const stationLevelPressure = barAsReadValue + heightCorrection;
       const roundedStationPressure = Math.round(stationLevelPressure / 5) * 5;
-      console.log("Rounded Station Pressure:", roundedStationPressure);
 
-      // Find the closest available pressure in the table for sea level reduction
-      let closestPressure = availablePressures[availablePressures.length - 1]; // Default to highest
-      for (const pressure of availablePressures) {
-        if (pressure >= roundedStationPressure) {
-          closestPressure = pressure;
-          break;
-        }
-      }
-
-      // Look up Sea Level Reduction Constant in the table
-      let seaLevelReductionConstant = 0;
-      if (stationPressure[dryBulbKey][closestPressure.toString()]) {
-        seaLevelReductionConstant =
-          stationPressure[dryBulbKey][closestPressure.toString()];
-      } else {
-        toast.error("Could not find sea level reduction constant in table");
+      const seaLevelCorrection =
+        correctionEntry.cistern_level_pressure[
+          roundedStationPressure.toString()
+        ];
+      if (seaLevelCorrection === undefined) {
+        toast.error("No sea level correction found for station level pressure");
         return;
       }
-      console.log("Sea Level Reduction Constant:", seaLevelReductionConstant);
 
-      // Calculate Sea-Level Pressure
-      const seaLevelPressure = stationLevelPressure + seaLevelReductionConstant;
+      const seaLevelPressure = stationLevelPressure + seaLevelCorrection;
 
-      // Format values for display
-      const heightDifferenceStr = heightDifferenceCorrection.toFixed(2);
-      const stationLevelPressureStr = stationLevelPressure.toFixed(2);
-      const seaLevelReductionStr = seaLevelReductionConstant.toFixed(2);
-      const seaLevelPressureStr = seaLevelPressure.toFixed(2);
-
-      console.log("Calculated pressure values:", {
+      // Save results
+      setFormData((prev) => ({
+        ...prev,
         heightDifference: heightDifferenceStr,
-        stationLevelPressure: stationLevelPressureStr,
-        seaLevelReduction: seaLevelReductionStr,
-        correctedSeaLevelPressure: seaLevelPressureStr,
-      });
+        stationLevelPressure: stationLevelPressure.toFixed(2),
+        seaLevelReduction: seaLevelCorrection.toFixed(2),
+        correctedSeaLevelPressure: seaLevelPressure.toFixed(2),
+      }));
 
-      // Update the form data with a new object to ensure state change is detected
-      setFormData((prev) => {
-        const newData = {
-          ...prev,
-          heightDifference: heightDifferenceStr,
-          stationLevelPressure: stationLevelPressureStr,
-          seaLevelReduction: seaLevelReductionStr,
-          correctedSeaLevelPressure: seaLevelPressureStr,
-        };
-        return newData;
-      });
-
-      // Show success message
       toast.success("Pressure values calculated successfully");
     } catch (error) {
-      console.error("Error calculating pressure values:", error);
-      toast.error(
-        "Failed to calculate pressure values. Please check your inputs."
-      );
+      console.error("Pressure calculation error:", error);
+      toast.error("Calculation failed. Please check your inputs.");
     }
   };
 

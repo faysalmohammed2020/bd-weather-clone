@@ -5,7 +5,7 @@ import * as Yup from "yup";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs/tabs-summery";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import BasicInfoTab from "./tabs/basic-info-tab";
+import BasicInfoTab from "../../../components/basic-info-tab";
 import MeasurementsTab from "./tabs/measurements-tab";
 import MeteorCodesTab from "./tabs/meteor-codes-tab";
 import CharacterCodesTab from "./tabs/character-codes-tab";
@@ -16,8 +16,6 @@ import { toast } from "sonner";
 import { weatherFormSchema } from "./validation-schema";
 import { useRouter } from "next/navigation";
 
-
-// Define validation schema using Yup
 const validationSchema = Yup.object({
   dataType: Yup.string().max(2, "Maximum 2 characters"),
   stationNo: Yup.string().max(5, "Maximum 5 characters"),
@@ -35,9 +33,8 @@ export default function WeatherDataForm() {
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
 
-  const [currentTab, setCurrentTab] = useState("basic-info");
+  const [currentTab, setCurrentTab] = useState("measurements");
   const tabOrder = [
-    "basic-info",
     "measurements",
     "meteor-codes",
     "character-codes",
@@ -63,19 +60,22 @@ export default function WeatherDataForm() {
     windTime: "",
   };
 
-  const handleSubmit = async (values: typeof initialValues, { resetForm }: { resetForm: () => void }) => {
+  const handleSubmit = async (
+    values: typeof initialValues,
+    { resetForm }: { resetForm: () => void }
+  ) => {
     try {
       setSubmitting(true);
       const result = await saveDailySummeryData(values);
       setSubmitResult(result);
-  
+
       if (result.success) {
         toast.success("✅ Weather data saved successfully");
-  
+
         // Reset form and go to dashboard
-        resetForm();                // clear all fields
-        setCurrentTab("basic-info"); // go to first tab
-        setTimeout(() => router.push("/dashboard"), 1000); // redirect after toast
+        resetForm();
+        setCurrentTab("measurements");
+        setTimeout(() => router.push("/dashboard"), 1000);
       } else {
         toast.error(result.message || "❌ Failed to save weather data");
       }
@@ -86,7 +86,6 @@ export default function WeatherDataForm() {
       setSubmitting(false);
     }
   };
-  
 
   return (
     <Formik
@@ -97,19 +96,18 @@ export default function WeatherDataForm() {
       {({ values, errors, touched, isSubmitting }) => (
         <Form>
           <Card className="shadow-lg border-t-4 border-t-blue-500">
-            {/* <Tabs defaultValue="basic-info" className="w-full"> */}
+            {/* Basic Info Section - Common for all tabs */}
+            <div className="p-4 border-b">
+              <BasicInfoTab />
+            </div>
+
+            {/* Tabs for other sections */}
             <Tabs
               value={currentTab}
               onValueChange={setCurrentTab}
               className="w-full"
             >
-              <TabsList className="w-full mx-6 p-0 h-auto bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-lg">
-                <TabsTrigger
-                  value="basic-info"
-                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-none flex-1 py-3 text-sm font-medium"
-                >
-                  Basic Info
-                </TabsTrigger>
+              <TabsList className="w-full mx-6 p-0 h-auto bg-gradient-to-r from-blue-50 to-indigo-50">
                 <TabsTrigger
                   value="measurements"
                   className="data-[state=active]:bg-green-500 data-[state=active]:text-white rounded-none flex-1 py-3 text-sm font-medium"
@@ -137,13 +135,6 @@ export default function WeatherDataForm() {
               </TabsList>
 
               <CardContent className="pt-6">
-                <TabsContent
-                  value="basic-info"
-                  className="mt-0 border-2 border-blue-100 rounded-md p-4 bg-blue-50/30"
-                >
-                  <BasicInfoTab />
-                </TabsContent>
-
                 <TabsContent
                   value="measurements"
                   className="mt-0 border-2 border-green-100 rounded-md p-4 bg-green-50/30"
