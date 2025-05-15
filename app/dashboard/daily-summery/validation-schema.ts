@@ -60,10 +60,9 @@
 import * as Yup from "yup"
 
 export const weatherFormSchema = Yup.object({
-  dataType: Yup.string()
-    .required("Data type is required")
-    .max(2, "Maximum 2 characters")
-    .matches(/^[0-9]*$/, "Must contain only numbers"),
+ dataType: Yup.string()
+  .required("Data type is required")
+  .matches(/^[A-Z]{2}$/, "Must be exactly 2 uppercase letters"),
 
   stationNo: Yup.string()
     .required("Station number is required")

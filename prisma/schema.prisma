@@ -15,28 +15,28 @@ datasource db {
 }
 
 model users {
-  id                 String               @id @default(cuid())
-  email              String               @unique
-  name               String?
-  emailVerified      Boolean
-  image              String?
-  role               String?
-  banned             Boolean?
-  banReason          String?
-  banExpires         Int?
-  division           String
-  district           String
-  upazila            String
-  stationName        String?
-  stationId          String?
-  securityCode       String?
-  twoFactorEnabled   Boolean?
-  createdAt          DateTime
-  updatedAt          DateTime
-  sessions           sessions[]
-  accounts           accounts[]
-  WeatherObservation WeatherObservation[]
-  twoFactor          twoFactor[]
+  id                  String                @id @default(cuid())
+  email               String                @unique
+  name                String?
+  emailVerified       Boolean
+  image               String?
+  role                String?
+  banned              Boolean?
+  banReason           String?
+  banExpires          Int?
+  division            String
+  district            String
+  upazila             String
+  stationName         String?
+  stationId           String?
+  securityCode        String?
+  twoFactorEnabled    Boolean?
+  createdAt           DateTime
+  updatedAt           DateTime
+  sessions            sessions[]
+  accounts            accounts[]
+  WeatherObservation  WeatherObservation[]
+  twoFactor           twoFactor[]
   MeteorologicalEntry MeteorologicalEntry[]
 }
 
@@ -101,6 +101,8 @@ model Station {
   stationId    String
   name         String
   securityCode String
+  latitude     Float
+  longitude    Float
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
@@ -109,7 +111,7 @@ model MeteorologicalEntry {
   id                        String   @id @default(cuid())
   createdAt                 DateTime @default(now())
   updatedAt                 DateTime @updatedAt
-  userId                    String   // NEW: Foreign key
+  userId                    String // NEW: Foreign key
   user                      users    @relation(fields: [userId], references: [id], onDelete: Cascade) // NEW: Relation
   dataType                  String
   stationNo                 String
