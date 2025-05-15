@@ -258,8 +258,8 @@
 //                 {/* First Card Tab */}
 //                 {activeMainTab === "first-card" && (
 //                   <div>
-//                     <Tabs
-//                       value={activeSubTabs["first-card"]}
+//                     <Tabs 
+//                       value={activeSubTabs["first-card"]} 
 //                       onValueChange={(value) => handleSubTabChange("first-card", value)}
 //                     >
 //                       <TabsList className="mb-4">
@@ -286,8 +286,8 @@
 //                 {/* Second Card Tab */}
 //                 {activeMainTab === "second-card" && (
 //                   <div>
-//                     <Tabs
-//                       value={activeSubTabs["second-card"]}
+//                     <Tabs 
+//                       value={activeSubTabs["second-card"]} 
 //                       onValueChange={(value) => handleSubTabChange("second-card", value)}
 //                     >
 //                       <TabsList className="mb-4">
@@ -314,8 +314,8 @@
 //                 {/* Daily Summary Tab */}
 //                 {activeMainTab === "daily-summary" && (
 //                   <div>
-//                     <Tabs
-//                       value={activeSubTabs["daily-summary"]}
+//                     <Tabs 
+//                       value={activeSubTabs["daily-summary"]} 
 //                       onValueChange={(value) => handleSubTabChange("daily-summary", value)}
 //                     >
 //                       <TabsList className="mb-4">
@@ -343,8 +343,8 @@
 //                 {/* Synoptic Code Tab */}
 //                 {activeMainTab === "synoptic-code" && (
 //                   <div>
-//                     <Tabs
-//                       value={activeSubTabs["synoptic-code"]}
+//                     <Tabs 
+//                       value={activeSubTabs["synoptic-code"]} 
 //                       onValueChange={(value) => handleSubTabChange("synoptic-code", value)}
 //                     >
 //                       <TabsList className="mb-4">
@@ -416,6 +416,8 @@
 //     </div>
 //   )
 // }
+
+
 
 // "use client"
 
@@ -835,35 +837,38 @@
 //   )
 // }
 
-"use client";
 
-import { useState } from "react";
-import { Formik, Form } from "formik";
-import * as Yup from "yup";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardFooter,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Save } from "lucide-react";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+
+
+
+
+
+
+
+"use client"
+
+import { useState } from "react"
+import { Formik, Form } from "formik"
+import * as Yup from "yup"
+import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Loader2, Save } from "lucide-react"
+import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 // Import all form components
 
-import CloudTab from "@/components/weather-form/cloud-tab";
-import RainfallTab from "@/components/weather-form/rainfall-tab";
-import PressureTab from "@/components/weather-form/pressure-tab";
-import TemperatureTab from "@/components/weather-form/temperature-tab";
-import BasicInfoTab from "../../components/basic-info-tab";
-import MeasurementsTab from "../dashboard/daily-summery/tabs/measurements-tab";
-import MeteorCodesTab from "../dashboard/daily-summery/tabs/meteor-codes-tab";
-import CharacterCodesTab from "../dashboard/daily-summery/tabs/character-codes-tab";
-import WindDirectionTab from "../dashboard/daily-summery/tabs/wind-direction-tab";
-import SynopticMeasurementsTab from "../dashboard/synoptic-code/synoptic-components/synoptic-measurement";
+import CloudTab from "@/components/weather-form/cloud-tab"
+import RainfallTab from "@/components/weather-form/rainfall-tab"
+import PressureTab from "@/components/weather-form/pressure-tab"
+import TemperatureTab from "@/components/weather-form/temperature-tab"
+import BasicInfoTab from "../dashboard/daily-summery/tabs/basic-info-tab"
+import MeasurementsTab from "../dashboard/daily-summery/tabs/measurements-tab"
+import MeteorCodesTab from "../dashboard/daily-summery/tabs/meteor-codes-tab"
+import CharacterCodesTab from "../dashboard/daily-summery/tabs/character-codes-tab"
+import WindDirectionTab from "../dashboard/daily-summery/tabs/wind-direction-tab"
+import SynopticMeasurementsTab from "../dashboard/synoptic-code/synoptic-components/synoptic-measurement"
 
 // Define validation schema
 const validationSchema = Yup.object({
@@ -897,11 +902,11 @@ const validationSchema = Yup.object({
   // Second card data
   cloud: Yup.object().nullable(),
   rainfall: Yup.object().nullable(),
-});
+})
 
 export default function WeatherFormPage() {
-  const [submitting, setSubmitting] = useState(false);
-  const router = useRouter();
+  const [submitting, setSubmitting] = useState(false)
+  const router = useRouter()
 
   // Define main form tabs
   const mainTabs = [
@@ -910,7 +915,7 @@ export default function WeatherFormPage() {
     { id: "second-card", label: "Second Card", color: "violet" },
     { id: "daily-summary", label: "Daily Summary", color: "green" },
     { id: "synoptic-code", label: "Synoptic Code", color: "amber" },
-  ];
+  ]
 
   // Define sub-tabs for each main tab
   const subTabs = {
@@ -930,18 +935,16 @@ export default function WeatherFormPage() {
       { id: "character-codes", label: "Character Codes", icon: "CloudRain" },
       { id: "wind-direction", label: "Wind Direction", icon: "Wind" },
     ],
-    "synoptic-code": [
-      { id: "synoptic-measurements", label: "Measurements", icon: "BarChart3" },
-    ],
-  };
+    "synoptic-code": [{ id: "synoptic-measurements", label: "Measurements", icon: "BarChart3" }],
+  }
 
-  const [activeMainTab, setActiveMainTab] = useState("basic-info");
+  const [activeMainTab, setActiveMainTab] = useState("basic-info")
   const [activeSubTabs, setActiveSubTabs] = useState({
     "first-card": "pressure",
     "second-card": "cloud",
     "daily-summary": "measurements",
     "synoptic-code": "synoptic-measurements",
-  });
+  })
 
   // Initial form values
   const initialValues = {
@@ -977,17 +980,17 @@ export default function WeatherFormPage() {
     cloud: {},
     rainfall: {},
     wind: {},
-  };
+  }
 
   // Handle form submission
   const handleSubmit = async (values, { resetForm }) => {
     // Only proceed if we're on the last tab and the submit button was clicked
     if (activeMainTab !== mainTabs[mainTabs.length - 1].id) {
-      return; // Don't submit if not on the last tab
+      return // Don't submit if not on the last tab
     }
 
     try {
-      setSubmitting(true);
+      setSubmitting(true)
 
       // Combine all data into a single object
       const combinedData = {
@@ -1019,7 +1022,7 @@ export default function WeatherFormPage() {
         synopticCode: {
           weatherRemark: values.weatherRemark,
         },
-      };
+      }
 
       // Send data to the server
       const response = await fetch("/api/weather-data", {
@@ -1028,65 +1031,59 @@ export default function WeatherFormPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(combinedData),
-      });
+      })
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (result.success) {
-        toast.success("Weather data saved successfully!");
-        resetForm();
-        setTimeout(() => router.push("/dashboard"), 1500);
+        toast.success("Weather data saved successfully!")
+        resetForm()
+        setTimeout(() => router.push("/dashboard"), 1500)
       } else {
-        throw new Error(result.message || "Failed to save weather data");
+        throw new Error(result.message || "Failed to save weather data")
       }
     } catch (error) {
-      console.error("Error submitting form:", error);
-      toast.error("An error occurred while saving the data. Please try again.");
+      console.error("Error submitting form:", error)
+      toast.error("An error occurred while saving the data. Please try again.")
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   // Handle sub-tab change
   const handleSubTabChange = (mainTab, subTab) => {
     setActiveSubTabs((prev) => ({
       ...prev,
       [mainTab]: subTab,
-    }));
-  };
+    }))
+  }
 
   // Navigate to next main tab
   const handleNextMainTab = () => {
-    const currentIndex = mainTabs.findIndex((tab) => tab.id === activeMainTab);
+    const currentIndex = mainTabs.findIndex((tab) => tab.id === activeMainTab)
     if (currentIndex < mainTabs.length - 1) {
-      setActiveMainTab(mainTabs[currentIndex + 1].id);
+      setActiveMainTab(mainTabs[currentIndex + 1].id)
     }
-  };
+  }
 
   // Navigate to previous main tab
   const handlePrevMainTab = () => {
-    const currentIndex = mainTabs.findIndex((tab) => tab.id === activeMainTab);
+    const currentIndex = mainTabs.findIndex((tab) => tab.id === activeMainTab)
     if (currentIndex > 0) {
-      setActiveMainTab(mainTabs[currentIndex - 1].id);
+      setActiveMainTab(mainTabs[currentIndex - 1].id)
     }
-  };
+  }
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6 text-blue-800 text-center">
-        Weather Data Management System
-      </h1>
+      <h1 className="text-2xl font-bold mb-6 text-blue-800 text-center">Weather Data Management System</h1>
 
-      <Formik
-        initialValues={initialValues}
-        validationSchema={validationSchema}
-        onSubmit={handleSubmit}
-      >
+      <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
         {({ values, errors, touched, isSubmitting }) => (
           <Form
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                e.preventDefault();
+                e.preventDefault()
               }
             }}
           >
@@ -1123,9 +1120,7 @@ export default function WeatherFormPage() {
                     <div>
                       <Tabs
                         value={activeSubTabs["first-card"]}
-                        onValueChange={(value) =>
-                          handleSubTabChange("first-card", value)
-                        }
+                        onValueChange={(value) => handleSubTabChange("first-card", value)}
                       >
                         <TabsList className="mb-4">
                           {subTabs["first-card"].map((tab) => (
@@ -1166,9 +1161,7 @@ export default function WeatherFormPage() {
                     <div>
                       <Tabs
                         value={activeSubTabs["second-card"]}
-                        onValueChange={(value) =>
-                          handleSubTabChange("second-card", value)
-                        }
+                        onValueChange={(value) => handleSubTabChange("second-card", value)}
                       >
                         <TabsList className="mb-4">
                           {subTabs["second-card"].map((tab) => (
@@ -1209,9 +1202,7 @@ export default function WeatherFormPage() {
                     <div>
                       <Tabs
                         value={activeSubTabs["daily-summary"]}
-                        onValueChange={(value) =>
-                          handleSubTabChange("daily-summary", value)
-                        }
+                        onValueChange={(value) => handleSubTabChange("daily-summary", value)}
                       >
                         <TabsList className="mb-4">
                           {subTabs["daily-summary"].map((tab) => (
@@ -1257,9 +1248,7 @@ export default function WeatherFormPage() {
                     <div>
                       <Tabs
                         value={activeSubTabs["synoptic-code"]}
-                        onValueChange={(value) =>
-                          handleSubTabChange("synoptic-code", value)
-                        }
+                        onValueChange={(value) => handleSubTabChange("synoptic-code", value)}
                       >
                         <TabsList className="mb-4">
                           {subTabs["synoptic-code"].map((tab) => (
@@ -1287,9 +1276,7 @@ export default function WeatherFormPage() {
               <CardFooter className="border-t pt-6 flex justify-between">
                 <div>
                   {Object.keys(errors).length > 0 && (
-                    <p className="text-sm text-destructive">
-                      Please fill in all required fields before submitting
-                    </p>
+                    <p className="text-sm text-destructive">Please fill in all required fields before submitting</p>
                   )}
                 </div>
 
@@ -1304,11 +1291,7 @@ export default function WeatherFormPage() {
                   </Button>
 
                   {activeMainTab !== mainTabs[mainTabs.length - 1].id ? (
-                    <Button
-                      type="button"
-                      onClick={() => handleNextMainTab()}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
+                    <Button type="button" onClick={() => handleNextMainTab()} className="bg-blue-600 hover:bg-blue-700">
                       Next
                     </Button>
                   ) : (
@@ -1337,5 +1320,5 @@ export default function WeatherFormPage() {
         )}
       </Formik>
     </div>
-  );
+  )
 }

@@ -160,7 +160,7 @@
 //                   >
 //                     Reset
 //                   </Button>
-
+                  
 //                   {activeStep === "basic-info" && (
 //                     <Button
 //                       type="button"
@@ -204,7 +204,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import BasicInfoTab from "../../../components/basic-info-tab";
+import BasicInfoTab from "../daily-summery/tabs/basic-info-tab";
 import SynopticMeasurementsTab from "./synoptic-components/synoptic-measurement";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -289,16 +289,12 @@ export default function SynopticCodeForm() {
             <CardContent className="pt-6">
               <div>
                 <div className="border-2 border-blue-100 rounded-md p-4 bg-blue-50/30">
-                  <h3 className="text-lg font-semibold mb-4 text-blue-800">
-                    Basic Information
-                  </h3>
+                  <h3 className="text-lg font-semibold mb-4 text-blue-800">Basic Information</h3>
                   <BasicInfoTab />
                 </div>
-
+                
                 <div className="border-2 border-green-100 rounded-md p-4 bg-green-50/30">
-                  <h3 className="text-lg font-semibold mb-4 text-green-800">
-                    Measurements
-                  </h3>
+                  <h3 className="text-lg font-semibold mb-4 text-green-800">Measurements</h3>
                   <SynopticMeasurementsTab />
                 </div>
               </div>
@@ -329,7 +325,7 @@ export default function SynopticCodeForm() {
                 >
                   Reset
                 </Button>
-
+                
                 <Button
                   type="submit"
                   disabled={isSubmitting || submitting}
