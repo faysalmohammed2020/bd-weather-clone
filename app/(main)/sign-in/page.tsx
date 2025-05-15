@@ -56,15 +56,15 @@ export default function SignInForm() {
   useEffect(() => {
     const fetchStations = async () => {
       try {
-        const response = await fetch('/api/stations');
+        const response = await fetch("/api/stationlocation");
         if (!response.ok) {
-          throw new Error('Failed to fetch stations');
+          throw new Error("Failed to fetch stations");
         }
         const data = await response.json();
         setStations(data);
       } catch (err) {
-        console.error('Error fetching stations:', err);
-        setFetchError('Could not load stations. Please try again later.');
+        console.error("Error fetching stations:", err);
+        setFetchError("Could not load stations. Please try again later.");
       }
     };
 
@@ -109,7 +109,9 @@ export default function SignInForm() {
     setLoading(false);
   };
 
-  const handleCredentialsSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCredentialsSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
     // Client-side validation first
@@ -139,10 +141,10 @@ export default function SignInForm() {
 
     try {
       // Call our custom API route for comprehensive authentication
-      const response = await fetch('/api/auth/sign-in', {
-        method: 'POST',
+      const response = await fetch("/api/auth/sign-in", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email,
@@ -153,12 +155,12 @@ export default function SignInForm() {
           stationName: station.name,
         }),
         // Important: include credentials to allow cookies to be set
-        credentials: 'include'
+        credentials: "include",
       });
 
       const data = await response.json();
 
-      if(data.twoFactorRedirect){
+      if (data.twoFactorRedirect) {
         router.push("/2fa");
         return;
       }
@@ -173,7 +175,8 @@ export default function SignInForm() {
       }
 
       // Handle error responses
-      let errorMessage = data.error || data.message || "An error occurred during sign in";
+      let errorMessage =
+        data.error || data.message || "An error occurred during sign in";
 
       // Provide user-friendly error messages
       if (errorMessage.includes("credentials")) {
@@ -192,7 +195,9 @@ export default function SignInForm() {
 
       setFormError(errorMessage);
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : 'An unexpected error occurred');
+      setFormError(
+        error instanceof Error ? error.message : "An unexpected error occurred"
+      );
     } finally {
       setLoading(false);
     }
@@ -372,7 +377,13 @@ export default function SignInForm() {
                 disabled={stations.length === 0}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={stations.length === 0 ? "Loading stations..." : "Select your station"} />
+                  <SelectValue
+                    placeholder={
+                      stations.length === 0
+                        ? "Loading stations..."
+                        : "Select your station"
+                    }
+                  />
                 </SelectTrigger>
                 <SelectContent className="max-h-60">
                   {stations.map((station) => (

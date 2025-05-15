@@ -38,6 +38,10 @@ export default function BasicInfoTab() {
   useEffect(() => {
     const today = new Date(); // ✅ Define inside useEffect
 
+    if (!values.dataType) {
+      setFieldValue("dataType", "SY");
+    }
+
     if (session?.user.stationId && !values.stationNo) {
       setFieldValue(
         "stationNo",
@@ -59,6 +63,7 @@ export default function BasicInfoTab() {
     }
   }, [
     session,
+    values.dataType,
     values.stationNo,
     setFieldValue,
     values.year,
@@ -101,13 +106,27 @@ export default function BasicInfoTab() {
               >
                 DATA TYPE
               </Label>
-              <div className="flex gap-1 ">
-                {["S", "Y"].map((char, i) => (
+              <div className="flex gap-1">
+                {dataTypeRefs.map((ref, i) => (
                   <Input
                     key={`dataType-${i}`}
                     id={`dataType-${i}`}
+                    maxLength={1}
+                    ref={ref}
                     className="w-12 border-blue-200 focus:border-blue-500 text-center"
-                    value={char}
+                    value={values.dataType?.[i] || ""}
+                    onChange={(e) => {
+                      const val = e.target.value.toUpperCase();
+                      if (!/^[A-Z]?$/.test(val)) return;
+                      const updated =
+                        values.dataType.substring(0, i) +
+                        val +
+                        values.dataType.substring(i + 1);
+                      setFieldValue("dataType", updated);
+                      if (val.length === 1 && i < dataTypeRefs.length - 1) {
+                        dataTypeRefs[i + 1]?.current?.focus();
+                      }
+                    }}
                   />
                 ))}
               </div>

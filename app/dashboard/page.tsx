@@ -1,21 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import dynamic from 'next/dynamic';
-import MapControls from "@/components/map/map-controls";
+import dynamic from "next/dynamic";
 import RainfallChart from "@/components/charts/rainfall-chart";
 import EvapotranspirationChart from "@/components/charts/evapotranspiration-chart";
 import SoilMoistureChart from "@/components/charts/soil-moisture-chart";
 import TemperatureChart from "@/components/charts/temperature-chart";
+import { Station } from "@prisma/client";
 
-const MapComponent = dynamic(() => import("@/components/map"), { ssr: false });
+const MapComponent = dynamic(
+  () => import("@/components/StationMap/MapComponent"),
+  { ssr: false }
+);
+
+const MapControls = dynamic(() => import("@/components/map/map-controls"), {
+  ssr: false,
+});
 
 export default function DroughtDashboard() {
   const [selectedRegion, setSelectedRegion] = useState("Bangladesh");
   const [selectedDistrict, setSelectedDistrict] = useState("Dhaka");
   const [selectedPeriod, setSelectedPeriod] = useState("1 Month");
   const [selectedIndex, setSelectedIndex] = useState("Rainfall");
-  const [currentDate, setCurrentDate] = useState("19-Mar");
+  const [currentDate, setCurrentDate] = useState("18-Oct");
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [selectedStation, setSelectedStation] = useState<Station | null>(null);
 
   return (
     <div className="flex flex-col h-screen bg-gray-100">
@@ -25,12 +34,12 @@ export default function DroughtDashboard() {
             <MapControls
               selectedRegion={selectedRegion}
               setSelectedRegion={setSelectedRegion}
-              selectedDistrict={selectedDistrict}
-              setSelectedDistrict={setSelectedDistrict}
               selectedPeriod={selectedPeriod}
               setSelectedPeriod={setSelectedPeriod}
               selectedIndex={selectedIndex}
               setSelectedIndex={setSelectedIndex}
+              selectedStation={selectedStation}
+              setSelectedStation={setSelectedStation}
             />
             {/* <MapComponent /> */}
           </div>
@@ -52,9 +61,17 @@ export default function DroughtDashboard() {
 
         <div className="md:col-span-2 grid grid-cols-1 gap-4">
           <div className="bg-white rounded-lg shadow">
+            {/* <MapComponent
+              currentDate={currentDate}
+              setCurrentDate={setCurrentDate}
+            /> */}
             <MapComponent
               currentDate={currentDate}
               setCurrentDate={setCurrentDate}
+              isPlaying={isPlaying}
+              setIsPlaying={setIsPlaying}
+              selectedStation={selectedStation}
+              onStationSelect={setSelectedStation}
             />
           </div>
 

@@ -51,18 +51,18 @@ type UserRole = "super_admin" | "station_admin" | "observer";
 const UserManagement = () => {
   // Get the current user session
   const { data: session } = useSession();
-  
+
   // Use the location context for division, district, and upazila
-  const { 
-    divisions, 
-    districts, 
-    upazilas, 
-    selectedDivision, 
+  const {
+    divisions,
+    districts,
+    upazilas,
+    selectedDivision,
     setSelectedDivision,
-    selectedDistrict, 
+    selectedDistrict,
     setSelectedDistrict,
     setSelectedUpazila,
-    loading: locationLoading
+    loading: locationLoading,
   } = useLocation();
 
   const [users, setUsers] = useState<User[]>([]);
@@ -90,26 +90,26 @@ const UserManagement = () => {
     stationId: "",
     securityCode: "",
   });
-  
+
   // Loading states for dependent data
   const [loadingStations, setLoadingStations] = useState(false);
   const [loadingDivisions, setLoadingDivisions] = useState(false);
   const [loadingDistricts, setLoadingDistricts] = useState(false);
   const [loadingUpazilas, setLoadingUpazilas] = useState(false);
-  
+
   // Fetch stations from the API
   const fetchStations = useCallback(async () => {
     setLoadingStations(true);
     try {
-      const response = await fetch('/api/stations');
+      const response = await fetch("/api/stations");
       if (!response.ok) {
-        throw new Error('Failed to fetch stations');
+        throw new Error("Failed to fetch stations");
       }
       const data = await response.json();
       setStations(data);
     } catch (error) {
-      console.error('Error fetching stations:', error);
-      toast.error('Failed to load stations');
+      console.error("Error fetching stations:", error);
+      toast.error("Failed to load stations");
     } finally {
       setLoadingStations(false);
     }
@@ -120,15 +120,17 @@ const UserManagement = () => {
     setIsLoading(true);
     try {
       // Use our custom API endpoint for listing users
-      const response = await fetch(`/api/users?limit=${pageSize}&offset=${pageIndex * pageSize}`);
-      
+      const response = await fetch(
+        `/api/users?limit=${pageSize}&offset=${pageIndex * pageSize}`
+      );
+
       if (!response.ok) {
-        throw new Error('Failed to fetch users');
+        throw new Error("Failed to fetch users");
       }
-      
+
       const data = await response.json();
       console.log("API response:", data);
-      
+
       // Set users and total from the API response
       setUsers(data.users);
       setTotalUsers(data.total);
@@ -144,32 +146,34 @@ const UserManagement = () => {
   useEffect(() => {
     fetchStations();
   }, [fetchStations]);
-  
+
   // Update loading states based on location context loading state
   useEffect(() => {
     setLoadingDivisions(locationLoading);
     setLoadingDistricts(locationLoading);
     setLoadingUpazilas(locationLoading);
   }, [locationLoading]);
-  
+
   // Fetch users when page changes
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
-  
+
   // Handle station selection
   const handleStationChange = (stationName: string) => {
-    const selectedStation = stations.find(station => station.name === stationName);
+    const selectedStation = stations.find(
+      (station) => station.name === stationName
+    );
     if (selectedStation) {
-      setFormData(prevData => ({
+      setFormData((prevData) => ({
         ...prevData,
         stationName: selectedStation.name,
         stationId: selectedStation.stationId,
-        securityCode: selectedStation.securityCode
+        securityCode: selectedStation.securityCode,
       }));
     }
   };
-  
+
   // We're now handling form data updates directly in the select onValueChange handlers
   // This ensures the form data and location context stay in sync
 
@@ -180,10 +184,15 @@ const UserManagement = () => {
         toast.error("Please select a role first");
         return;
       }
-      
+
       // Validate required fields
-      if (!formData.email || !formData.password || 
-          !formData.division || !formData.district || !formData.upazila) {
+      if (
+        !formData.email ||
+        !formData.password ||
+        !formData.division ||
+        !formData.district ||
+        !formData.upazila
+      ) {
         toast.error("Please fill all required fields");
         return;
       }
@@ -192,21 +201,23 @@ const UserManagement = () => {
       const passwordMinLength = {
         super_admin: 12,
         station_admin: 11,
-        observer: 10
+        observer: 10,
       };
-      
+
       const requiredLength = passwordMinLength[formData.role as UserRole];
-      
+
       if (formData.password.length < requiredLength) {
-        toast.error(`Password must be at least ${requiredLength} characters for ${formData.role} role`);
+        toast.error(
+          `Password must be at least ${requiredLength} characters for ${formData.role} role`
+        );
         return;
       }
 
       // Use the API to create a user
-      const response = await fetch('/api/users', {
-        method: 'POST',
+      const response = await fetch("/api/users", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: formData.name,
@@ -224,7 +235,7 @@ const UserManagement = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create user');
+        throw new Error(errorData.error || "Failed to create user");
       }
 
       toast.success("User created successfully");
@@ -233,31 +244,35 @@ const UserManagement = () => {
       fetchUsers();
     } catch (error) {
       console.error("Failed to create user:", error);
-      toast.error(typeof error === 'object' && error instanceof Error ? error.message : "Failed to create user");
+      toast.error(
+        typeof error === "object" && error instanceof Error
+          ? error.message
+          : "Failed to create user"
+      );
     }
   };
 
   // Function to confirm role changes before updating
   const confirmRoleUpdate = () => {
     if (!editUser) return;
-    
+
     // First check if role is selected
     if (!formData.role) {
       toast.error("Please select a role first");
       return;
     }
-    
+
     // Check if the role is actually changing
     if (editUser.role === formData.role) {
       // No role change, proceed with normal update
       handleUpdateUser();
       return;
     }
-    
+
     // Store the original and new roles for the confirmation dialog
     setOriginalRole(editUser.role);
     setNewRole(formData.role);
-    
+
     // Open the confirmation dialog
     setOpenRoleUpdateDialog(true);
   };
@@ -268,7 +283,7 @@ const UserManagement = () => {
     try {
       console.log("Starting update process for user:", editUser.id);
       console.log("Current form data:", formData);
-      
+
       // First check if role is selected
       if (!formData.role) {
         toast.error("Please select a role first");
@@ -276,28 +291,34 @@ const UserManagement = () => {
       }
 
       // Validate required fields
-      if (!formData.email || 
-          !formData.division || !formData.district || !formData.upazila) {
+      if (
+        !formData.email ||
+        !formData.division ||
+        !formData.district ||
+        !formData.upazila
+      ) {
         toast.error("Please fill all required fields");
         return;
       }
 
       // Validate password length based on role if a new password is provided
-      if (formData.password && formData.password.trim() !== '') {
+      if (formData.password && formData.password.trim() !== "") {
         const passwordMinLength = {
           super_admin: 12,
           station_admin: 11,
-          observer: 10
+          observer: 10,
         };
-        
+
         const requiredLength = passwordMinLength[formData.role as UserRole];
-        
+
         if (formData.password.length < requiredLength) {
-          toast.error(`Password must be at least ${requiredLength} characters for ${formData.role} role`);
+          toast.error(
+            `Password must be at least ${requiredLength} characters for ${formData.role} role`
+          );
           return;
         }
       }
-      
+
       // Close the role update dialog if it's open
       setOpenRoleUpdateDialog(false);
 
@@ -306,7 +327,10 @@ const UserManagement = () => {
         id: editUser.id,
         name: formData.name || "",
         email: formData.email,
-        password: formData.password && formData.password.trim() !== "" ? formData.password : undefined,
+        password:
+          formData.password && formData.password.trim() !== ""
+            ? formData.password
+            : undefined,
         role: formData.role,
         division: formData.division,
         district: formData.district,
@@ -315,34 +339,37 @@ const UserManagement = () => {
         stationId: formData.stationId || null,
         securityCode: formData.securityCode || null,
       };
-      
+
       // Remove any undefined values
-      Object.keys(updateData).forEach(key => {
+      Object.keys(updateData).forEach((key) => {
         if (updateData[key as keyof typeof updateData] === undefined) {
           delete updateData[key as keyof typeof updateData];
         }
       });
-      
+
       console.log("Sending update request with data:", {
         ...updateData,
-        password: formData.password && formData.password.trim() !== "" ? "[REDACTED]" : undefined, 
+        password:
+          formData.password && formData.password.trim() !== ""
+            ? "[REDACTED]"
+            : undefined,
       });
-      
+
       // Use the custom API endpoint for updating users
-      const response = await fetch('/api/users', {
-        method: 'PUT',
+      const response = await fetch("/api/users", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(updateData),
       });
 
       console.log("Response status:", response.status);
-      
+
       // Get the response text first
       const responseText = await response.text();
       console.log("Response text:", responseText);
-      
+
       // Try to parse as JSON if possible
       let responseData;
       try {
@@ -352,10 +379,10 @@ const UserManagement = () => {
         console.error("Error parsing response:", parseError);
         responseData = {};
       }
-      
+
       // Check if the response was successful
       if (!response.ok) {
-        const errorMessage = responseData.error || 'Failed to update user';
+        const errorMessage = responseData.error || "Failed to update user";
         console.error("API error response:", responseData);
         throw new Error(errorMessage);
       }
@@ -366,7 +393,11 @@ const UserManagement = () => {
       fetchUsers();
     } catch (error) {
       console.error("Failed to update user:", error);
-      toast.error(typeof error === 'object' && error instanceof Error ? error.message : "Failed to update user");
+      toast.error(
+        typeof error === "object" && error instanceof Error
+          ? error.message
+          : "Failed to update user"
+      );
     }
   };
 
@@ -376,13 +407,13 @@ const UserManagement = () => {
       toast.error("You cannot delete your own account");
       return;
     }
-    
+
     // Super admin accounts can never be deleted
     if (userRole === "super_admin") {
       toast.error("Super admin accounts cannot be deleted");
       return;
     }
-    
+
     // For all other cases, show the confirmation dialog
     setUserToDelete(userId);
     setOpenDeleteDialog(true);
@@ -390,16 +421,16 @@ const UserManagement = () => {
 
   const handleDeleteUser = async () => {
     if (!userToDelete) return;
-    
+
     try {
       // Use the API to delete a user
       const response = await fetch(`/api/users?id=${userToDelete}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete user');
+        throw new Error(errorData.error || "Failed to delete user");
       }
 
       toast.success("User deleted successfully");
@@ -408,7 +439,11 @@ const UserManagement = () => {
       fetchUsers();
     } catch (error) {
       console.error("Failed to delete user:", error);
-      toast.error(typeof error === 'object' && error instanceof Error ? error.message : "Failed to delete user");
+      toast.error(
+        typeof error === "object" && error instanceof Error
+          ? error.message
+          : "Failed to delete user"
+      );
     }
   };
 
@@ -434,13 +469,13 @@ const UserManagement = () => {
       return;
     }
     setEditUser(user);
-    
+
     // If the user has a stationId, fetch the station to get the security code
     let securityCode = "";
     if (user.stationId) {
       try {
         // Find the station in our existing stations list
-        const station = stations.find(s => s.stationId === user.stationId);
+        const station = stations.find((s) => s.stationId === user.stationId);
         if (station) {
           securityCode = station.securityCode;
         }
@@ -448,7 +483,7 @@ const UserManagement = () => {
         console.error("Error fetching station details:", error);
       }
     }
-    
+
     setFormData({
       name: user.name || "",
       email: user.email,
@@ -488,7 +523,12 @@ const UserManagement = () => {
         <div>
           <Dialog open={openDialog} onOpenChange={setOpenDialog}>
             <DialogTrigger asChild>
-              <Button onClick={openCreateDialog}>Create User</Button>
+              <Button
+                className="bg-sky-600 hover:bg-sky-400"
+                onClick={openCreateDialog}
+              >
+                + Create User
+              </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
@@ -508,24 +548,28 @@ const UserManagement = () => {
                     }
                   />
                 </div>
-                
+
                 {/* Role - Placed first for validation purposes */}
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="role">Role <span className="text-red-500">*</span></label>
+                  <label htmlFor="role">
+                    Role <span className="text-red-500">*</span>
+                  </label>
                   <Select
                     value={formData.role}
                     onValueChange={(value) => {
                       const role = value as UserRole;
                       setFormData({ ...formData, role });
-                      
+
                       // Display password requirement based on selected role
                       const passwordMinLength = {
                         super_admin: 12,
                         station_admin: 11,
-                        observer: 10
+                        observer: 10,
                       };
-                      
-                      toast.info(`Password must be at least ${passwordMinLength[role]} characters for ${role} role`);
+
+                      toast.info(
+                        `Password must be at least ${passwordMinLength[role]} characters for ${role} role`
+                      );
                     }}
                   >
                     <SelectTrigger id="role" className="w-full">
@@ -533,16 +577,20 @@ const UserManagement = () => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="super_admin">Super Admin</SelectItem>
-                      <SelectItem value="station_admin">Station Admin</SelectItem>
+                      <SelectItem value="station_admin">
+                        Station Admin
+                      </SelectItem>
                       <SelectItem value="observer">Observer</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 {/* Email and Password */}
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="email">Email <span className="text-red-500">*</span></label>
+                    <label htmlFor="email">
+                      Email <span className="text-red-500">*</span>
+                    </label>
                     <Input
                       id="email"
                       type="email"
@@ -554,19 +602,26 @@ const UserManagement = () => {
                     />
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="password" className="flex items-center gap-1">
-                      {editUser ? "New Password" : "Password"} 
+                    <label
+                      htmlFor="password"
+                      className="flex items-center gap-1"
+                    >
+                      {editUser ? "New Password" : "Password"}
                       {!editUser && <span className="text-red-500">*</span>}
                       {formData.role && (
                         <span className="text-xs text-blue-600 block">
-                          {`Min ${formData.role === 'super_admin' ? 12 : formData.role === 'station_admin' ? 11 : 10} characters`}
+                          {`Min ${formData.role === "super_admin" ? 12 : formData.role === "station_admin" ? 11 : 10} characters`}
                         </span>
                       )}
                     </label>
                     <Input
                       id="password"
                       type="password"
-                      placeholder={formData.role ? `Min ${formData.role === 'super_admin' ? 12 : formData.role === 'station_admin' ? 11 : 10} characters` : "Select a role first"}
+                      placeholder={
+                        formData.role
+                          ? `Min ${formData.role === "super_admin" ? 12 : formData.role === "station_admin" ? 11 : 10} characters`
+                          : "Select a role first"
+                      }
                       value={formData.password}
                       onChange={(e) =>
                         setFormData({ ...formData, password: e.target.value })
@@ -576,7 +631,7 @@ const UserManagement = () => {
                     />
                   </div>
                 </div>
-                
+
                 {/* Station Name */}
                 <div className="flex flex-col gap-2">
                   <label htmlFor="stationName">Station Name</label>
@@ -585,18 +640,25 @@ const UserManagement = () => {
                     onValueChange={handleStationChange}
                   >
                     <SelectTrigger id="stationName" className="w-full">
-                      <SelectValue placeholder={loadingStations ? "Loading..." : "Select Station"} />
+                      <SelectValue
+                        placeholder={
+                          loadingStations ? "Loading..." : "Select Station"
+                        }
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {stations.map((station) => (
-                        <SelectItem key={station.stationId} value={station.name}>
+                        <SelectItem
+                          key={station.stationId}
+                          value={station.name}
+                        >
                           {station.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 {/* Station ID */}
                 <div className="flex flex-col gap-2">
                   <label htmlFor="stationId">Station ID</label>
@@ -608,10 +670,12 @@ const UserManagement = () => {
                     readOnly
                   />
                 </div>
-                
+
                 {/* Station Code (Security Code) */}
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="securityCode">Station Code (Security Code)</label>
+                  <label htmlFor="securityCode">
+                    Station Code (Security Code)
+                  </label>
                   <Input
                     id="securityCode"
                     value={formData.securityCode}
@@ -620,23 +684,27 @@ const UserManagement = () => {
                     readOnly
                   />
                 </div>
-                
+
                 {/* Division, District, Upazila */}
                 <div className="grid grid-cols-3 gap-4 w-full">
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="division">Division <span className="text-red-500">*</span></label>
+                    <label htmlFor="division">
+                      Division <span className="text-red-500">*</span>
+                    </label>
                     <Select
                       value={formData.division}
                       onValueChange={(value) => {
                         console.log("Division selected:", value);
-                        const division = divisions.find(d => d.name === value);
+                        const division = divisions.find(
+                          (d) => d.name === value
+                        );
                         if (division) {
                           // First update form data
-                          setFormData(prevData => ({
+                          setFormData((prevData) => ({
                             ...prevData,
                             division: value,
-                            district: '',
-                            upazila: ''
+                            district: "",
+                            upazila: "",
                           }));
                           // Then update selected division which will trigger district loading
                           setSelectedDivision(division);
@@ -648,31 +716,42 @@ const UserManagement = () => {
                       disabled={loadingDivisions}
                     >
                       <SelectTrigger id="division" className="w-full">
-                        <SelectValue placeholder={loadingDivisions ? "Loading..." : "Select Division"} />
+                        <SelectValue
+                          placeholder={
+                            loadingDivisions ? "Loading..." : "Select Division"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {divisions.map((division) => (
-                          <SelectItem key={division.osmId} value={division.name}>
+                          <SelectItem
+                            key={division.osmId}
+                            value={division.name}
+                          >
                             {division.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="district">District <span className="text-red-500">*</span></label>
+                    <label htmlFor="district">
+                      District <span className="text-red-500">*</span>
+                    </label>
                     <Select
                       value={formData.district}
                       onValueChange={(value) => {
                         console.log("District selected:", value);
-                        const district = districts.find(d => d.name === value);
+                        const district = districts.find(
+                          (d) => d.name === value
+                        );
                         if (district) {
                           // First update form data
-                          setFormData(prevData => ({
+                          setFormData((prevData) => ({
                             ...prevData,
                             district: value,
-                            upazila: ''
+                            upazila: "",
                           }));
                           // Then update selected district which will trigger upazila loading
                           setSelectedDistrict(district);
@@ -683,30 +762,39 @@ const UserManagement = () => {
                       disabled={!selectedDivision || districts.length === 0}
                     >
                       <SelectTrigger id="district" className="w-full">
-                        <SelectValue placeholder={loadingDistricts ? "Loading..." : "Select District"} />
+                        <SelectValue
+                          placeholder={
+                            loadingDistricts ? "Loading..." : "Select District"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {districts.map((district) => (
-                          <SelectItem key={district.osmId} value={district.name}>
+                          <SelectItem
+                            key={district.osmId}
+                            value={district.name}
+                          >
                             {district.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="flex flex-col gap-2">
-                    <label htmlFor="upazila">Upazila <span className="text-red-500">*</span></label>
+                    <label htmlFor="upazila">
+                      Upazila <span className="text-red-500">*</span>
+                    </label>
                     <Select
                       value={formData.upazila}
                       onValueChange={(value) => {
                         console.log("Upazila selected:", value);
-                        const upazila = upazilas.find(u => u.name === value);
+                        const upazila = upazilas.find((u) => u.name === value);
                         if (upazila) {
                           // Update form data
-                          setFormData(prevData => ({
+                          setFormData((prevData) => ({
                             ...prevData,
-                            upazila: value
+                            upazila: value,
                           }));
                           // Then update selected upazila
                           setSelectedUpazila(upazila);
@@ -715,7 +803,11 @@ const UserManagement = () => {
                       disabled={!selectedDistrict || upazilas.length === 0}
                     >
                       <SelectTrigger id="upazila" className="w-full">
-                        <SelectValue placeholder={loadingUpazilas ? "Loading..." : "Select Upazila"} />
+                        <SelectValue
+                          placeholder={
+                            loadingUpazilas ? "Loading..." : "Select Upazila"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent>
                         {upazilas.map((upazila) => (
@@ -785,7 +877,9 @@ const UserManagement = () => {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => openDeleteConfirmation(user.id, user.role)}
+                        onClick={() =>
+                          openDeleteConfirmation(user.id, user.role)
+                        }
                       >
                         Delete
                       </Button>
@@ -833,7 +927,7 @@ const UserManagement = () => {
           </Button>
         </div>
       </div>
-      
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
         <DialogContent className="sm:max-w-md">
@@ -841,35 +935,62 @@ const UserManagement = () => {
             <DialogTitle className="text-center">Confirm Deletion</DialogTitle>
           </DialogHeader>
           <div className="p-4 text-center">
-            <p className="mb-4">Are you sure you want to delete this user? This action cannot be undone.</p>
+            <p className="mb-4">
+              Are you sure you want to delete this user? This action cannot be
+              undone.
+            </p>
             <div className="flex justify-center space-x-4">
-              <Button variant="outline" onClick={() => setOpenDeleteDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={handleDeleteUser}>Delete</Button>
+              <Button
+                variant="outline"
+                onClick={() => setOpenDeleteDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteUser}>
+                Delete
+              </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-      
+
       {/* Role Update Confirmation Dialog */}
-      <Dialog open={openRoleUpdateDialog} onOpenChange={setOpenRoleUpdateDialog}>
+      <Dialog
+        open={openRoleUpdateDialog}
+        onOpenChange={setOpenRoleUpdateDialog}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-center">Confirm Role Change</DialogTitle>
+            <DialogTitle className="text-center">
+              Confirm Role Change
+            </DialogTitle>
           </DialogHeader>
           <div className="p-4 text-center">
             <p className="mb-4">
-              Are you sure you want to change this user&apos;s role from <strong>{originalRole}</strong> to <strong>{newRole}</strong>?
+              Are you sure you want to change this user&apos;s role from{" "}
+              <strong>{originalRole}</strong> to <strong>{newRole}</strong>?
             </p>
             <p className="mb-4 text-amber-600">
-              Changing user roles affects their permissions and access levels in the system.
+              Changing user roles affects their permissions and access levels in
+              the system.
             </p>
             <div className="flex justify-center space-x-4">
-              <Button variant="outline" onClick={() => setOpenRoleUpdateDialog(false)}>Cancel</Button>
-              <Button variant="default" onClick={() => {
-                setOpenRoleUpdateDialog(false);
-                // Small delay to ensure dialog closes before submitting
-                setTimeout(() => handleUpdateUser(), 100);
-              }}>Confirm Change</Button>
+              <Button
+                variant="outline"
+                onClick={() => setOpenRoleUpdateDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="default"
+                onClick={() => {
+                  setOpenRoleUpdateDialog(false);
+                  // Small delay to ensure dialog closes before submitting
+                  setTimeout(() => handleUpdateUser(), 100);
+                }}
+              >
+                Confirm Change
+              </Button>
             </div>
           </div>
         </DialogContent>
