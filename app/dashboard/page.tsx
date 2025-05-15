@@ -2,14 +2,20 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import MapControls from "@/components/map/map-controls";
 import RainfallChart from "@/components/charts/rainfall-chart";
 import EvapotranspirationChart from "@/components/charts/evapotranspiration-chart";
 import SoilMoistureChart from "@/components/charts/soil-moisture-chart";
 import TemperatureChart from "@/components/charts/temperature-chart";
-import MapComponent from "@/components/StationMap/MapComponent";
+import { Station } from "@prisma/client";
 
-// const MapComponent = dynamic(() => import("@/components/map"), { ssr: false });
+const MapComponent = dynamic(
+  () => import("@/components/StationMap/MapComponent"),
+  { ssr: false }
+);
+
+const MapControls = dynamic(() => import("@/components/map/map-controls"), {
+  ssr: false,
+});
 
 export default function DroughtDashboard() {
   const [selectedRegion, setSelectedRegion] = useState("Bangladesh");
