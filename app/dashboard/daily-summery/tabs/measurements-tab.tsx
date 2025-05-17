@@ -1334,7 +1334,7 @@ export default function MeasurementsTab() {
         windDirection: tableData[10]?.value || "",
       };
 
-      const res = await fetch("/api/daily-summery", {
+      const res = await fetch("/api/daily-summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
