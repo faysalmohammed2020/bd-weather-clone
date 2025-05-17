@@ -172,6 +172,58 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
   // STEP 1: Station Level Pressure Calculation
 
+  // const calculatePressureValues = (
+  //   dryBulb: string,
+  //   barAsRead: string,
+  //   stationId: string
+  // ) => {
+  //   if (!dryBulb || !barAsRead || !stationId) return;
+
+  //   const userStationData = stationDataMap[stationId];
+  //   if (!userStationData) {
+  //     toast.error("Station data not found");
+  //     return;
+  //   }
+
+  //   const correctionTable = userStationData.station.correction_table;
+  //   const dryBulbValue = Number.parseFloat(dryBulb) / 10;
+  //   const roundedDryBulb = Math.round(dryBulbValue);
+  //   const dryBulbKey = roundedDryBulb;
+
+  //   const barAsReadValue = Number.parseFloat(barAsRead) / 10;
+
+  //   const correctionEntry = correctionTable.find(
+  //     (entry) => entry.dry_bulb_temp_c === dryBulbKey
+  //   );
+
+  //   if (!correctionEntry) {
+  //     toast.error(
+  //       `Dry bulb temperature ${dryBulbKey}°C not found in correction table`
+  //     );
+  //     return;
+  //   }
+
+  //   const availablePressures = Object.keys(
+  //     correctionEntry.cistern_level_pressure
+  //   )
+  //     .map(Number)
+  //     .sort((a, b) => a - b);
+  //   let closestPressure = availablePressures.reduce((prev, curr) =>
+  //     Math.abs(curr - barAsReadValue) < Math.abs(prev - barAsReadValue)
+  //       ? curr
+  //       : prev
+  //   );
+
+  //   const heightCorrection =
+  //     correctionEntry.cistern_level_pressure[closestPressure.toString()];
+  //   const stationLevelPressure = barAsReadValue + heightCorrection;
+
+  //   return {
+  //     stationLevelPressure: stationLevelPressure.toFixed(2),
+  //     heightDifference: heightCorrection.toFixed(2),
+  //   };
+  // };
+
   const calculatePressureValues = (
     dryBulb: string,
     barAsRead: string,
@@ -188,17 +240,16 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     const correctionTable = userStationData.station.correction_table;
     const dryBulbValue = Number.parseFloat(dryBulb) / 10;
     const roundedDryBulb = Math.round(dryBulbValue);
-    const dryBulbKey = roundedDryBulb;
 
-    const barAsReadValue = Number.parseFloat(barAsRead);
+    const barAsReadValue = Number.parseFloat(barAsRead) / 10;
 
     const correctionEntry = correctionTable.find(
-      (entry) => entry.dry_bulb_temp_c === dryBulbKey
+      (entry) => entry.dry_bulb_temp_c === roundedDryBulb
     );
 
     if (!correctionEntry) {
       toast.error(
-        `Dry bulb temperature ${dryBulbKey}°C not found in correction table`
+        `Dry bulb temperature ${roundedDryBulb}°C not found in correction table`
       );
       return;
     }
@@ -208,7 +259,8 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     )
       .map(Number)
       .sort((a, b) => a - b);
-    let closestPressure = availablePressures.reduce((prev, curr) =>
+
+    const closestPressure = availablePressures.reduce((prev, curr) =>
       Math.abs(curr - barAsReadValue) < Math.abs(prev - barAsReadValue)
         ? curr
         : prev
@@ -218,13 +270,73 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       correctionEntry.cistern_level_pressure[closestPressure.toString()];
     const stationLevelPressure = barAsReadValue + heightCorrection;
 
+    const seaLevelCorrection =
+      correctionEntry.sea_level_pressure?.[closestPressure.toString()];
+
     return {
-      stationLevelPressure: stationLevelPressure.toFixed(2),
-      heightDifference: heightCorrection.toFixed(2),
+      stationLevelPressure: Math.round(stationLevelPressure * 10).toString(), // e.g., "10041"
+      heightDifference: `+${Math.round(heightCorrection * 100)}`, // e.g., "+95"
+      seaLevelReduction:
+        seaLevelCorrection !== undefined
+          ? `+${Math.round(seaLevelCorrection * 100)}`
+          : undefined,
     };
   };
 
   // STEP 2: Sea Level Pressure Calculation
+
+  // const calculateSeaLevelPressure = (
+  //   dryBulb: string,
+  //   stationLevelPressure: string,
+  //   stationId: string
+  // ) => {
+  //   if (!dryBulb || !stationLevelPressure || !stationId) return;
+
+  //   const userStationData = stationDataMap[stationId];
+  //   if (!userStationData) {
+  //     toast.error("Station data not found");
+  //     return;
+  //   }
+
+  //   const seaCorrectionTable = userStationData.sea.correction_table;
+  //   const dryBulbValue = Number.parseFloat(dryBulb) / 10;
+  //   const roundedDryBulb = Math.round(dryBulbValue);
+  //   const dryBulbKey = roundedDryBulb;
+
+  //   const stationPressureValue = Number.parseFloat(stationLevelPressure) / 10;
+
+  //   const correctionEntry = seaCorrectionTable.find(
+  //     (entry) => entry.dry_bulb_temp_c === dryBulbKey
+  //   );
+
+  //   if (!correctionEntry) {
+  //     toast.error(
+  //       `Dry bulb temperature ${dryBulbKey}°C not found in sea level correction table`
+  //     );
+  //     return;
+  //   }
+
+  //   const availablePressures = Object.keys(
+  //     correctionEntry.station_level_pressure
+  //   )
+  //     .map(Number)
+  //     .sort((a, b) => a - b);
+  //   let closestPressure = availablePressures.reduce((prev, curr) =>
+  //     Math.abs(curr - stationPressureValue) <
+  //     Math.abs(prev - stationPressureValue)
+  //       ? curr
+  //       : prev
+  //   );
+
+  //   const seaLevelReduction =
+  //     correctionEntry.station_level_pressure[closestPressure.toString()];
+  //   const seaLevelPressure = stationPressureValue + seaLevelReduction;
+
+  //   return {
+  //     seaLevelReduction: seaLevelReduction.toFixed(2),
+  //     correctedSeaLevelPressure: seaLevelPressure.toFixed(2),
+  //   };
+  // };
 
   const calculateSeaLevelPressure = (
     dryBulb: string,
@@ -242,17 +354,17 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     const seaCorrectionTable = userStationData.sea.correction_table;
     const dryBulbValue = Number.parseFloat(dryBulb) / 10;
     const roundedDryBulb = Math.round(dryBulbValue);
-    const dryBulbKey = roundedDryBulb;
 
-    const stationPressureValue = Number.parseFloat(stationLevelPressure);
+    // Convert 5-digit string pressure to decimal (e.g., "10041" → 1004.1)
+    const stationPressureValue = Number.parseFloat(stationLevelPressure) / 10;
 
     const correctionEntry = seaCorrectionTable.find(
-      (entry) => entry.dry_bulb_temp_c === dryBulbKey
+      (entry) => entry.dry_bulb_temp_c === roundedDryBulb
     );
 
     if (!correctionEntry) {
       toast.error(
-        `Dry bulb temperature ${dryBulbKey}°C not found in sea level correction table`
+        `Dry bulb temperature ${roundedDryBulb}°C not found in sea level correction table`
       );
       return;
     }
@@ -262,7 +374,8 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     )
       .map(Number)
       .sort((a, b) => a - b);
-    let closestPressure = availablePressures.reduce((prev, curr) =>
+
+    const closestPressure = availablePressures.reduce((prev, curr) =>
       Math.abs(curr - stationPressureValue) <
       Math.abs(prev - stationPressureValue)
         ? curr
@@ -274,8 +387,8 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     const seaLevelPressure = stationPressureValue + seaLevelReduction;
 
     return {
-      seaLevelReduction: seaLevelReduction.toFixed(2),
-      correctedSeaLevelPressure: seaLevelPressure.toFixed(2),
+      seaLevelReduction: `+${Math.round(seaLevelReduction * 100)}`, // e.g., 0.95 → "+95"
+      correctedSeaLevelPressure: Math.round(seaLevelPressure * 10).toString(), // e.g., 1004.1 → "10041"
     };
   };
 
