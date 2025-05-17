@@ -83,7 +83,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
   const { data: session } = useSession();
 
-
   // Refs for multi-box inputs to handle auto-focus
   const dataTypeRefs = [useRef(null), useRef(null)];
   const stationNoRefs = [
@@ -529,11 +528,15 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
   const isLastTab = tabOrder.indexOf(activeTab) === tabOrder.length - 1;
   const isFirstTab = tabOrder.indexOf(activeTab) === 0;
 
-
   return (
     <>
       <form onSubmit={handleSubmit} className="w-full mx-auto">
-        <BasicInfoTab />
+        {/* <BasicInfoTab /> */}
+        <BasicInfoTab
+          onFieldChange={(name, value) => {
+            setFormData((prev) => ({ ...prev, [name]: value }));
+          }}
+        />
         {/*Card Body */}
         <Card className="border-none shadow-xl overflow-hidden">
           <CardContent className="p-6">

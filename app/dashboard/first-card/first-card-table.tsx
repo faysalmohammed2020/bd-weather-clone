@@ -715,7 +715,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                             {time.split(":")[0] || "--"}
                           </td>
                           <td className="border border-slate-300 p-1">
-                            {record.c2Indicator || "--"}
+                            {record.subIndicator || "--"}
                           </td>
                           <td className="border border-slate-300 p-1">
                             {record.alteredThermometer || "--"}
