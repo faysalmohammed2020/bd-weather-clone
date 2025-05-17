@@ -1000,7 +1000,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                           />
                         </div>
 
-                        <div className="space-y-2">
+                        {/* <div className="space-y-2">
                           <Label htmlFor="squallTime">Time (qt)</Label>
                           <Input
                             id="squallTime"
@@ -1009,6 +1009,29 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                             onChange={handleChange}
                             className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
                           />
+                        </div> */}
+                        <div className="space-y-2">
+                          <Label htmlFor="squallTime">
+                            GG: Time of Observation (UTC)
+                          </Label>
+                          <select
+                            id="squallTime"
+                            name="squallTime"
+                            value={formData.squallTime || ""}
+                            onChange={handleChange}
+                            required
+                            className="w-full border border-slate-600 rounded-md px-3 py-2 focus:outline-none focus:border-fuchsia-500 focus:ring-fuchsia-500/30"
+                          >
+                            <option value="">-- Select GG Time --</option>
+                            <option value="00">00 UTC</option>
+                            <option value="03">03 UTC</option>
+                            <option value="06">06 UTC</option>
+                            <option value="09">09 UTC</option>
+                            <option value="12">12 UTC</option>
+                            <option value="15">15 UTC</option>
+                            <option value="18">18 UTC</option>
+                            <option value="21">21 UTC</option>
+                          </select>
                         </div>
                       </div>
                     ) : (
