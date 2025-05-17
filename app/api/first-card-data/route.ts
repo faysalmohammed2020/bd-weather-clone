@@ -27,6 +27,7 @@ export async function POST(req: Request) {
       typeof data.year === "string"
         ? data.year
         : Object.values(data.year || {}).join("") || "";
+        
 
     const savedEntry = await prisma.meteorologicalEntry.create({
       data: {

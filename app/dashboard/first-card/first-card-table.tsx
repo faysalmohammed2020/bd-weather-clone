@@ -783,8 +783,16 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                             {record.squallTime || "--"}
                           </td>
                           <td className="border border-slate-300 p-1 font-medium text-blue-700">
-                            {record.horizontalVisibility || "--"}
+                            {record.horizontalVisibility
+                              ? parseInt(record.horizontalVisibility) % 10 === 0
+                                ? parseInt(record.horizontalVisibility, 10) / 10
+                                : (
+                                    parseInt(record.horizontalVisibility, 10) /
+                                    10
+                                  ).toFixed(1)
+                              : "--"}
                           </td>
+
                           <td className="border border-slate-300 p-1">
                             {record.miscMeteors || "--"}
                           </td>
