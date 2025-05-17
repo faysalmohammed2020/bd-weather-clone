@@ -321,7 +321,7 @@ export default function WeatherDataForm() {
         totalRainDuration: measurements?.[15] || "",
       };
 
-      const response = await fetch("/api/daily-summery", {
+      const response = await fetch("/api/daily-summary", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
