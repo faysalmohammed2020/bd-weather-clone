@@ -165,6 +165,9 @@ export async function GET(req: Request) {
       maxTemperature: summary.maxTemperature
         ? (parseFloat(summary.maxTemperature as any) / 10).toFixed(1)
         : summary.maxTemperature,
+      minTemperature: summary.minTemperature
+        ? (parseFloat(summary.minTemperature as any) / 10).toFixed(1)
+        : summary.minTemperature,
       lowestVisibility: summary.lowestVisibility
         ? (parseFloat(summary.lowestVisibility as any) / 10).toFixed(1)
         : summary.lowestVisibility,
