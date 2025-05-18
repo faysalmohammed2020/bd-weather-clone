@@ -434,9 +434,9 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-blue-700 flex items-center">
-        <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mr-2">
+    <div className="space-y-4 mb-6">
+      <h2 className="text-lg font-semibold text-slate-700 flex items-center">
+        <span className="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center mr-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"
@@ -457,12 +457,12 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
         Basic Information
       </h2>
 
-      <Card className="border border-blue-200 bg-white shadow-sm rounded-xl">
+      <Card className=" bg-blue-50 rounded-xl border border-blue-200 ">
         <CardContent className="p-6">
           <div className="flex flex-wrap justify-between gap-8">
             {/* Data Type */}
             <div className="flex flex-col">
-              <Label htmlFor="dataType" className="text-sm font-medium text-blue-700 mb-2">
+              <Label htmlFor="dataType" className="text-sm font-medium text-blue-500 mb-2">
                 DATA TYPE
               </Label>
               <div className="flex gap-1">
@@ -472,7 +472,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
                     id={`dataType-${i}`}
                     maxLength={1}
                     ref={ref}
-                    className="w-12 border-blue-200 focus:border-blue-500 text-center"
+                    className="w-12 bg-white text-center"
                     value={values.dataType?.[i] || ""}
                     onChange={(e) => handleSegmentedInput(e, i, dataTypeRefs, "dataType")}
                   />
@@ -481,7 +481,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
             </div>
 
             <div className="flex flex-col">
-              <Label htmlFor="stationNo" className="text-sm font-medium text-blue-700 mb-2">
+              <Label htmlFor="stationNo" className="text-sm font-medium text-blue-500 mb-2">
                 STATION NO.
               </Label>
               <div className="flex gap-1">
@@ -491,7 +491,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
                     id={`stationNo-${i}`}
                     maxLength={1}
                     ref={ref}
-                    className="w-12 border-blue-200 focus:border-blue-500 text-center"
+                    className="w-12 bg-white text-center"
                     value={values.stationNo?.[i] || ""}
                     onChange={(e) => handleSegmentedInput(e, i, stationNoRefs, "stationNo")}
                   />
@@ -501,20 +501,20 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
 
             {/* Station Name */}
             <div className="flex flex-col flex-1">
-              <Label htmlFor="stationName" className="text-sm font-medium text-blue-700 mb-2">
+              <Label htmlFor="stationName" className="text-sm font-medium text-blue-500 mb-2">
                 STATION NAME
               </Label>
               <Input
                 id="stationName"
                 name="stationName"
                 value={session?.user?.stationName || ""}
-                className="border-blue-200 focus:border-blue-500"
+                className="bg-white"
                 readOnly
               />
             </div>
 
             <div className="flex flex-col">
-              <Label htmlFor="year" className="text-sm font-medium text-blue-700 mb-2">
+              <Label htmlFor="year" className="text-sm font-medium text-blue-500 mb-2">
                 YEAR
               </Label>
               <div className="flex gap-1">
@@ -524,7 +524,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
                     id={`year-${i}`}
                     maxLength={1}
                     ref={ref}
-                    className="w-12 border-blue-200 focus:border-blue-500 text-center"
+                    className="w-12 bg-white text-center"
                     value={values.year?.[i] || ""}
                     onChange={(e) => handleSegmentedInput(e, i, yearRefs, "year")}
                   />
@@ -534,7 +534,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
 
             {/* Month */}
             <div className="flex flex-col">
-              <Label htmlFor="month" className="text-sm font-medium text-blue-700 mb-2">
+              <Label htmlFor="month" className="text-sm font-medium text-blue-500 mb-2">
                 MONTH
               </Label>
               <div className="flex gap-1">
@@ -544,7 +544,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
                     id={`month-${i}`}
                     maxLength={1}
                     ref={ref}
-                    className="w-12 border-blue-200 focus:border-blue-500 text-center"
+                    className="w-12 bg-white text-center"
                     value={values.month?.[i] || ""}
                     onChange={(e) => handleSegmentedInput(e, i, monthRefs, "month")}
                   />
@@ -554,7 +554,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
 
             {/* Day */}
             <div className="flex flex-col">
-              <Label htmlFor="day" className="text-sm font-medium text-blue-700 mb-2">
+              <Label htmlFor="day" className="text-sm font-medium text-blue-500 mb-2">
                 DAY
               </Label>
               <div className="flex gap-1">
@@ -564,7 +564,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
                     id={`day-${i}`}
                     maxLength={1}
                     ref={ref}
-                    className="w-12 border-blue-200 focus:border-blue-500 text-center"
+                    className="w-12 bg-white text-center"
                     value={values.day?.[i] || ""}
                     onChange={(e) => handleSegmentedInput(e, i, dayRefs, "day")}
                   />

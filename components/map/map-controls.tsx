@@ -98,48 +98,34 @@ export default function MapControls({
         Map Controls
       </h3>
 
-      <RadioGroup
-        value={selectedRegion}
-        onValueChange={setSelectedRegion}
-        className="mb-4"
+<label className="block text-sm font-medium text-gray-700 mb-1.5">Stations</label>
+      <Select
+        value={selectedStation?.stationId || ""}
+        onValueChange={(value) => {
+          const station = stations.find((s) => s.stationId === value);
+          setSelectedStation(station || null);
+        }}
+        disabled={loading || permittedStations.length === 0}
       >
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="bangladesh" id="bangladesh" />
-          <Label htmlFor="bangladesh">Bangladesh</Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <RadioGroupItem value="station" id="station" />
-          <Label htmlFor="station">
-            <Select
-              value={selectedStation?.stationId || ""}
-              onValueChange={(value) => {
-                const station = stations.find((s) => s.stationId === value);
-                setSelectedStation(station || null);
-              }}
-              disabled={loading || permittedStations.length === 0}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue
-                  placeholder={
-                    loading
-                      ? "Loading..."
-                      : permittedStations.length === 0
-                        ? "No stations"
-                        : "Select Station"
-                  }
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {permittedStations.map((station) => (
-                  <SelectItem key={station.id} value={station.stationId}>
-                    {station.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Label>
-        </div>
-      </RadioGroup>
+        <SelectTrigger className="w-full">
+          <SelectValue
+            placeholder={
+              loading
+                ? "Loading..."
+                : permittedStations.length === 0
+                  ? "No stations"
+                  : "Select Station"
+            }
+          />
+        </SelectTrigger>
+        <SelectContent>
+          {permittedStations.map((station) => (
+            <SelectItem key={station.id} value={station.stationId}>
+              {station.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       {error && <div className="mt-4 text-red-600 text-sm">Error: {error}</div>}
     </div>

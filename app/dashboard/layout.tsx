@@ -7,7 +7,7 @@ import Profile from "@/components/profile";
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
-      <div className="flex fixed size-full">
+      <div className="flex fixed size-full bg-gray-50">
         <Sidebar />
 
         <div className="flex w-full flex-col overflow-hidden">

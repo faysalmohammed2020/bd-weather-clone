@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MeteorologicalDataForm } from "./meteorological-data-form";
 import { FirstCardTable } from "./first-card-table";
+import { Eye, Pencil } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function FirstCardPage() {
   const [activeTab, setActiveTab] = useState("form");
@@ -16,7 +18,7 @@ export default function FirstCardPage() {
   return (
     <div className=" min-h-screen">
       <main className="container mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-6 text-center">
+        <h1 className="text-3xl font-semibold mb-6 text-center text-slate-700">
           Bangladesh Weather Data Collection
         </h1>
 
@@ -26,12 +28,22 @@ export default function FirstCardPage() {
           onValueChange={setActiveTab}
           className="w-full "
         >
-          <TabsList className="grid w-full bg-white grid-cols-2 mb-8">
-            <TabsTrigger value="form" className="text-base p-3 ">
-              Data Entry Form
+          <TabsList className="grid w-full grid-cols-2 mb-8 gap-4 bg-transparent">
+            <TabsTrigger value="form" className={cn("text-base p-3 border border-gray-300 bg-white flex items-center gap-2", {
+              "border-blue-500 text-blue-700 !bg-blue-50": activeTab === "form",
+            })}>  
+              <Pencil className="size-5" />
+              <span className="font-medium">
+                Data Entry Form
+              </span>
             </TabsTrigger>
-            <TabsTrigger value="table" className="text-base p-3 ">
-              View & Manage Data
+            <TabsTrigger value="table" className={cn("text-base p-3 border border-gray-300 bg-white flex items-center gap-2", {
+              "border-blue-500 text-blue-700 !bg-blue-50": activeTab === "table",
+            })}>
+              <Eye className="size-5"/>
+              <span className="font-medium">
+                View & Manage Data
+              </span>
             </TabsTrigger>
           </TabsList>
 
