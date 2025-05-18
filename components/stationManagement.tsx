@@ -348,7 +348,7 @@ export function StationManagement({
                   );
                 })
                 .map((station) => (
-                  <TableRow key={station.id}>
+                  <TableRow key={`${station.id}-${station.stationId}`}>
                     <TableCell>
                       {editingId === station.id ? (
                         <Input
