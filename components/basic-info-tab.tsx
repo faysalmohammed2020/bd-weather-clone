@@ -471,6 +471,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
                     key={`dataType-${i}`}
                     id={`dataType-${i}`}
                     maxLength={1}
+                    readOnly
                     ref={ref}
                     className="w-12 bg-white text-center"
                     value={values.dataType?.[i] || ""}
@@ -490,6 +491,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
                     key={i}
                     id={`stationNo-${i}`}
                     maxLength={1}
+                    readOnly
                     ref={ref}
                     className="w-12 bg-white text-center"
                     value={values.stationNo?.[i] || ""}
@@ -523,6 +525,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
                     key={i}
                     id={`year-${i}`}
                     maxLength={1}
+                    readOnly
                     ref={ref}
                     className="w-12 bg-white text-center"
                     value={values.year?.[i] || ""}
@@ -543,6 +546,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
                     key={i}
                     id={`month-${i}`}
                     maxLength={1}
+                    readOnly
                     ref={ref}
                     className="w-12 bg-white text-center"
                     value={values.month?.[i] || ""}
@@ -563,6 +567,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
                     key={i}
                     id={`day-${i}`}
                     maxLength={1}
+                    readOnly
                     ref={ref}
                     className="w-12 bg-white text-center"
                     value={values.day?.[i] || ""}
