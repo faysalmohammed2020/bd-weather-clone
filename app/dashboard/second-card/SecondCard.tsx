@@ -1,82 +1,107 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState, useEffect } from "react"
-import { toast } from "sonner"
-import { CloudIcon, CloudRainIcon, Wind, User, Sun, Loader2 } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useSession } from "@/lib/auth-client"
-import { useWeatherObservationForm } from "@/stores/useWeatherObservationForm"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
+import type React from "react";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
+import {
+  CloudIcon,
+  CloudRainIcon,
+  Wind,
+  User,
+  Sun,
+  Loader2,
+} from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useSession } from "@/lib/auth-client";
+import { useWeatherObservationForm } from "@/stores/useWeatherObservationForm";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export default function WeatherObservationForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [activeTab, setActiveTab] = useState("cloud")
-  const [currentStep, setCurrentStep] = useState(1)
-  const totalSteps = 6 // cloud, n, significant-cloud, rainfall, wind, observer
-  const { data: session } = useSession()
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState("cloud");
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
+  const { data: session } = useSession();
 
   const handleNext = () => {
     // Add validation for current step before proceeding
     if (validateStep(currentStep)) {
-      const nextStep = Math.min(currentStep + 1, totalSteps)
-      setCurrentStep(nextStep)
-      setActiveTab(getTabForStep(nextStep))
+      const nextStep = Math.min(currentStep + 1, totalSteps);
+      setCurrentStep(nextStep);
+      setActiveTab(getTabForStep(nextStep));
     }
-  }
+  };
 
   const handlePrevious = () => {
-    const prevStep = Math.max(currentStep - 1, 1)
-    setCurrentStep(prevStep)
-    setActiveTab(getTabForStep(prevStep))
-  }
+    const prevStep = Math.max(currentStep - 1, 1);
+    setCurrentStep(prevStep);
+    setActiveTab(getTabForStep(prevStep));
+  };
 
   const getTabForStep = (step: number) => {
-    const steps = ["cloud", "n", "significant-cloud", "rainfall", "wind", "observer"]
-    return steps[step - 1] || "cloud"
-  }
+    const steps = [
+      "cloud",
+      "n",
+      "significant-cloud",
+      "rainfall",
+      "wind",
+      "observer",
+    ];
+    return steps[step - 1] || "cloud";
+  };
 
   // This section was removed to avoid duplicate declarations
 
   const validateStep = (step: number) => {
     switch (step) {
       case 1: // Cloud
-        return !!safeFormData.clouds.low.form || !!safeFormData.clouds.medium.form || !!safeFormData.clouds.high.form
+        return (
+          !!safeFormData.clouds.low.form ||
+          !!safeFormData.clouds.medium.form ||
+          !!safeFormData.clouds.high.form
+        );
       case 2: // Total Cloud
-        return !!safeFormData.totalCloud["total-cloud-amount"]
+        return !!safeFormData.totalCloud["total-cloud-amount"];
       // Add validation for other steps as needed
       default:
-        return true
+        return true;
     }
-  }
+  };
 
   // Get the persistent form store
-  const { formData, updateFields, resetForm, checkAndResetIfExpired } = useWeatherObservationForm()
-  
+  const { formData, updateFields, resetForm, checkAndResetIfExpired } =
+    useWeatherObservationForm();
+
   // Create a safe default value for form data to prevent TypeScript errors
   const safeFormData = {
     clouds: {
       low: formData?.clouds?.low || {},
       medium: formData?.clouds?.medium || {},
-      high: formData?.clouds?.high || {}
+      high: formData?.clouds?.high || {},
     },
     significantClouds: {
       layer1: formData?.significantClouds?.layer1 || {},
       layer2: formData?.significantClouds?.layer2 || {},
       layer3: formData?.significantClouds?.layer3 || {},
-      layer4: formData?.significantClouds?.layer4 || {}
+      layer4: formData?.significantClouds?.layer4 || {},
     },
     rainfall: formData?.rainfall || {},
     wind: formData?.wind || {},
     observer: formData?.observer || {},
     totalCloud: formData?.totalCloud || {},
-    metadata: formData?.metadata || {}
-  }
-  
+    metadata: formData?.metadata || {},
+  };
+
   // Check for expired form data on component mount
   useEffect(() => {
     const wasReset = checkAndResetIfExpired();
@@ -84,7 +109,7 @@ export default function WeatherObservationForm() {
       toast.info("Your form data was reset due to inactivity");
     }
   }, [checkAndResetIfExpired]);
-  
+
   // Initialize session-specific values when session is available
   useEffect(() => {
     if (session?.user) {
@@ -103,281 +128,320 @@ export default function WeatherObservationForm() {
     // We intentionally omit formData from dependencies to prevent infinite loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, updateFields]);
-  
+
+  // Set observation time on initial load (only runs once)
+  // Set observation time on initial load (only runs once)
   // Set observation time on initial load (only runs once)
   useEffect(() => {
-    // Only set the observation time if it doesn't exist
     if (!formData?.observer || !formData?.observer["observation-time"]) {
+      const utcHour = new Date().getUTCHours().toString().padStart(2, "0"); // "03", "15", etc.
       updateFields({
         observer: {
           ...(formData?.observer || {}),
-          "observation-time": new Date().toISOString().slice(0, 16),
-        }
+          "observation-time": utcHour,
+        },
       });
     }
-    // We intentionally omit formData and updateFields from dependencies to prevent infinite loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handle input changes and update the form data state
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    const { name, value } = e.target;
 
     // Update the appropriate section of the form data based on the input name
     if (name.startsWith("low-cloud-")) {
-      const field = name.replace("low-cloud-", "")
+      const field = name.replace("low-cloud-", "");
       // Ensure we have all required properties for clouds
       updateFields({
         clouds: {
           low: { ...(safeFormData.clouds?.low || {}), [field]: value },
           medium: { ...(safeFormData.clouds?.medium || {}) },
-          high: { ...(safeFormData.clouds?.high || {}) }
+          high: { ...(safeFormData.clouds?.high || {}) },
         },
-      })
+      });
     } else if (name.startsWith("medium-cloud-")) {
-      const field = name.replace("medium-cloud-", "")
+      const field = name.replace("medium-cloud-", "");
       // Ensure we have all required properties for clouds
       updateFields({
         clouds: {
           low: { ...(safeFormData.clouds?.low || {}) },
           medium: { ...(safeFormData.clouds?.medium || {}), [field]: value },
-          high: { ...(safeFormData.clouds?.high || {}) }
+          high: { ...(safeFormData.clouds?.high || {}) },
         },
-      })
+      });
     } else if (name.startsWith("high-cloud-")) {
-      const field = name.replace("high-cloud-", "")
+      const field = name.replace("high-cloud-", "");
       // Ensure we have all required properties for clouds
       updateFields({
         clouds: {
           low: { ...(safeFormData.clouds?.low || {}) },
           medium: { ...(safeFormData.clouds?.medium || {}) },
-          high: { ...(safeFormData.clouds?.high || {}), [field]: value }
+          high: { ...(safeFormData.clouds?.high || {}), [field]: value },
         },
-      })
+      });
     } else if (name.startsWith("sig-cloud-layer1-")) {
-      const field = name.replace("sig-cloud-layer1-", "")
+      const field = name.replace("sig-cloud-layer1-", "");
       // Ensure we have all required properties for significantClouds
       updateFields({
         significantClouds: {
-          layer1: { ...(safeFormData.significantClouds?.layer1 || {}), [field]: value },
+          layer1: {
+            ...(safeFormData.significantClouds?.layer1 || {}),
+            [field]: value,
+          },
           layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
           layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) }
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) },
         },
-      })
+      });
     } else if (name.startsWith("sig-cloud-layer2-")) {
-      const field = name.replace("sig-cloud-layer2-", "")
+      const field = name.replace("sig-cloud-layer2-", "");
       // Ensure we have all required properties for significantClouds
       updateFields({
         significantClouds: {
           layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
-          layer2: { ...(safeFormData.significantClouds?.layer2 || {}), [field]: value },
+          layer2: {
+            ...(safeFormData.significantClouds?.layer2 || {}),
+            [field]: value,
+          },
           layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) }
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) },
         },
-      })
+      });
     } else if (name.startsWith("sig-cloud-layer3-")) {
-      const field = name.replace("sig-cloud-layer3-", "")
+      const field = name.replace("sig-cloud-layer3-", "");
       // Ensure we have all required properties for significantClouds
       updateFields({
         significantClouds: {
           layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
           layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
-          layer3: { ...(safeFormData.significantClouds?.layer3 || {}), [field]: value },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) }
+          layer3: {
+            ...(safeFormData.significantClouds?.layer3 || {}),
+            [field]: value,
+          },
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) },
         },
-      })
+      });
     } else if (name.startsWith("sig-cloud-layer4-")) {
-      const field = name.replace("sig-cloud-layer4-", "")
+      const field = name.replace("sig-cloud-layer4-", "");
       // Ensure we have all required properties for significantClouds
       updateFields({
         significantClouds: {
           layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
           layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
           layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}), [field]: value }
+          layer4: {
+            ...(safeFormData.significantClouds?.layer4 || {}),
+            [field]: value,
+          },
         },
-      })
-    } else if (name.startsWith("rainfall-") || name.startsWith("time-") || name.startsWith("since-") || name.startsWith("during-") || name.startsWith("last-")) {
+      });
+    } else if (
+      name.startsWith("rainfall-") ||
+      name.startsWith("time-") ||
+      name.startsWith("since-") ||
+      name.startsWith("during-") ||
+      name.startsWith("last-")
+    ) {
       // Handle rainfall fields with or without the rainfall- prefix
-      const field = name.startsWith("rainfall-") ? name.replace("rainfall-", "") : name
+      const field = name.startsWith("rainfall-")
+        ? name.replace("rainfall-", "")
+        : name;
       updateFields({
         rainfall: { ...(safeFormData.rainfall || {}), [field]: value },
-      })
-    } else if (name.startsWith("wind-") || name === "first-anemometer" || name === "second-anemometer" || name === "speed" || name === "direction") {
-      // Handle wind fields with or without the wind- prefix
-      const field = name.startsWith("wind-") ? name.replace("wind-", "") : name
+      });
+    } else if (
+      name === "first-anemometer" ||
+      name === "second-anemometer" ||
+      name === "speed" ||
+      name === "wind-direction" // এই লাইনটি নিশ্চিত করুন
+    ) {
       updateFields({
-        wind: { ...(safeFormData.wind || {}), [field]: value },
-      })
-    } else if (name.startsWith("observer-")) {
-      const field = name.replace("observer-", "")
-      updateFields({
-        observer: { ...(safeFormData.observer || {}), [field]: value },
-      })
-    } else if (name === "station-id") {
-      updateFields({
-        metadata: {
-          ...(safeFormData.metadata || {}),
-          stationId: value,
+        wind: {
+          ...(safeFormData.wind || {}),
+          [name]: value,
         },
-      })
+      });
     }
-  }
+  };
 
   // Handle select changes for dropdown fields
   const handleSelectChange = (name: string, value: string) => {
     if (name.startsWith("low-cloud-")) {
-      const field = name.replace("low-cloud-", "")
+      const field = name.replace("low-cloud-", "");
       updateFields({
         clouds: {
           low: { ...(safeFormData.clouds?.low || {}), [field]: value },
           medium: { ...(safeFormData.clouds?.medium || {}) },
-          high: { ...(safeFormData.clouds?.high || {}) }
+          high: { ...(safeFormData.clouds?.high || {}) },
         },
-      })
+      });
     } else if (name.startsWith("medium-cloud-")) {
-      const field = name.replace("medium-cloud-", "")
+      const field = name.replace("medium-cloud-", "");
       updateFields({
         clouds: {
           low: { ...(safeFormData.clouds?.low || {}) },
           medium: { ...(safeFormData.clouds?.medium || {}), [field]: value },
-          high: { ...(safeFormData.clouds?.high || {}) }
+          high: { ...(safeFormData.clouds?.high || {}) },
         },
-      })
+      });
+    } // Add this case to your handleInputChange function
+    // Update your handleSelectChange to include observation-time
+    else if (name === "observation-time") {
+      updateFields({
+        observer: {
+          ...(safeFormData.observer || {}),
+          "observation-time": value,
+        },
+      });
     } else if (name.startsWith("high-cloud-")) {
-      const field = name.replace("high-cloud-", "")
+      const field = name.replace("high-cloud-", "");
       updateFields({
         clouds: {
           low: { ...(safeFormData.clouds?.low || {}) },
           medium: { ...(safeFormData.clouds?.medium || {}) },
-          high: { ...(safeFormData.clouds?.high || {}), [field]: value }
+          high: { ...(safeFormData.clouds?.high || {}), [field]: value },
         },
-      })
+      });
     } else if (name.startsWith("layer1-")) {
       // Handle significant cloud layer1
-      const field = name.replace("layer1-", "")
+      const field = name.replace("layer1-", "");
       updateFields({
         significantClouds: {
-          layer1: { ...(safeFormData.significantClouds?.layer1 || {}), [field]: value },
+          layer1: {
+            ...(safeFormData.significantClouds?.layer1 || {}),
+            [field]: value,
+          },
           layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
           layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) }
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) },
         },
-      })
+      });
     } else if (name.startsWith("layer2-")) {
       // Handle significant cloud layer2
-      const field = name.replace("layer2-", "")
+      const field = name.replace("layer2-", "");
       updateFields({
         significantClouds: {
           layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
-          layer2: { ...(safeFormData.significantClouds?.layer2 || {}), [field]: value },
+          layer2: {
+            ...(safeFormData.significantClouds?.layer2 || {}),
+            [field]: value,
+          },
           layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) }
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) },
         },
-      })
+      });
     } else if (name.startsWith("layer3-")) {
       // Handle significant cloud layer3
-      const field = name.replace("layer3-", "")
+      const field = name.replace("layer3-", "");
       updateFields({
         significantClouds: {
           layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
           layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
-          layer3: { ...(safeFormData.significantClouds?.layer3 || {}), [field]: value },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) }
+          layer3: {
+            ...(safeFormData.significantClouds?.layer3 || {}),
+            [field]: value,
+          },
+          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) },
         },
-      })
+      });
     } else if (name.startsWith("layer4-")) {
       // Handle significant cloud layer4
-      const field = name.replace("layer4-", "")
+      const field = name.replace("layer4-", "");
       updateFields({
         significantClouds: {
           layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
           layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
           layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}), [field]: value }
+          layer4: {
+            ...(safeFormData.significantClouds?.layer4 || {}),
+            [field]: value,
+          },
         },
-      })
+      });
     } else if (name === "total-cloud-amount") {
       updateFields({
         totalCloud: { ...(safeFormData.totalCloud || {}), [name]: value },
-      })
-    } else if (name.startsWith("time-") || name.startsWith("since-") || name.startsWith("during-") || name.startsWith("last-")) {
+      });
+    } else if (
+      name.startsWith("time-") ||
+      name.startsWith("since-") ||
+      name.startsWith("during-") ||
+      name.startsWith("last-")
+    ) {
       // Handle rainfall fields
       updateFields({
         rainfall: { ...(safeFormData.rainfall || {}), [name]: value },
-      })
+      });
     }
-  }
+  };
 
   // Update the handleSubmit function to ensure session values are included in the submission
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (currentStep < totalSteps) {
-      handleNext()
-      return
+    e.preventDefault();
+
+    // Validate all required fields before submission
+    if (!validateStep(currentStep)) {
+      toast.error("Please complete all required fields");
+      return;
     }
-    
-    setIsSubmitting(true)
-    
+
+    setIsSubmitting(true);
+
     try {
-      // Prepare the submission data with safe defaults to prevent null/undefined errors
       const submissionData = {
         clouds: safeFormData.clouds,
         significantClouds: safeFormData.significantClouds,
         rainfall: safeFormData.rainfall,
         wind: safeFormData.wind,
-        observer: safeFormData.observer,
+        observer: {
+          ...safeFormData.observer,
+          "observation-time": safeFormData.observer["observation-time"] || "",
+        },
         totalCloud: safeFormData.totalCloud,
         metadata: {
           ...safeFormData.metadata,
           submittedAt: new Date().toISOString(),
-          tabActiveAtSubmission: activeTab,
-          stationId: safeFormData.metadata.stationId || session?.user?.stationId || ''
-        }
-      }
-      
-      // Send the data to the API
-      const response = await fetch('/api/save-observation', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+          stationId: session?.user?.stationId || "",
         },
-        credentials: 'include', // Include credentials for authentication
+      };
+
+      const response = await fetch("/api/save-observation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
         body: JSON.stringify(submissionData),
-      })
-      
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`)
-      }
-      
-      // Process the response
-      await response.json()
-      
-      // Show success message and reset form
-      toast.success('Weather observation submitted successfully!')
-      resetForm()
-      
-      // Reset to first step
-      setCurrentStep(1)
-      setActiveTab('cloud')
+      });
+
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+
+      const result = await response.json();
+      toast.success("Observation submitted successfully!");
+      resetForm();
+      setCurrentStep(1);
+      setActiveTab("cloud");
     } catch (error) {
-      console.error('Error submitting form:', error)
-      toast.error('Failed to submit weather observation. Please try again.')
+      console.error("Submission error:", error);
+      toast.error("Failed to submit. Please try again.");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   // Define tab colors for different sections
   const tabColors: Record<string, string> = {
     cloud: "bg-blue-100 hover:bg-blue-200 data-[state=active]:bg-blue-500",
     n: "bg-yellow-100 hover:bg-yellow-200 data-[state=active]:bg-yellow-500",
-    "significant-cloud": "bg-purple-100 hover:bg-purple-200 data-[state=active]:bg-purple-500",
+    "significant-cloud":
+      "bg-purple-100 hover:bg-purple-200 data-[state=active]:bg-purple-500",
     rainfall: "bg-cyan-100 hover:bg-cyan-200 data-[state=active]:bg-cyan-500",
     wind: "bg-green-100 hover:bg-green-200 data-[state=active]:bg-green-500",
-    observer: "bg-orange-100 hover:bg-orange-200 data-[state=active]:bg-orange-500",
-  }
+    observer:
+      "bg-orange-100 hover:bg-orange-200 data-[state=active]:bg-orange-500",
+  };
   const cloudAmountOptions = [
     { value: "0", label: "0 - No cloud" },
     { value: "1", label: "1 - 1 octa or less (1/10 or less but not zero)" },
@@ -392,23 +456,27 @@ export default function WeatherObservationForm() {
       value: "/",
       label: "/ - Key obscured or cloud amount cannot be estimated",
     },
-  ]
+  ];
   // Prevent form submission on Enter key and other unwanted submissions
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      e.preventDefault()
+      e.preventDefault();
       if (currentStep < totalSteps) {
-        handleNext()
+        handleNext();
       }
     }
-  }
+  };
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
       <div className="max-w-7xl mx-auto">
         <header className="text-center py-6">
-          <h1 className="text-3xl font-bold text-gray-800">Weather Observation System</h1>
-          <p className="text-lg text-gray-600">Record meteorological data with precision</p>
+          <h1 className="text-3xl font-bold text-gray-800">
+            Weather Observation System
+          </h1>
+          <p className="text-lg text-gray-600">
+            Record meteorological data with precision
+          </p>
         </header>
 
         {/* Wrap in a div to prevent form submission issues */}
@@ -417,15 +485,19 @@ export default function WeatherObservationForm() {
             onSubmit={(e) => {
               // Only allow submission when we're on the last step and the Submit button is clicked
               if (activeTab !== "observer" || currentStep !== totalSteps) {
-                e.preventDefault()
-                return
+                e.preventDefault();
+                return;
               }
-              handleSubmit(e)
+              handleSubmit(e);
             }}
             onKeyDown={handleKeyDown}
             className="w-full"
           >
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
               <TabsList className="flex w-full bg-gray-100 p-1 rounded-none">
                 <TabTrigger
                   value="cloud"
@@ -433,7 +505,12 @@ export default function WeatherObservationForm() {
                   label="CLOUD"
                   colorClass={tabColors.cloud}
                 />
-                <TabTrigger value="n" icon={<Sun className="h-5 w-5" />} label="TOTAL CLOUD" colorClass={tabColors.n} />
+                <TabTrigger
+                  value="n"
+                  icon={<Sun className="h-5 w-5" />}
+                  label="TOTAL CLOUD"
+                  colorClass={tabColors.n}
+                />
                 <TabTrigger
                   value="significant-cloud"
                   icon={<CloudIcon className="h-5 w-5" />}
@@ -446,7 +523,12 @@ export default function WeatherObservationForm() {
                   label="RAINFALL"
                   colorClass={tabColors.rainfall}
                 />
-                <TabTrigger value="wind" icon={<Wind className="h-5 w-5" />} label="WIND" colorClass={tabColors.wind} />
+                <TabTrigger
+                  value="wind"
+                  icon={<Wind className="h-5 w-5" />}
+                  label="WIND"
+                  colorClass={tabColors.wind}
+                />
                 <TabTrigger
                   value="observer"
                   icon={<User className="h-5 w-5" />}
@@ -506,9 +588,13 @@ export default function WeatherObservationForm() {
                         label="Total Cloud Amount (Octa)"
                         accent="yellow"
                         value={formData.totalCloud["total-cloud-amount"] || ""}
-                        onValueChange={(value) => handleSelectChange("total-cloud-amount", value)}
+                        onValueChange={(value) =>
+                          handleSelectChange("total-cloud-amount", value)
+                        }
                         options={cloudAmountOptions.map((opt) => opt.value)}
-                        optionLabels={cloudAmountOptions.map((opt) => opt.label)}
+                        optionLabels={cloudAmountOptions.map(
+                          (opt) => opt.label
+                        )}
                       />
                     </div>
                   </SectionCard>
@@ -640,18 +726,32 @@ export default function WeatherObservationForm() {
                         value={formData.wind["speed"] || ""}
                         onChange={handleInputChange}
                       />
-                      <InputField
-                        id="direction"
-                        name="wind-direction"
-                        label="Direction"
-                        accent="green"
-                        value={formData.wind["wind-direction"] || ""}
-                        onChange={handleInputChange}
-                      />
+                      {/* Wind Direction - Fixed */}
+                      <div className="grid gap-2">
+                        <Label
+                          htmlFor="wind-direction"
+                          className="font-medium text-gray-700"
+                        >
+                          Direction (Degrees)
+                        </Label>
+                        <Input
+                          id="wind-direction"
+                          name="wind-direction"
+                          type="number"
+                          min="0"
+                          max="360"
+                          value={formData.wind["wind-direction"] || ""}
+                          onChange={handleInputChange}
+                          className="border-2 border-green-300 bg-green-50 focus:border-green-500 focus:ring-green-500/30 rounded-lg py-2 px-3"
+                          placeholder="0-360 degrees"
+                        />
+                      </div>
                     </div>
                   </SectionCard>
                 </TabsContent>
 
+                {/* OBSERVER Tab */}
+                {/* OBSERVER Tab */}
                 {/* OBSERVER Tab */}
                 <TabsContent value="observer">
                   <SectionCard
@@ -660,23 +760,89 @@ export default function WeatherObservationForm() {
                     className="border-orange-200"
                   >
                     <div className="grid gap-6 md:grid-cols-2">
+                      {/* Observer Initial */}
                       <InputField
                         id="observer-initial"
                         name="observer-initial"
-                        label="Initial of Observer"
+                        label="Observer Initials"
                         accent="orange"
                         value={formData.observer["observer-initial"] || ""}
                         onChange={handleInputChange}
+                        required
                       />
-                      <InputField
-                        id="observation-time"
-                        name="observation-time"
-                        label="Time of Observation (UTC)"
-                        type="datetime-local"
-                        accent="orange"
-                        value={formData.observer["observation-time"] || ""}
-                        onChange={handleInputChange}
-                      />
+
+                      {/* Observation Time (UTC) */}
+                      <div className="grid gap-2 w-full">
+                        <Label
+                          htmlFor="observation-time"
+                          className="font-medium text-gray-700"
+                        >
+                          Observation Time (UTC) *
+                        </Label>
+                        <Select
+                          value={formData.observer["observation-time"] || ""}
+                          onValueChange={(value) =>
+                            handleSelectChange("observation-time", value)
+                          }
+                          required
+                        >
+                          <SelectTrigger className="w-full border-2 border-orange-300 bg-orange-50 focus:border-orange-500 focus:ring-orange-500/30 rounded-lg px-3 py-2 transition-all">
+                            <SelectValue placeholder="Select UTC time" />
+                          </SelectTrigger>
+                          <SelectContent className="border-2 border-gray-200 rounded-lg shadow-lg">
+                            <SelectItem
+                              value="00"
+                              className="py-2.5 px-4 focus:bg-gray-100"
+                            >
+                              00:00 UTC (Midnight)
+                            </SelectItem>
+                            <SelectItem
+                              value="03"
+                              className="py-2.5 px-4 focus:bg-gray-100"
+                            >
+                              03:00 UTC (Early Morning)
+                            </SelectItem>
+                            <SelectItem
+                              value="06"
+                              className="py-2.5 px-4 focus:bg-gray-100"
+                            >
+                              06:00 UTC (Dawn)
+                            </SelectItem>
+                            <SelectItem
+                              value="09"
+                              className="py-2.5 px-4 focus:bg-gray-100"
+                            >
+                              09:00 UTC (Morning)
+                            </SelectItem>
+                            <SelectItem
+                              value="12"
+                              className="py-2.5 px-4 focus:bg-gray-100"
+                            >
+                              12:00 UTC (Noon)
+                            </SelectItem>
+                            <SelectItem
+                              value="15"
+                              className="py-2.5 px-4 focus:bg-gray-100"
+                            >
+                              15:00 UTC (Afternoon)
+                            </SelectItem>
+                            <SelectItem
+                              value="18"
+                              className="py-2.5 px-4 focus:bg-gray-100"
+                            >
+                              18:00 UTC (Evening)
+                            </SelectItem>
+                            <SelectItem
+                              value="21"
+                              className="py-2.5 px-4 focus:bg-gray-100"
+                            >
+                              21:00 UTC (Night)
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Station ID (Read-only) */}
                       <InputField
                         id="station-id"
                         name="station-id"
@@ -684,7 +850,7 @@ export default function WeatherObservationForm() {
                         accent="orange"
                         value={session?.user?.stationId || ""}
                         onChange={handleInputChange}
-                        disabled // Make it read-only
+                        disabled
                       />
                     </div>
                   </SectionCard>
@@ -692,6 +858,7 @@ export default function WeatherObservationForm() {
               </div>
             </Tabs>
 
+            {/* In your form footer */}
             <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 flex justify-between">
               <Button
                 type="button"
@@ -712,14 +879,7 @@ export default function WeatherObservationForm() {
                 </Button>
               ) : (
                 <Button
-                  type="button"
-                  onClick={(e) => {
-                    // Only submit when we're on the last step and observer tab
-                    if (activeTab === "observer" && currentStep === totalSteps) {
-                      const form = e.currentTarget.closest("form")
-                      if (form) form.requestSubmit()
-                    }
-                  }}
+                  type="submit"
                   className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
                   disabled={isSubmitting}
                 >
@@ -741,7 +901,7 @@ export default function WeatherObservationForm() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Reusable Components
@@ -751,10 +911,10 @@ function TabTrigger({
   label,
   colorClass,
 }: {
-  value: string
-  icon: React.ReactNode
-  label: string
-  colorClass: string
+  value: string;
+  icon: React.ReactNode;
+  label: string;
+  colorClass: string;
 }) {
   return (
     <TabsTrigger
@@ -765,7 +925,7 @@ function TabTrigger({
       {icon}
       <span>{label}</span>
     </TabsTrigger>
-  )
+  );
 }
 
 function SectionCard({
@@ -774,10 +934,10 @@ function SectionCard({
   children,
   className = "",
 }: {
-  title: string
-  icon: React.ReactNode
-  children: React.ReactNode
-  className?: string
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
 }) {
   return (
     <Card className={`border-2 ${className} shadow-sm`}>
@@ -789,7 +949,7 @@ function SectionCard({
       </CardHeader>
       <CardContent>{children}</CardContent>
     </Card>
-  )
+  );
 }
 
 // Update the InputField component to support disabled state
@@ -803,14 +963,14 @@ function InputField({
   disabled = false, // Add disabled prop with default value
   onChange,
 }: {
-  id: string
-  name: string
-  label: string
-  type?: string
-  accent?: string
-  value: string
-  disabled?: boolean
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  id: string;
+  name: string;
+  label: string;
+  type?: string;
+  accent?: string;
+  value: string;
+  disabled?: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   const focusClasses: Record<string, string> = {
     blue: "focus:ring-blue-500 focus:border-blue-500",
@@ -822,7 +982,7 @@ function InputField({
     fuchsia: "focus:ring-fuchsia-500 focus:border-fuchsia-500",
     violet: "focus:ring-violet-500 focus:border-violet-500",
     indigo: "focus:ring-indigo-500 focus:border-indigo-500",
-  }
+  };
 
   return (
     <div className="grid gap-2">
@@ -839,7 +999,7 @@ function InputField({
         disabled={disabled}
       />
     </div>
-  )
+  );
 }
 
 function SelectField({
@@ -852,26 +1012,33 @@ function SelectField({
   options,
   optionLabels,
 }: {
-  id: string
-  name: string
-  label: string
-  accent?: string
-  value: string
-  onValueChange: (value: string) => void
-  options: string[]
-  optionLabels?: string[]
+  id: string;
+  name: string;
+  label: string;
+  accent?: string;
+  value: string;
+  onValueChange: (value: string) => void;
+  options: string[];
+  optionLabels?: string[];
 }) {
   const accentColors: Record<string, string> = {
     blue: "border-blue-200 bg-blue-50/50 focus-within:ring-blue-500 focus-within:border-blue-500",
-    yellow: "border-yellow-200 bg-yellow-50/50 focus-within:ring-yellow-500 focus-within:border-yellow-500",
-    purple: "border-purple-200 bg-purple-50/50 focus-within:ring-purple-500 focus-within:border-purple-500",
+    yellow:
+      "border-yellow-200 bg-yellow-50/50 focus-within:ring-yellow-500 focus-within:border-yellow-500",
+    purple:
+      "border-purple-200 bg-purple-50/50 focus-within:ring-purple-500 focus-within:border-purple-500",
     cyan: "border-cyan-200 bg-cyan-50/50 focus-within:ring-cyan-500 focus-within:border-cyan-500",
-    green: "border-green-200 bg-green-50/50 focus-within:ring-green-500 focus-within:border-green-500",
-    orange: "border-orange-200 bg-orange-50/50 focus-within:ring-orange-500 focus-within:border-orange-500",
-    fuchsia: "border-fuchsia-200 bg-fuchsia-50/50 focus-within:ring-fuchsia-500 focus-within:border-fuchsia-500",
-    violet: "border-violet-200 bg-violet-50/50 focus-within:ring-violet-500 focus-within:border-violet-500",
-    indigo: "border-indigo-200 bg-indigo-50/50 focus-within:ring-indigo-500 focus-within:border-indigo-500",
-  }
+    green:
+      "border-green-200 bg-green-50/50 focus-within:ring-green-500 focus-within:border-green-500",
+    orange:
+      "border-orange-200 bg-orange-50/50 focus-within:ring-orange-500 focus-within:border-orange-500",
+    fuchsia:
+      "border-fuchsia-200 bg-fuchsia-50/50 focus-within:ring-fuchsia-500 focus-within:border-fuchsia-500",
+    violet:
+      "border-violet-200 bg-violet-50/50 focus-within:ring-violet-500 focus-within:border-violet-500",
+    indigo:
+      "border-indigo-200 bg-indigo-50/50 focus-within:ring-indigo-500 focus-within:border-indigo-500",
+  };
 
   return (
     <div className="grid gap-2 w-full">
@@ -898,7 +1065,7 @@ function SelectField({
         </SelectContent>
       </Select>
     </div>
-  )
+  );
 }
 
 function CloudLevelSection({
@@ -909,12 +1076,12 @@ function CloudLevelSection({
   onChange,
   onSelectChange,
 }: {
-  title: string
-  prefix: string
-  color?: string
-  data: Record<string, string>
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onSelectChange: (name: string, value: string) => void
+  title: string;
+  prefix: string;
+  color?: string;
+  data: Record<string, string>;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onSelectChange: (name: string, value: string) => void;
 }) {
   const cloudFormOptions = [
     { value: "0", label: "0 - No Sc, St, Cu or Cb" },
@@ -928,7 +1095,7 @@ function CloudLevelSection({
     { value: "8", label: "8 - Cu and Sc at different levels" },
     { value: "9", label: "9 - Cb with fibrous upper part/anvil" },
     { value: "/", label: "/ - Not visible" },
-  ]
+  ];
 
   const cloudDirectionOptions = [
     { value: "0", label: "0 - Stationary or no direction" },
@@ -941,7 +1108,7 @@ function CloudLevelSection({
     { value: "7", label: "7 - Cloud coming from NW" },
     { value: "8", label: "8 - Cloud coming from N" },
     { value: "9", label: "9 - No definite direction or direction unknown" },
-  ]
+  ];
 
   const cloudHeightOptions = [
     { value: "0", label: "0 - 0 to 50 m" },
@@ -955,7 +1122,7 @@ function CloudLevelSection({
     { value: "8", label: "8 - 2000 to 2500 m" },
     { value: "9", label: "9 - 2500 m or more or no cloud" },
     { value: "/", label: "/ - Height of base of cloud not known" },
-  ]
+  ];
 
   const cloudAmountOptions = [
     { value: "0", label: "0 - No cloud" },
@@ -971,11 +1138,13 @@ function CloudLevelSection({
       value: "/",
       label: "/ - Key obscured or cloud amount cannot be estimated",
     },
-  ]
+  ];
 
   return (
     <div className="bg-gradient-to-r from-white to-gray-50 p-4 rounded-lg border border-gray-200">
-      <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>{title}</h3>
+      <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>
+        {title}
+      </h3>
       <div className="grid gap-4 md:grid-cols-2">
         <SelectField
           id={`${prefix}-direction`}
@@ -983,7 +1152,9 @@ function CloudLevelSection({
           label="Direction (Code)"
           accent={color}
           value={data["direction"] || ""}
-          onValueChange={(value) => onSelectChange(`${prefix}-direction`, value)}
+          onValueChange={(value) =>
+            onSelectChange(`${prefix}-direction`, value)
+          }
           options={cloudDirectionOptions.map((opt) => opt.value)}
           optionLabels={cloudDirectionOptions.map((opt) => opt.label)}
         />
@@ -1019,7 +1190,7 @@ function CloudLevelSection({
         />
       </div>
     </div>
-  )
+  );
 }
 
 function SignificantCloudSection({
@@ -1029,14 +1200,14 @@ function SignificantCloudSection({
   data,
   onSelectChange,
 }: {
-  title: string
-  prefix: string
-  color?: string
-  data: Record<string, string>
-  onSelectChange: (name: string, value: string) => void
+  title: string;
+  prefix: string;
+  color?: string;
+  data: Record<string, string>;
+  onSelectChange: (name: string, value: string) => void;
 }) {
   // Generate height options from 0 to 99
-  const heightOptions = Array.from({ length: 100 }, (_, i) => i.toString())
+  const heightOptions = Array.from({ length: 100 }, (_, i) => i.toString());
 
   const cloudFormOptions = [
     { value: "0", label: "0 - Cirrus (Ci)" },
@@ -1050,7 +1221,7 @@ function SignificantCloudSection({
     { value: "8", label: "8 - Cumulus (Cu)" },
     { value: "9", label: "9 - Cumulonimbus (Cb)" },
     { value: "/", label: "/ - Clouds not visible (darkness, fog, etc.)" },
-  ]
+  ];
 
   const SigcloudAmountOptions = [
     { value: "0", label: "0 - No cloud" },
@@ -1066,11 +1237,13 @@ function SignificantCloudSection({
       value: "/",
       label: "/ - Key obscured or cloud amount cannot be estimated",
     },
-  ]
+  ];
 
   return (
     <div className="bg-gradient-to-r from-white to-gray-50 p-4 rounded-lg border border-gray-200">
-      <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>{title}</h3>
+      <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>
+        {title}
+      </h3>
       <div className="grid gap-4 md:grid-cols-2">
         <SelectField
           id={`${prefix}-height`}
@@ -1103,1087 +1276,5 @@ function SignificantCloudSection({
         />
       </div>
     </div>
-  )
+  );
 }
-
-
-
-// "use client"
-
-// import type React from "react"
-// import { useEffect, useState } from "react"
-// import { toast } from "sonner"
-// import { CloudIcon, CloudRainIcon, Wind, User, Sun, Loader2 } from "lucide-react"
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-// import { Input } from "@/components/ui/input"
-// import { Label } from "@/components/ui/label"
-// import { Button } from "@/components/ui/button"
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// import { useSession } from "@/lib/auth-client"
-
-// // Define the form data structure
-// interface FormData {
-//   clouds: {
-//     low: Record<string, string>
-//     medium: Record<string, string>
-//     high: Record<string, string>
-//   }
-//   significantClouds: {
-//     layer1: Record<string, string>
-//     layer2: Record<string, string>
-//     layer3: Record<string, string>
-//     layer4: Record<string, string>
-//   }
-//   rainfall: Record<string, string>
-//   wind: Record<string, string>
-//   observer: Record<string, string>
-//   totalCloud: Record<string, string>
-//   metadata?: {
-//     stationId: string
-//     submittedAt?: string
-//     tabActiveAtSubmission?: string
-//   }
-// }
-
-// export default function WeatherObservationForm() {
-//   const [isSubmitting, setIsSubmitting] = useState(false)
-//   const [activeTab, setActiveTab] = useState("cloud")
-//   const [currentStep, setCurrentStep] = useState(1)
-//   const totalSteps = 6 // cloud, n, significant-cloud, rainfall, wind, observer
-//   const { data: session } = useSession()
-
-//   const handleNext = () => {
-//     // Add validation for current step before proceeding
-//     if (validateStep(currentStep)) {
-//       const nextStep = Math.min(currentStep + 1, totalSteps)
-//       setCurrentStep(nextStep)
-//       setActiveTab(getTabForStep(nextStep))
-//     }
-//   }
-
-//   const handlePrevious = () => {
-//     const prevStep = Math.max(currentStep - 1, 1)
-//     setCurrentStep(prevStep)
-//     setActiveTab(getTabForStep(prevStep))
-//   }
-
-//   const getTabForStep = (step: number) => {
-//     const steps = ["cloud", "n", "significant-cloud", "rainfall", "wind", "observer"]
-//     return steps[step - 1] || "cloud"
-//   }
-
-//   const validateStep = (step: number) => {
-//     switch (step) {
-//       case 1: // Cloud
-//         return !!formData.clouds.low.form || !!formData.clouds.medium.form || !!formData.clouds.high.form
-//       case 2: // Total Cloud
-//         return !!formData.totalCloud["total-cloud-amount"]
-//       // Add validation for other steps as needed
-//       default:
-//         return true
-//     }
-//   }
-
-//   // Initialize form data state to store values across tab changes
-//   const [formData, setFormData] = useState<FormData>({
-//     clouds: {
-//       low: {},
-//       medium: {},
-//       high: {},
-//     },
-//     totalCloud: {},
-//     significantClouds: {
-//       layer1: {},
-//       layer2: {},
-//       layer3: {},
-//       layer4: {},
-//     },
-//     rainfall: {},
-//     wind: {},
-//     observer: {},
-//     metadata: {
-//       stationId: "",
-//     },
-//   })
-
-//   // Handle input changes and update the form data state
-//   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const { name, value } = e.target
-
-//     // Update the appropriate section of the form data based on the input name
-//     if (name.startsWith("low-cloud-")) {
-//       const field = name.replace("low-cloud-", "")
-//       setFormData((prev) => ({
-//         ...prev,
-//         clouds: {
-//           ...prev.clouds,
-//           low: { ...prev.clouds.low, [field]: value },
-//         },
-//       }))
-//     } else if (name.startsWith("medium-cloud-")) {
-//       const field = name.replace("medium-cloud-", "")
-//       setFormData((prev) => ({
-//         ...prev,
-//         clouds: {
-//           ...prev.clouds,
-//           medium: { ...prev.clouds.medium, [field]: value },
-//         },
-//       }))
-//     } else if (name.startsWith("high-cloud-")) {
-//       const field = name.replace("high-cloud-", "")
-//       setFormData((prev) => ({
-//         ...prev,
-//         clouds: {
-//           ...prev.clouds,
-//           high: { ...prev.clouds.high, [field]: value },
-//         },
-//       }))
-//     }
-//     // Significant clouds
-//     else if (name.startsWith("layer")) {
-//       const [layer, field] = name.split("-").slice(0, 2)
-//       setFormData((prev) => ({
-//         ...prev,
-//         significantClouds: {
-//           ...prev.significantClouds,
-//           [layer]: {
-//             ...prev.significantClouds[layer as keyof typeof prev.significantClouds],
-//             [field]: value,
-//           },
-//         },
-//       }))
-//     }
-//     // Total cloud
-//     else if (name === "total-cloud-amount") {
-//       setFormData((prev) => ({
-//         ...prev,
-//         totalCloud: { ...prev.totalCloud, [name]: value },
-//       }))
-//     }
-//     // Rainfall
-//     else if (["time-start", "time-end", "since-previous", "during-previous", "last-24-hours"].includes(name)) {
-//       setFormData((prev) => ({
-//         ...prev,
-//         rainfall: { ...prev.rainfall, [name]: value },
-//       }))
-//     }
-//     // Wind
-//     else if (["first-anemometer", "second-anemometer", "speed", "wind-direction"].includes(name)) {
-//       setFormData((prev) => ({
-//         ...prev,
-//         wind: { ...prev.wind, [name]: value },
-//       }))
-//     }
-//     // Observer fields
-//     else if (["observer-initial", "observation-time"].includes(name)) {
-//       setFormData((prev) => ({
-//         ...prev,
-//         observer: { ...prev.observer, [name]: value },
-//       }))
-//     }
-//     // Station ID (needs to go in metadata)
-//     else if (name === "station-id") {
-//       setFormData((prev) => ({
-//         ...prev,
-//         metadata: {
-//           ...(prev.metadata || {}),
-//           stationId: value,
-//         },
-//       }))
-//     }
-//   }
-
-//   // Handle select changes for dropdown fields
-//   const handleSelectChange = (name: string, value: string) => {
-//     if (name.startsWith("low-cloud-")) {
-//       const field = name.replace("low-cloud-", "")
-//       setFormData((prev) => ({
-//         ...prev,
-//         clouds: {
-//           ...prev.clouds,
-//           low: { ...prev.clouds.low, [field]: value },
-//         },
-//       }))
-//     } else if (name.startsWith("medium-cloud-")) {
-//       const field = name.replace("medium-cloud-", "")
-//       setFormData((prev) => ({
-//         ...prev,
-//         clouds: {
-//           ...prev.clouds,
-//           medium: { ...prev.clouds.medium, [field]: value },
-//         },
-//       }))
-//     } else if (name.startsWith("high-cloud-")) {
-//       const field = name.replace("high-cloud-", "")
-//       setFormData((prev) => ({
-//         ...prev,
-//         clouds: {
-//           ...prev.clouds,
-//           high: { ...prev.clouds.high, [field]: value },
-//         },
-//       }))
-//     } else if (name.startsWith("layer")) {
-//       const [layer, field] = name.split("-").slice(0, 2)
-//       setFormData((prev) => ({
-//         ...prev,
-//         significantClouds: {
-//           ...prev.significantClouds,
-//           [layer]: {
-//             ...prev.significantClouds[layer as keyof typeof prev.significantClouds],
-//             [field]: value,
-//           },
-//         },
-//       }))
-//     } else if (name === "total-cloud-amount") {
-//       setFormData((prev) => ({
-//         ...prev,
-//         totalCloud: { ...prev.totalCloud, [name]: value },
-//       }))
-//     }
-//   }
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault()
-//     setIsSubmitting(true)
-
-//     try {
-//       // Prepare the data object from our state
-//       const dataToSubmit = {
-//         clouds: formData.clouds,
-//         totalCloud: formData.totalCloud,
-//         significantClouds: formData.significantClouds,
-//         rainfall: formData.rainfall,
-//         wind: {
-//           ...formData.wind,
-//           direction: formData.wind["wind-direction"], // Rename to match expected format
-//         },
-//         observer: {
-//           ...formData.observer,
-//         },
-//         metadata: {
-//           submittedAt: new Date().toISOString(),
-//           stationId: formData.metadata?.stationId || "",
-//           tabActiveAtSubmission: activeTab,
-//         },
-//       }
-
-//       console.log("Submitting data:", dataToSubmit)
-
-//       const response = await fetch("/api/save-observation", {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//           "X-Request-ID": crypto.randomUUID(),
-//         },
-//         body: JSON.stringify(dataToSubmit),
-//       })
-
-//       if (!response.ok) {
-//         const errorData = await response.json()
-//         throw new Error(errorData.error || `Server error: ${response.status}`)
-//       }
-
-//       const result = await response.json()
-
-//       toast.success("Weather data saved successfully!", {
-//         description: `Observation ID: ${result.data.id}`,
-//         action: {
-//           label: "View All",
-//           onClick: () => (window.location.href = "/observations"),
-//         },
-//       })
-
-//       // Reset form but preserve station ID
-//       const stationId = formData.metadata?.stationId || ""
-
-//       // Reset form data
-//       setFormData({
-//         clouds: { low: {}, medium: {}, high: {} },
-//         significantClouds: { layer1: {}, layer2: {}, layer3: {}, layer4: {} },
-//         rainfall: {},
-//         wind: {},
-//         observer: {},
-//         totalCloud: {},
-//         metadata: { stationId },
-//       })
-//     } catch (error) {
-//       toast.error("Failed to save observation", {
-//         description: error instanceof Error ? error.message : "Unknown error",
-//         action: {
-//           label: "Retry",
-//           onClick: () => handleSubmit(e),
-//         },
-//       })
-//       console.error("Submission error:", error)
-//     } finally {
-//       setIsSubmitting(false)
-//     }
-//   }
-
-//   useEffect(() => {
-//     async function fetchUserInfo() {
-//       try {
-//         const res = await fetch("/api/users") // same route
-//         if (!res.ok) {
-//           throw new Error("Unauthorized or failed to fetch user")
-//         }
-
-//         const users = await res.json()
-//         const currentUser = users && users.length > 0 ? users[0] : null // or use your own filtering logic if multiple users
-
-//         const now = new Date().toISOString().slice(0, 16) // for datetime-local
-
-//         setFormData((prev) => ({
-//           ...prev,
-//           observer: {
-//             ...prev.observer,
-//             "observer-initial": currentUser?.name || "",
-//             "observation-time": now,
-//           },
-//           metadata: {
-//             ...prev.metadata,
-//             stationId: currentUser?.stationId || "",
-//           },
-//         }))
-//       } catch (err) {
-//         console.error("Failed to fetch user info:", err)
-//       }
-//     }
-
-//     fetchUserInfo()
-//   }, [])
-
-//   const tabColors: Record<string, string> = {
-//     cloud: "bg-blue-100 hover:bg-blue-200 data-[state=active]:bg-blue-500",
-//     n: "bg-yellow-100 hover:bg-yellow-200 data-[state=active]:bg-yellow-500",
-//     "significant-cloud": "bg-purple-100 hover:bg-purple-200 data-[state=active]:bg-purple-500",
-//     rainfall: "bg-cyan-100 hover:bg-cyan-200 data-[state=active]:bg-cyan-500",
-//     wind: "bg-green-100 hover:bg-green-200 data-[state=active]:bg-green-500",
-//     observer: "bg-orange-100 hover:bg-orange-200 data-[state=active]:bg-orange-500",
-//   }
-//   const cloudAmountOptions = [
-//     { value: "0", label: "0 - No cloud" },
-//     { value: "1", label: "1 - 1 octa or less (1/10 or less but not zero)" },
-//     { value: "2", label: "2 - 2 octas (2/10 to 3/10)" },
-//     { value: "3", label: "3 - 3 octas (4/10)" },
-//     { value: "4", label: "4 - 4 octas (5/10)" },
-//     { value: "5", label: "5 - 5 octas (6/10)" },
-//     { value: "6", label: "6 - 6 octas (7/10 to 8/10)" },
-//     { value: "7", label: "7 - 7 octas (9/10 or more but not 10/10)" },
-//     { value: "8", label: "8 - 8 octas (10/10)" },
-//     {
-//       value: "/",
-//       label: "/ - Key obscured or cloud amount cannot be estimated",
-//     },
-//   ]
-//   // Prevent form submission on Enter key and other unwanted submissions
-//   const handleKeyDown = (e: React.KeyboardEvent) => {
-//     if (e.key === "Enter") {
-//       e.preventDefault()
-//       if (currentStep < totalSteps) {
-//         handleNext()
-//       }
-//     }
-//   }
-
-//   return (
-//     <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
-//       <div className="max-w-7xl mx-auto">
-//         <header className="text-center py-6">
-//           <h1 className="text-3xl font-bold text-gray-800">Weather Observation System</h1>
-//           <p className="text-lg text-gray-600">Record meteorological data with precision</p>
-//         </header>
-
-//         {/* Wrap in a div to prevent form submission issues */}
-//         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-//           <form
-//             onSubmit={(e) => {
-//               // Only allow submission when we're on the last step and the Submit button is clicked
-//               if (activeTab !== "observer" || currentStep !== totalSteps) {
-//                 e.preventDefault()
-//                 return
-//               }
-//               handleSubmit(e)
-//             }}
-//             onKeyDown={handleKeyDown}
-//             className="w-full"
-//           >
-//             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-//               <TabsList className="flex w-full bg-gray-100 p-1 rounded-none">
-//                 <TabTrigger
-//                   value="cloud"
-//                   icon={<CloudIcon className="h-5 w-5" />}
-//                   label="CLOUD"
-//                   colorClass={tabColors.cloud}
-//                 />
-//                 <TabTrigger value="n" icon={<Sun className="h-5 w-5" />} label="TOTAL CLOUD" colorClass={tabColors.n} />
-//                 <TabTrigger
-//                   value="significant-cloud"
-//                   icon={<CloudIcon className="h-5 w-5" />}
-//                   label="SIG CLOUD"
-//                   colorClass={tabColors["significant-cloud"]}
-//                 />
-//                 <TabTrigger
-//                   value="rainfall"
-//                   icon={<CloudRainIcon className="h-5 w-5" />}
-//                   label="RAINFALL"
-//                   colorClass={tabColors.rainfall}
-//                 />
-//                 <TabTrigger value="wind" icon={<Wind className="h-5 w-5" />} label="WIND" colorClass={tabColors.wind} />
-//                 <TabTrigger
-//                   value="observer"
-//                   icon={<User className="h-5 w-5" />}
-//                   label="OBSERVER"
-//                   colorClass={tabColors.observer}
-//                 />
-//               </TabsList>
-
-//               <div className="p-6">
-//                 {/* CLOUD Tab */}
-//                 <TabsContent value="cloud">
-//                   <SectionCard
-//                     title="Cloud Observation"
-//                     icon={<CloudIcon className="h-6 w-6 text-blue-500" />}
-//                     className="border-blue-200"
-//                   >
-//                     <div className="space-y-8">
-//                       <CloudLevelSection
-//                         title="Low Cloud"
-//                         prefix="low-cloud"
-//                         color="blue"
-//                         data={formData.clouds.low}
-//                         onChange={handleInputChange}
-//                         onSelectChange={handleSelectChange}
-//                       />
-//                       <CloudLevelSection
-//                         title="Medium Cloud"
-//                         prefix="medium-cloud"
-//                         color="purple"
-//                         data={formData.clouds.medium}
-//                         onChange={handleInputChange}
-//                         onSelectChange={handleSelectChange}
-//                       />
-//                       <CloudLevelSection
-//                         title="High Cloud"
-//                         prefix="high-cloud"
-//                         color="cyan"
-//                         data={formData.clouds.high}
-//                         onChange={handleInputChange}
-//                         onSelectChange={handleSelectChange}
-//                       />
-//                     </div>
-//                   </SectionCard>
-//                 </TabsContent>
-
-//                 {/* TOTAL CLOUD Tab */}
-//                 <TabsContent value="n">
-//                   <SectionCard
-//                     title="Total Cloud Amount"
-//                     icon={<Sun className="h-6 w-6 text-yellow-500" />}
-//                     className="border-yellow-200"
-//                   >
-//                     <div className="grid gap-6">
-//                       <SelectField
-//                         id="total-cloud-amount"
-//                         name="total-cloud-amount"
-//                         label="Total Cloud Amount (Octa)"
-//                         accent="yellow"
-//                         value={formData.totalCloud["total-cloud-amount"] || ""}
-//                         onValueChange={(value) => handleSelectChange("total-cloud-amount", value)}
-//                         options={cloudAmountOptions.map((opt) => opt.value)}
-//                         optionLabels={cloudAmountOptions.map((opt) => opt.label)}
-//                       />
-//                     </div>
-//                   </SectionCard>
-//                 </TabsContent>
-
-//                 {/* SIGNIFICANT CLOUD Tab */}
-//                 <TabsContent value="significant-cloud">
-//                   <SectionCard
-//                     title="Significant Cloud"
-//                     icon={<CloudIcon className="h-6 w-6 text-purple-500" />}
-//                     className="border-purple-200"
-//                   >
-//                     <div className="space-y-8">
-//                       <SignificantCloudSection
-//                         title="1st Layer"
-//                         prefix="layer1"
-//                         color="purple"
-//                         data={formData.significantClouds.layer1}
-//                         onSelectChange={handleSelectChange}
-//                       />
-//                       <SignificantCloudSection
-//                         title="2nd Layer"
-//                         prefix="layer2"
-//                         color="fuchsia"
-//                         data={formData.significantClouds.layer2}
-//                         onSelectChange={handleSelectChange}
-//                       />
-//                       <SignificantCloudSection
-//                         title="3rd Layer"
-//                         prefix="layer3"
-//                         color="violet"
-//                         data={formData.significantClouds.layer3}
-//                         onSelectChange={handleSelectChange}
-//                       />
-//                       <SignificantCloudSection
-//                         title="4th Layer"
-//                         prefix="layer4"
-//                         color="indigo"
-//                         data={formData.significantClouds.layer4}
-//                         onSelectChange={handleSelectChange}
-//                       />
-//                     </div>
-//                   </SectionCard>
-//                 </TabsContent>
-
-//                 {/* RAINFALL Tab */}
-//                 <TabsContent value="rainfall">
-//                   <SectionCard
-//                     title="Rainfall Measurement (mm)"
-//                     icon={<CloudRainIcon className="h-6 w-6 text-cyan-500" />}
-//                     className="border-cyan-200"
-//                   >
-//                     <div className="grid gap-6 md:grid-cols-2">
-//                       <InputField
-//                         id="time-start"
-//                         name="time-start"
-//                         label="Time of Start (HH:MM UTC)"
-//                         accent="cyan"
-//                         value={formData.rainfall["time-start"] || ""}
-//                         onChange={handleInputChange}
-//                       />
-//                       <InputField
-//                         id="time-end"
-//                         name="time-end"
-//                         label="Time of Ending (HH:MM UTC)"
-//                         accent="cyan"
-//                         value={formData.rainfall["time-end"] || ""}
-//                         onChange={handleInputChange}
-//                       />
-//                       <InputField
-//                         id="since-previous"
-//                         name="since-previous"
-//                         label="Since Previous Observation"
-//                         accent="cyan"
-//                         value={formData.rainfall["since-previous"] || ""}
-//                         onChange={handleInputChange}
-//                       />
-//                       <InputField
-//                         id="during-previous"
-//                         name="during-previous"
-//                         label="During Previous 6 Hours (At 00, 06, 12, 18 UTC)"
-//                         accent="cyan"
-//                         value={formData.rainfall["during-previous"] || ""}
-//                         onChange={handleInputChange}
-//                       />
-//                       <div className="md:col-span-2">
-//                         <InputField
-//                           id="last-24-hours"
-//                           name="last-24-hours"
-//                           label="Last 24 Hours Precipitation"
-//                           accent="cyan"
-//                           value={formData.rainfall["last-24-hours"] || ""}
-//                           onChange={handleInputChange}
-//                         />
-//                       </div>
-//                     </div>
-//                   </SectionCard>
-//                 </TabsContent>
-
-//                 {/* WIND Tab */}
-//                 <TabsContent value="wind">
-//                   <SectionCard
-//                     title="Wind Measurement"
-//                     icon={<Wind className="h-6 w-6 text-green-500" />}
-//                     className="border-green-200"
-//                   >
-//                     <div className="grid gap-6 md:grid-cols-2">
-//                       <InputField
-//                         id="first-anemometer"
-//                         name="first-anemometer"
-//                         label="1st Anemometer Reading"
-//                         accent="green"
-//                         value={formData.wind["first-anemometer"] || ""}
-//                         onChange={handleInputChange}
-//                       />
-//                       <InputField
-//                         id="second-anemometer"
-//                         name="second-anemometer"
-//                         label="2nd Anemometer Reading"
-//                         accent="green"
-//                         value={formData.wind["second-anemometer"] || ""}
-//                         onChange={handleInputChange}
-//                       />
-//                       <InputField
-//                         id="speed"
-//                         name="speed"
-//                         label="Speed (KTS)"
-//                         accent="green"
-//                         value={formData.wind["speed"] || ""}
-//                         onChange={handleInputChange}
-//                       />
-//                       <InputField
-//                         id="direction"
-//                         name="wind-direction"
-//                         label="Direction"
-//                         accent="green"
-//                         value={formData.wind["wind-direction"] || ""}
-//                         onChange={handleInputChange}
-//                       />
-//                     </div>
-//                   </SectionCard>
-//                 </TabsContent>
-
-//                 {/* OBSERVER Tab */}
-//                 <TabsContent value="observer">
-//                   <SectionCard
-//                     title="Observer Information"
-//                     icon={<User className="h-6 w-6 text-orange-500" />}
-//                     className="border-orange-200"
-//                   >
-//                     <div className="grid gap-6 md:grid-cols-2">
-//                       <InputField
-//                         id="observer-initial"
-//                         name="observer-initial"
-//                         label="Initial of Observer"
-//                         accent="orange"
-//                         value={formData.observer["observer-initial"] || ""}
-//                         onChange={handleInputChange}
-//                       />
-//                       <InputField
-//                         id="observation-time"
-//                         name="observation-time"
-//                         label="Time of Observation (UTC)"
-//                         type="datetime-local"
-//                         accent="orange"
-//                         value={formData.observer["observation-time"] || ""}
-//                         onChange={handleInputChange}
-//                       />
-//                       <InputField
-//                         id="station-id"
-//                         name="station-id"
-//                         label="Station ID"
-//                         accent="orange"
-//                         value={session?.user?.stationId || ""}
-//                         onChange={handleInputChange}
-//                       />
-//                     </div>
-//                   </SectionCard>
-//                 </TabsContent>
-//               </div>
-//             </Tabs>
-
-//             <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 flex justify-between">
-//               <Button
-//                 type="button"
-//                 onClick={handlePrevious}
-//                 disabled={currentStep === 1}
-//                 className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
-//               >
-//                 Previous
-//               </Button>
-
-//               {currentStep < totalSteps ? (
-//                 <Button
-//                   type="button"
-//                   onClick={handleNext}
-//                   className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
-//                 >
-//                   Next
-//                 </Button>
-//               ) : (
-//                 <Button
-//                   type="button"
-//                   onClick={(e) => {
-//                     // Only submit when we're on the last step and observer tab
-//                     if (activeTab === "observer" && currentStep === totalSteps) {
-//                       const form = e.currentTarget.closest("form")
-//                       if (form) form.requestSubmit()
-//                     }
-//                   }}
-//                   className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
-//                   disabled={isSubmitting}
-//                 >
-//                   {isSubmitting ? (
-//                     <>
-//                       <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-//                       Submitting...
-//                     </>
-//                   ) : (
-//                     <>
-//                       <CloudIcon className="h-5 w-5 mr-2" />
-//                       Submit Observation
-//                     </>
-//                   )}
-//                 </Button>
-//               )}
-//             </div>
-//           </form>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// // Reusable Components
-// function TabTrigger({
-//   value,
-//   icon,
-//   label,
-//   colorClass,
-// }: {
-//   value: string
-//   icon: React.ReactNode
-//   label: string
-//   colorClass: string
-// }) {
-//   return (
-//     <TabsTrigger
-//       value={value}
-//       className={`flex-1 flex items-center justify-center gap-2 py-3 px-2 rounded-md transition-all 
-//                  ${colorClass} data-[state=active]:text-white font-medium`}
-//     >
-//       {icon}
-//       <span>{label}</span>
-//     </TabsTrigger>
-//   )
-// }
-
-// function SectionCard({
-//   title,
-//   icon,
-//   children,
-//   className = "",
-// }: {
-//   title: string
-//   icon: React.ReactNode
-//   children: React.ReactNode
-//   className?: string
-// }) {
-//   return (
-//     <Card className={`border-2 ${className} shadow-sm`}>
-//       <CardHeader className="pb-4">
-//         <CardTitle className="flex items-center gap-3 text-xl">
-//           {icon}
-//           {title}
-//         </CardTitle>
-//       </CardHeader>
-//       <CardContent>{children}</CardContent>
-//     </Card>
-//   )
-// }
-
-// function InputField({
-//   id,
-//   name,
-//   label,
-//   type = "text",
-//   accent = "blue",
-//   value,
-//   disabled,
-//   onChange,
-// }: {
-//   id: string
-//   name: string
-//   label: string
-//   type?: string
-//   accent?: string
-//   value: string
-//   disabled?: boolean
-//   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-// }) {
-//   const focusClasses: Record<string, string> = {
-//     blue: "focus:ring-blue-500 focus:border-blue-500",
-//     yellow: "focus:ring-yellow-500 focus:border-yellow-500",
-//     purple: "focus:ring-purple-500 focus:border-purple-500",
-//     cyan: "focus:ring-cyan-500 focus:border-cyan-500",
-//     green: "focus:ring-green-500 focus:border-green-500",
-//     orange: "focus:ring-orange-500 focus:border-orange-500",
-//     fuchsia: "focus:ring-fuchsia-500 focus:border-fuchsia-500",
-//     violet: "focus:ring-violet-500 focus:border-violet-500",
-//     indigo: "focus:ring-indigo-500 focus:border-indigo-500",
-//   }
-
-//   return (
-//     <div className="grid gap-2">
-//       <Label htmlFor={id} className="font-medium text-gray-700">
-//         {label}
-//       </Label>
-//       <Input
-//         id={id}
-//         name={name}
-//         type={type}
-//         value={value}
-//         onChange={onChange}
-//         className={`${focusClasses[accent]} border-gray-300 rounded-lg py-2 px-3`}
-//         disabled={disabled}
-//       />
-//     </div>
-//   )
-// }
-
-// function SelectField({
-//   id,
-//   name,
-//   label,
-//   accent = "blue",
-//   value,
-//   onValueChange,
-//   options,
-//   optionLabels,
-// }: {
-//   id: string
-//   name: string
-//   label: string
-//   accent?: string
-//   value: string
-//   onValueChange: (value: string) => void
-//   options: string[]
-//   optionLabels?: string[]
-// }) {
-//   const accentColors: Record<string, string> = {
-//     blue: "border-blue-200 bg-blue-50/50 focus-within:ring-blue-500 focus-within:border-blue-500",
-//     yellow: "border-yellow-200 bg-yellow-50/50 focus-within:ring-yellow-500 focus-within:border-yellow-500",
-//     purple: "border-purple-200 bg-purple-50/50 focus-within:ring-purple-500 focus-within:border-purple-500",
-//     cyan: "border-cyan-200 bg-cyan-50/50 focus-within:ring-cyan-500 focus-within:border-cyan-500",
-//     green: "border-green-200 bg-green-50/50 focus-within:ring-green-500 focus-within:border-green-500",
-//     orange: "border-orange-200 bg-orange-50/50 focus-within:ring-orange-500 focus-within:border-orange-500",
-//     fuchsia: "border-fuchsia-200 bg-fuchsia-50/50 focus-within:ring-fuchsia-500 focus-within:border-fuchsia-500",
-//     violet: "border-violet-200 bg-violet-50/50 focus-within:ring-violet-500 focus-within:border-violet-500",
-//     indigo: "border-indigo-200 bg-indigo-50/50 focus-within:ring-indigo-500 focus-within:border-indigo-500",
-//   }
-
-//   return (
-//     <div className="grid gap-2 w-full">
-//       <Label htmlFor={id} className="font-medium text-gray-700">
-//         {label}
-//       </Label>
-//       <Select name={name} value={value} onValueChange={onValueChange}>
-//         <SelectTrigger
-//           id={id}
-//           className={`w-full border-2 ${accentColors[accent]} rounded-lg py-2.5 px-4 transition-all duration-200 shadow-sm hover:bg-white focus:shadow-md`}
-//         >
-//           <SelectValue placeholder="Select..." className="text-gray-600" />
-//         </SelectTrigger>
-//         <SelectContent className="max-h-80 overflow-y-auto rounded-lg border-2 border-gray-200 shadow-lg">
-//           {options.map((option, index) => (
-//             <SelectItem
-//               key={option}
-//               value={option}
-//               className="py-2.5 px-4 focus:bg-gray-100 focus:text-gray-900 rounded-md cursor-pointer"
-//             >
-//               {optionLabels ? optionLabels[index] : option}
-//             </SelectItem>
-//           ))}
-//         </SelectContent>
-//       </Select>
-//     </div>
-//   )
-// }
-
-// function CloudLevelSection({
-//   title,
-//   prefix,
-//   color = "blue",
-//   data,
-//   onChange,
-//   onSelectChange,
-// }: {
-//   title: string
-//   prefix: string
-//   color?: string
-//   data: Record<string, string>
-//   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-//   onSelectChange: (name: string, value: string) => void
-// }) {
-//   const cloudFormOptions = [
-//     { value: "0", label: "0 - No Sc, St, Cu or Cb" },
-//     { value: "1", label: "1 - Cu with little vertical extent" },
-//     { value: "2", label: "2 - Cu of moderate/strong vertical extent" },
-//     { value: "3", label: "3 - Cb lacking sharp outlines" },
-//     { value: "4", label: "4 - Sc formed from spreading Cu" },
-//     { value: "5", label: "5 - Sc not from spreading Cu" },
-//     { value: "6", label: "6 - St in continuous sheet or ragged shreds" },
-//     { value: "7", label: "7 - Stratus fractus or Cu fractus of bad weather" },
-//     { value: "8", label: "8 - Cu and Sc at different levels" },
-//     { value: "9", label: "9 - Cb with fibrous upper part/anvil" },
-//     { value: "/", label: "/ - Not visible" },
-//   ]
-
-//   const cloudDirectionOptions = [
-//     { value: "0", label: "0 - Stationary or no direction" },
-//     { value: "1", label: "1 - Cloud coming from NE" },
-//     { value: "2", label: "2 - Cloud coming from E" },
-//     { value: "3", label: "3 - Cloud coming from SE" },
-//     { value: "4", label: "4 - Cloud coming from S" },
-//     { value: "5", label: "5 - Cloud coming from SW" },
-//     { value: "6", label: "6 - Cloud coming from W" },
-//     { value: "7", label: "7 - Cloud coming from NW" },
-//     { value: "8", label: "8 - Cloud coming from N" },
-//     { value: "9", label: "9 - No definite direction or direction unknown" },
-//   ]
-
-//   const cloudHeightOptions = [
-//     { value: "0", label: "0 - 0 to 50 m" },
-//     { value: "1", label: "1 - 50 to 100 m" },
-//     { value: "2", label: "2 - 100 to 200 m" },
-//     { value: "3", label: "3 - 200 to 300 m" },
-//     { value: "4", label: "4 - 300 to 600 m" },
-//     { value: "5", label: "5 - 600 to 1000 m" },
-//     { value: "6", label: "6 - 1000 to 1500 m" },
-//     { value: "7", label: "7 - 1500 to 2000 m" },
-//     { value: "8", label: "8 - 2000 to 2500 m" },
-//     { value: "9", label: "9 - 2500 m or more or no cloud" },
-//     { value: "/", label: "/ - Height of base of cloud not known" },
-//   ]
-
-//   const cloudAmountOptions = [
-//     { value: "0", label: "0 - No cloud" },
-//     { value: "1", label: "1 - 1 octa or less (1/10 or less but not zero)" },
-//     { value: "2", label: "2 - 2 octas (2/10 to 3/10)" },
-//     { value: "3", label: "3 - 3 octas (4/10)" },
-//     { value: "4", label: "4 - 4 octas (5/10)" },
-//     { value: "5", label: "5 - 5 octas (6/10)" },
-//     { value: "6", label: "6 - 6 octas (7/10 to 8/10)" },
-//     { value: "7", label: "7 - 7 octas (9/10 or more but not 10/10)" },
-//     { value: "8", label: "8 - 8 octas (10/10)" },
-//     {
-//       value: "/",
-//       label: "/ - Key obscured or cloud amount cannot be estimated",
-//     },
-//   ]
-
-//   return (
-//     <div className="bg-gradient-to-r from-white to-gray-50 p-4 rounded-lg border border-gray-200">
-//       <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>{title}</h3>
-//       <div className="grid gap-4 md:grid-cols-2">
-//         <SelectField
-//           id={`${prefix}-direction`}
-//           name={`${prefix}-direction`}
-//           label="Direction (Code)"
-//           accent={color}
-//           value={data["direction"] || ""}
-//           onValueChange={(value) => onSelectChange(`${prefix}-direction`, value)}
-//           options={cloudDirectionOptions.map((opt) => opt.value)}
-//           optionLabels={cloudDirectionOptions.map((opt) => opt.label)}
-//         />
-//         <SelectField
-//           id={`${prefix}-height`}
-//           name={`${prefix}-height`}
-//           label="Height of Base (Code)"
-//           accent={color}
-//           value={data["height"] || ""}
-//           onValueChange={(value) => onSelectChange(`${prefix}-height`, value)}
-//           options={cloudHeightOptions.map((opt) => opt.value)}
-//           optionLabels={cloudHeightOptions.map((opt) => opt.label)}
-//         />
-//         <SelectField
-//           id={`${prefix}-form`}
-//           name={`${prefix}-form`}
-//           label="Form (Code)"
-//           accent={color}
-//           value={data["form"] || ""}
-//           onValueChange={(value) => onSelectChange(`${prefix}-form`, value)}
-//           options={cloudFormOptions.map((opt) => opt.value)}
-//           optionLabels={cloudFormOptions.map((opt) => opt.label)}
-//         />
-//         <SelectField
-//           id={`${prefix}-amount`}
-//           name={`${prefix}-amount`}
-//           label="Amount (Octa)"
-//           accent={color}
-//           value={data["amount"] || ""}
-//           onValueChange={(value) => onSelectChange(`${prefix}-amount`, value)}
-//           options={cloudAmountOptions.map((opt) => opt.value)}
-//           optionLabels={cloudAmountOptions.map((opt) => opt.label)}
-//         />
-//       </div>
-//     </div>
-//   )
-// }
-
-// function SignificantCloudSection({
-//   title,
-//   prefix,
-//   color = "purple",
-//   data,
-//   onSelectChange,
-// }: {
-//   title: string
-//   prefix: string
-//   color?: string
-//   data: Record<string, string>
-//   onSelectChange: (name: string, value: string) => void
-// }) {
-//   // Generate height options from 0 to 99
-//   const heightOptions = Array.from({ length: 100 }, (_, i) => i.toString())
-
-//   const cloudFormOptions = [
-//     { value: "0", label: "0 - Cirrus (Ci)" },
-//     { value: "1", label: "1 - Cirrocumulus (Cc)" },
-//     { value: "2", label: "2 - Cirrostratus (Cs)" },
-//     { value: "3", label: "3 - Altocumulus (Ac)" },
-//     { value: "4", label: "4 - Altostratus (As)" },
-//     { value: "5", label: "5 - Nimbostratus (Ns)" },
-//     { value: "6", label: "6 - Stratocumulus (Sc)" },
-//     { value: "7", label: "7 - Stratus (St)" },
-//     { value: "8", label: "8 - Cumulus (Cu)" },
-//     { value: "9", label: "9 - Cumulonimbus (Cb)" },
-//     { value: "/", label: "/ - Clouds not visible (darkness, fog, etc.)" },
-//   ]
-
-//   const SigcloudAmountOptions = [
-//     { value: "0", label: "0 - No cloud" },
-//     { value: "1", label: "1 - 1 octa or less (1/10 or less but not zero)" },
-//     { value: "2", label: "2 - 2 octas (2/10 to 3/10)" },
-//     { value: "3", label: "3 - 3 octas (4/10)" },
-//     { value: "4", label: "4 - 4 octas (5/10)" },
-//     { value: "5", label: "5 - 5 octas (6/10)" },
-//     { value: "6", label: "6 - 6 octas (7/10 to 8/10)" },
-//     { value: "7", label: "7 - 7 octas (9/10 or more but not 10/10)" },
-//     { value: "8", label: "8 - 8 octas (10/10)" },
-//     {
-//       value: "/",
-//       label: "/ - Key obscured or cloud amount cannot be estimated",
-//     },
-//   ]
-
-//   return (
-//     <div className="bg-gradient-to-r from-white to-gray-50 p-4 rounded-lg border border-gray-200">
-//       <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>{title}</h3>
-//       <div className="grid gap-4 md:grid-cols-2">
-//         <SelectField
-//           id={`${prefix}-height`}
-//           name={`${prefix}-height`}
-//           label="Height of Base (Code)"
-//           accent={color}
-//           value={data["height"] || ""}
-//           onValueChange={(value) => onSelectChange(`${prefix}-height`, value)}
-//           options={heightOptions}
-//         />
-//         <SelectField
-//           id={`${prefix}-form`}
-//           name={`${prefix}-form`}
-//           label="Form (Code)"
-//           accent={color}
-//           value={data["form"] || ""}
-//           onValueChange={(value) => onSelectChange(`${prefix}-form`, value)}
-//           options={cloudFormOptions.map((opt) => opt.value)}
-//           optionLabels={cloudFormOptions.map((opt) => opt.label)}
-//         />
-//         <SelectField
-//           id={`${prefix}-amount`}
-//           name={`${prefix}-amount`}
-//           label="Amount (Octa)"
-//           accent={color}
-//           value={data["amount"] || ""}
-//           onValueChange={(value) => onSelectChange(`${prefix}-amount`, value)}
-//           options={SigcloudAmountOptions.map((opt) => opt.value)}
-//           optionLabels={SigcloudAmountOptions.map((opt) => opt.label)}
-//         />
-//       </div>
-//     </div>
-//   )
-// }

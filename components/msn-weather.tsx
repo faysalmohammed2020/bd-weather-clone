@@ -1,59 +1,186 @@
 "use client";
 
 import {
-  Sun,
-  Moon,
   Thermometer,
   Droplets,
   CloudRain,
   Wind,
   Eye,
   Cloud,
-  Gauge,
-  CircleGauge,
-  SunDim,
-  CircleDot,
 } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
+import { useEffect, useState } from "react";
 
-export default function WeatherDashboard() {
+interface WeatherData {
+  maxTemperature: string | null;
+  minTemperature: string | null;
+  totalPrecipitation: string | null;
+  windSpeed: string | null;
+  avTotalCloud: string | null;
+  avRelativeHumidity: string | null;
+  lowestVisibility: string | null;
+}
+
+export default function WeatherDashboard({
+  selectedStation,
+}: {
+  selectedStation: any | null;
+}) {
+  const { data: session } = useSession();
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchWeatherData = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        // Determine which station to query
+        const stationToQuery =
+          selectedStation?.stationId || session?.user?.stationId;
+
+        if (!stationToQuery) {
+          setError("No station selected");
+          setLoading(false);
+          return;
+        }
+
+        // Get current date in "DD-MMM" format
+        const date = new Date();
+        const day = date.getDate();
+        const monthNames = [
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
+        ];
+        const month = monthNames[date.getMonth()];
+        const dateString = `${day}-${month}`;
+
+        const response = await fetch(
+          `/api/daily-summary?stationNo=${stationToQuery}&date=${dateString}`
+        );
+
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setWeatherData(data);
+      } catch (err) {
+        setError("Failed to fetch weather data");
+        console.error("Error fetching weather data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchWeatherData();
+  }, [selectedStation, session]);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6 min-h-screen">
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={i}
+            className="bg-white rounded-xl shadow-md p-5 space-y-4 animate-pulse"
+          >
+            <div className="h-6 w-3/4 bg-gray-200 rounded"></div>
+            <div className="h-8 w-1/2 bg-gray-200 rounded"></div>
+            <div className="h-4 w-full bg-gray-200 rounded"></div>
+            <div className="h-4 w-5/6 bg-gray-200 rounded"></div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="grid place-items-center min-h-screen">
+        <div className="text-red-600">{error}</div>
+      </div>
+    );
+  }
+
+  // Default values if data is not available
+  const defaultValues = {
+    maxTemperature: "N/A",
+    minTemperature: "N/A",
+    totalPrecipitation: "0 cm",
+    windSpeed: "0 km/h",
+    avTotalCloud: "0%",
+    avRelativeHumidity: "0%",
+    lowestVisibility: "0 km",
+  };
+
+  const data = weatherData
+    ? {
+        maxTemperature:
+          weatherData.maxTemperature || defaultValues.maxTemperature,
+        minTemperature:
+          weatherData.minTemperature || defaultValues.minTemperature,
+        totalPrecipitation:
+          weatherData.totalPrecipitation || defaultValues.totalPrecipitation,
+        windSpeed: weatherData.windSpeed || defaultValues.windSpeed,
+        avTotalCloud: weatherData.avTotalCloud || defaultValues.avTotalCloud,
+        avRelativeHumidity:
+          weatherData.avRelativeHumidity || defaultValues.avRelativeHumidity,
+        lowestVisibility:
+          weatherData.lowestVisibility || defaultValues.lowestVisibility,
+      }
+    : defaultValues;
+
+  // Calculate temperature difference
+  const tempDiff =
+    data.maxTemperature && data.minTemperature
+      ? `${parseFloat(data.maxTemperature) - parseFloat(data.minTemperature)}°`
+      : "N/A";
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6 bg-blue-50 min-h-screen">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6 min-h-screen">
       {/* Temperature */}
       <WeatherCard
         icon={<Thermometer className="text-blue-500" />}
         title="Temperature"
-        value="34°"
-        status="Steady"
-        description="Steady at current value of 34°. Overnight low of 26° at 3:00 AM."
-      />
-
-      {/* Feels Like */}
-      <WeatherCard
-        icon={<Droplets className="text-red-500" />}
-        title="Feels like"
-        value="42°"
-        status="Hot"
-        description="Feels considerably warmer than the actual temperature due to the humidity."
-        subtext="Dominant factor: humidity"
-        extra="Temperature: 34°"
+        value={`${data.maxTemperature}°`}
+        status={`High: ${data.maxTemperature}° | Low: ${data.minTemperature}°`}
+        description={`Daily range: ${tempDiff}. Overnight low of ${data.minTemperature}°`}
       />
 
       {/* Cloud Cover */}
       <WeatherCard
         icon={<Cloud className="text-gray-500" />}
         title="Cloud cover"
-        value="Mostly Cloudy (75%)"
-        status="Mostly Cloudy"
-        description="Decreasing with partly cloudy sky at 3:00 PM. Partly cloudy sky expected in the evening."
+        value={`${data.avTotalCloud}%`}
+        status={
+          parseInt(data.avTotalCloud) > 50 ? "Mostly Cloudy" : "Partly Cloudy"
+        }
+        description={`Current cloud cover at ${data.avTotalCloud}%`}
       />
 
       {/* Precipitation */}
       <WeatherCard
         icon={<CloudRain className="text-indigo-500" />}
         title="Precipitation"
-        value="0.04 cm"
-        status="Light rain showers"
-        description="Rain stopping soon"
+        value={data.totalPrecipitation}
+        status={
+          parseFloat(data.totalPrecipitation) > 0
+            ? "Rain recorded"
+            : "No precipitation"
+        }
+        description="Last 24 hours"
         subtext="In next 24h"
       />
 
@@ -61,84 +188,46 @@ export default function WeatherDashboard() {
       <WeatherCard
         icon={<Wind className="text-blue-600" />}
         title="Wind"
-        value="10 km/h"
-        status="Force: 2 (Light Breeze)"
-        description="Steady with averages holding at 8 km/h (gusts to 18) expected from 5 through the evening."
-        subtext="From ESE (110°), Gust: 31 km/h"
+        value={data.windSpeed}
+        status={`Current wind speed`}
+        description={`Steady at ${data.windSpeed}`}
+        subtext={`From ESE (110°)`}
+      />
+
+      <WeatherCard
+        icon={<Droplets className="text-cyan-600" />}
+        title="Rain"
+        value={data.minTemperature}
+        status={
+          parseInt(data.avRelativeHumidity) > 70
+            ? "Very humid"
+            : "Moderate humidity"
+        }
+        description={`Current humidity level`}
+        subtext={`Dew point: ${data.avRelativeHumidity}°`}
       />
 
       {/* Humidity */}
       <WeatherCard
         icon={<Droplets className="text-cyan-600" />}
         title="Humidity"
-        value="70%"
-        status="Very humid"
-        description="Steady at 72%. Very humid conditions expected in the evening."
-        subtext="Dew point: 28°"
-      />
-
-      {/* UV */}
-      <WeatherCard
-        icon={<SunDim className="text-yellow-500" />}
-        title="UV"
-        value="6"
-        status="High"
-        description="Maximum UV exposure for today will be high, expected at 2:52 PM."
-      />
-
-      {/* AQI */}
-      <WeatherCard
-        icon={<CircleGauge className="text-yellow-600" />}
-        title="AQI"
-        value="91"
-        status="Moderate"
-        description="Deteriorating air quality with primary pollutant: PM2.5 33 µg/m³."
+        value={data.avRelativeHumidity}
+        status={
+          parseInt(data.avRelativeHumidity) > 70
+            ? "Very humid"
+            : "Moderate humidity"
+        }
+        description={`Current humidity level`}
+        subtext={`Dew point: ${data.avRelativeHumidity}°`}
       />
 
       {/* Visibility */}
       <WeatherCard
         icon={<Eye className="text-green-600" />}
         title="Visibility"
-        value="4 km"
-        status="Good"
-        description="Remaining steady at 20 km. Excellent visibility expected in the evening."
-      />
-
-      {/* Pressure */}
-      <WeatherCard
-        icon={<Gauge className="text-blue-700" />}
-        title="Pressure"
-        value="1005 mb"
-        status="Falling slowly"
-        description="Falling slowly in the last 3 hours. Expected to fall slowly in the next 3 hours."
-        subtext="2:56 PM (Now)"
-      />
-
-      {/* Sun */}
-      <WeatherCard
-        icon={<Sun className="text-orange-500" />}
-        title="Sun"
-        value="13 hrs 17 mins"
-        status="Sunrise: 5:16 AM"
-        description="Sunset: 6:33 PM"
-      />
-
-      {/* Moon */}
-      <WeatherCard
-        icon={<Moon className="text-purple-600" />}
-        title="Moon"
-        value="10 hrs 30 mins"
-        status="Moonrise: 9:09 PM"
-        description="Moonset: 7:39 AM"
-      />
-
-      {/* Moon Phase */}
-      <WeatherCard
-        icon={<CircleDot className="text-yellow-400" />}
-        title="Moon phase"
-        value="94%"
-        status="Phase of moon"
-        description="Next time full moon: Jun 11"
+        value={data.lowestVisibility}
+        status={parseInt(data.lowestVisibility) > 10 ? "Excellent" : "Good"}
+        description={`Current visibility conditions`}
       />
     </div>
   );
