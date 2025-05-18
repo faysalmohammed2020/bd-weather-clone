@@ -20,7 +20,11 @@ import {
   Eye,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -44,10 +48,12 @@ const Sidebar = () => {
       roles: ["observer", "station_admin", "super_admin"],
       subMenu: [
         {
+          icon: <CloudHail className="w-5 h-5" />,
           href: "/dashboard/first-card",
           label: "First Card",
         },
         {
+          icon: <Binoculars className="w-5 h-5" />,
           href: "/dashboard/second-card",
           label: "Second Card",
         },
@@ -59,12 +65,24 @@ const Sidebar = () => {
       roles: ["observer", "station_admin", "super_admin"],
       subMenu: [
         {
+          icon: <CloudHail className="w-5 h-5" />,
           href: "/dashboard/first-card-view",
           label: "First Card",
         },
         {
+          icon: <Binoculars className="w-5 h-5" />,
           href: "/dashboard/second-card-view",
           label: "Second Card",
+        },
+        {
+          icon: <Codesandbox className="w-5 h-5" />,
+          href: "/dashboard/synoptic-code",
+          label: "Synoptic Code",
+        },
+        {
+          icon: <BarChart className="w-5 h-5" />,
+          href: "/dashboard/daily-summery",
+          label: "Daily Summary",
         },
       ],
     },
@@ -166,12 +184,21 @@ type SidebarLinkProps = {
   subMenu?: {
     href: string;
     label: string;
+    icon?: React.ReactNode;
   }[];
 };
 
-const SidebarLink = ({ href, icon, label, isCollapsed, subMenu = [] }: SidebarLinkProps) => {
+const SidebarLink = ({
+  href,
+  icon,
+  label,
+  isCollapsed,
+  subMenu = [],
+}: SidebarLinkProps) => {
   const pathname = usePathname();
-  const isActive = href ? pathname === href : subMenu.some(item => pathname === item.href);
+  const isActive = href
+    ? pathname === href
+    : subMenu.some((item) => pathname === item.href);
   const [isOpen, setIsOpen] = useState(isActive);
 
   // If it has submenu, render as collapsible
@@ -188,7 +215,9 @@ const SidebarLink = ({ href, icon, label, isCollapsed, subMenu = [] }: SidebarLi
               {!isCollapsed && <span>{label}</span>}
             </div>
             {!isCollapsed && (
-              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown
+                className={`h-4 w-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+              />
             )}
           </Button>
         </CollapsibleTrigger>
@@ -202,6 +231,9 @@ const SidebarLink = ({ href, icon, label, isCollapsed, subMenu = [] }: SidebarLi
                   size="sm"
                   className={`w-full flex items-center gap-2 justify-start py-1.5 pl-2 ${isItemActive ? "bg-sky-600 text-white" : "text-white hover:bg-white hover:text-black"}`}
                 >
+                  {item.icon && (
+                    <span className="text-current">{item.icon}</span>
+                  )}
                   {!isCollapsed && <span>{item.label}</span>}
                 </Button>
               </Link>
