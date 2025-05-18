@@ -49,12 +49,12 @@ const Sidebar = () => {
       subMenu: [
         {
           icon: <CloudHail className="w-5 h-5" />,
-          href: "/dashboard/first-card",
+          href: "/dashboard/data-entry/first-card",
           label: "First Card",
         },
         {
           icon: <Binoculars className="w-5 h-5" />,
-          href: "/dashboard/second-card",
+          href: "/dashboard/data-entry/second-card",
           label: "Second Card",
         },
       ],
@@ -66,49 +66,25 @@ const Sidebar = () => {
       subMenu: [
         {
           icon: <CloudHail className="w-5 h-5" />,
-          href: "/dashboard/first-card-view",
+          href: "/dashboard/view-and-manage/first-card-view",
           label: "First Card",
         },
         {
           icon: <Binoculars className="w-5 h-5" />,
-          href: "/dashboard/second-card-view",
+          href: "/dashboard/view-and-manage/second-card-view",
           label: "Second Card",
         },
         {
           icon: <Codesandbox className="w-5 h-5" />,
-          href: "/dashboard/synoptic-code",
+          href: "/dashboard/view-and-manage/synoptic-code",
           label: "Synoptic Code",
         },
         {
           icon: <BarChart className="w-5 h-5" />,
-          href: "/dashboard/daily-summery",
+          href: "/dashboard/view-and-manage/daily-summery",
           label: "Daily Summary",
         },
       ],
-    },
-    {
-      href: "/dashboard/first-card",
-      icon: <CloudHail className="w-5 h-5" />,
-      label: "First Card",
-      roles: ["observer", "station_admin", "super_admin"],
-    },
-    {
-      href: "/dashboard/second-card",
-      icon: <Binoculars className="w-5 h-5" />,
-      label: "Second Card",
-      roles: ["observer", "station_admin", "super_admin"],
-    },
-    {
-      href: "/dashboard/daily-summery",
-      icon: <BarChart className="w-5 h-5" />,
-      label: "Daily Summary",
-      roles: ["super_admin", "observer", "station_admin"],
-    },
-    {
-      href: "/dashboard/synoptic-code",
-      icon: <Codesandbox className="w-5 h-5" />,
-      label: "Synoptic Code",
-      roles: ["super_admin", "observer", "station_admin"],
     },
     {
       href: "/dashboard/user",

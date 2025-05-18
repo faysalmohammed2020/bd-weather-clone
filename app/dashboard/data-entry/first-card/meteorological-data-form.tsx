@@ -2,19 +2,75 @@
 
 import type React from "react";
 import { useState, useRef, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
-import { Thermometer, Wind, Eye, Cloud, Clock, BarChart3 } from "lucide-react";
+import {
+  Thermometer,
+  Wind,
+  Eye,
+  Cloud,
+  Clock,
+  BarChart3,
+  ChevronRight,
+  ChevronLeft,
+} from "lucide-react";
 import { toast } from "sonner";
-import { hygrometricTable } from "../../../data/hygrometric-table"; // Import the hygrometric table data
-import { stationPressure } from "../../../data/station-pressure"; // Import the station pressure data
+import { hygrometricTable } from "@/data/hygrometric-table"; // Import the hygrometric table data
 
-export function MeteorologicalDataForm() {
-  const [formData, setFormData] = useState({});
+import { useSession } from "@/lib/auth-client";
+import { stationDataMap } from "@/data/station-data-map";
+import BasicInfoTab from "@/components/basic-info-tab";
+
+type MeteorologicalFormData = {
+  presentWeatherWW?: string;
+  subIndicator?: string;
+  alteredThermometer?: string;
+  barAsRead?: string;
+  correctedForIndex?: string;
+  heightDifference?: string;
+  stationLevelPressure?: string;
+  seaLevelReduction?: string;
+  correctedSeaLevelPressure?: string;
+  afternoonReading?: string;
+  pressureChange24h?: string;
+  dryBulbAsRead?: string;
+  wetBulbAsRead?: string;
+  maxMinTempAsRead?: string;
+  dryBulbCorrected?: string;
+  wetBulbCorrected?: string;
+  maxMinTempCorrected?: string;
+  Td?: string;
+  relativeHumidity?: string;
+  squallConfirmed?: boolean;
+  squallForce?: string;
+  squallDirection?: string;
+  squallTime?: string;
+  horizontalVisibility?: string;
+  miscMeteors?: string;
+  pastWeatherW1?: string;
+  pastWeatherW2?: string;
+  c2Indicator?: string;
+  observationTime?: string;
+  stationName?: string;
+  stationNo?: string;
+  year?: string;
+  cloudCover?: string;
+  visibility?: string;
+  // Add any other fields you use in formData here
+};
+
+export function MeteorologicalDataForm({ onDataSubmitted }) {
+  const [formData, setFormData] = useState<MeteorologicalFormData>({});
   const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hygrometricData, setHygrometricData] = useState({
@@ -24,6 +80,8 @@ export function MeteorologicalDataForm() {
     dewPoint: "",
     relativeHumidity: "",
   });
+
+  const { data: session } = useSession();
 
   // Refs for multi-box inputs to handle auto-focus
   const dataTypeRefs = [useRef(null), useRef(null)];
@@ -35,6 +93,16 @@ export function MeteorologicalDataForm() {
     useRef(null),
   ];
   const yearRefs = [useRef(null), useRef(null)];
+
+  // Tab order for navigation
+  const tabOrder = [
+    "temperature",
+    "pressure",
+    "squall",
+    "V.V",
+    "weather",
+    "indicators",
+  ];
 
   // Tab styles with gradients and more vibrant colors
   const tabStyles = {
@@ -75,295 +143,225 @@ export function MeteorologicalDataForm() {
     console.log("Form data updated:", formData);
   }, [formData]);
 
+  const calculateDewPointAndHumidity = (dryBulbInput, wetBulbInput) => {
+    if (!dryBulbInput || !wetBulbInput) return;
 
-  const calculateDewPointAndHumidity = (dryBulb, wetBulb) => {
-    if (!dryBulb || !wetBulb) return;
-  
-    const dryBulbValue = Number.parseFloat(dryBulb);
-    const wetBulbValue = Number.parseFloat(wetBulb);
+    // Convert 3-digit inputs like "256" => 25.6
+    const dryBulbValue = Number.parseFloat(
+      `${dryBulbInput.slice(0, 2)}.${dryBulbInput.slice(2)}`
+    );
+    const wetBulbValue = Number.parseFloat(
+      `${wetBulbInput.slice(0, 2)}.${wetBulbInput.slice(2)}`
+    );
+
     const difference = Number(Math.abs(dryBulbValue - wetBulbValue).toFixed(1));
     const roundedDryBulb = Math.round(dryBulbValue);
-  
+
     // Validate ranges
     if (roundedDryBulb < 0 || roundedDryBulb > 50 || difference > 30.0) {
-      toast.error("Temperature values are outside the range of the hygrometric table");
+      toast.error(
+        "Temperature values are outside the range of the hygrometric table"
+      );
       return;
     }
-  
+
     // Find index of the difference in 'differences'
     const diffIndex = hygrometricTable.differences.indexOf(difference);
     if (diffIndex === -1) {
       toast.error("Invalid temperature difference for lookup");
       return;
     }
-  
+
     // Find the dbT entry
-    const dbtEntry = hygrometricTable.data.find(entry => entry.dbT === roundedDryBulb);
+    const dbtEntry = hygrometricTable.data.find(
+      (entry) => entry.dbT === roundedDryBulb
+    );
     if (!dbtEntry || !dbtEntry.values || !dbtEntry.values[diffIndex]) {
-      toast.error("Could not find matching dry bulb temperature or difference in the table");
+      toast.error(
+        "Could not find matching dry bulb temperature or difference in the table"
+      );
       return;
     }
-  
+
     const { DpT, RH } = dbtEntry.values[diffIndex];
-  
+
     // Update state
     setHygrometricData({
-      dryBulb: dryBulbValue.toString(),
-      wetBulb: wetBulbValue.toString(),
+      dryBulb: dryBulbValue.toFixed(1),
+      wetBulb: wetBulbValue.toFixed(1),
       difference: difference.toString(),
       dewPoint: DpT.toString(),
       relativeHumidity: RH.toString(),
     });
-  
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
       Td: DpT.toString(),
       relativeHumidity: RH.toString(),
     }));
-  
+
     toast.success("Dew point and relative humidity calculated successfully");
   };
-  
 
-  // Update the handleSubmit function to save the JSON file on the server
+  useEffect(() => {
+    const year = new Date().getFullYear().toString(); // e.g., "2025"
+    setFormData((prev) => ({
+      ...prev,
+      subIndicator: "1",
+      year: year.slice(2), // only "25" for last two digits
+      stationNo: session?.user?.stationId || "",
+      stationName: session?.user?.stationName || "",
+    }));
+  }, []);
 
-  const calculatePressureValues = (dryBulb, barAsRead) => {
-    if (!dryBulb || !barAsRead) return;
+  const calculatePressureValues = (
+    dryBulb: string,
+    barAsRead: string,
+    stationId: string
+  ) => {
+    if (!dryBulb || !barAsRead || !stationId) return;
 
-    try {
-      // Parse input values to numbers
-      const dryBulbValue = Number.parseFloat(dryBulb);
-      const barAsReadValue = Number.parseFloat(barAsRead);
-
-      // Round dry bulb to nearest integer
-      const roundedDryBulb = Math.round(dryBulbValue);
-      const dryBulbKey = `${roundedDryBulb}.0`;
-
-      // Check if the rounded dry bulb temperature exists in the table
-      if (!stationPressure[dryBulbKey]) {
-        toast.error(
-          `Temperature ${roundedDryBulb}°C not found in station pressure table`
-        );
-        return;
-      }
-
-      // Get all available pressure values for this temperature
-      const availablePressures = Object.keys(stationPressure[dryBulbKey])
-        .map(Number)
-        .sort((a, b) => a - b);
-      console.log("Available Pressures:", availablePressures);
-
-      // Find the closest pressure to barAsReadValue for height difference correction
-      let closestPressureForCorrection = availablePressures[0];
-      console.log(
-        "Closest Pressure for Correction:",
-        closestPressureForCorrection
-      );
-
-      let minDiff = Math.abs(availablePressures[0] - barAsReadValue);
-
-      for (const pressure of availablePressures) {
-        const diff = Math.abs(pressure - barAsReadValue);
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestPressureForCorrection = pressure;
-        }
-      }
-
-      // Now use the closest pressure to get the height difference correction
-      const heightDifferenceCorrection =
-        stationPressure[dryBulbKey][closestPressureForCorrection.toString()];
-      console.log(
-        "Closest Pressure for Correction:",
-        closestPressureForCorrection
-      );
-      console.log("Height Difference Correction:", heightDifferenceCorrection);
-
-      if (!heightDifferenceCorrection) {
-        toast.error(
-          "Could not find temperature difference in hygrometric table"
-        );
-        return;
-      }
-
-      // Calculate Station Level Pressure
-      const stationLevelPressure = barAsReadValue + heightDifferenceCorrection;
-
-      // Round station level pressure to nearest 5 for lookup
-      const roundedStationPressure = Math.round(stationLevelPressure / 5) * 5;
-      console.log("Rounded Station Pressure:", roundedStationPressure);
-
-      // Find the closest available pressure in the table for sea level reduction
-      let closestPressure = availablePressures[availablePressures.length - 1]; // Default to highest
-      for (const pressure of availablePressures) {
-        if (pressure >= roundedStationPressure) {
-          closestPressure = pressure;
-          break;
-        }
-      }
-
-      // Look up Sea Level Reduction Constant in the table
-      let seaLevelReductionConstant = 0;
-      if (stationPressure[dryBulbKey][closestPressure.toString()]) {
-        seaLevelReductionConstant =
-          stationPressure[dryBulbKey][closestPressure.toString()];
-      } else {
-        toast.error("Could not find sea level reduction constant in table");
-        return;
-      }
-      console.log("Sea Level Reduction Constant:", seaLevelReductionConstant);
-
-      // Calculate Sea-Level Pressure
-      const seaLevelPressure = stationLevelPressure + seaLevelReductionConstant;
-
-      // Format values for display
-      const heightDifferenceStr = heightDifferenceCorrection.toFixed(2);
-      const stationLevelPressureStr = stationLevelPressure.toFixed(2);
-      const seaLevelReductionStr = seaLevelReductionConstant.toFixed(2);
-      const seaLevelPressureStr = seaLevelPressure.toFixed(2);
-
-      console.log("Calculated pressure values:", {
-        heightDifference: heightDifferenceStr,
-        stationLevelPressure: stationLevelPressureStr,
-        seaLevelReduction: seaLevelReductionStr,
-        correctedSeaLevelPressure: seaLevelPressureStr,
-      });
-
-      // Update the form data with a new object to ensure state change is detected
-      setFormData((prev) => {
-        const newData = {
-          ...prev,
-          heightDifference: heightDifferenceStr,
-          stationLevelPressure: stationLevelPressureStr,
-          seaLevelReduction: seaLevelReductionStr,
-          correctedSeaLevelPressure: seaLevelPressureStr,
-        };
-        return newData;
-      });
-
-      // Show success message
-      toast.success("Pressure values calculated successfully");
-    } catch (error) {
-      console.error("Error calculating pressure values:", error);
-      toast.error(
-        "Failed to calculate pressure values. Please check your inputs."
-      );
+    const userStationData = stationDataMap[stationId];
+    if (!userStationData) {
+      toast.error("Station data not found");
+      return;
     }
+
+    const correctionTable = userStationData.station.correction_table;
+    const dryBulbValue = Number.parseFloat(dryBulb) / 10;
+    const roundedDryBulb = Math.round(dryBulbValue);
+
+    const barAsReadValue = Number.parseFloat(barAsRead) / 10;
+
+    const correctionEntry = correctionTable.find(
+      (entry) => entry.dry_bulb_temp_c === roundedDryBulb
+    );
+
+    if (!correctionEntry) {
+      toast.error(
+        `Dry bulb temperature ${roundedDryBulb}°C not found in correction table`
+      );
+      return;
+    }
+
+    const availablePressures = Object.keys(
+      correctionEntry.cistern_level_pressure
+    )
+      .map(Number)
+      .sort((a, b) => a - b);
+
+    const closestPressure = availablePressures.reduce((prev, curr) =>
+      Math.abs(curr - barAsReadValue) < Math.abs(prev - barAsReadValue)
+        ? curr
+        : prev
+    );
+
+    const heightCorrection =
+      correctionEntry.cistern_level_pressure[closestPressure.toString()];
+    const stationLevelPressure = barAsReadValue + heightCorrection;
+
+    const seaLevelCorrection =
+      correctionEntry.sea_level_pressure?.[closestPressure.toString()];
+
+    return {
+      stationLevelPressure: Math.round(stationLevelPressure * 10).toString(), // e.g., "10041"
+      heightDifference: `+${Math.round(heightCorrection * 100)}`, // e.g., "+95"
+      seaLevelReduction:
+        seaLevelCorrection !== undefined
+          ? `+${Math.round(seaLevelCorrection * 100)}`
+          : undefined,
+    };
   };
 
-  
+  const calculateSeaLevelPressure = (
+    dryBulb: string,
+    stationLevelPressure: string,
+    stationId: string
+  ) => {
+    if (!dryBulb || !stationLevelPressure || !stationId) return;
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setIsSubmitting(true);
-  
-  //   try {
-  //     // Add timestamp to the form data
-  //     const submissionData = {
-  //       ...formData,
-  //       timestamp: new Date().toISOString(),
-  //       stationInfo: {
-  //         stationName: formData.stationName,
-  //         stationNo: formData.stationNo,
-  //         year: formData.year
-  //       }
-  //     };
-  
-  //     const response = await fetch("/api/first-card-data", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify(submissionData),
-  //     });
-  
-  //     const result = await response.json();
-  
-  //     if (!response.ok) {
-  //       throw new Error(result.message || "Failed to save data");
-  //     }
-  
-  //     toast.success("Meteorological data saved successfully!", {
-  //       description: `Entry #${result.dataCount} saved at ${new Date().toLocaleTimeString()}`,
-  //       action: {
-  //         label: "View All",
-  //         onClick: () => {
-  //           // Optional: Add navigation to view all data
-  //           console.log("View all data clicked");
-  //         },
-  //       },
-  //     });
-  
-  //     // Reset form after successful submission if needed
-  //     setFormData({
-  //       // Keep station info but clear measurements
-  //       ...(formData.stationName && { stationName: formData.stationName }),
-  //       ...(formData.stationNo && { stationNo: formData.stationNo }),
-  //       ...(formData.year && { year: formData.year }),
-  //     });
-  
-  //     // Reset hygrometric data
-  //     setHygrometricData({
-  //       dryBulb: "",
-  //       wetBulb: "",
-  //       difference: "",
-  //       dewPoint: "",
-  //       relativeHumidity: "",
-  //     });
-  
-  //   } catch (error) {
-  //     console.error("Error saving data:", error);
-  //     toast.error("Failed to save data", {
-  //       description: error instanceof Error ? error.message : "Please check your connection and try again.",
-  //       action: {
-  //         label: "Retry",
-  //         onClick: () => handleSubmit(e),
-  //       },
-  //     });
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
+    const userStationData = stationDataMap[stationId];
+    if (!userStationData) {
+      toast.error("Station data not found");
+      return;
+    }
+
+    const seaCorrectionTable = userStationData.sea.correction_table;
+    const dryBulbValue = Number.parseFloat(dryBulb) / 10;
+    const roundedDryBulb = Math.round(dryBulbValue);
+
+    // Convert 5-digit string pressure to decimal (e.g., "10041" → 1004.1)
+    const stationPressureValue = Number.parseFloat(stationLevelPressure) / 10;
+
+    const correctionEntry = seaCorrectionTable.find(
+      (entry) => entry.dry_bulb_temp_c === roundedDryBulb
+    );
+
+    if (!correctionEntry) {
+      toast.error(
+        `Dry bulb temperature ${roundedDryBulb}°C not found in sea level correction table`
+      );
+      return;
+    }
+
+    const availablePressures = Object.keys(
+      correctionEntry.station_level_pressure
+    )
+      .map(Number)
+      .sort((a, b) => a - b);
+
+    const closestPressure = availablePressures.reduce((prev, curr) =>
+      Math.abs(curr - stationPressureValue) <
+      Math.abs(prev - stationPressureValue)
+        ? curr
+        : prev
+    );
+
+    const seaLevelReduction =
+      correctionEntry.station_level_pressure[closestPressure.toString()];
+    const seaLevelPressure = stationPressureValue + seaLevelReduction;
+
+    return {
+      seaLevelReduction: `+${Math.round(seaLevelReduction * 100)}`, // e.g., 0.95 → "+95"
+      correctedSeaLevelPressure: Math.round(seaLevelPressure * 10).toString(), // e.g., 1004.1 → "10041"
+    };
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Prevent duplicate submissions
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
-  
+
     try {
       // Prepare data (removed redundant stationInfo nesting)
       const submissionData = {
         ...formData,
         ...hygrometricData, // Include hygrometric data directly
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       };
-  
+
       const response = await fetch("/api/first-card-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(submissionData),
       });
-  
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Failed to save data");
       }
-  
+
       const result = await response.json();
-  
+
       toast.success("Data saved successfully!", {
         description: `Entry #${result.dataCount} saved`,
-        action: {
-          label: "View All",
-          onClick: () => router.push("/data"), // Example: Navigate to data view
-        },
       });
-  
+
       // Reset only measurement fields (preserves station info)
-      setFormData(prev => ({
+      setFormData((prev) => ({
         stationName: prev.stationName,
         stationNo: prev.stationNo,
         year: prev.year,
@@ -372,7 +370,7 @@ export function MeteorologicalDataForm() {
         visibility: "",
         // ... other fields to reset
       }));
-  
+
       setHygrometricData({
         dryBulb: "",
         wetBulb: "",
@@ -380,7 +378,14 @@ export function MeteorologicalDataForm() {
         dewPoint: "",
         relativeHumidity: "",
       });
-  
+
+      // Notify parent component that data was submitted
+      if (onDataSubmitted) {
+        onDataSubmitted();
+      }
+
+      // Reset to first tab after submission
+      setActiveTab("temperature");
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("Submission failed", {
@@ -390,11 +395,12 @@ export function MeteorologicalDataForm() {
       setIsSubmitting(false);
     }
   };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // If dry-bulb or wet-bulb values change, calculate dew point and humidity
+    // Dew point & humidity calculation
     if (name === "dryBulbAsRead" || name === "wetBulbAsRead") {
       const dryBulb = name === "dryBulbAsRead" ? value : formData.dryBulbAsRead;
       const wetBulb = name === "wetBulbAsRead" ? value : formData.wetBulbAsRead;
@@ -404,13 +410,57 @@ export function MeteorologicalDataForm() {
       }
     }
 
-    // If dry-bulb or barAsRead values change, calculate pressure values
+    // Station level + Sea level pressure calculation
     if (name === "dryBulbAsRead" || name === "barAsRead") {
       const dryBulb = name === "dryBulbAsRead" ? value : formData.dryBulbAsRead;
       const barAsRead = name === "barAsRead" ? value : formData.barAsRead;
 
       if (dryBulb && barAsRead) {
-        calculatePressureValues(dryBulb, barAsRead);
+        const stationId = session?.user?.stationId;
+
+        if (!stationId) {
+          toast.error("Station ID is missing");
+          return;
+        }
+
+        const pressureData = calculatePressureValues(
+          dryBulb,
+          barAsRead,
+          stationId
+        );
+        if (pressureData) {
+          setFormData((prev) => ({
+            ...prev,
+            stationLevelPressure: pressureData.stationLevelPressure,
+            heightDifference: pressureData.heightDifference,
+          }));
+
+          const seaData = calculateSeaLevelPressure(
+            dryBulb,
+            pressureData.stationLevelPressure,
+            stationId
+          );
+          if (seaData) {
+            setFormData((prev) => ({
+              ...prev,
+              seaLevelReduction: seaData.seaLevelReduction,
+              correctedSeaLevelPressure: seaData.correctedSeaLevelPressure,
+            }));
+          }
+        }
+      }
+    }
+
+    // Automatically generate Present Weather (WW) from W1 and W2
+    if (name === "pastWeatherW1" || name === "pastWeatherW2") {
+      const w1 = name === "pastWeatherW1" ? value : formData.pastWeatherW1;
+      const w2 = name === "pastWeatherW2" ? value : formData.pastWeatherW2;
+
+      if (w1 && w2) {
+        setFormData((prev) => ({
+          ...prev,
+          presentWeatherWW: `${w1}${w2}`,
+        }));
       }
     }
   };
@@ -424,29 +474,22 @@ export function MeteorologicalDataForm() {
     e: React.ChangeEvent<HTMLInputElement>,
     index: number,
     refs: React.RefObject<HTMLInputElement>[],
-    fieldName: string
+    key: string
   ) => {
-    const { value } = e.target;
+    const value = e.target.value.slice(0, 1); // ensure single digit
+    const updated = (formData[key] || "").split("");
+    updated[index] = value;
 
-    // Update form data with the specific segment
-    setFormData((prev) => {
-      const updatedField = {
-        ...(prev[fieldName] || {}),
-        [index]: value,
-      };
+    setFormData((prev) => ({
+      ...prev,
+      [key]: updated.join(""),
+    }));
 
-      return {
-        ...prev,
-        [fieldName]: updatedField,
-      };
-    });
-
-    // Auto-focus to next input if value is entered and not the last box
-    if (value && index < refs.length - 1) {
-      refs[index + 1].current?.focus();
+    // Auto-focus next input
+    if (value && refs[index + 1]) {
+      refs[index + 1]?.current?.focus();
     }
   };
-
   // Reset form function
   const handleReset = () => {
     // Clear all form data
@@ -461,109 +504,43 @@ export function MeteorologicalDataForm() {
 
     // Show toast notification
     toast.info("All form data has been cleared.");
+
+    // Reset to first tab
+    setActiveTab("temperature");
   };
+
+  // Navigation functions
+  const nextTab = () => {
+    const currentIndex = tabOrder.indexOf(activeTab);
+    if (currentIndex < tabOrder.length - 1) {
+      setActiveTab(tabOrder[currentIndex + 1]);
+    }
+  };
+
+  const prevTab = () => {
+    const currentIndex = tabOrder.indexOf(activeTab);
+    if (currentIndex > 0) {
+      setActiveTab(tabOrder[currentIndex - 1]);
+    }
+  };
+
+  // Check if current tab is the last one
+  const isLastTab = tabOrder.indexOf(activeTab) === tabOrder.length - 1;
+  const isFirstTab = tabOrder.indexOf(activeTab) === 0;
 
   return (
     <>
       <form onSubmit={handleSubmit} className="w-full mx-auto">
-        {/* Header Section - Single Line */}
-        <Card className="mb-6 overflow-hidden border-none shadow-lg">
-          <div className="absolute " />
-          <CardHeader className="relative">
-            <CardTitle className="text-2xl text-center text-black font-bold">
-              First Card
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="relative z-10">
-            <div className="flex flex-wrap justify-between gap-8">
-              {/* Data Type */}
-              <div className="space-y-2">
-                <Label htmlFor="dataType" className="text-black font-medium">
-                  Data Type
-                </Label>
-                <div className="flex space-x-1 ">
-                  {[0, 1].map((i) => (
-                    <Input
-                      key={`dataType-${i}`}
-                      id={`dataType-${i}`}
-                      ref={dataTypeRefs[i]}
-                      className="w-10 text-center p-2 bg-white/90 border-2 shadow-sm focus:ring-2 focus:ring-blue-500"
-                      maxLength={1}
-                      value={formData.dataType?.[i] || ""}
-                      onChange={(e) =>
-                        handleSegmentedInput(e, i, dataTypeRefs, "dataType")
-                      }
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Station No */}
-              <div className="space-y-2 ">
-                <Label htmlFor="stationNo" className="text-black font-medium">
-                  Station No
-                </Label>
-                <div className="flex space-x-1">
-                  {[0, 1, 2, 3, 4].map((i) => (
-                    <Input
-                      key={`stationNo-${i}`}
-                      id={`stationNo-${i}`}
-                      ref={stationNoRefs[i]}
-                      className=" w-10 text-center p-2 bg-white/90 border-2 shadow-sm focus:ring-2 focus:ring-blue-500"
-                      maxLength={1}
-                      value={formData.stationNo?.[i] || ""}
-                      onChange={(e) =>
-                        handleSegmentedInput(e, i, stationNoRefs, "stationNo")
-                      }
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Station Name */}
-              <div className="space-y-2 flex-1">
-                <Label htmlFor="stationName" className="text-black font-medium">
-                  Station Name
-                </Label>
-                <Input
-                  id="stationName"
-                  name="stationName"
-                  value={formData.stationName || ""}
-                  onChange={handleChange}
-                  className="bg-white/90 border-2 shadow-sm focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Year */}
-              <div className="space-y-2">
-                <Label htmlFor="year" className="text-black font-medium">
-                  Year
-                </Label>
-                <div className="flex space-x-1">
-                  {[0, 1].map((i) => (
-                    <Input
-                      key={`year-${i}`}
-                      id={`year-${i}`}
-                      ref={yearRefs[i]}
-                      className="w-10 text-center p-2 bg-white/90 border-2 shadow-sm focus:ring-2 focus:ring-blue-500"
-                      maxLength={1}
-                      value={formData.year?.[i] || ""}
-                      onChange={(e) =>
-                        handleSegmentedInput(e, i, yearRefs, "year")
-                      }
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
+        {/* <BasicInfoTab /> */}
+        <BasicInfoTab
+          onFieldChange={(name, value) => {
+            setFormData((prev) => ({ ...prev, [name]: value }));
+          }}
+        />
         {/*Card Body */}
         <Card className="border-none shadow-xl overflow-hidden">
           <CardContent className="p-6">
             <Tabs
-              defaultValue="temperature"
               value={activeTab}
               onValueChange={setActiveTab}
               className="w-full"
@@ -602,7 +579,7 @@ export function MeteorologicalDataForm() {
                       <BarChart3 className="mr-2" /> Bar Pressure Measurements
                     </h3>
                   </div>
-                  <CardContent className="pt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="subIndicator">1st Card Indicator</Label>
                       <Input
@@ -610,7 +587,8 @@ export function MeteorologicalDataForm() {
                         name="subIndicator"
                         value={formData.subIndicator || ""}
                         onChange={handleChange}
-                        className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
+                        readOnly
+                        className="border-slate-600 bg-gray-100 cursor-not-allowed text-gray-700 transition-all focus:border-rose-400 focus:ring-rose-500/30"
                       />
                     </div>
 
@@ -662,19 +640,6 @@ export function MeteorologicalDataForm() {
                         onChange={handleChange}
                         className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
                         readOnly
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="correctionForTemp">
-                        Correction for Temp
-                      </Label>
-                      <Input
-                        id="correctionForTemp"
-                        name="correctionForTemp"
-                        value={formData.correctionForTemp || ""}
-                        onChange={handleChange}
-                        className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
                       />
                     </div>
 
@@ -746,6 +711,23 @@ export function MeteorologicalDataForm() {
                       />
                     </div>
                   </CardContent>
+                  <CardFooter className="flex justify-between p-6">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={prevTab}
+                      disabled={isFirstTab}
+                    >
+                      <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={nextTab}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Next <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
                 </Card>
               </TabsContent>
 
@@ -874,7 +856,8 @@ export function MeteorologicalDataForm() {
                         <div className="mt-6 space-y-4">
                           <div className="p-4 bg-gradient-to-r from-blue-200 to-blue-300 text-blue-800">
                             <h3 className="text-lg font-semibold flex items-center">
-                              <Thermometer className="mr-2" /> Dew-Point & Humidity
+                              <Thermometer className="mr-2" /> Dew-Point &
+                              Humidity
                             </h3>
                           </div>
                           <div className="grid gap-4 sm:grid-cols-2">
@@ -927,116 +910,165 @@ export function MeteorologicalDataForm() {
                       </TabsContent>
                     </Tabs>
                   </CardContent>
+                  <CardFooter className="flex justify-end p-6">
+                    <Button
+                      type="button"
+                      onClick={nextTab}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Next <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
                 </Card>
               </TabsContent>
 
               {/* Squall Tab */}
               <TabsContent
-  value="squall"
-  className="mt-6 transition-all duration-500"
->
-  <Card className={cn("overflow-hidden", tabStyles.squall.card)}>
-    <div className="p-4 bg-gradient-to-r from-amber-200 to-amber-300 text-amber-800">
-      <h3 className="text-lg font-semibold flex items-center">
-        <Wind className="mr-2" /> Squall Measurements
-      </h3>
-    </div>
-    <CardContent className="pt-6 space-y-4">
-      {formData.squallConfirmed === undefined ? (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
-          <p className="text-amber-800 font-medium mb-3">Are you sure you want to fill up squall measurements?</p>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              className="border-amber-500 text-amber-700 hover:bg-amber-50"
-              onClick={() => {
-                setFormData(prev => ({
-                  ...prev,
-                  squallConfirmed: false,
-                  squallForce: "",
-                  squallDirection: "",
-                  squallTime: ""
-                }));
-                // Skip to next tab (replace "next-tab-value" with your actual next tab value)
-                setTabValue("next-tab-value");
-              }}
-            >
-              No, Skip
-            </Button>
-            <Button
-              type="button"
-              className="bg-amber-500 hover:bg-amber-600"
-              onClick={() => {
-                setFormData(prev => ({
-                  ...prev,
-                  squallConfirmed: true
-                }));
-              }}
-            >
-              Yes, Continue
-            </Button>
-          </div>
-        </div>
-      ) : formData.squallConfirmed ? (
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="squallForce">Force (KTS)</Label>
-            <Input
-              id="squallForce"
-              name="squallForce"
-              value={formData.squallForce || ""}
-              onChange={handleChange}
-              className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
-            />
-          </div>
+                value="squall"
+                className="mt-6 transition-all duration-500"
+              >
+                <Card className={cn("overflow-hidden", tabStyles.squall.card)}>
+                  <div className="p-4 bg-gradient-to-r from-amber-200 to-amber-300 text-amber-800">
+                    <h3 className="text-lg font-semibold flex items-center">
+                      <Wind className="mr-2" /> Squall Measurements
+                    </h3>
+                  </div>
+                  <CardContent className="pt-6 space-y-4">
+                    {formData.squallConfirmed === undefined ? (
+                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
+                        <p className="text-amber-800 font-medium mb-3">
+                          Are you sure you want to fill up squall measurements?
+                        </p>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="border-amber-500 text-amber-700 hover:bg-amber-50"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                squallConfirmed: false,
+                                squallForce: "",
+                                squallDirection: "",
+                                squallTime: "",
+                              }));
+                              nextTab();
+                            }}
+                          >
+                            No, Skip
+                          </Button>
+                          <Button
+                            type="button"
+                            className="bg-amber-500 hover:bg-amber-600"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                squallConfirmed: true,
+                              }));
+                            }}
+                          >
+                            Yes, Continue
+                          </Button>
+                        </div>
+                      </div>
+                    ) : formData.squallConfirmed ? (
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="squallForce">Force (KTS)</Label>
+                          <Input
+                            id="squallForce"
+                            name="squallForce"
+                            value={formData.squallForce || ""}
+                            onChange={handleChange}
+                            className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
+                          />
+                        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="squallDirection">Direction (°d)</Label>
-            <Input
-              id="squallDirection"
-              name="squallDirection"
-              type="number"
-              min="0"
-              max="360"
-              value={formData.squallDirection || ""}
-              onChange={handleChange}
-              className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
-            />
-          </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="squallDirection">
+                            Direction (°d)
+                          </Label>
+                          <Input
+                            id="squallDirection"
+                            name="squallDirection"
+                            type="number"
+                            min="0"
+                            max="360"
+                            value={formData.squallDirection || ""}
+                            onChange={handleChange}
+                            className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
+                          />
+                        </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="squallTime">Time (qt)</Label>
-            <Input
-              id="squallTime"
-              name="squallTime"
-              value={formData.squallTime || ""}
-              onChange={handleChange}
-              className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
-            />
-          </div>
-        </div>
-      ) : (
-        <div className="p-4 bg-slate-50 border border-slate-200 rounded-md flex justify-between items-center">
-          <p className="text-slate-600">Squall measurements skipped</p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setFormData(prev => ({
-                ...prev,
-                squallConfirmed: true
-              }));
-            }}
-          >
-            Fill Measurements
-          </Button>
-        </div>
-      )}
-    </CardContent>
-  </Card>
-</TabsContent>
+                        {/* <div className="space-y-2">
+                          <Label htmlFor="squallTime">Time (qt)</Label>
+                          <Input
+                            id="squallTime"
+                            name="squallTime"
+                            value={formData.squallTime || ""}
+                            onChange={handleChange}
+                            className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
+                          />
+                        </div> */}
+                        <div className="space-y-2">
+                          <Label htmlFor="squallTime">
+                            GG: Time of Observation (UTC)
+                          </Label>
+                          <select
+                            id="squallTime"
+                            name="squallTime"
+                            value={formData.squallTime || ""}
+                            onChange={handleChange}
+                            required
+                            className="w-full border border-slate-600 rounded-md px-3 py-2 focus:outline-none focus:border-fuchsia-500 focus:ring-fuchsia-500/30"
+                          >
+                            <option value="">-- Select GG Time --</option>
+                            <option value="00">00 UTC</option>
+                            <option value="03">03 UTC</option>
+                            <option value="06">06 UTC</option>
+                            <option value="09">09 UTC</option>
+                            <option value="12">12 UTC</option>
+                            <option value="15">15 UTC</option>
+                            <option value="18">18 UTC</option>
+                            <option value="21">21 UTC</option>
+                          </select>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-4 bg-slate-50 border border-slate-200 rounded-md flex justify-between items-center">
+                        <p className="text-slate-600">
+                          Squall measurements skipped
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setFormData((prev) => ({
+                              ...prev,
+                              squallConfirmed: true,
+                            }));
+                          }}
+                        >
+                          Fill Measurements
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                  <CardFooter className="flex justify-between p-6">
+                    <Button type="button" variant="outline" onClick={prevTab}>
+                      <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={nextTab}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Next <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </TabsContent>
 
               {/* VV Tab */}
               <TabsContent
@@ -1074,6 +1106,18 @@ export function MeteorologicalDataForm() {
                       />
                     </div>
                   </CardContent>
+                  <CardFooter className="flex justify-between p-6">
+                    <Button type="button" variant="outline" onClick={prevTab}>
+                      <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={nextTab}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Next <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
                 </Card>
               </TabsContent>
 
@@ -1188,11 +1232,12 @@ export function MeteorologicalDataForm() {
                               <Input
                                 id="presentWeatherWW"
                                 name="presentWeatherWW"
-                                placeholder="Enter present weather code (00-99)"
+                                placeholder="Auto-generated from W1 + W2"
                                 value={formData.presentWeatherWW || ""}
-                                onChange={handleChange}
-                                className="border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
+                                readOnly
+                                className="border-slate-600 bg-gray-100 cursor-not-allowed text-gray-700"
                               />
+
                               <p className="text-xs text-muted-foreground mt-1">
                                 Current weather conditions at time of
                                 observation
@@ -1203,6 +1248,18 @@ export function MeteorologicalDataForm() {
                       </TabsContent>
                     </Tabs>
                   </CardContent>
+                  <CardFooter className="flex justify-between p-6">
+                    <Button type="button" variant="outline" onClick={prevTab}>
+                      <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={nextTab}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Next <ChevronRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
                 </Card>
               </TabsContent>
 
@@ -1221,53 +1278,54 @@ export function MeteorologicalDataForm() {
                   </div>
                   <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="c2Indicator">
-                        C2: 2nd Card Indicator
-                      </Label>
-                      <Input
-                        id="c2Indicator"
-                        name="c2Indicator"
-                        value={formData.c2Indicator || ""}
-                        onChange={handleChange}
-                        className="border-slate-600 transition-all focus:border-fuchsia-500 focus:ring-fuchsia-500/30"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
                       <Label htmlFor="observationTime">
                         GG: Time of Observation (UTC)
                       </Label>
-                      <Input
+                      <select
                         id="observationTime"
                         name="observationTime"
-                        type="time"
                         value={formData.observationTime || ""}
                         onChange={handleChange}
-                        className="border-slate-600 transition-all focus:border-fuchsia-500 focus:ring-fuchsia-500/30"
-                      />
+                        required
+                        className="w-full border border-slate-600 rounded-md px-3 py-2 focus:outline-none focus:border-fuchsia-500 focus:ring-fuchsia-500/30"
+                      >
+                        <option value="">-- Select GG Time --</option>
+                        <option value="00">00 UTC</option>
+                        <option value="03">03 UTC</option>
+                        <option value="06">06 UTC</option>
+                        <option value="09">09 UTC</option>
+                        <option value="12">12 UTC</option>
+                        <option value="15">15 UTC</option>
+                        <option value="18">18 UTC</option>
+                        <option value="21">21 UTC</option>
+                      </select>
                     </div>
                   </CardContent>
+                  <CardFooter className="flex justify-between p-6">
+                    <Button type="button" variant="outline" onClick={prevTab}>
+                      <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                    </Button>
+                    <div className="flex gap-4">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="border-slate-600 hover:bg-slate-100 transition-all duration-300"
+                        onClick={handleReset}
+                      >
+                        Reset
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? "Saving..." : "Submit Data"}
+                      </Button>
+                    </div>
+                  </CardFooter>
                 </Card>
               </TabsContent>
             </Tabs>
-
-            <div className="flex justify-end gap-4 mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                className="border-slate-600 hover:bg-slate-100 transition-all duration-300"
-                onClick={handleReset}
-              >
-                Reset
-              </Button>
-              <Button
-                type="submit"
-                className="bg-gradient-to-r from-slate-400 to-slate-500 hover:from-slate-500 hover:to-slate-600 transition-all duration-300 shadow-sm"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Saving..." : "Submit Data"}
-              </Button>
-            </div>
           </CardContent>
         </Card>
       </form>
