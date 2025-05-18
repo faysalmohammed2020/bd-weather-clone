@@ -15,8 +15,12 @@ import {
   Users,
   CloudFog,
   Settings,
+  PencilIcon,
+  ChevronDown,
+  Eye,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -31,8 +35,38 @@ const Sidebar = () => {
     {
       href: "/dashboard",
       icon: <LayoutDashboard className="w-5 h-5" />,
-      label: `Dashboard (${session?.user?.role || "No Role"})`,
+      label: "Dashboard",
       roles: ["super_admin", "observer", "station_admin"],
+    },
+    {
+      icon: <PencilIcon className="w-5 h-5" />,
+      label: "Data Entry",
+      roles: ["observer", "station_admin", "super_admin"],
+      subMenu: [
+        {
+          href: "/dashboard/first-card",
+          label: "First Card",
+        },
+        {
+          href: "/dashboard/second-card",
+          label: "Second Card",
+        },
+      ],
+    },
+    {
+      icon: <Eye className="w-5 h-5" />,
+      label: "View & Manage",
+      roles: ["observer", "station_admin", "super_admin"],
+      subMenu: [
+        {
+          href: "/dashboard/first-card-view",
+          label: "First Card",
+        },
+        {
+          href: "/dashboard/second-card-view",
+          label: "Second Card",
+        },
+      ],
     },
     {
       href: "/dashboard/first-card",
@@ -105,12 +139,13 @@ const Sidebar = () => {
             if (link.roles.includes(role as string)) {
               return (
                 <SidebarLink
-                  key={link.href}
+                  key={link.href || link.label}
                   href={link.href}
                   icon={link.icon}
                   label={link.label}
                   isCollapsed={isCollapsed}
                   roles={link.roles}
+                  subMenu={link.subMenu}
                 />
               );
             }
@@ -123,26 +158,66 @@ const Sidebar = () => {
 };
 
 type SidebarLinkProps = {
-  href: string;
+  href?: string;
   icon: React.ReactNode;
   label: string;
   isCollapsed: boolean;
-  roles?: string[]; // Optional prop for roles
+  roles?: string[];
+  subMenu?: {
+    href: string;
+    label: string;
+  }[];
 };
 
-const SidebarLink = ({ href, icon, label, isCollapsed }: SidebarLinkProps) => {
+const SidebarLink = ({ href, icon, label, isCollapsed, subMenu = [] }: SidebarLinkProps) => {
   const pathname = usePathname();
-  const isActive = pathname === href;
+  const isActive = href ? pathname === href : subMenu.some(item => pathname === item.href);
+  const [isOpen, setIsOpen] = useState(isActive);
 
+  // If it has submenu, render as collapsible
+  if (subMenu && subMenu.length > 0) {
+    return (
+      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="w-full">
+        <CollapsibleTrigger asChild>
+          <Button
+            variant="ghost"
+            className="w-full flex items-center justify-between text-white hover:bg-white hover:text-black"
+          >
+            <div className="flex items-center gap-3">
+              {icon}
+              {!isCollapsed && <span>{label}</span>}
+            </div>
+            {!isCollapsed && (
+              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+            )}
+          </Button>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="ml-7 mt-2 flex flex-col space-y-1">
+          {subMenu.map((item) => {
+            const isItemActive = pathname === item.href;
+            return (
+              <Link key={item.href} href={item.href}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`w-full flex items-center gap-2 justify-start py-1.5 pl-2 ${isItemActive ? "bg-sky-600 text-white" : "text-white hover:bg-white hover:text-black"}`}
+                >
+                  {!isCollapsed && <span>{item.label}</span>}
+                </Button>
+              </Link>
+            );
+          })}
+        </CollapsibleContent>
+      </Collapsible>
+    );
+  }
+
+  // Regular link
   return (
-    <Link href={href}>
+    <Link href={href || "#"}>
       <Button
         variant="ghost"
-        className={`w-full flex items-center gap-3 justify-start ${
-          isActive
-            ? "bg-gray-200 text-gray-900"
-            : "text-white hover:bg-gray-100"
-        }`}
+        className={`w-full flex items-center gap-3 justify-start ${isActive ? "bg-sky-600 text-white" : "text-white hover:bg-white hover:text-black"}`}
       >
         {icon}
         {!isCollapsed && <span>{label}</span>}

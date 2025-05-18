@@ -47,6 +47,7 @@ export default function SignInForm() {
   const [securityCode, setSecurityCode] = useState("");
   const [role, setRole] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showSecurityCode, setShowSecurityCode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [stations, setStations] = useState<Station[]>([]);
@@ -73,6 +74,10 @@ export default function SignInForm() {
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
+  };
+
+  const toggleSecurityCodeVisibility = () => {
+    setShowSecurityCode((prev) => !prev);
   };
 
   const handleStationSubmit = (e: React.FormEvent) => {
@@ -451,13 +456,24 @@ export default function SignInForm() {
               <Input
                 id="securityCode"
                 name="securityCode"
-                type="text"
+                type={showSecurityCode ? "text" : "password"}
                 placeholder="Enter your station security code"
-                className="pl-10"
+                className="pl-10 pr-10"
                 value={securityCode}
                 onChange={(e) => setSecurityCode(e.target.value)}
                 required
               />
+              <button
+                type="button"
+                onClick={toggleSecurityCodeVisibility}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+              >
+                {showSecurityCode ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
             </div>
           </div>
 
