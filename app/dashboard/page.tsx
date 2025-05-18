@@ -74,7 +74,7 @@ export default function DroughtDashboard() {
           </div>
         </div> */}
 
-        <WeatherDashboard />
+        <WeatherDashboard selectedStation={selectedStation} />
       </div>
     </div>
   );
