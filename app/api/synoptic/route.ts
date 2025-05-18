@@ -120,7 +120,7 @@ export async function GET() {
 
     // 8. 6RRRtR (47-51) - Precipitation
     const precipitation = finalWeatherObs.rainfallLast24Hours || '0';
-    measurements[7] = `6${pad(precipitation, 4)}0`;
+    measurements[7] = `6${pad(precipitation, 4)}`;
 
     // 9. 7wwW1W2 (52-56) - Weather codes
     const presentWeather = finalFirstCard.presentWeatherWW || '00';
@@ -136,7 +136,9 @@ export async function GET() {
     measurements[9] = `8${lowAmount}${lowForm}${mediumForm}${highForm}`;
 
     // 11. 2SnTnTnTn/InInInIn (62-66) - Min temperature / ground state
-    const minTemp = Number.parseFloat(finalFirstCard.maxMinTempAsRead || '0');
+    // const minTemp = Number.parseFloat(finalFirstCard.maxMinTempAsRead || '0');
+    const minTemp = Number.parseFloat(finalFirstCard.maxMinTempAsRead || '0') / 10;
+
     let sN, x;
     if (minTemp >= 0) {
       sN = 0;
