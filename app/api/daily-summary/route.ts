@@ -74,18 +74,13 @@ export async function GET(req: Request) {
           "Dec",
         ];
         month = monthNames.indexOf(dateParts[1]) + 1;
-        year = new Date().getFullYear(); // Or use a specific year if needed
+        year = new Date().getFullYear(); // default to current year
       }
     }
 
     // First try exact match
     let summary = await prisma.dailySummary.findFirst({
-      where: {
-        stationNo,
-        day,
-        month,
-        year,
-      },
+      where: { stationNo, day, month, year },
       orderBy: { createdAt: "desc" },
       select: {
         maxTemperature: true,
@@ -99,14 +94,10 @@ export async function GET(req: Request) {
       },
     });
 
-    // If not found, try without year (in case year is incorrect)
+    // Try without year if not found
     if (!summary) {
       summary = await prisma.dailySummary.findFirst({
-        where: {
-          stationNo,
-          day,
-          month,
-        },
+        where: { stationNo, day, month },
         orderBy: { createdAt: "desc" },
         select: {
           maxTemperature: true,
@@ -121,7 +112,7 @@ export async function GET(req: Request) {
       });
     }
 
-    // If still not found, try just matching the month/day (in case stationNo format differs)
+    // Try partial match on stationNo
     if (!summary) {
       summary = await prisma.dailySummary.findFirst({
         where: {
@@ -143,6 +134,7 @@ export async function GET(req: Request) {
       });
     }
 
+    // Final fallback by station only
     if (!summary) {
       console.log(
         "Final fallback - searching for any record with this station"
@@ -167,7 +159,18 @@ export async function GET(req: Request) {
       return new NextResponse("No data found", { status: 404 });
     }
 
-    return NextResponse.json(summary);
+    // Transform data: divide maxTemperature and lowestVisibility by 10
+    const adjustedSummary = {
+      ...summary,
+      maxTemperature: summary.maxTemperature
+        ? (parseFloat(summary.maxTemperature as any) / 10).toFixed(1)
+        : summary.maxTemperature,
+      lowestVisibility: summary.lowestVisibility
+        ? (parseFloat(summary.lowestVisibility as any) / 10).toFixed(1)
+        : summary.lowestVisibility,
+    };
+
+    return NextResponse.json(adjustedSummary);
   } catch (err) {
     console.error("Error:", err);
     return new NextResponse("Failed to fetch data", { status: 500 });
