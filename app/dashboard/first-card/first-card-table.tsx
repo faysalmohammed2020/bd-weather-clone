@@ -892,97 +892,116 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     id: "observationTime",
                     label: "Observation Time (GMT)",
                     bg: "bg-blue-50",
+                    readOnly: false,
                   },
-                  { id: "c2Indicator", label: "Indicator", bg: "bg-indigo-50" },
+                  { id: "c2Indicator", label: "Indicator", bg: "bg-indigo-50" , readOnly: false},
                   {
                     id: "alteredThermometer",
                     label: "Attached Thermometer (°C)",
                     bg: "bg-blue-50",
+                    readOnly: false,
                   },
                   {
                     id: "barAsRead",
                     label: "Bar As Read (hPa)",
                     bg: "bg-indigo-50",
+                    readOnly: false,
                   },
                   {
                     id: "correctedForIndex",
                     label: "Corrected for Index",
                     bg: "bg-blue-50",
+                    readOnly: false,
                   },
                   {
                     id: "heightDifference",
                     label: "Height Difference Correction (hPa)",
                     bg: "bg-indigo-50",
+                    readOnly: true,
                   },
                   {
                     id: "stationLevelPressure",
                     label: "Station Level Pressure (QFE)",
                     bg: "bg-blue-50",
+                    readOnly: true,
                   },
                   {
                     id: "seaLevelReduction",
                     label: "Sea Level Reduction",
                     bg: "bg-indigo-50",
+                    readOnly: true,
                   },
                   {
                     id: "correctedSeaLevelPressure",
                     label: "Sea Level Pressure (QNH)",
                     bg: "bg-blue-50",
+                    readOnly: true,
                   },
                   {
                     id: "dryBulbAsRead",
                     label: "Dry Bulb As Read (°C)",
                     bg: "bg-indigo-50",
+                    readOnly: false,
                   },
                   {
                     id: "wetBulbAsRead",
                     label: "Wet Bulb As Read (°C)",
                     bg: "bg-blue-50",
+                    readOnly: false,
                   },
                   {
                     id: "maxMinTempAsRead",
                     label: "MAX/MIN Temp As Read (°C)",
                     bg: "bg-indigo-50",
+                    readOnly: false,
                   },
                   {
                     id: "dryBulbCorrected",
                     label: "Dry Bulb Corrected (°C)",
                     bg: "bg-blue-50",
+                    readOnly: false,
                   },
                   {
                     id: "wetBulbCorrected",
                     label: "Wet Bulb Corrected (°C)",
                     bg: "bg-indigo-50",
+                    readOnly: false,
                   },
                   {
                     id: "Td",
                     label: "Dew Point Temperature (°C)",
                     bg: "bg-blue-50",
+                    readOnly: true,
                   },
                   {
                     id: "relativeHumidity",
                     label: "Relative Humidity (%)",
                     bg: "bg-indigo-50",
+                    readOnly: true,
                   },
                   {
                     id: "horizontalVisibility",
                     label: "Horizontal Visibility (km)",
                     bg: "bg-blue-50",
+                    readOnly: false,
                   },
                   {
                     id: "presentWeatherWW",
                     label: "Present Weather (ww)",
                     bg: "bg-indigo-50",
+                    readOnly: false,
                   },
                   {
                     id: "pastWeatherW1",
                     label: "Past Weather (W₁)",
                     bg: "bg-blue-50",
+                    readOnly: false,
                   },
                   {
                     id: "pastWeatherW2",
                     label: "Past Weather (W₂)",
                     bg: "bg-indigo-50",
+                    readOnly: false,
                   },
                 ].map((field) => (
                   <div
@@ -999,7 +1018,8 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                       id={field.id}
                       value={editFormData[field.id] || ""}
                       onChange={handleEditInputChange}
-                      className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
+                      readOnly={field.readOnly}
+                      className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 read-only:opacity-70 read-only:cursor-not-allowed"
                     />
                   </div>
                 ))}
