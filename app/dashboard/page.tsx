@@ -7,6 +7,7 @@ import EvapotranspirationChart from "@/components/charts/evapotranspiration-char
 import SoilMoistureChart from "@/components/charts/soil-moisture-chart";
 import TemperatureChart from "@/components/charts/temperature-chart";
 import { Station } from "@prisma/client";
+import WeatherDashboard from "@/components/msn-weather";
 
 const MapComponent = dynamic(
   () => import("@/components/StationMap/MapComponent"),
@@ -27,77 +28,53 @@ export default function DroughtDashboard() {
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 flex-grow overflow-auto">
-        <div className="md:col-span-1">
-          <div className="bg-white rounded-lg shadow mb-4">
-            <MapControls
-              selectedRegion={selectedRegion}
-              setSelectedRegion={setSelectedRegion}
-              selectedPeriod={selectedPeriod}
-              setSelectedPeriod={setSelectedPeriod}
-              selectedIndex={selectedIndex}
-              setSelectedIndex={setSelectedIndex}
-              selectedStation={selectedStation}
-              setSelectedStation={setSelectedStation}
-            />
-            {/* <MapComponent /> */}
-          </div>
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-4">
-              <h3 className="text-lg font-medium bg-blue-400 text-white py-2 px-4 mb-4 rounded">
-                About
-              </h3>
-              <p className="text-sm text-gray-700 leading-relaxed">
-                ICIMOD is developing an integrated information platform linking
-                weather and climate data with agriculture practices in the
-                region. The platform provides data analysis support to
-                professionals responsible for developing response strategies to
-                drought conditions.
-              </p>
-            </div>
-          </div>
+    <div className="flex flex-col h-screen">
+      <div className="grid grid-cols-5 rounded-lg shadow mb-4">
+        <div className="col-span-1">
+          <MapControls
+            selectedRegion={selectedRegion}
+            setSelectedRegion={setSelectedRegion}
+            selectedPeriod={selectedPeriod}
+            setSelectedPeriod={setSelectedPeriod}
+            selectedIndex={selectedIndex}
+            setSelectedIndex={setSelectedIndex}
+            selectedStation={selectedStation}
+            setSelectedStation={setSelectedStation}
+          />
         </div>
 
-        <div className="md:col-span-2 grid grid-cols-1 gap-4">
-          <div className="bg-white rounded-lg shadow">
-            {/* <MapComponent
-              currentDate={currentDate}
-              setCurrentDate={setCurrentDate}
-            /> */}
-            <MapComponent
-              currentDate={currentDate}
-              setCurrentDate={setCurrentDate}
-              isPlaying={isPlaying}
-              setIsPlaying={setIsPlaying}
-              selectedStation={selectedStation}
-              onStationSelect={setSelectedStation}
-            />
+        <div className="col-span-4 p-4">
+          <MapComponent
+            currentDate={currentDate}
+            setCurrentDate={setCurrentDate}
+            isPlaying={isPlaying}
+            setIsPlaying={setIsPlaying}
+            selectedStation={selectedStation}
+            onStationSelect={setSelectedStation}
+          />
+        </div>
+      </div>
+
+      <div className="md:col-span-2 grid grid-cols-1 gap-4 p-4">
+        {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white rounded-lg shadow p-4">
+            <h3 className="text-lg font-medium mb-2">Rainfall (mm/day)</h3>
+            <RainfallChart />
+          </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <h3 className="text-lg font-medium mb-2">
+              Total Evapotranspiration (mm/day)
+            </h3>
+            <EvapotranspirationChart />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-lg font-medium mb-2">Rainfall (mm/day)</h3>
-              <RainfallChart />
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-lg font-medium mb-2">
-                Total Evapotranspiration (mm/day)
-              </h3>
-              <EvapotranspirationChart />
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-lg font-medium mb-2">
-                Soil Moisture (kg/m²)
-              </h3>
-              <SoilMoistureChart />
-            </div>
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-lg font-medium mb-2">Temperature (°C)</h3>
-              <TemperatureChart />
-            </div>
+          <div className="bg-white rounded-lg shadow p-4">
+            <h3 className="text-lg font-medium mb-2">Temperature (°C)</h3>
+            <TemperatureChart />
           </div>
-        </div>
+        </div> */}
+
+        <WeatherDashboard selectedStation={selectedStation} />
       </div>
     </div>
   );
