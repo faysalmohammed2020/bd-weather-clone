@@ -213,7 +213,7 @@ model WeatherObservation {
 
   // OBSERVER METADATA
   observerInitial String?
-  observationTime DateTime?
+  observationTime  String?
 }
 
 
