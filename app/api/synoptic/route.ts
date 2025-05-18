@@ -104,7 +104,9 @@ export async function GET() {
     measurements[3] = `${totalCloud}${dd}${ff}`;
 
     // 5. 1SnTTT (32-36) - Dry bulb temperature
-    const dryBulb = Number.parseFloat(finalFirstCard.dryBulbAsRead || '0');
+    // const dryBulb = Number.parseFloat(finalFirstCard.dryBulbAsRead || '0');
+    const dryBulb = Number.parseFloat(finalFirstCard.dryBulbAsRead || '0') / 10;
+
     measurements[4] = `1${getTempValue(dryBulb)}`;
 
     // 6. 2SnTdTdTd (37-41) - Dew point temperature
