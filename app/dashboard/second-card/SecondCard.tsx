@@ -377,12 +377,12 @@ export default function WeatherObservationForm() {
   };
 
   // Update the handleSubmit function to ensure session values are included in the submission
+  // Update your handleSubmit function to this:
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate all required fields before submission
-    if (!validateStep(currentStep)) {
-      toast.error("Please complete all required fields");
+    // Only allow submission from the observer tab
+    if (activeTab !== "observer" || currentStep !== totalSteps) {
       return;
     }
 
@@ -418,7 +418,7 @@ export default function WeatherObservationForm() {
       if (!response.ok)
         throw new Error(`HTTP error! status: ${response.status}`);
 
-      const result = await response.json();
+      await response.json();
       toast.success("Observation submitted successfully!");
       resetForm();
       setCurrentStep(1);
@@ -481,18 +481,7 @@ export default function WeatherObservationForm() {
 
         {/* Wrap in a div to prevent form submission issues */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <form
-            onSubmit={(e) => {
-              // Only allow submission when we're on the last step and the Submit button is clicked
-              if (activeTab !== "observer" || currentStep !== totalSteps) {
-                e.preventDefault();
-                return;
-              }
-              handleSubmit(e);
-            }}
-            onKeyDown={handleKeyDown}
-            className="w-full"
-          >
+          <form onSubmit={handleSubmit} className="w-full">
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
@@ -753,6 +742,7 @@ export default function WeatherObservationForm() {
                 {/* OBSERVER Tab */}
                 {/* OBSERVER Tab */}
                 {/* OBSERVER Tab */}
+                {/* OBSERVER Tab */}
                 <TabsContent value="observer">
                   <SectionCard
                     title="Observer Information"
@@ -760,7 +750,6 @@ export default function WeatherObservationForm() {
                     className="border-orange-200"
                   >
                     <div className="grid gap-6 md:grid-cols-2">
-                      {/* Observer Initial */}
                       <InputField
                         id="observer-initial"
                         name="observer-initial"
@@ -771,7 +760,6 @@ export default function WeatherObservationForm() {
                         required
                       />
 
-                      {/* Observation Time (UTC) */}
                       <div className="grid gap-2 w-full">
                         <Label
                           htmlFor="observation-time"
@@ -779,70 +767,31 @@ export default function WeatherObservationForm() {
                         >
                           Observation Time (UTC) *
                         </Label>
-                        <Select
+                        <select
+                          id="observation-time"
+                          name="observation-time"
                           value={formData.observer["observation-time"] || ""}
-                          onValueChange={(value) =>
-                            handleSelectChange("observation-time", value)
+                          onChange={(e) =>
+                            handleSelectChange(
+                              "observation-time",
+                              e.target.value
+                            )
                           }
                           required
+                          className="w-full border border-orange-300 bg-orange-50 focus:border-orange-500 focus:ring-orange-500/30 rounded-lg px-3 py-2 transition-all"
                         >
-                          <SelectTrigger className="w-full border-2 border-orange-300 bg-orange-50 focus:border-orange-500 focus:ring-orange-500/30 rounded-lg px-3 py-2 transition-all">
-                            <SelectValue placeholder="Select UTC time" />
-                          </SelectTrigger>
-                          <SelectContent className="border-2 border-gray-200 rounded-lg shadow-lg">
-                            <SelectItem
-                              value="00"
-                              className="py-2.5 px-4 focus:bg-gray-100"
-                            >
-                              00:00 UTC (Midnight)
-                            </SelectItem>
-                            <SelectItem
-                              value="03"
-                              className="py-2.5 px-4 focus:bg-gray-100"
-                            >
-                              03:00 UTC (Early Morning)
-                            </SelectItem>
-                            <SelectItem
-                              value="06"
-                              className="py-2.5 px-4 focus:bg-gray-100"
-                            >
-                              06:00 UTC (Dawn)
-                            </SelectItem>
-                            <SelectItem
-                              value="09"
-                              className="py-2.5 px-4 focus:bg-gray-100"
-                            >
-                              09:00 UTC (Morning)
-                            </SelectItem>
-                            <SelectItem
-                              value="12"
-                              className="py-2.5 px-4 focus:bg-gray-100"
-                            >
-                              12:00 UTC (Noon)
-                            </SelectItem>
-                            <SelectItem
-                              value="15"
-                              className="py-2.5 px-4 focus:bg-gray-100"
-                            >
-                              15:00 UTC (Afternoon)
-                            </SelectItem>
-                            <SelectItem
-                              value="18"
-                              className="py-2.5 px-4 focus:bg-gray-100"
-                            >
-                              18:00 UTC (Evening)
-                            </SelectItem>
-                            <SelectItem
-                              value="21"
-                              className="py-2.5 px-4 focus:bg-gray-100"
-                            >
-                              21:00 UTC (Night)
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                          <option value="">-- Select GG Time --</option>
+                          <option value="00">00 UTC</option>
+                          <option value="03">03 UTC</option>
+                          <option value="06">06 UTC</option>
+                          <option value="09">09 UTC</option>
+                          <option value="12">12 UTC</option>
+                          <option value="15">15 UTC</option>
+                          <option value="18">18 UTC</option>
+                          <option value="21">21 UTC</option>
+                        </select>
                       </div>
 
-                      {/* Station ID (Read-only) */}
                       <InputField
                         id="station-id"
                         name="station-id"
