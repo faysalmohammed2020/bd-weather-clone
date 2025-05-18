@@ -24,12 +24,10 @@ export async function POST(request: Request) {
       userId: session.user.id,
       stationId,
       tabActive: data.metadata?.tabActiveAtSubmission || "unknown",
-      
+
       // Observer info
       observerInitial: data.observer?.["observer-initial"] || null,
-      observationTime: data.observer?.["observation-time"]
-        ? new Date(data.observer["observation-time"])
-        : null,
+      observationTime: data.observer?.["observation-time"],
 
       // Cloud
       lowCloudForm: data.clouds?.low?.form || null,
@@ -140,7 +138,7 @@ export async function GET() {
       },
       observer: {
         "observer-initial": obs.observerInitial,
-        "observation-time": obs.observationTime?.toISOString() || null,
+        "observation-time": obs.observationTime || null,
         name: obs.user?.name,
         email: obs.user?.email,
         role: obs.user?.role,
@@ -233,6 +231,7 @@ export async function PUT(request: Request) {
         userId: true,
         stationId: true,
         observationTime: true,
+        submittedAt: true,
       },
     });
 
@@ -244,7 +243,7 @@ export async function PUT(request: Request) {
     }
 
     const now = new Date();
-    const obsTime = new Date(observation.observationTime || now);
+    const obsTime = new Date(observation.submittedAt || now);
     const daysDiff = Math.floor((+now - +obsTime) / (1000 * 60 * 60 * 24));
     const { role, id: userId, stationId } = session.user;
 

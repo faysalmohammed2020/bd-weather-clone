@@ -213,9 +213,8 @@ model WeatherObservation {
 
   // OBSERVER METADATA
   observerInitial String?
-  observationTime  DateTime?
+  observationTime String?
 }
-
 
 model DailySummary {
   id                    String   @id @default(cuid())
@@ -240,7 +239,7 @@ model DailySummary {
   maxWindDirection      String?
   avTotalCloud          String?
   lowestVisibility      String?
-  totalRainDuration     String?  
+  totalRainDuration     String?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
 }

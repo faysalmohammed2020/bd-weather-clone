@@ -102,14 +102,6 @@ export default function WeatherObservationForm() {
     metadata: formData?.metadata || {},
   };
 
-  // Check for expired form data on component mount
-  useEffect(() => {
-    const wasReset = checkAndResetIfExpired();
-    if (wasReset) {
-      toast.info("Your form data was reset due to inactivity");
-    }
-  }, [checkAndResetIfExpired]);
-
   // Initialize session-specific values when session is available
   useEffect(() => {
     if (session?.user) {

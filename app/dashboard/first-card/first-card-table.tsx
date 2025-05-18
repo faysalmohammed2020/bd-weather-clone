@@ -122,11 +122,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
       setStationNames(Array.from(names));
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch meteorological data",
-        variant: "destructive",
-      });
+      toast.error("Failed to fetch meteorological data");
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -323,21 +319,13 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
         )
       );
 
-      toast({
-        title: "Success",
-        description: "Record updated successfully",
-        variant: "default",
-      });
+      toast.success("Record updated successfully");
 
       // Close the dialog
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error("Error updating record:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update record",
-        variant: "destructive",
-      });
+      toast.error("Failed to update record");
     } finally {
       setIsSaving(false);
     }
