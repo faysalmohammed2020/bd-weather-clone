@@ -11,32 +11,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         <Sidebar />
 
         <div className="flex w-full flex-col overflow-hidden">
-          <div className="flex flex-col">
-            <div className="bg-blue-400 px-6 py-2 flex items-center justify-between">
-              <Tabs defaultValue="current" className="w-full">
-                <TabsList className="bg-transparent h-12">
-                  <TabsTrigger
-                    value="current"
-                    className="text-white data-[state=active]:bg-white data-[state=active]:text-foreground h-full px-8"
-                  >
-                    Current
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="seasonal"
-                    className="text-white data-[state=active]:bg-white data-[state=active]:text-foreground h-full px-8"
-                  >
-                    Seasonal
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="outlook"
-                    className="text-white data-[state=active]:bg-white data-[state=active]:text-foreground h-full px-8"
-                  >
-                    Outlook
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-              <Profile />
-            </div>
+          <div className="bg-blue-400 flex flex-col p-2 items-end">
+            <Profile />
           </div>
           <div className="growgrow overflow-y-auto">
             <LocationProvider>{children}</LocationProvider>

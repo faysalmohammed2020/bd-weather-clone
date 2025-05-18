@@ -1,23 +1,17 @@
 "use client";
 
 import {
-  Sun,
-  Moon,
   Thermometer,
   Droplets,
   CloudRain,
   Wind,
   Eye,
   Cloud,
-  Gauge,
-  CircleGauge,
-  SunDim,
-  CircleDot,
 } from "lucide-react";
 
 export default function WeatherDashboard() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6 bg-blue-50 min-h-screen">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6  min-h-screen">
       {/* Temperature */}
       <WeatherCard
         icon={<Thermometer className="text-blue-500" />}
@@ -25,17 +19,6 @@ export default function WeatherDashboard() {
         value="34°"
         status="Steady"
         description="Steady at current value of 34°. Overnight low of 26° at 3:00 AM."
-      />
-
-      {/* Feels Like */}
-      <WeatherCard
-        icon={<Droplets className="text-red-500" />}
-        title="Feels like"
-        value="42°"
-        status="Hot"
-        description="Feels considerably warmer than the actual temperature due to the humidity."
-        subtext="Dominant factor: humidity"
-        extra="Temperature: 34°"
       />
 
       {/* Cloud Cover */}
@@ -77,24 +60,6 @@ export default function WeatherDashboard() {
         subtext="Dew point: 28°"
       />
 
-      {/* UV */}
-      <WeatherCard
-        icon={<SunDim className="text-yellow-500" />}
-        title="UV"
-        value="6"
-        status="High"
-        description="Maximum UV exposure for today will be high, expected at 2:52 PM."
-      />
-
-      {/* AQI */}
-      <WeatherCard
-        icon={<CircleGauge className="text-yellow-600" />}
-        title="AQI"
-        value="91"
-        status="Moderate"
-        description="Deteriorating air quality with primary pollutant: PM2.5 33 µg/m³."
-      />
-
       {/* Visibility */}
       <WeatherCard
         icon={<Eye className="text-green-600" />}
@@ -102,43 +67,6 @@ export default function WeatherDashboard() {
         value="4 km"
         status="Good"
         description="Remaining steady at 20 km. Excellent visibility expected in the evening."
-      />
-
-      {/* Pressure */}
-      <WeatherCard
-        icon={<Gauge className="text-blue-700" />}
-        title="Pressure"
-        value="1005 mb"
-        status="Falling slowly"
-        description="Falling slowly in the last 3 hours. Expected to fall slowly in the next 3 hours."
-        subtext="2:56 PM (Now)"
-      />
-
-      {/* Sun */}
-      <WeatherCard
-        icon={<Sun className="text-orange-500" />}
-        title="Sun"
-        value="13 hrs 17 mins"
-        status="Sunrise: 5:16 AM"
-        description="Sunset: 6:33 PM"
-      />
-
-      {/* Moon */}
-      <WeatherCard
-        icon={<Moon className="text-purple-600" />}
-        title="Moon"
-        value="10 hrs 30 mins"
-        status="Moonrise: 9:09 PM"
-        description="Moonset: 7:39 AM"
-      />
-
-      {/* Moon Phase */}
-      <WeatherCard
-        icon={<CircleDot className="text-yellow-400" />}
-        title="Moon phase"
-        value="94%"
-        status="Phase of moon"
-        description="Next time full moon: Jun 11"
       />
     </div>
   );
