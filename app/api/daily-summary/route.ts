@@ -93,6 +93,9 @@ export async function GET(req: Request) {
         totalPrecipitation: true,
         windSpeed: true,
         avTotalCloud: true,
+        totalRainDuration: true,
+        avRelativeHumidity: true,
+        lowestVisibility: true,
       },
     });
 
@@ -111,6 +114,9 @@ export async function GET(req: Request) {
           totalPrecipitation: true,
           windSpeed: true,
           avTotalCloud: true,
+          totalRainDuration: true,
+          avRelativeHumidity: true,
+          lowestVisibility: true,
         },
       });
     }
@@ -130,6 +136,9 @@ export async function GET(req: Request) {
           totalPrecipitation: true,
           windSpeed: true,
           avTotalCloud: true,
+          totalRainDuration: true,
+          avRelativeHumidity: true,
+          lowestVisibility: true,
         },
       });
     }
@@ -147,6 +156,9 @@ export async function GET(req: Request) {
           totalPrecipitation: true,
           windSpeed: true,
           avTotalCloud: true,
+          totalRainDuration: true,
+          avRelativeHumidity: true,
+          lowestVisibility: true,
         },
       });
     }
