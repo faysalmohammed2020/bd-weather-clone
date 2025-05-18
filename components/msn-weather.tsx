@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface WeatherData {
   maxTemperature: string | null;
@@ -28,6 +29,8 @@ export default function WeatherDashboard({
   selectedStation: any | null;
 }) {
   const { data: session } = useSession();
+  const role = session?.user.role;
+
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,9 +42,20 @@ export default function WeatherDashboard({
       setError(null);
 
       try {
-        // Determine which station to query
-        const stationToQuery =
-          selectedStation?.stationId || session?.user?.stationId;
+        let stationToQuery: string | null = null;
+        let nameToDisplay: string = "Your Station";
+
+        // Super admin logic
+        if (session?.user?.role === "super_admin") {
+          stationToQuery =
+            selectedStation?.stationId || session?.user?.stationId || "";
+          nameToDisplay = selectedStation?.name || "";
+          ("Selected Station");
+        } else {
+          // Other roles: always use own station
+          stationToQuery = session?.user?.stationId || "";
+          nameToDisplay = session?.user?.stationName || "Your Station";
+        }
 
         if (!stationToQuery) {
           setError("No station selected");
@@ -49,8 +63,8 @@ export default function WeatherDashboard({
           return;
         }
 
-        // Update station name
-        setStationName(selectedStation?.name || "Selected Station");
+        // Update station name for display
+        setStationName(nameToDisplay);
 
         // Get current date in "DD-MMM" format
         const date = new Date();
@@ -72,17 +86,22 @@ export default function WeatherDashboard({
         const month = monthNames[date.getMonth()];
         const dateString = `${day}-${month}`;
 
+        console.log("Vut", stationToQuery);
+
+        // Fetch data
         const response = await fetch(
           `/api/daily-summary?stationNo=${stationToQuery}&date=${dateString}`
         );
 
         if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
+          setWeatherData(null);
+          toast.error("No Data Found!");
+          return;
         }
 
         const data = await response.json();
 
-        // Check if data has valid values
+        // Check if data has any non-null value
         const hasValidData = Object.values(data).some(
           (val) => val !== null && val !== undefined
         );

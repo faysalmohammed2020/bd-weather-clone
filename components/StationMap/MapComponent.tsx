@@ -52,7 +52,6 @@ function LiveLocationMarker({
 }: {
   station: { coordinates: L.LatLngExpression } | null;
 }) {
-  const map = useMap();
   const [pulseSize, setPulseSize] = useState(10);
   const pulseRef = useRef<L.CircleMarker>(null);
 
@@ -143,18 +142,11 @@ function StationMarkers({
   loading: boolean;
 }) {
   const map = useMap();
-  const { data: session } = useSession();
 
   const stationIcon = L.icon({
     iconUrl: "/broadcasting.png",
     iconSize: [32, 32],
     iconAnchor: [16, 16],
-  });
-
-  const selectedStationIcon = L.icon({
-    iconUrl: "/broadcasting.png",
-    iconSize: [48, 48],
-    iconAnchor: [24, 24],
   });
 
   // Zoom to selected station
@@ -179,11 +171,7 @@ function StationMarkers({
         <Marker
           key={station.id}
           position={[station.latitude, station.longitude]}
-          icon={
-            selectedStation?.id === station.id
-              ? selectedStationIcon
-              : stationIcon
-          }
+          icon={stationIcon}
           eventHandlers={{
             click: () => onStationSelect(station),
             mouseover: (e) => {
@@ -466,77 +454,76 @@ export default function MapComponent({
 
       {/* Selected station info */}
       {selectedStation && (
-        <div className="absolute top-4 left-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
-          <div className="text-sm font-medium">{selectedStation.name}</div>
-          <div className="text-xs text-gray-500">
-            Lat: {selectedStation.latitude.toFixed(4)}, Long:{" "}
-            {selectedStation.longitude.toFixed(4)}
-          </div>
-        </div>
-      )}
-      {selectedStation && (
-        <div className="absolute bottom-20 right-4 bg-white p-3 rounded-lg shadow-lg z-[1000] w-64">
-          <div className="text-sm font-medium mb-2">Weather Summary</div>
-          {weatherData ? (
-            <div className="grid grid-cols-1 gap-2">
-              <div className="flex items-center">
-                <Thermometer className="h-4 w-4 mr-2 text-orange-500" />
-                <div className="text-xs">
-                  <span className="font-medium">Temperature: </span>
-                  {weatherData.maxTemperature
-                    ? `${weatherData.maxTemperature}°C (max)`
-                    : "N/A"}{" "}
-                  /
-                  {weatherData.minTemperature
-                    ? `${weatherData.minTemperature}°C (min)`
-                    : "N/A"}
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <Droplets className="h-4 w-4 mr-2 text-blue-500" />
-                <div className="text-xs">
-                  <span className="font-medium">Precipitation: </span>
-                  {weatherData.totalPrecipitation
-                    ? `${weatherData.totalPrecipitation} mm`
-                    : "No data"}
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <Wind className="h-4 w-4 mr-2 text-gray-500" />
-                <div className="text-xs">
-                  <span className="font-medium">Wind Speed: </span>
-                  {weatherData.windSpeed
-                    ? `${weatherData.windSpeed} km/h`
-                    : "No data"}
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <Cloud className="h-4 w-4 mr-2 text-gray-400" />
-                <div className="text-xs">
-                  <span className="font-medium">Cloud Cover: </span>
-                  {weatherData.avTotalCloud
-                    ? `${weatherData.avTotalCloud}%`
-                    : "No data"}
-                </div>
-              </div>
-
-              {weatherData.totalPrecipitation &&
-                Number.parseFloat(weatherData.totalPrecipitation) > 0 && (
-                  <div className="text-xs text-blue-600 font-medium mt-1">
-                    Rain detected: {weatherData.totalPrecipitation} mm
-                  </div>
-                )}
-            </div>
-          ) : (
+          <div className="absolute top-4 left-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
+            <div className="text-sm font-medium">{selectedStation.name}</div>
             <div className="text-xs text-gray-500">
-              No weather data available for {currentDate}
+              Lat: {selectedStation.latitude.toFixed(4)}, Long:{" "}
+              {selectedStation.longitude.toFixed(4)}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        ) && (
+          <div className="absolute bottom-20 right-4 bg-white p-3 rounded-lg shadow-lg z-[1000] w-64">
+            <div className="text-sm font-medium mb-2">Weather Summary</div>
+            {weatherData ? (
+              <div className="grid grid-cols-1 gap-2">
+                <div className="flex items-center">
+                  <Thermometer className="h-4 w-4 mr-2 text-orange-500" />
+                  <div className="text-xs">
+                    <span className="font-medium">Temperature: </span>
+                    {weatherData.maxTemperature
+                      ? `${weatherData.maxTemperature}°C (max)`
+                      : "N/A"}{" "}
+                    /
+                    {weatherData.minTemperature
+                      ? `${weatherData.minTemperature}°C (min)`
+                      : "N/A"}
+                  </div>
+                </div>
+
+                <div className="flex items-center">
+                  <Droplets className="h-4 w-4 mr-2 text-blue-500" />
+                  <div className="text-xs">
+                    <span className="font-medium">Precipitation: </span>
+                    {weatherData.totalPrecipitation
+                      ? `${weatherData.totalPrecipitation} mm`
+                      : "No data"}
+                  </div>
+                </div>
+
+                <div className="flex items-center">
+                  <Wind className="h-4 w-4 mr-2 text-gray-500" />
+                  <div className="text-xs">
+                    <span className="font-medium">Wind Speed: </span>
+                    {weatherData.windSpeed
+                      ? `${weatherData.windSpeed} km/h`
+                      : "No data"}
+                  </div>
+                </div>
+
+                <div className="flex items-center">
+                  <Cloud className="h-4 w-4 mr-2 text-gray-400" />
+                  <div className="text-xs">
+                    <span className="font-medium">Cloud Cover: </span>
+                    {weatherData.avTotalCloud
+                      ? `${weatherData.avTotalCloud}%`
+                      : "No data"}
+                  </div>
+                </div>
+
+                {weatherData.totalPrecipitation &&
+                  Number.parseFloat(weatherData.totalPrecipitation) > 0 && (
+                    <div className="text-xs text-blue-600 font-medium mt-1">
+                      Rain detected: {weatherData.totalPrecipitation} mm
+                    </div>
+                  )}
+              </div>
+            ) : (
+              <div className="text-xs text-gray-500">
+                No weather data available for {currentDate}
+              </div>
+            )}
+          </div>
+        )}
     </div>
   );
 }
