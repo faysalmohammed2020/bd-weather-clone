@@ -1,7 +1,5 @@
 "use client";
 
-import type React from "react";
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,17 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  CloudSun,
-  Filter,
-  RefreshCw,
-  Loader2,
-} from "lucide-react";
-import { format } from "date-fns";
+import { Calendar, ChevronLeft, ChevronRight, CloudSun, Filter, RefreshCw, Loader2, Search, AlertTriangle } from 'lucide-react';
+import { format, parseISO, differenceInDays, isValid, isAfter, isBefore, isEqual } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { useSession } from "@/lib/auth-client";
 import {
@@ -33,8 +22,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface MeteorologicalEntry {
   id: string;
@@ -74,37 +71,91 @@ interface MeteorologicalEntry {
   c2Indicator: string;
   observationTime: string;
   timestamp: string;
+  submittedBy?: string;
+  submittedAt?: string;
+}
+
+interface Station {
+  id: string;
+  stationId: string;
+  name: string;
 }
 
 interface FirstCardTableProps {
   refreshTrigger?: number;
 }
 
+// Function to check if user can edit a record based on role and submission time
+function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
+  if (!user || !record.submittedAt) return false;
+
+  try {
+    const submissionDate = parseISO(record.submittedAt);
+    if (!isValid(submissionDate)) return false;
+
+    const now = new Date();
+    const daysDifference = differenceInDays(now, submissionDate);
+
+    // Role-based permissions
+    const role = user.role;
+    const userId = user.id;
+    const stationId = user.stationId;
+    const recordStationId = record.stationNo;
+
+    // Super admin can edit records up to 1 year old
+    if (role === "super_admin") return daysDifference <= 365;
+    
+    // Station admin can edit records from their station up to 30 days old
+    if (role === "station_admin") 
+      return daysDifference <= 30 && stationId && recordStationId && stationId === recordStationId;
+    
+    // Regular users can edit their own records up to 2 days old
+    if (role === "observer") 
+      return daysDifference <= 2 && userId && record.userId && userId === record.userId;
+
+    return false;
+  } catch (e) {
+    console.warn("Error in canEditRecord:", e);
+    return false;
+  }
+}
+
 export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
+  // State for data and loading
   const [data, setData] = useState<MeteorologicalEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(
-    format(new Date(), "yyyy-MM-dd")
-  );
+  
+  // Date range filter state
+  const [startDate, setStartDate] = useState(format(new Date(new Date().setDate(new Date().getDate() - 7)), "yyyy-MM-dd"));
+  const [endDate, setEndDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  
+  // Station filter state
   const [stationFilter, setStationFilter] = useState("all");
-  const [stationNames, setStationNames] = useState<string[]>([]);
+  const [stations, setStations] = useState<Station[]>([]);
+  
+  // UI state
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { data: session } = useSession();
   const user = session?.user;
+  
+  // Check if user is super admin
+  const isSuperAdmin = user?.role === "super_admin";
 
-  // Edit modal state
+  // Edit dialog state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] =
-    useState<MeteorologicalEntry | null>(null);
-  const [editFormData, setEditFormData] = useState<
-    Partial<MeteorologicalEntry>
-  >({});
+  const [selectedRecord, setSelectedRecord] = useState<MeteorologicalEntry | null>(null);
+  const [editFormData, setEditFormData] = useState<Partial<MeteorologicalEntry>>({});
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Permission denied dialog state
+  const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false);
 
   // Fetch data from API
   const fetchData = async () => {
     try {
       setLoading(true);
+      
+      // Fetch meteorological data
       const response = await fetch("/api/first-card-data");
       if (!response.ok) {
         throw new Error("Failed to fetch data");
@@ -112,14 +163,14 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
       const result = await response.json();
       setData(result.entries);
 
-      // Extract unique station names
-      const names = new Set<string>();
-      result.entries.forEach((item: MeteorologicalEntry) => {
-        if (item.stationName) {
-          names.add(item.stationName);
-        }
-      });
-      setStationNames(Array.from(names));
+      // Fetch stations from the database
+      const stationsResponse = await fetch("/api/stations");
+      if (!stationsResponse.ok) {
+        throw new Error("Failed to fetch stations");
+      }
+      const stationsResult = await stationsResponse.json();
+      setStations(stationsResult);
+      
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to fetch meteorological data");
@@ -140,95 +191,59 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     fetchData();
   }, [refreshTrigger]);
 
-  // Filter data based on selected date and station
+  // Filter data based on selected date range and station
   const filteredData = data.filter((item) => {
     if (!item.timestamp) return false;
 
-    const itemDate = format(new Date(item.timestamp), "yyyy-MM-dd");
-    const matchesDate = itemDate === selectedDate;
-    const matchesStation =
-      stationFilter === "all" || item.stationName === stationFilter;
+    const itemDate = new Date(item.timestamp);
+    
+    // Date range filter
+    const start = parseISO(startDate);
+    const end = parseISO(endDate);
+    // Include the end date by setting it to the end of the day
+    const endOfDay = new Date(end);
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    const matchesDate = (
+      (isAfter(itemDate, start) || isEqual(itemDate, start)) && 
+      (isBefore(itemDate, endOfDay) || isEqual(itemDate, endOfDay))
+    );
+
+    const matchesStation = stationFilter === "all" || item.stationNo === stationFilter;
 
     return matchesDate && matchesStation;
   });
 
-  // Navigate to previous day
-  const goToPreviousDay = () => {
-    const currentDate = new Date(selectedDate);
-    const previousDay = new Date(currentDate);
-    previousDay.setDate(currentDate.getDate() - 1);
-    setSelectedDate(format(previousDay, "yyyy-MM-dd"));
+  // Navigate to previous week (date range mode)
+  const goToPreviousWeek = () => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const daysInRange = differenceInDays(end, start);
+    
+    const newStart = new Date(start);
+    newStart.setDate(start.getDate() - daysInRange - 1);
+    
+    const newEnd = new Date(start);
+    newEnd.setDate(start.getDate() - 1);
+    
+    setStartDate(format(newStart, "yyyy-MM-dd"));
+    setEndDate(format(newEnd, "yyyy-MM-dd"));
   };
 
-  // Navigate to next day
-  const goToNextDay = () => {
-    const currentDate = new Date(selectedDate);
-    const nextDay = new Date(currentDate);
-    nextDay.setDate(currentDate.getDate() + 1);
-    setSelectedDate(format(nextDay, "yyyy-MM-dd"));
-  };
-
-  // Export to CSV
-  const exportToCSV = () => {
-    // Create CSV content
-    const headers = [
-      "Time",
-      "Station",
-      "Bar As Read",
-      "Corrected For Index",
-      "Height Difference",
-      "Station Level Pressure",
-      "Sea Level Reduction",
-      "Sea Level Pressure",
-      "Dry Bulb As Read",
-      "Wet Bulb As Read",
-      "Max/Min Temp As Read",
-      "Dry Bulb Corrected",
-      "Wet Bulb Corrected",
-      "Dew Point",
-      "Relative Humidity",
-      "Horizontal Visibility",
-      "Present Weather",
-    ];
-
-    const csvRows = [
-      headers.join(","),
-      ...filteredData.map((item) => {
-        const time = item.observationTime || "N/A";
-
-        return [
-          time,
-          item.stationName || "N/A",
-          item.barAsRead || "N/A",
-          item.correctedForIndex || "N/A",
-          item.heightDifference || "N/A",
-          item.stationLevelPressure || "N/A",
-          item.seaLevelReduction || "N/A",
-          item.correctedSeaLevelPressure || "N/A",
-          item.dryBulbAsRead || "N/A",
-          item.wetBulbAsRead || "N/A",
-          item.maxMinTempAsRead || "N/A",
-          item.dryBulbCorrected || "N/A",
-          item.wetBulbCorrected || "N/A",
-          item.Td || "N/A",
-          item.relativeHumidity || "N/A",
-          item.horizontalVisibility || "N/A",
-          item.presentWeatherWW || "N/A",
-        ].join(",");
-      }),
-    ];
-
-    const csvContent = csvRows.join("\n");
-
-    // Create and download the CSV file
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `meteorological-data-${selectedDate}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Navigate to next week (date range mode)
+  const goToNextWeek = () => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const daysInRange = differenceInDays(end, start);
+    
+    const newStart = new Date(end);
+    newStart.setDate(end.getDate() + 1);
+    
+    const newEnd = new Date(end);
+    newEnd.setDate(end.getDate() + daysInRange + 1);
+    
+    setStartDate(format(newStart, "yyyy-MM-dd"));
+    setEndDate(format(newEnd, "yyyy-MM-dd"));
   };
 
   // Get weather status color based on relative humidity
@@ -265,11 +280,17 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     ? new Date(filteredData[0].timestamp).getFullYear().toString().slice(-2)
     : new Date().getFullYear().toString().slice(-2);
 
-  // Handle opening the edit dialog
+  // Handle clicking the edit button
   const handleEditClick = (record: MeteorologicalEntry) => {
-    setSelectedRecord(record);
-    setEditFormData(record);
-    setIsEditDialogOpen(true);
+    // Check if the user has permission to edit this record
+    if (user && canEditRecord(record, user)) {
+      setSelectedRecord(record);
+      setEditFormData(record);
+      setIsEditDialogOpen(true);
+    } else {
+      // Show permission denied dialog
+      setIsPermissionDeniedOpen(true);
+    }
   };
 
   // Handle input changes in the edit form
@@ -331,97 +352,86 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     }
   };
 
+  // Get the station name by ID
+  const getStationNameById = (stationId: string): string => {
+    const station = stations.find(s => s.stationId === stationId);
+    return station ? station.name : stationId;
+  };
+
   return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
-      <CardHeader className="p-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <CloudSun size={24} className="text-yellow-300" />
-            <CardTitle className="text-xl font-bold">
-              Meteorological Data Dashboard
-            </CardTitle>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={handleRefresh}
-              variant="outline"
-              size="sm"
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20"
-            >
-              <RefreshCw
-                size={16}
-                className={isRefreshing ? "animate-spin" : ""}
-              />
-              <span className="ml-1">Refresh</span>
-            </Button>
-            <Button
-              onClick={exportToCSV}
-              className="gap-1 bg-emerald-500 hover:bg-emerald-600 text-white"
-              size="sm"
-            >
-              <Download size={16} /> Export CSV
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
 
       <CardContent className="p-6">
-        {/* Date and Station Filters */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 bg-slate-100 p-4 rounded-lg">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={goToPreviousDay}
-              className="hover:bg-slate-200"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+        {/* Date Range Filter - Only visible to super admin */}
+      {isSuperAdmin && (
+        <div className="mb-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 p-4 rounded-lg">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={goToPreviousWeek}
+                  className="hover:bg-slate-200"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
 
-            <div className="relative">
-              <Calendar className="absolute left-2 top-2.5 h-4 w-4 text-purple-500" />
-              <Input
-                type="date"
-                className="pl-8 w-40 border-slate-300 focus:border-purple-500 focus:ring-purple-500"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-              />
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <Calendar className="absolute left-2 top-2.5 h-4 w-4 text-purple-500" />
+                    <Input
+                      type="date"
+                      className="pl-8 w-40 border-slate-300 focus:border-purple-500 focus:ring-purple-500"
+                      value={startDate}
+                      onChange={(e) => setStartDate(e.target.value)}
+                    />
+                  </div>
+                  <span className="text-slate-500">to</span>
+                  <Input
+                    type="date"
+                    className="w-40 border-slate-300 focus:border-purple-500 focus:ring-purple-500"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={goToNextWeek}
+                  className="hover:bg-slate-200"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
 
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={goToNextDay}
-              className="hover:bg-slate-200"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Filter size={16} className="text-purple-500" />
-            <Label
-              htmlFor="stationFilter"
-              className="whitespace-nowrap font-medium text-slate-700"
-            >
-              Station:
-            </Label>
-            <Select value={stationFilter} onValueChange={setStationFilter}>
-              <SelectTrigger className="w-[200px] border-slate-300 focus:ring-purple-500">
-                <SelectValue placeholder="All Stations" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Stations</SelectItem>
-                {stationNames.map((name) => (
-                  <SelectItem key={name} value={name}>
-                    {name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex items-center gap-2">
+              <Filter size={16} className="text-purple-500" />
+              <Label
+                htmlFor="stationFilter"
+                className="whitespace-nowrap font-medium text-slate-700"
+              >
+                Station:
+              </Label>
+              <Select value={stationFilter} onValueChange={setStationFilter}>
+                <SelectTrigger className="w-[200px] border-slate-300 focus:ring-purple-500">
+                  <SelectValue placeholder="All Stations" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Stations</SelectItem>
+                  {stations.map((station) => (
+                    <SelectItem key={station.id} value={station.stationId}>
+                      {station.name} ({station.stationId})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
+      )}
 
         {/* Form View */}
         <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
@@ -495,6 +505,12 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
                       CI
                     </th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
+                      Date
+                    </th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
+                      Station
+                    </th>
                     <th
                       colSpan={9}
                       className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 p-1 text-purple-800"
@@ -556,6 +572,12 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
                       <div className="h-16 text-indigo-800">Indicator</div>
+                    </th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
+                      <div className="h-16 text-indigo-800">Date</div>
+                    </th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
+                      <div className="h-16 text-indigo-800">Station ID</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
                       <div className="h-16 text-purple-800">
@@ -664,7 +686,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={25} className="text-center py-8">
+                      <td colSpan={27} className="text-center py-8">
                         <div className="flex justify-center items-center">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
                           <span className="ml-3 text-indigo-600 font-medium">
@@ -675,7 +697,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     </tr>
                   ) : filteredData.length === 0 ? (
                     <tr>
-                      <td colSpan={25} className="text-center py-12">
+                      <td colSpan={27} className="text-center py-12">
                         <div className="flex flex-col items-center justify-center text-slate-500">
                           <CloudSun size={48} className="text-slate-400 mb-3" />
                           <p className="text-lg font-medium">
@@ -693,17 +715,31 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                       const humidityClass = getWeatherStatusColor(
                         record.relativeHumidity
                       );
+                      const recordDate = record.timestamp 
+                        ? format(new Date(record.timestamp), "yyyy-MM-dd")
+                        : "--";
+                      const canEdit = user && canEditRecord(record, user);
 
                       return (
                         <tr
                           key={record.id}
-                          className="text-center font-mono hover:bg-slate-50 transition-colors"
+                          className={`text-center font-mono hover:bg-slate-50 transition-colors ${
+                            index % 2 === 0 ? "bg-white" : "bg-slate-50"
+                          }`}
                         >
                           <td className="border border-slate-300 p-1 font-medium text-indigo-700">
                             {time.split(":")[0] || "--"}
                           </td>
                           <td className="border border-slate-300 p-1">
                             {record.subIndicator || "--"}
+                          </td>
+                          <td className="border border-slate-300 p-1 font-medium text-indigo-700">
+                            {recordDate}
+                          </td>
+                          <td className="border border-slate-300 p-1">
+                            <Badge variant="outline" className="font-mono">
+                              {record.stationNo || "--"}
+                            </Badge>
                           </td>
                           <td className="border border-slate-300 p-1">
                             {record.alteredThermometer || "--"}
@@ -798,27 +834,47 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                             {record.presentWeatherWW || "--"}
                           </td>
                           <td className="border border-slate-300 p-1">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 w-8 p-0"
-                              onClick={() => handleEditClick(record)}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                              </svg>
-                            </Button>
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className={`h-8 w-8 p-0 ${
+                                      !canEdit ? "opacity-50 cursor-not-allowed" : ""
+                                    }`}
+                                    onClick={() => handleEditClick(record)}
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="16"
+                                      height="16"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                                      />
+                                      <path
+                                        d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                                      />
+                                    </svg>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {canEdit
+                                    ? "Edit this record"
+                                    : "You don't have permission to edit this record"}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </td>
                         </tr>
                       );
@@ -830,27 +886,27 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
 
             <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-purple-500" />
+                <Calendar className="h-4 w-4 text-sky-500" />
                 <span className="text-sm text-slate-600">
-                  Date:{" "}
-                  <span className="font-medium text-slate-800">
-                    {format(new Date(selectedDate), "MMMM d, yyyy")}
-                  </span>
+                  Date Range:{" "}
+                  <div className="text-center text-lg font-semibold text-slate-600">
+                    {`${format(parseISO(startDate), "MMM d")} - ${format(parseISO(endDate), "MMM d, yyyy")}`}
+                  </div>
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Badge
                   variant="outline"
-                  className="bg-indigo-100 text-indigo-800 hover:bg-indigo-200"
+                  className="bg-sky-100 text-sky-800 hover:bg-sky-200"
                 >
                   {filteredData.length} record(s)
                 </Badge>
                 {stationFilter !== "all" && (
                   <Badge
                     variant="outline"
-                    className="bg-purple-100 text-purple-800 hover:bg-purple-200"
+                    className="bg-blue-100 text-blue-800 hover:bg-blue-200"
                   >
-                    Station: {stationFilter}
+                    Station: {getStationNameById(stationFilter)} ({stationFilter})
                   </Badge>
                 )}
               </div>
@@ -881,6 +937,9 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                   Edit Meteorological Data
                 </div>
               </DialogTitle>
+              <DialogDescription className="text-slate-600">
+                Editing record from {selectedRecord?.stationName} ({selectedRecord?.stationNo}) on {selectedRecord?.timestamp ? format(new Date(selectedRecord.timestamp), "MMMM d, yyyy") : ""}
+              </DialogDescription>
               <div className="h-1 w-20 rounded-full bg-gradient-to-r from-indigo-400 to-blue-400 mt-2"></div>
             </DialogHeader>
 
@@ -1016,7 +1075,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     </Label>
                     <Input
                       id={field.id}
-                      value={editFormData[field.id] || ""}
+                      value={editFormData[field.id as keyof typeof editFormData] || ""}
                       onChange={handleEditInputChange}
                       readOnly={field.readOnly}
                       className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 read-only:opacity-70 read-only:cursor-not-allowed"
@@ -1067,6 +1126,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
 
         {/* Add custom CSS for vertical text */}
         <style jsx global>{`
