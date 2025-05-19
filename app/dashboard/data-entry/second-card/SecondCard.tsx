@@ -10,6 +10,7 @@ import {
   User,
   Sun,
   Loader2,
+  Clock,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -25,8 +26,11 @@ import { useWeatherObservationForm } from "@/stores/useWeatherObservationForm";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import HourSelector from "@/components/hour-selector";
+import { useHour } from "@/contexts/hourContext";
 
 export default function WeatherObservationForm() {
+  const {timeData, isHourSelected, selectedHour} = useHour()
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("cloud");
   const [currentStep, setCurrentStep] = useState(1);
@@ -386,15 +390,15 @@ export default function WeatherObservationForm() {
         significantClouds: safeFormData.significantClouds,
         rainfall: safeFormData.rainfall,
         wind: safeFormData.wind,
+        observingTimeId: selectedHour,
         observer: {
           ...safeFormData.observer,
-          "observation-time": safeFormData.observer["observation-time"] || "",
         },
         totalCloud: safeFormData.totalCloud,
         metadata: {
           ...safeFormData.metadata,
           submittedAt: new Date().toISOString(),
-          stationId: session?.user?.stationId || "",
+          stationId: session?.user?.station?.id || "",
         },
       };
 
@@ -471,9 +475,27 @@ export default function WeatherObservationForm() {
           </p>
         </header>
 
+        <HourSelector />
+
         {/* Wrap in a div to prevent form submission issues */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <form onSubmit={handleSubmit} className="w-full">
+            <div className="relative rounded-xl">
+              {/* Overlay that blocks interaction when no hour is selected */}
+              {(!isHourSelected || !timeData?.time) && (
+                <div className="absolute inset-0 bg-amber-50/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-xl ring-2 ring-amber-200 ring-offset-4">
+                  <div className="bg-white p-4 rounded-lg shadow-lg text-center border-2 border-amber-300">
+                    <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />
+                    <h3 className="text-lg font-medium text-amber-800">
+                      Select an hour first
+                    </h3>
+                    <p className="text-sm text-amber-600 mt-1">
+                      Please select a valid hour before entering data
+                    </p>
+                  </div>
+                </div>
+              )}
+
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
@@ -837,6 +859,7 @@ export default function WeatherObservationForm() {
                   )}
                 </Button>
               )}
+            </div>
             </div>
           </form>
         </div>
