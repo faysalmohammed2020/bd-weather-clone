@@ -119,7 +119,7 @@ model ObservingTime {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user                users                 @relation(fields: [userId], references: [id], onDelete: SetDefault)
+  user                users                 @relation(fields: [userId], references: [id], onDelete: Restrict)
   MeteorologicalEntry MeteorologicalEntry[]
   WeatherObservation  WeatherObservation[]
   DailySummary        DailySummary[]
@@ -176,7 +176,7 @@ model MeteorologicalEntry {
 }
 
 model WeatherObservation {
-  id              String    @id @default(cuid())
+  id              String @id @default(cuid())
   tabActive       String
   stationId       String
   observingTimeId String
