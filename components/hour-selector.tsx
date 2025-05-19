@@ -62,7 +62,7 @@ const HourSelector = () => {
   };
 
   return (
-    <div className="bg-white p-6 border rounded-lg shadow mb-4 flex flex-col gap-4">
+    <div className="bg-white p-6 border rounded-lg shadow mb-6 flex flex-col gap-4">
       <div className="flex items-center gap-4">
       <label className="flex items-center text-lg font-bold text-amber-700">
         <Clock className="size-5 mr-2" />

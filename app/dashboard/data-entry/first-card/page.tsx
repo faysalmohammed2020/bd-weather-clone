@@ -48,8 +48,6 @@ export default function FirstCardPage() {
             </TabsTrigger>
           </TabsList>
 
-          <HourSelector />
-
           <TabsContent value="form" className="mt-0">
             <MeteorologicalDataForm onDataSubmitted={handleDataSubmitted} />
           </TabsContent>

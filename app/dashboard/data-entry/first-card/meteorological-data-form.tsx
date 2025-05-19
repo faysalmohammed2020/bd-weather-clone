@@ -25,6 +25,7 @@ import { useSession } from "@/lib/auth-client";
 import { stationDataMap } from "@/data/station-data-map";
 import BasicInfoTab from "@/components/basic-info-tab";
 import { useHour } from "@/contexts/hourContext";
+import HourSelector from "@/components/hour-selector";
 
 type MeteorologicalFormData = {
   presentWeatherWW?: string;
@@ -533,6 +534,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
             setFormData((prev) => ({ ...prev, [name]: value }));
           }}
         />
+        <HourSelector />
         {/*Card Body */}
         <div className="relative rounded-xl">
           {/* Overlay that blocks interaction when no hour is selected */}
