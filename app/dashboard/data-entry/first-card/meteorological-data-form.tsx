@@ -66,7 +66,7 @@ type MeteorologicalFormData = {
 
 export function MeteorologicalDataForm({ onDataSubmitted }) {
   const [formData, setFormData] = useState<MeteorologicalFormData>({});
-  const {timeData, isHourSelected} = useHour()
+  const {timeData, isHourSelected, hasDataForHour} = useHour()
   const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hygrometricData, setHygrometricData] = useState({
