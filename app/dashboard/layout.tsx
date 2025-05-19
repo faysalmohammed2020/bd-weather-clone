@@ -1,7 +1,6 @@
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
 import Sidebar from "./../../components/sidebar";
 import { LocationProvider } from "@/contexts/divisionContext";
+import { HourProvider } from "@/contexts/hourContext";
 import Profile from "@/components/profile";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
@@ -15,7 +14,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <Profile />
           </div>
           <div className="growgrow overflow-y-auto">
-            <LocationProvider>{children}</LocationProvider>
+            <LocationProvider>
+              <HourProvider>
+                {children}
+              </HourProvider>
+            </LocationProvider>
           </div>
         </div>
       </div>

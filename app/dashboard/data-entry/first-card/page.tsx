@@ -6,6 +6,7 @@ import { MeteorologicalDataForm } from "./meteorological-data-form";
 import { FirstCardTable } from "./first-card-table";
 import { Eye, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
+import HourSelector from "@/components/hour-selector";
 
 export default function FirstCardPage() {
   const [activeTab, setActiveTab] = useState("form");
@@ -46,6 +47,8 @@ export default function FirstCardPage() {
               </span>
             </TabsTrigger>
           </TabsList>
+
+          <HourSelector />
 
           <TabsContent value="form" className="mt-0">
             <MeteorologicalDataForm onDataSubmitted={handleDataSubmitted} />

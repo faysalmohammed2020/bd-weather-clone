@@ -114,7 +114,7 @@ model Station {
 model ObservingTime {
   id        String   @id @default(cuid())
   userId    String
-  utcTime   DateTime
+  utcTime   DateTime @unique
   localTime DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -126,7 +126,6 @@ model ObservingTime {
   SynopticCode        SynopticCode[]
 
   @@index([userId])
-  @@index([utcTime])
   @@index([localTime])
 }
 
