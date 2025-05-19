@@ -1218,17 +1218,27 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                   </TabsContent>
                 </Tabs>
               </CardContent>
-              <CardFooter className="flex justify-between p-6">
+               <CardFooter className="flex justify-between p-6">
                 <Button type="button" variant="outline" onClick={prevTab}>
                   <ChevronLeft className="mr-2 h-4 w-4" /> Previous
                 </Button>
-                <Button
-                  type="button"
-                  onClick={nextTab}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  Next <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
+                <div className="flex gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="border-slate-600 hover:bg-slate-100 transition-all duration-300"
+                    onClick={handleReset}
+                  >
+                    Reset
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Saving..." : "Submit Data"}
+                  </Button>
+                </div>
               </CardFooter>
             </Card>
           </TabsContent>
@@ -1292,7 +1302,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                 </div>
               </CardFooter>
             </Card>
-          </TabsContent> */}
+          </TabsContent>  */}
         </Tabs>
       </form>
     </>
