@@ -20,7 +20,7 @@ const Profile = () => {
               {session?.user.name} ({session?.user.role})
             </span>
             <span className="uppercase text-md text-white text-shadow">
-              {session?.user.stationName} ({session?.user.stationId})
+              {session?.user.station?.name} ({session?.user.station?.stationId})
             </span>
           </div>
         </>
