@@ -11,6 +11,19 @@ export const addTime = async (time: string) => {
   const localTime = convertUTCToBDTime(formattedTime);
 
   try {
+    const existingTime = await prisma.observingTime.findUnique({
+      where: {
+        utcTime: formattedTime,
+      },
+    });
+
+    if (existingTime) {
+      return {
+        success: false,
+        error: "Time already exists",
+      };
+    }
+
     const newTime = await prisma.observingTime.create({
       data: {
         utcTime: formattedTime,
