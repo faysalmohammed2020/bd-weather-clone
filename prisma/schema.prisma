@@ -15,29 +15,28 @@ datasource db {
 }
 
 model users {
-  id                  String                @id @default(cuid())
-  email               String                @unique
-  name                String?
-  emailVerified       Boolean
-  image               String?
-  role                String?
-  banned              Boolean?
-  banReason           String?
-  banExpires          Int?
-  division            String
-  district            String
-  upazila             String
-  stationName         String?
-  stationId           String?
-  securityCode        String?
-  twoFactorEnabled    Boolean?
-  createdAt           DateTime
-  updatedAt           DateTime
-  sessions            sessions[]
-  accounts            accounts[]
-  WeatherObservation  WeatherObservation[]
-  twoFactor           twoFactor[]
-  MeteorologicalEntry MeteorologicalEntry[]
+  id               String      @id @default(cuid())
+  email            String      @unique
+  name             String?
+  emailVerified    Boolean
+  image            String?
+  role             String?
+  banned           Boolean?
+  banReason        String?
+  banExpires       Int?
+  division         String
+  district         String
+  upazila          String
+  stationId        String
+  twoFactorEnabled Boolean?
+  createdAt        DateTime
+  updatedAt        DateTime
+  sessions         sessions[]
+  accounts         accounts[]
+  twoFactor        twoFactor[]
+
+  Station       Station         @relation(fields: [stationId], references: [id], onDelete: Restrict)
+  ObservingTime ObservingTime[]
 }
 
 model sessions {
@@ -97,26 +96,45 @@ model twoFactor {
 }
 
 model Station {
-  id           String   @id @default(cuid())
-  stationId    String
-  name         String
-  securityCode String
-  latitude     Float
-  longitude    Float
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                  String                @id @default(cuid())
+  stationId           String
+  name                String
+  securityCode        String
+  latitude            Float
+  longitude           Float
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  users               users[]
+  WeatherObservation  WeatherObservation[]
+  MeteorologicalEntry MeteorologicalEntry[]
+  DailySummary        DailySummary[]
+  SynopticCode        SynopticCode[]
+}
+
+model ObservingTime {
+  id        String   @id @default(cuid())
+  userId    String
+  utcTime   DateTime
+  localTime DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user                users                 @relation(fields: [userId], references: [id], onDelete: SetDefault)
+  MeteorologicalEntry MeteorologicalEntry[]
+  WeatherObservation  WeatherObservation[]
+  DailySummary        DailySummary[]
+  SynopticCode        SynopticCode[]
+
+  @@index([userId])
+  @@index([utcTime])
+  @@index([localTime])
 }
 
 model MeteorologicalEntry {
-  id                        String   @id @default(cuid())
-  createdAt                 DateTime @default(now())
-  updatedAt                 DateTime @updatedAt
-  userId                    String // NEW: Foreign key
-  user                      users    @relation(fields: [userId], references: [id], onDelete: Cascade) // NEW: Relation
+  id                        String    @id @default(cuid())
+  observingTimeId           String
+  stationId                 String
   dataType                  String
-  stationNo                 String
-  stationName               String
-  year                      String
   subIndicator              String
   alteredThermometer        String
   barAsRead                 String
@@ -146,19 +164,22 @@ model MeteorologicalEntry {
   pastWeatherW2             String
   presentWeatherWW          String
   c2Indicator               String
-  observationTime           String
-  timestamp                 String
+  submittedAt               DateTime?
+  createdAt                 DateTime  @default(now())
+  updatedAt                 DateTime  @updatedAt
+
+  ObservingTime ObservingTime @relation(fields: [observingTimeId], references: [id], onDelete: Restrict)
+  station       Station       @relation(fields: [stationId], references: [id], onDelete: Restrict)
+
+  @@index([observingTimeId])
+  @@index([stationId])
 }
 
 model WeatherObservation {
-  id          String   @id @default(cuid())
-  submittedAt DateTime @default(now())
-  tabActive   String
-  stationId   String
-
-  // Link to user (observer)
-  userId String
-  user   users  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              String    @id @default(cuid())
+  tabActive       String
+  stationId       String
+  observingTimeId String
 
   // LOW CLOUD
   lowCloudForm      String?
@@ -210,20 +231,22 @@ model WeatherObservation {
   windSecondAnemometer String?
   windSpeed            String?
   windDirection        String?
+  submittedAt          DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   // OBSERVER METADATA
   observerInitial String?
-  observationTime String?
+
+  station       Station       @relation(fields: [stationId], references: [id], onDelete: Restrict)
+  ObservingTime ObservingTime @relation(fields: [observingTimeId], references: [id], onDelete: Restrict)
 }
 
 model DailySummary {
   id                    String   @id @default(cuid())
-  userId                String?
+  observingTimeId       String
   dataType              String?
-  stationNo             String?
-  year                  Int?
-  month                 Int?
-  day                   Int?
+  stationId             String
   avStationPressure     String?
   avSeaLevelPressure    String?
   avDryBulbTemperature  String?
@@ -242,4 +265,46 @@ model DailySummary {
   totalRainDuration     String?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
+
+  ObservingTime ObservingTime @relation(fields: [observingTimeId], references: [id], onDelete: Restrict)
+  station       Station       @relation(fields: [stationId], references: [id], onDelete: Restrict)
+}
+
+model SynopticCode {
+  id                String  @id @default(cuid())
+  observingTimeId   String
+  stationId         String
+  dataType          String? @default("SYNOP")
+  // Synoptic Measurement Fields
+  C1                String? // 0
+  Iliii             String? // 1
+  iRiXhvv           String? // 2
+  Nddff             String? // 3
+  S1nTTT            String? // 4
+  S2nTddTddTdd      String? // 5
+  P3PPP4PPPP        String? // 6 (combined 3 & 4 groups)
+  RRRtR6            String? // 7
+  wwW1W2            String? // 8
+  NhClCmCh          String? // 9
+  S2nTnTnTnInInInIn String? // 10 (combined 2 and I groups)
+  D56DLDMDH         String? // 11
+  CD57DaEc          String? // 12
+  avgTotalCloud     String? // 13
+  C2                String? // 14
+  GG                String? // 15
+  P24Group58_59     String? // 16 (58+59 combined)
+  R24Group6_7       String? // 17 (6+7 for 24hr rain)
+  NsChshs           String? // 18
+  dqqqt90           String? // 19
+  fqfqfq91          String? // 20
+
+  weatherRemark String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ObservingTime ObservingTime @relation(fields: [observingTimeId], references: [id], onDelete: Restrict)
+  station       Station       @relation(fields: [stationId], references: [id], onDelete: Restrict)
+
+  @@index([stationId])
 }
