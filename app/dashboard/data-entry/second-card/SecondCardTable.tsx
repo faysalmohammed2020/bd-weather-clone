@@ -484,7 +484,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                   STATION NO
                 </div>
                 <div className="flex h-10 border border-slate-400 rounded-lg p-2 mx-auto">
-                  {user?.stationId || "N/A"}
+                  {user?.station.stationId || "N/A"}
                 </div>
               </div>
               <div>
@@ -492,7 +492,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                   STATION NAME
                 </div>
                 <div className="h-10 border border-slate-400 p-2 mx-auto flex items-cente font-mono rounded-md">
-                  {user?.stationName || "N/A"}
+                  {user?.station.name || "N/A"}
                 </div>
               </div>
 
