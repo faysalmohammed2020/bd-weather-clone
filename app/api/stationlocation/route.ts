@@ -3,18 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const stations = await prisma.station.findMany({
-      select: {
-        id: true,
-        stationId: true,
-        name: true,
-        securityCode: true,
-        latitude: true,
-        longitude: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    const stations = await prisma.station.findMany();
 
     return NextResponse.json(stations);
   } catch (error) {

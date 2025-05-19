@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Mail,
   Lock,
@@ -11,22 +11,51 @@ import {
   CloudRain,
   Sun,
   Droplets,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { signUp } from "@/lib/auth-client";
 import { FormError } from "@/components/ui/form-error";
+import { Station } from "@prisma/client";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formError, setFormError] = useState<string>("");
+  const [stations, setStations] = useState<Station[]>([]);
+  const [fetchError, setFetchError] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const response = await fetch("/api/stationlocation");
+        if (!response.ok) {
+          throw new Error("Failed to fetch stations");
+        }
+        const data = await response.json();
+        setStations(data);
+      } catch (err) {
+        console.error("Error fetching stations:", err);
+        setFetchError("Could not load stations. Please try again later.");
+      }
+    };
+
+    fetchStations();
+  }, []);
 
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
@@ -40,6 +69,7 @@ export default function SignUpForm() {
     const role = "super_admin";
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const stationId = formData.get("stationId") as string;
 
     await signUp.email(
       {
@@ -47,7 +77,7 @@ export default function SignUpForm() {
         email,
         role,
         password,
-        stationId: "cmauprmb40000y7q8cfyk6lvp",
+        stationId,
         division: "default-division",
         district: "default-district",
         upazila: "default-upazila",
@@ -162,9 +192,36 @@ export default function SignUpForm() {
               name="name"
               type="text"
               placeholder="Enter your name"
-              className="pl-10"
+              className="pl-10 w-full"
               required
             />
+          </div>
+
+          <div>
+            <Label htmlFor="stationId" className="block text-sm font-medium text-gray-700 mb-1">
+              Weather Station
+            </Label>
+            {fetchError ? (
+              <div className="text-red-500 text-sm mb-2">{fetchError}</div>
+            ) : null}
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Select name="stationId" required>
+                <SelectTrigger className="pl-10 w-full">
+                  <SelectValue placeholder="Select your station" />
+                </SelectTrigger>
+                <SelectContent>
+                  {stations.map((station) => (
+                    <SelectItem key={station.stationId} value={station.id}>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        {station.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="relative">

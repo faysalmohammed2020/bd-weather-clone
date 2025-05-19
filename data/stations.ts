@@ -4,6 +4,7 @@ export interface Station {
   securityCode: string;
   latitude: number;
   longitude: number;
+  id?: string;
 }
 
 export const stations: Station[] = [
