@@ -202,8 +202,8 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       ...prev,
       subIndicator: "1",
       year: year.slice(2), // only "25" for last two digits
-      stationNo: session?.user?.stationId || "",
-      stationName: session?.user?.stationName || "",
+      stationNo: session?.user?.station?.stationId || "",
+      stationName: session?.user?.station?.name || "",
     }));
   }, []);
 
@@ -409,7 +409,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       const barAsRead = name === "barAsRead" ? value : formData.barAsRead;
 
       if (dryBulb && barAsRead) {
-        const stationId = session?.user?.stationId;
+        const stationId = session?.user?.station?.stationId;
 
         if (!stationId) {
           toast.error("Station ID is missing");
