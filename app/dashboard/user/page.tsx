@@ -31,18 +31,29 @@ import { useLocation } from "@/contexts/divisionContext";
 import { Station } from "@/data/stations";
 import { useSession } from "@/lib/auth-client";
 
-// Define the User type
+// Define the User type based on Prisma schema
 interface User {
   id: string;
   name: string | null;
   email: string;
   role: string | null;
-  createdAt: string;
+  emailVerified: boolean;
+  image: string | null;
+  banned: boolean | null;
+  banReason: string | null;
+  banExpires: number | null;
   division: string;
   district: string;
   upazila: string;
-  stationName: string | null;
-  stationId: string | null;
+  stationId: string;
+  twoFactorEnabled: boolean | null;
+  createdAt: string;
+  updatedAt: string;
+  station?: {
+    id: string;
+    name: string;
+    securityCode: string;
+  } | null;
 }
 
 // Define the role type
@@ -78,17 +89,26 @@ const UserManagement = () => {
   const [newRole, setNewRole] = useState<string | null>(null);
   const [editUser, setEditUser] = useState<User | null>(null);
   const [stations, setStations] = useState<Station[]>([]);
-  const [formData, setFormData] = useState({
+  interface FormData {
+    name: string;
+    email: string;
+    password: string;
+    role: UserRole;
+    division: string;
+    district: string;
+    upazila: string;
+    stationId: string;
+  }
+
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     password: "",
-    role: "observer" as UserRole,
+    role: "observer",
     division: "",
     district: "",
     upazila: "",
-    stationName: "",
     stationId: "",
-    securityCode: "",
   });
 
   // Loading states for dependent data
@@ -160,16 +180,12 @@ const UserManagement = () => {
   }, [fetchUsers]);
 
   // Handle station selection
-  const handleStationChange = (stationName: string) => {
-    const selectedStation = stations.find(
-      (station) => station.name === stationName
-    );
+  const handleStationChange = (stationId: string) => {
+    const selectedStation = stations.find(station => station.id === stationId);
     if (selectedStation) {
-      setFormData((prevData) => ({
+      setFormData(prevData => ({
         ...prevData,
-        stationName: selectedStation.name,
-        stationId: selectedStation.stationId,
-        securityCode: selectedStation.securityCode,
+        stationId: selectedStation.id,
       }));
     }
   };
@@ -227,9 +243,7 @@ const UserManagement = () => {
           division: formData.division,
           district: formData.district,
           upazila: formData.upazila,
-          stationName: formData.stationName || null,
-          stationId: formData.stationId || null,
-          securityCode: formData.securityCode || null,
+          stationId: formData.stationId,
         }),
       });
 
@@ -335,9 +349,7 @@ const UserManagement = () => {
         division: formData.division,
         district: formData.district,
         upazila: formData.upazila,
-        stationName: formData.stationName || null,
-        stationId: formData.stationId || null,
-        securityCode: formData.securityCode || null,
+        stationId: formData.stationId,
       };
 
       // Remove any undefined values
@@ -456,9 +468,7 @@ const UserManagement = () => {
       division: "",
       district: "",
       upazila: "",
-      stationName: "",
       stationId: "",
-      securityCode: "",
     });
     setEditUser(null);
   };
@@ -492,9 +502,7 @@ const UserManagement = () => {
       division: user.division,
       district: user.district,
       upazila: user.upazila,
-      stationName: user.stationName || "",
       stationId: user.stationId || "",
-      securityCode: securityCode, // Set the security code from the station
     });
     setOpenDialog(true);
   };
@@ -636,7 +644,7 @@ const UserManagement = () => {
                 <div className="flex flex-col gap-2">
                   <label htmlFor="stationName">Station Name</label>
                   <Select
-                    value={formData.stationName}
+                    value={formData.stationId}
                     onValueChange={handleStationChange}
                   >
                     <SelectTrigger id="stationName" className="w-full">
@@ -649,8 +657,8 @@ const UserManagement = () => {
                     <SelectContent>
                       {stations.map((station) => (
                         <SelectItem
-                          key={station.stationId}
-                          value={station.name}
+                          key={station.id}
+                          value={station.id}
                         >
                           {station.name}
                         </SelectItem>
@@ -664,7 +672,7 @@ const UserManagement = () => {
                   <label htmlFor="stationId">Station ID</label>
                   <Input
                     id="stationId"
-                    value={formData.stationId}
+                    value={stations.find((station) => station.id === formData.stationId)?.stationId}
                     className="bg-gray-100"
                     disabled
                     readOnly
@@ -678,7 +686,7 @@ const UserManagement = () => {
                   </label>
                   <Input
                     id="securityCode"
-                    value={formData.securityCode}
+                    value={stations.find((station) => station.id === formData.stationId)?.securityCode}
                     className="bg-gray-100"
                     disabled
                     readOnly
@@ -861,7 +869,7 @@ const UserManagement = () => {
                   <TableCell>{user.name || "N/A"}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.role || "N/A"}</TableCell>
-                  <TableCell>{user.stationName || "N/A"}</TableCell>
+                  <TableCell>{stations.find((station) => station.id === user.stationId)?.name || "N/A"}</TableCell>
                   <TableCell>
                     {new Date(user.createdAt).toLocaleDateString()}
                   </TableCell>

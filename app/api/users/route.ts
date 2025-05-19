@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
         division: true,
         district: true,
         upazila: true,
-        stationName: true,
         stationId: true,
         // Don't include password or sensitive fields
       },
@@ -67,7 +66,6 @@ export async function PUT(request: NextRequest) {
       division, 
       district, 
       upazila, 
-      stationName, 
       stationId, 
       securityCode 
     } = body;
@@ -131,13 +129,11 @@ export async function PUT(request: NextRequest) {
       division?: string;
       district?: string;
       upazila?: string;
-      stationName?: string | null;
-      stationId?: string | null;
-      securityCode?: string | null;
+      stationId: string | null;
       password?: string;
       updatedAt: Date;
     } = {
-      updatedAt: new Date(),
+ 
     };
     
     // Only include fields that are defined
@@ -149,9 +145,7 @@ export async function PUT(request: NextRequest) {
     if (upazila !== undefined) updateData.upazila = upazila;
     
     // Handle potentially null values
-    updateData.stationName = stationName;
     updateData.stationId = stationId;
-    updateData.securityCode = securityCode;
 
     // Handle password separately if provided
     let hashedPassword: string | undefined;
@@ -315,9 +309,7 @@ export async function POST(request: NextRequest) {
           division,
           district,
           upazila,
-          stationName: stationName || null,
           stationId: stationId || null,
-          securityCode: securityCode || null,
           emailVerified: false,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -353,7 +345,6 @@ export async function POST(request: NextRequest) {
       division: result.division,
       district: result.district,
       upazila: result.upazila,
-      stationName: result.stationName,
       stationId: result.stationId,
       createdAt: result.createdAt,
     };
