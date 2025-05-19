@@ -47,6 +47,7 @@ export default function SignUpForm() {
         email,
         role,
         password,
+        stationId: "cmauprmb40000y7q8cfyk6lvp",
         division: "default-division",
         district: "default-district",
         upazila: "default-upazila",

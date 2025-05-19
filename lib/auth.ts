@@ -21,23 +21,12 @@ export const auth = betterAuth({
         type: "string",
       },
       upazila: {
-        required: true,
-        type: "string",
-      },
-      stationName: {
         nullable: true,
         required: false,
         type: "string",
       },
       stationId: {
-        nullable: true,
-        required: false,
-        type: "string",
-      },
-      securityCode: {
-        // Changed from stationCode to securityCode to match your schema
-        nullable: true,
-        required: false,
+        required: true,
         type: "string",
       },
     },

@@ -15,19 +15,12 @@ export const { signIn, signUp, signOut, useSession, admin, twoFactor } = createA
           type: "string",
         },
         upazila: {
-          type: "string",
-        },
-        stationName: {
+          nullable: true,
           required: false,
           type: "string",
         },
         stationId: {
-          required: false,
-          type: "string",
-        },
-        securityCode: {
-          // Changed from stationCode to securityCode to match your schema
-          required: false,
+          required: true,
           type: "string",
         },
         role: {
