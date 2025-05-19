@@ -204,12 +204,12 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import BasicInfoTab from "../daily-summery/tabs/basic-info-tab";
 import SynopticMeasurementsTab from "./synoptic-components/synoptic-measurement";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { saveSynopticCodeData } from "@/app/actions/synoptic-code-data";
 import { useRouter } from "next/navigation";
+import BasicInfoTab from "@/components/basic-info-tab";
 
 // Define validation schema using Yup
 const validationSchema = Yup.object({
@@ -300,48 +300,7 @@ export default function SynopticCodeForm() {
               </div>
             </CardContent>
 
-            <CardFooter className="border-t pt-6 flex flex-col sm:flex-row justify-between gap-4">
-              <div>
-                {Object.keys(errors).length > 0 && (
-                  <p className="text-sm text-destructive">
-                    Please enter the field values before submitting
-                  </p>
-                )}
-
-                {submitResult?.success && (
-                  <p className="text-sm text-green-600">
-                    Data saved successfully as {submitResult.filename}
-                  </p>
-                )}
-              </div>
-              <div className="space-x-2">
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() => {
-                    resetForm();
-                    setSubmitResult(null);
-                  }}
-                >
-                  Reset
-                </Button>
-                
-                <Button
-                  type="submit"
-                  disabled={isSubmitting || submitting}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {isSubmitting || submitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    "Submit Data"
-                  )}
-                </Button>
-              </div>
-            </CardFooter>
+          
           </Card>
         </Form>
       )}

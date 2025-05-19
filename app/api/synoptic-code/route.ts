@@ -1,32 +1,57 @@
-import { NextResponse } from "next/server"
-import fs from "fs"
-import path from "path"
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
-export async function POST(request: Request) {
+const prisma = new PrismaClient();
+
+export async function POST(req: Request) {
   try {
-    const data = await request.json()
+    const body = await req.json();
 
-    // Create data directory if it doesn't exist
-    const dataDir = path.join(process.cwd(), "data")
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true })
-    }
+    const newEntry = await prisma.synopticEntry.create({
+      data: {
+        stationNo: body.stationNo || null,
+        stationName: body.stationName || null,
+        year: body.year || null,
+        month: body.month || null,
+        day: body.day || null,
+        dataType: body.dataType || "SYNOP",
 
-    // Generate a unique filename based on timestamp and station
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-")
-    const stationNo = data.stationNo || "unknown"
-    const filename = `weather-data-station-${stationNo}-${timestamp}.json`
+        // Measurement fields
+        C1: body.C1 || null,
+        Iliii: body.Iliii || null,
+        iRiXhvv: body.iRiXhvv || null,
+        Nddff: body.Nddff || null,
+        S1nTTT: body.S1nTTT || null,
+        S2nTddTddTdd: body.S2nTddTddTdd || null,
+        P3PPP4PPPP: body.P3PPP4PPPP || null,
+        RRRtR6: body.RRRtR6 || null,
+        wwW1W2: body.wwW1W2 || null,
+        NhClCmCh: body.NhClCmCh || null,
+        S2nTnTnTnInInInIn: body.S2nTnTnTnInInInIn || null,
+        D56DLDMDH: body.D56DLDMDH || null,
+        CD57DaEc: body.CD57DaEc || null,
+        avgTotalCloud: body.avgTotalCloud || null,
+        C2: body.C2 || null,
+        GG: body.GG || null,
+        P24Group58_59: body.P24Group58_59 || null,
+        R24Group6_7: body.R24Group6_7 || null,
+        NsChshs: body.NsChshs || null,
+        dqqqt90: body.dqqqt90 || null,
+        fqfqfq91: body.fqfqfq91 || null,
 
-    // Write the data to a JSON file
-    fs.writeFileSync(path.join(dataDir, filename), JSON.stringify(data, null, 2))
+        weatherRemark: body.weatherRemark || null,
+      },
+    });
 
-    return NextResponse.json({
-      success: true,
-      message: "Weather data saved successfully",
-      filename,
-    })
+    return NextResponse.json(
+      { message: "Synoptic entry saved", data: newEntry },
+      { status: 201 }
+    );
   } catch (error) {
-    console.error("Error saving weather data:", error)
-    return NextResponse.json({ success: false, message: "Failed to save weather data" }, { status: 500 })
+    console.error("Failed to save synoptic entry:", error);
+    return NextResponse.json(
+      { message: "Internal server error", error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    );
   }
 }

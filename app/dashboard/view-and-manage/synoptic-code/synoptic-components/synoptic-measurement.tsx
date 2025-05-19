@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type SynopticFormValues } from "@/lib/generateSynopticCode";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 // ... (keep your existing measurements array exactly as is) ...
 
@@ -181,19 +183,23 @@ export default function SynopticMeasurementsTab() {
     message: string;
     isLoading: boolean;
     error?: string;
-  }>({ 
-    hasToday: true, 
-    message: "", 
-    isLoading: true 
+  }>({
+    hasToday: true,
+    message: "",
+    isLoading: true,
   });
 
   useEffect(() => {
     const fetchSynopticData = async () => {
       try {
-        setDataStatus(prev => ({ ...prev, isLoading: true, error: undefined }));
-        
-        const response = await fetch('/api/synoptic');
-        
+        setDataStatus((prev) => ({
+          ...prev,
+          isLoading: true,
+          error: undefined,
+        }));
+
+        const response = await fetch("/api/synoptic");
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -225,7 +231,6 @@ export default function SynopticMeasurementsTab() {
         setFieldValue("year", generatedValues.year);
         setFieldValue("month", generatedValues.month);
         setFieldValue("day", generatedValues.day);
-
       } catch (error) {
         console.error("Error fetching synoptic data:", error);
         setDataStatus({
@@ -257,6 +262,59 @@ export default function SynopticMeasurementsTab() {
       </div>
     );
   }
+
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        stationNo: values.stationNo,
+        year: values.year,
+        month: values.month,
+        day: values.day,
+        dataType: values.dataType || "SYNOP",
+        weatherRemark: values.weatherRemark,
+
+        // Individual measurement fields
+        C1: values.measurements[0] || null,
+        Iliii: values.measurements[1] || null,
+        iRiXhvv: values.measurements[2] || null,
+        Nddff: values.measurements[3] || null,
+        S1nTTT: values.measurements[4] || null,
+        S2nTddTddTdd: values.measurements[5] || null,
+        P3PPP4PPPP: values.measurements[6] || null,
+        RRRtR6: values.measurements[7] || null,
+        wwW1W2: values.measurements[8] || null,
+        NhClCmCh: values.measurements[9] || null,
+        S2nTnTnTnInInInIn: values.measurements[10] || null,
+        D56DLDMDH: values.measurements[11] || null,
+        CD57DaEc: values.measurements[12] || null,
+        avgTotalCloud: values.measurements[13] || null,
+        C2: values.measurements[14] || null,
+        GG: values.measurements[15] || null,
+        P24Group58_59: values.measurements[16] || null,
+        R24Group6_7: values.measurements[17] || null,
+        NsChshs: values.measurements[18] || null,
+        dqqqt90: values.measurements[19] || null,
+        fqfqfq91: values.measurements[20] || null,
+      };
+
+      const response = await fetch("/api/synoptic-code", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast.success("✅ Synoptic data saved successfully");
+      } else {
+        const error = await response.json();
+        toast.error(error.message || "❌ Failed to save data");
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+      toast.error("❌ Something went wrong");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -434,7 +492,7 @@ export default function SynopticMeasurementsTab() {
                 </div>
               ))}
             </div>
-            
+
             {/* Weather Remark Field */}
             <div className="mt-4">
               <Card className="border-none bg-white">
@@ -459,6 +517,15 @@ export default function SynopticMeasurementsTab() {
           </CardContent>
         </Card>
       </div>
+       <div className="flex justify-end mt-6">
+            <Button
+              type="button"
+              className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-md shadow-sm text-lg"
+              onClick={handleSubmit}
+            >
+              Submit
+            </Button>
+          </div>
     </div>
   );
 }
