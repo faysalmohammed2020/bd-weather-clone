@@ -1,5 +1,5 @@
 import { betterAuth } from "better-auth";
-import { admin, twoFactor } from "better-auth/plugins";
+import { admin, twoFactor, customSession } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import prisma from "@/lib/prisma";
@@ -29,6 +29,11 @@ export const auth = betterAuth({
         required: true,
         type: "string",
       },
+      role: {
+        required: true,
+        type: "string",
+        enum: ["super_admin", "station_admin", "observer"],
+      },
     },
   },
   session: {
@@ -44,8 +49,34 @@ export const auth = betterAuth({
     enabled: true,
   },
   appName: "BD Weather",
-  plugins: [admin({
-    defaultRole: "observer",
-    adminRoles: ["super_admin"],
-  }), twoFactor(), nextCookies()],
+  plugins: [
+    admin({
+      defaultRole: "observer",
+      adminRoles: ["super_admin"],
+    }),
+    twoFactor(),
+    nextCookies(),
+    customSession(async ({ user, session }) => {
+      const authUser = await prisma.users.findUnique({
+        where: {
+          id: session.userId,
+        },
+        include: {
+          Station: true,
+        },
+      });
+
+      return {
+        session,
+        user: {
+          ...user,
+          role: authUser?.role,
+          station: authUser?.Station,
+          division: authUser?.division,
+          district: authUser?.district,
+          upazila: authUser?.upazila,
+        },
+      };
+    }),
+  ],
 });

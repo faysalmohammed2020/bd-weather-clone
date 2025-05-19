@@ -33,7 +33,9 @@ const Sidebar = () => {
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
-  const role = session?.user.role;
+  const role = session?.user?.role;
+
+  console.log("Session", session);
 
   const sidebarLinks = [
     {
