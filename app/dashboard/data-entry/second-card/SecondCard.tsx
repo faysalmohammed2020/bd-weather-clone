@@ -752,7 +752,7 @@ export default function WeatherObservationForm() {
                         required
                       />
 
-                      <div className="grid gap-2 w-full">
+                      {/* <div className="grid gap-2 w-full">
                         <Label
                           htmlFor="observation-time"
                           className="font-medium text-gray-700"
@@ -782,7 +782,7 @@ export default function WeatherObservationForm() {
                           <option value="18">18 UTC</option>
                           <option value="21">21 UTC</option>
                         </select>
-                      </div>
+                      </div> */}
 
                       <InputField
                         id="station-id"

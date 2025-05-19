@@ -397,38 +397,6 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
 
   return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
-      <CardHeader className="p-4 bg-gradient-to-r from-sky-600 to-blue-600 text-white">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <CloudSun size={24} className="text-yellow-300" />
-            <CardTitle className="text-xl font-bold">
-              Weather Observation Dashboard
-            </CardTitle>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={handleRefresh}
-              variant="outline"
-              size="sm"
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20"
-            >
-              <RefreshCw
-                size={16}
-                className={isRefreshing ? "animate-spin" : ""}
-              />
-              <span className="ml-1">Refresh</span>
-            </Button>
-            <Button
-              onClick={exportToCSV}
-              className="gap-1 bg-emerald-500 hover:bg-emerald-600 text-white"
-              size="sm"
-            >
-              <Download size={16} /> Export CSV
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
 
       <CardContent className="p-6">
         {/* Date and Station Filters */}

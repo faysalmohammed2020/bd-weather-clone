@@ -13,7 +13,6 @@ import {
   Wind,
   Eye,
   Cloud,
-  Clock,
   BarChart3,
   ChevronRight,
   ChevronLeft,
@@ -95,7 +94,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     "squall",
     "V.V",
     "weather",
-    "indicators",
+    // "indicators",
   ];
 
   // Tab styles with gradients and more vibrant colors
@@ -125,11 +124,11 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       card: "bg-gradient-to-br from-cyan-50 to-white border-l-4 border-cyan-200 shadow-sm",
       icon: <Cloud className="size-5 mr-2" />,
     },
-    indicators: {
-      tab: "border border-fuchsia-500 px-4 py-3 !bg-fuchsia-50 text-fuchsia-800 hover:opacity-90 shadow-sm shadow-fuchsia-500/50",
-      card: "bg-gradient-to-br from-fuchsia-50 to-white border-l-4 border-fuchsia-200 shadow-sm",
-      icon: <Clock className="size-5 mr-2" />,
-    },
+    // indicators: {
+    //   tab: "border border-fuchsia-500 px-4 py-3 !bg-fuchsia-50 text-fuchsia-800 hover:opacity-90 shadow-sm shadow-fuchsia-500/50",
+    //   card: "bg-gradient-to-br from-fuchsia-50 to-white border-l-4 border-fuchsia-200 shadow-sm",
+    //   icon: <Clock className="size-5 mr-2" />,
+    // },
   };
 
   // Debug logging for formData changes
@@ -533,7 +532,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
         />
         {/*Card Body */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-3 rounded-xl p-1 border-0 bg-transparent">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 gap-3 rounded-xl p-1 border-0 bg-transparent">
             {Object.entries(tabStyles).map(([key, style]) => (
               <TabsTrigger
                 key={key}
@@ -1219,23 +1218,33 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                   </TabsContent>
                 </Tabs>
               </CardContent>
-              <CardFooter className="flex justify-between p-6">
+               <CardFooter className="flex justify-between p-6">
                 <Button type="button" variant="outline" onClick={prevTab}>
                   <ChevronLeft className="mr-2 h-4 w-4" /> Previous
                 </Button>
-                <Button
-                  type="button"
-                  onClick={nextTab}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  Next <ChevronRight className="ml-2 h-4 w-4" />
-                </Button>
+                <div className="flex gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="border-slate-600 hover:bg-slate-100 transition-all duration-300"
+                    onClick={handleReset}
+                  >
+                    Reset
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Saving..." : "Submit Data"}
+                  </Button>
+                </div>
               </CardFooter>
             </Card>
           </TabsContent>
 
           {/* Indicators Tab */}
-          <TabsContent
+          {/* <TabsContent
             value="indicators"
             className="mt-6 transition-all duration-500"
           >
@@ -1293,7 +1302,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                 </div>
               </CardFooter>
             </Card>
-          </TabsContent>
+          </TabsContent>  */}
         </Tabs>
       </form>
     </>
