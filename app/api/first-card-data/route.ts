@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/getSession";
+import { hourToUtc } from "@/lib/utils";
 
 const prisma = new PrismaClient();
 
@@ -10,32 +11,56 @@ export async function POST(req: Request) {
     if (!session || !session.user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-    const userId = session.user.id;
 
     const data = await req.json();
 
-    const dataType =
-      typeof data.dataType === "string"
-        ? data.dataType
-        : Object.values(data.dataType || {}).join("") || "";
-    const stationNo =
-      typeof data.stationNo === "string"
-        ? data.stationNo
-        : Object.values(data.stationNo || {}).join("") || "";
-     
-    const year =
-      typeof data.year === "string"
-        ? data.year
-        : Object.values(data.year || {}).join("") || "";
-        
+    console.log("API", data.observingTimeId)
+
+    const formattedObservingTime = hourToUtc(data.observingTimeId)
+    
+    // First, find the ObservingTime record by its UTC time
+    const observingTime = await prisma.observingTime.findUnique({
+      where: {
+        utcTime: formattedObservingTime
+      }
+    });
+    
+    if (!observingTime) {
+      return NextResponse.json({ 
+        message: "Observation time not found", 
+        error: "The selected hour does not exist in the database" 
+      }, { status: 404 });
+    }
+
+    const dataType = typeof data.dataType === "string"
+      ? data.dataType
+      : Object.values(data.dataType || {}).join("") || "";
+    
+    // Get station ID from session
+    const stationId = session.user.station?.stationId;
+    
+    if (!stationId) {
+      return NextResponse.json({ 
+        message: "Station ID is required", 
+        status: 400 
+      });
+    }
+    
+    // Find the station by stationId to get its primary key (id)
+    const stationRecord = await prisma.station.findFirst({
+      where: { stationId }
+    });
+    
+    if (!stationRecord) {
+      return NextResponse.json({
+        message: `No station found with ID: ${stationId}`,
+        status: 404
+      });
+    }
 
     const savedEntry = await prisma.meteorologicalEntry.create({
       data: {
-        userId,
         dataType,
-        stationNo,
-        stationName: session.user.stationName || "",
-        year,
         subIndicator: data.subIndicator || "",
         alteredThermometer: data.alteredThermometer || "",
         barAsRead: data.barAsRead || "",
@@ -72,8 +97,18 @@ export async function POST(req: Request) {
         presentWeatherWW: data.presentWeatherWW || "",
 
         c2Indicator: data.c2Indicator || "",
-        observationTime: data.observationTime || "",
-        timestamp: data.timestamp || new Date().toISOString(),
+        
+        // Connect to existing ObservingTime and Station records
+        ObservingTime: {
+          connect: {
+            id: observingTime.id
+          }
+        },
+        station: {
+          connect: {
+            id: stationRecord.id
+          }
+        }
       },
     });
 
@@ -106,13 +141,18 @@ export async function GET(req: Request) {
     const userId = session.user.id;
 
     // Optionally: Add query parameter parsing for filtering
-    const entries = await prisma.meteorologicalEntry.findMany({
-      where: { userId },
-      orderBy: { timestamp: "desc" },
-      take: 100, // Limit to latest 100 entries for performance
+    const entries = await prisma.observingTime.findFirst({
+      where: { 
+        userId,
+       },
+       include: {
+        MeteorologicalEntry: true,
+       },
+      orderBy: { createdAt: "desc" },
+      take: 100,
     });
 
-    return NextResponse.json({ entries }, { status: 200 });
+    return NextResponse.json({ entries: entries?.MeteorologicalEntry }, { status: 200 });
   } catch (error: any) {
     console.error("Error fetching meteorological entries:", error);
     return NextResponse.json(

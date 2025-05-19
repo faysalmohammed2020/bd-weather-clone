@@ -57,7 +57,6 @@ type MeteorologicalFormData = {
   pastWeatherW2?: string;
   c2Indicator?: string;
   observationTime?: string;
-  stationName?: string;
   stationNo?: string;
   year?: string;
   cloudCover?: string;
@@ -67,7 +66,7 @@ type MeteorologicalFormData = {
 
 export function MeteorologicalDataForm({ onDataSubmitted }) {
   const [formData, setFormData] = useState<MeteorologicalFormData>({});
-  const {timeData, isHourSelected, hasDataForHour} = useHour()
+  const {timeData, isHourSelected, selectedHour} = useHour()
   const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hygrometricData, setHygrometricData] = useState({
@@ -206,8 +205,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       ...prev,
       subIndicator: "1",
       year: year.slice(2), // only "25" for last two digits
-      stationNo: session?.user?.station?.stationId || "",
-      stationName: session?.user?.station?.name || "",
+      stationNo: session?.user?.station?.id || "",
     }));
   }, []);
 
@@ -327,6 +325,13 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if(!isHourSelected){
+      toast.error("Please select an hour");
+      return;
+    }
+
+    console.log(selectedHour);
+
     // Prevent duplicate submissions
     if (isSubmitting) return;
 
@@ -337,7 +342,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       const submissionData = {
         ...formData,
         ...hygrometricData, // Include hygrometric data directly
-        timestamp: new Date().toISOString(),
+        observingTimeId: selectedHour,
       };
 
       const response = await fetch("/api/first-card-data", {
@@ -359,7 +364,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
       // Reset only measurement fields (preserves station info)
       setFormData((prev) => ({
-        stationName: prev.stationName,
         stationNo: prev.stationNo,
         year: prev.year,
         // Clear other fields
