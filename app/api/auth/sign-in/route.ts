@@ -45,8 +45,7 @@ export async function POST(request: NextRequest) {
         id: true,
         email: true,
         role: true,
-        stationId: true,
-        stationName: true
+        Station: true
       }
     });
 
@@ -58,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Check if the user is associated with the station
-    if (user.stationId !== stationId) {
+    if (user.Station.stationId !== stationId) {
       return NextResponse.json(
         { error: "User is not associated with this station" },
         { status: 403 }
