@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { useTimeCheck } from "@/hooks/useTimeCheck";
 import {
   Thermometer,
   Wind,
@@ -16,7 +17,7 @@ import {
   BarChart3,
   ChevronRight,
   ChevronLeft,
-  Clock
+  Clock,
 } from "lucide-react";
 import { toast } from "sonner";
 import { hygrometricTable } from "@/data/hygrometric-table"; // Import the hygrometric table data
@@ -25,7 +26,6 @@ import { useSession } from "@/lib/auth-client";
 import { stationDataMap } from "@/data/station-data-map";
 import BasicInfoTab from "@/components/basic-info-tab";
 import { useHour } from "@/contexts/hourContext";
-import HourSelector from "@/components/hour-selector";
 
 type MeteorologicalFormData = {
   presentWeatherWW?: string;
@@ -66,9 +66,17 @@ type MeteorologicalFormData = {
 
 export function MeteorologicalDataForm({ onDataSubmitted }) {
   const [formData, setFormData] = useState<MeteorologicalFormData>({});
-  const {timeData, isHourSelected, selectedHour} = useHour()
-  const [activeTab, setActiveTab] = useState("temperature");
+  const [activeTab, setActiveTab] = useState("Observing Time");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { time, error: timeError } = useTimeCheck();
+  const {
+    selectedHour,
+    setSelectedHour,
+    error,
+    isLoading,
+    clearError,
+    timeData,
+  } = useHour();
   const [hygrometricData, setHygrometricData] = useState({
     dryBulb: "",
     wetBulb: "",
@@ -92,17 +100,17 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
   // Tab order for navigation
   const tabOrder = [
+    "Observing Time",
     "temperature",
     "pressure",
     "squall",
     "V.V",
     "weather",
-    "Observing Time",
   ];
 
   // Tab styles with gradients and more vibrant colors
   const tabStyles = {
-     "Observing Time": {
+    "Observing Time": {
       tab: "border border-fuchsia-500 px-4 py-3 !bg-fuchsia-50 text-fuchsia-800 hover:opacity-90 shadow-sm shadow-fuchsia-500/50",
       card: "bg-gradient-to-br from-fuchsia-50 to-white border-l-4 border-fuchsia-200 shadow-sm",
       icon: <Clock className="size-5 mr-2" />,
@@ -132,7 +140,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       card: "bg-gradient-to-br from-cyan-50 to-white border-l-4 border-cyan-200 shadow-sm",
       icon: <Cloud className="size-5 mr-2" />,
     },
-   
   };
 
   // Debug logging for formData changes
@@ -326,7 +333,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if(!isHourSelected){
+    if (!isHourSelected) {
       toast.error("Please select an hour");
       return;
     }
@@ -471,7 +478,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle input for segmented boxes with auto-focus to next box
+  // Handle segmented input (for multi-box inputs like station number, year, etc.)
   const handleSegmentedInput = (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number,
@@ -492,6 +499,16 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       refs[index + 1]?.current?.focus();
     }
   };
+
+  // Observing Time
+  const handleHourChange = (value: string) => {
+    if (!value) {
+      return;
+    }
+    clearError();
+    setSelectedHour(value);
+  };
+
   // Reset form function
   const handleReset = () => {
     // Clear all form data
@@ -539,16 +556,19 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
             setFormData((prev) => ({ ...prev, [name]: value }));
           }}
         />
-        <HourSelector />
         {/*Card Body */}
         <div className="relative rounded-xl">
           {/* Overlay that blocks interaction when no hour is selected */}
-          {(!isHourSelected || !timeData?.time) && (
+          {!time?.isPassed && !timeError && (
             <div className="absolute inset-0 bg-amber-50/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-xl ring-2 ring-amber-200 ring-offset-4">
-              <div className="bg-white p-4 rounded-lg shadow-lg text-center border-2 border-amber-300">
+              <div className="bg-white py-4 px-6 rounded-lg shadow-lg text-center border-2 border-amber-300">
                 <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />
-                <h3 className="text-lg font-medium text-amber-800">Select an hour first</h3>
-                <p className="text-sm text-amber-600 mt-1">Please select a valid hour before entering data</p>
+                <h3 className="text-lg font-medium text-amber-800">
+                  3 Hours has not passed yet
+                </h3>
+                <p className="text-sm text-amber-600 mt-1">
+                  Please wait a little longer
+                </p>
               </div>
             </div>
           )}
@@ -578,41 +598,55 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
             {/* Indicators Tab */}
             <TabsContent
-            value="Observing Time"
-            className="mt-6 transition-all duration-500"
-          >
-            <Card className={cn("overflow-hidden", tabStyles["Observing Time"].card)}>
-              <div className="p-4 bg-gradient-to-r from-fuchsia-200 to-fuchsia-300 text-fuchsia-800">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <Clock className="mr-2" /> Time Indicators
-                </h3>
-              </div>
-              <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="observationTime">
-                    GG: Time of Observation (UTC)
-                  </Label>
-                  <select
-                    id="observationTime"
-                    name="observationTime"
-                    value={formData.observationTime || ""}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-slate-600 rounded-md px-3 py-2 focus:outline-none focus:border-fuchsia-500 focus:ring-fuchsia-500/30"
-                  >
-                    <option value="">-- Select GG Time --</option>
-                    <option value="00">00 UTC</option>
-                    <option value="03">03 UTC</option>
-                    <option value="06">06 UTC</option>
-                    <option value="09">09 UTC</option>
-                    <option value="12">12 UTC</option>
-                    <option value="15">15 UTC</option>
-                    <option value="18">18 UTC</option>
-                    <option value="21">21 UTC</option>
-                  </select>
+              value="Observing Time"
+              className="mt-6 transition-all duration-500"
+            >
+              <Card
+                className={cn(
+                  "overflow-hidden",
+                  tabStyles["Observing Time"].card
+                )}
+              >
+                <div className="p-4 bg-gradient-to-r from-fuchsia-200 to-fuchsia-300 text-fuchsia-800">
+                  <h3 className="text-lg font-semibold flex items-center">
+                    <Clock className="mr-2" /> Time Indicators
+                  </h3>
                 </div>
-              </CardContent>
-              <CardFooter className="flex justify-between p-6">
+                <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="observationTime">
+                      GG: Time of Observation (UTC)
+                    </Label>
+                    <select
+                      id="observationTime"
+                      name="observationTime"
+                      value={selectedHour}
+                      onChange={(e) => handleHourChange(e.target.value)}
+                      required
+                      className={cn(
+                        "w-full border rounded-md px-3 py-2 focus:outline-none",
+                        {
+                          "border-red-500": error || timeData?.time,
+                          "border-emerald-500": !timeData?.time,
+                        }
+                      )}
+                    >
+                      <option value="">-- Select GG Time --</option>
+                      <option value="00">00 UTC</option>
+                      <option value="03">03 UTC</option>
+                      <option value="06">06 UTC</option>
+                      <option value="09">09 UTC</option>
+                      <option value="12">12 UTC</option>
+                      <option value="15">15 UTC</option>
+                      <option value="18">18 UTC</option>
+                      <option value="21">21 UTC</option>
+                    </select>
+                    {timeData?.time && (
+                      <p className="text-red-500">Time Already Exist</p>
+                    )}
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-between p-6">
                   <Button
                     type="button"
                     variant="outline"
@@ -625,12 +659,13 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     type="button"
                     onClick={nextTab}
                     className="bg-blue-600 hover:bg-blue-700"
+                    disabled={Boolean(timeData?.time)}
                   >
                     Next <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
                 </CardFooter>
-            </Card>
-          </TabsContent> 
+              </Card>
+            </TabsContent>
 
             {/* Bar Pressure Tab */}
             <TabsContent
@@ -1176,6 +1211,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     type="button"
                     onClick={nextTab}
                     className="bg-blue-600 hover:bg-blue-700"
+                    
                   >
                     Next <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -1333,8 +1369,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                 </CardFooter>
               </Card>
             </TabsContent>
-
-            
           </Tabs>
         </div>
       </form>
