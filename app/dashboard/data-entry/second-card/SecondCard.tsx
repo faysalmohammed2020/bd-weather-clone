@@ -28,14 +28,17 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import HourSelector from "@/components/hour-selector";
 import { useHour } from "@/contexts/hourContext";
+import { useTimeCheck } from "@/hooks/useTimeCheck";
+import { utcToHour } from "@/lib/utils";
 
 export default function WeatherObservationForm() {
-  const {timeData, isHourSelected, selectedHour} = useHour()
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("cloud");
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
   const { data: session } = useSession();
+
+  const { time, error: timeError } = useTimeCheck();
 
   const handleNext = () => {
     // Add validation for current step before proceeding
@@ -390,7 +393,6 @@ export default function WeatherObservationForm() {
         significantClouds: safeFormData.significantClouds,
         rainfall: safeFormData.rainfall,
         wind: safeFormData.wind,
-        observingTimeId: selectedHour,
         observer: {
           ...safeFormData.observer,
         },
@@ -475,306 +477,306 @@ export default function WeatherObservationForm() {
           </p>
         </header>
 
-        <HourSelector />
-
         {/* Wrap in a div to prevent form submission issues */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <form onSubmit={handleSubmit} className="w-full">
             <div className="relative rounded-xl">
               {/* Overlay that blocks interaction when no hour is selected */}
-              {(!isHourSelected || !timeData?.time) && (
+              {!time && !timeError && !time?.hasMeteorologicalData && (
                 <div className="absolute inset-0 bg-amber-50/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-xl ring-2 ring-amber-200 ring-offset-4">
-                  <div className="bg-white p-4 rounded-lg shadow-lg text-center border-2 border-amber-300">
+                  <div className="bg-white py-4 px-6 rounded-lg shadow-lg text-center border-2 border-amber-300">
                     <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />
                     <h3 className="text-lg font-medium text-amber-800">
-                      Select an hour first
+                      {time?.isPassed ? "3 Hours has not passed yet" : "Check first card"}
                     </h3>
                     <p className="text-sm text-amber-600 mt-1">
-                      Please select a valid hour before entering data
+                      Last update hour: {utcToHour(time?.time) === "NaN" ? "" : utcToHour(time?.time)}
                     </p>
                   </div>
                 </div>
               )}
 
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="flex w-full bg-gray-100 p-1 rounded-none">
-                <TabTrigger
-                  value="cloud"
-                  icon={<CloudIcon className="h-5 w-5" />}
-                  label="CLOUD"
-                  colorClass={tabColors.cloud}
-                />
-                <TabTrigger
-                  value="n"
-                  icon={<Sun className="h-5 w-5" />}
-                  label="TOTAL CLOUD"
-                  colorClass={tabColors.n}
-                />
-                <TabTrigger
-                  value="significant-cloud"
-                  icon={<CloudIcon className="h-5 w-5" />}
-                  label="SIG CLOUD"
-                  colorClass={tabColors["significant-cloud"]}
-                />
-                <TabTrigger
-                  value="rainfall"
-                  icon={<CloudRainIcon className="h-5 w-5" />}
-                  label="RAINFALL"
-                  colorClass={tabColors.rainfall}
-                />
-                <TabTrigger
-                  value="wind"
-                  icon={<Wind className="h-5 w-5" />}
-                  label="WIND"
-                  colorClass={tabColors.wind}
-                />
-                <TabTrigger
-                  value="observer"
-                  icon={<User className="h-5 w-5" />}
-                  label="OBSERVER"
-                  colorClass={tabColors.observer}
-                />
-              </TabsList>
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="flex w-full bg-gray-100 p-1 rounded-none">
+                  <TabTrigger
+                    value="cloud"
+                    icon={<CloudIcon className="h-5 w-5" />}
+                    label="CLOUD"
+                    colorClass={tabColors.cloud}
+                  />
+                  <TabTrigger
+                    value="n"
+                    icon={<Sun className="h-5 w-5" />}
+                    label="TOTAL CLOUD"
+                    colorClass={tabColors.n}
+                  />
+                  <TabTrigger
+                    value="significant-cloud"
+                    icon={<CloudIcon className="h-5 w-5" />}
+                    label="SIG CLOUD"
+                    colorClass={tabColors["significant-cloud"]}
+                  />
+                  <TabTrigger
+                    value="rainfall"
+                    icon={<CloudRainIcon className="h-5 w-5" />}
+                    label="RAINFALL"
+                    colorClass={tabColors.rainfall}
+                  />
+                  <TabTrigger
+                    value="wind"
+                    icon={<Wind className="h-5 w-5" />}
+                    label="WIND"
+                    colorClass={tabColors.wind}
+                  />
+                  <TabTrigger
+                    value="observer"
+                    icon={<User className="h-5 w-5" />}
+                    label="OBSERVER"
+                    colorClass={tabColors.observer}
+                  />
+                </TabsList>
 
-              <div className="p-6">
-                {/* CLOUD Tab */}
-                <TabsContent value="cloud">
-                  <SectionCard
-                    title="Cloud Observation"
-                    icon={<CloudIcon className="h-6 w-6 text-blue-500" />}
-                    className="border-blue-200"
-                  >
-                    <div className="space-y-8">
-                      <CloudLevelSection
-                        title="Low Cloud"
-                        prefix="low-cloud"
-                        color="blue"
-                        data={safeFormData.clouds.low}
-                        onChange={handleInputChange}
-                        onSelectChange={handleSelectChange}
-                      />
-                      <CloudLevelSection
-                        title="Medium Cloud"
-                        prefix="medium-cloud"
-                        color="purple"
-                        data={safeFormData.clouds.medium}
-                        onChange={handleInputChange}
-                        onSelectChange={handleSelectChange}
-                      />
-                      <CloudLevelSection
-                        title="High Cloud"
-                        prefix="high-cloud"
-                        color="cyan"
-                        data={safeFormData.clouds.high}
-                        onChange={handleInputChange}
-                        onSelectChange={handleSelectChange}
-                      />
-                    </div>
-                  </SectionCard>
-                </TabsContent>
+                <div className="p-6">
+                  {/* CLOUD Tab */}
+                  <TabsContent value="cloud">
+                    <SectionCard
+                      title="Cloud Observation"
+                      icon={<CloudIcon className="h-6 w-6 text-blue-500" />}
+                      className="border-blue-200"
+                    >
+                      <div className="space-y-8">
+                        <CloudLevelSection
+                          title="Low Cloud"
+                          prefix="low-cloud"
+                          color="blue"
+                          data={safeFormData.clouds.low}
+                          onChange={handleInputChange}
+                          onSelectChange={handleSelectChange}
+                        />
+                        <CloudLevelSection
+                          title="Medium Cloud"
+                          prefix="medium-cloud"
+                          color="purple"
+                          data={safeFormData.clouds.medium}
+                          onChange={handleInputChange}
+                          onSelectChange={handleSelectChange}
+                        />
+                        <CloudLevelSection
+                          title="High Cloud"
+                          prefix="high-cloud"
+                          color="cyan"
+                          data={safeFormData.clouds.high}
+                          onChange={handleInputChange}
+                          onSelectChange={handleSelectChange}
+                        />
+                      </div>
+                    </SectionCard>
+                  </TabsContent>
 
-                {/* TOTAL CLOUD Tab */}
-                <TabsContent value="n">
-                  <SectionCard
-                    title="Total Cloud Amount"
-                    icon={<Sun className="h-6 w-6 text-yellow-500" />}
-                    className="border-yellow-200"
-                  >
-                    <div className="grid gap-6">
-                      <SelectField
-                        id="total-cloud-amount"
-                        name="total-cloud-amount"
-                        label="Total Cloud Amount (Octa)"
-                        accent="yellow"
-                        value={formData.totalCloud["total-cloud-amount"] || ""}
-                        onValueChange={(value) =>
-                          handleSelectChange("total-cloud-amount", value)
-                        }
-                        options={cloudAmountOptions.map((opt) => opt.value)}
-                        optionLabels={cloudAmountOptions.map(
-                          (opt) => opt.label
-                        )}
-                      />
-                    </div>
-                  </SectionCard>
-                </TabsContent>
+                  {/* TOTAL CLOUD Tab */}
+                  <TabsContent value="n">
+                    <SectionCard
+                      title="Total Cloud Amount"
+                      icon={<Sun className="h-6 w-6 text-yellow-500" />}
+                      className="border-yellow-200"
+                    >
+                      <div className="grid gap-6">
+                        <SelectField
+                          id="total-cloud-amount"
+                          name="total-cloud-amount"
+                          label="Total Cloud Amount (Octa)"
+                          accent="yellow"
+                          value={
+                            formData.totalCloud["total-cloud-amount"] || ""
+                          }
+                          onValueChange={(value) =>
+                            handleSelectChange("total-cloud-amount", value)
+                          }
+                          options={cloudAmountOptions.map((opt) => opt.value)}
+                          optionLabels={cloudAmountOptions.map(
+                            (opt) => opt.label
+                          )}
+                        />
+                      </div>
+                    </SectionCard>
+                  </TabsContent>
 
-                {/* SIGNIFICANT CLOUD Tab */}
-                <TabsContent value="significant-cloud">
-                  <SectionCard
-                    title="Significant Cloud"
-                    icon={<CloudIcon className="h-6 w-6 text-purple-500" />}
-                    className="border-purple-200"
-                  >
-                    <div className="space-y-8">
-                      <SignificantCloudSection
-                        title="1st Layer"
-                        prefix="layer1"
-                        color="purple"
-                        data={formData.significantClouds.layer1}
-                        onSelectChange={handleSelectChange}
-                      />
-                      <SignificantCloudSection
-                        title="2nd Layer"
-                        prefix="layer2"
-                        color="fuchsia"
-                        data={formData.significantClouds.layer2}
-                        onSelectChange={handleSelectChange}
-                      />
-                      <SignificantCloudSection
-                        title="3rd Layer"
-                        prefix="layer3"
-                        color="violet"
-                        data={formData.significantClouds.layer3}
-                        onSelectChange={handleSelectChange}
-                      />
-                      <SignificantCloudSection
-                        title="4th Layer"
-                        prefix="layer4"
-                        color="indigo"
-                        data={formData.significantClouds.layer4}
-                        onSelectChange={handleSelectChange}
-                      />
-                    </div>
-                  </SectionCard>
-                </TabsContent>
+                  {/* SIGNIFICANT CLOUD Tab */}
+                  <TabsContent value="significant-cloud">
+                    <SectionCard
+                      title="Significant Cloud"
+                      icon={<CloudIcon className="h-6 w-6 text-purple-500" />}
+                      className="border-purple-200"
+                    >
+                      <div className="space-y-8">
+                        <SignificantCloudSection
+                          title="1st Layer"
+                          prefix="layer1"
+                          color="purple"
+                          data={formData.significantClouds.layer1}
+                          onSelectChange={handleSelectChange}
+                        />
+                        <SignificantCloudSection
+                          title="2nd Layer"
+                          prefix="layer2"
+                          color="fuchsia"
+                          data={formData.significantClouds.layer2}
+                          onSelectChange={handleSelectChange}
+                        />
+                        <SignificantCloudSection
+                          title="3rd Layer"
+                          prefix="layer3"
+                          color="violet"
+                          data={formData.significantClouds.layer3}
+                          onSelectChange={handleSelectChange}
+                        />
+                        <SignificantCloudSection
+                          title="4th Layer"
+                          prefix="layer4"
+                          color="indigo"
+                          data={formData.significantClouds.layer4}
+                          onSelectChange={handleSelectChange}
+                        />
+                      </div>
+                    </SectionCard>
+                  </TabsContent>
 
-                {/* RAINFALL Tab */}
-                <TabsContent value="rainfall">
-                  <SectionCard
-                    title="Rainfall Measurement (mm)"
-                    icon={<CloudRainIcon className="h-6 w-6 text-cyan-500" />}
-                    className="border-cyan-200"
-                  >
-                    <div className="grid gap-6 md:grid-cols-2">
-                      <InputField
-                        id="time-start"
-                        name="time-start"
-                        label="Time of Start (HH:MM UTC)"
-                        accent="cyan"
-                        value={formData.rainfall["time-start"] || ""}
-                        onChange={handleInputChange}
-                      />
-                      <InputField
-                        id="time-end"
-                        name="time-end"
-                        label="Time of Ending (HH:MM UTC)"
-                        accent="cyan"
-                        value={formData.rainfall["time-end"] || ""}
-                        onChange={handleInputChange}
-                      />
-                      <InputField
-                        id="since-previous"
-                        name="since-previous"
-                        label="Since Previous Observation"
-                        accent="cyan"
-                        value={formData.rainfall["since-previous"] || ""}
-                        onChange={handleInputChange}
-                      />
-                      <InputField
-                        id="during-previous"
-                        name="during-previous"
-                        label="During Previous 6 Hours (At 00, 06, 12, 18 UTC)"
-                        accent="cyan"
-                        value={formData.rainfall["during-previous"] || ""}
-                        onChange={handleInputChange}
-                      />
-                      <div className="md:col-span-2">
+                  {/* RAINFALL Tab */}
+                  <TabsContent value="rainfall">
+                    <SectionCard
+                      title="Rainfall Measurement (mm)"
+                      icon={<CloudRainIcon className="h-6 w-6 text-cyan-500" />}
+                      className="border-cyan-200"
+                    >
+                      <div className="grid gap-6 md:grid-cols-2">
                         <InputField
-                          id="last-24-hours"
-                          name="last-24-hours"
-                          label="Last 24 Hours Precipitation"
+                          id="time-start"
+                          name="time-start"
+                          label="Time of Start (HH:MM UTC)"
                           accent="cyan"
-                          value={formData.rainfall["last-24-hours"] || ""}
+                          value={formData.rainfall["time-start"] || ""}
                           onChange={handleInputChange}
                         />
-                      </div>
-                    </div>
-                  </SectionCard>
-                </TabsContent>
-
-                {/* WIND Tab */}
-                <TabsContent value="wind">
-                  <SectionCard
-                    title="Wind Measurement"
-                    icon={<Wind className="h-6 w-6 text-green-500" />}
-                    className="border-green-200"
-                  >
-                    <div className="grid gap-6 md:grid-cols-2">
-                      <InputField
-                        id="first-anemometer"
-                        name="first-anemometer"
-                        label="1st Anemometer Reading"
-                        accent="green"
-                        value={formData.wind["first-anemometer"] || ""}
-                        onChange={handleInputChange}
-                      />
-                      <InputField
-                        id="second-anemometer"
-                        name="second-anemometer"
-                        label="2nd Anemometer Reading"
-                        accent="green"
-                        value={formData.wind["second-anemometer"] || ""}
-                        onChange={handleInputChange}
-                      />
-                      <InputField
-                        id="speed"
-                        name="speed"
-                        label="Speed (KTS)"
-                        accent="green"
-                        value={formData.wind["speed"] || ""}
-                        onChange={handleInputChange}
-                      />
-                      {/* Wind Direction - Fixed */}
-                      <div className="grid gap-2">
-                        <Label
-                          htmlFor="wind-direction"
-                          className="font-medium text-gray-700"
-                        >
-                          Direction (Degrees)
-                        </Label>
-                        <Input
-                          id="wind-direction"
-                          name="wind-direction"
-                          type="number"
-                          min="0"
-                          max="360"
-                          value={formData.wind["wind-direction"] || ""}
+                        <InputField
+                          id="time-end"
+                          name="time-end"
+                          label="Time of Ending (HH:MM UTC)"
+                          accent="cyan"
+                          value={formData.rainfall["time-end"] || ""}
                           onChange={handleInputChange}
-                          className="border-2 border-green-300 bg-green-50 focus:border-green-500 focus:ring-green-500/30 rounded-lg py-2 px-3"
-                          placeholder="0-360 degrees"
                         />
+                        <InputField
+                          id="since-previous"
+                          name="since-previous"
+                          label="Since Previous Observation"
+                          accent="cyan"
+                          value={formData.rainfall["since-previous"] || ""}
+                          onChange={handleInputChange}
+                        />
+                        <InputField
+                          id="during-previous"
+                          name="during-previous"
+                          label="During Previous 6 Hours (At 00, 06, 12, 18 UTC)"
+                          accent="cyan"
+                          value={formData.rainfall["during-previous"] || ""}
+                          onChange={handleInputChange}
+                        />
+                        <div className="md:col-span-2">
+                          <InputField
+                            id="last-24-hours"
+                            name="last-24-hours"
+                            label="Last 24 Hours Precipitation"
+                            accent="cyan"
+                            value={formData.rainfall["last-24-hours"] || ""}
+                            onChange={handleInputChange}
+                          />
+                        </div>
                       </div>
-                    </div>
-                  </SectionCard>
-                </TabsContent>
+                    </SectionCard>
+                  </TabsContent>
 
-                {/* OBSERVER Tab */}
-                {/* OBSERVER Tab */}
-                {/* OBSERVER Tab */}
-                {/* OBSERVER Tab */}
-                <TabsContent value="observer">
-                  <SectionCard
-                    title="Observer Information"
-                    icon={<User className="h-6 w-6 text-orange-500" />}
-                    className="border-orange-200"
-                  >
-                    <div className="grid gap-6 md:grid-cols-2">
-                      <InputField
-                        id="observer-initial"
-                        name="observer-initial"
-                        label="Observer Initials"
-                        accent="orange"
-                        value={formData.observer["observer-initial"] || ""}
-                        onChange={handleInputChange}
-                        required
-                      />
+                  {/* WIND Tab */}
+                  <TabsContent value="wind">
+                    <SectionCard
+                      title="Wind Measurement"
+                      icon={<Wind className="h-6 w-6 text-green-500" />}
+                      className="border-green-200"
+                    >
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <InputField
+                          id="first-anemometer"
+                          name="first-anemometer"
+                          label="1st Anemometer Reading"
+                          accent="green"
+                          value={formData.wind["first-anemometer"] || ""}
+                          onChange={handleInputChange}
+                        />
+                        <InputField
+                          id="second-anemometer"
+                          name="second-anemometer"
+                          label="2nd Anemometer Reading"
+                          accent="green"
+                          value={formData.wind["second-anemometer"] || ""}
+                          onChange={handleInputChange}
+                        />
+                        <InputField
+                          id="speed"
+                          name="speed"
+                          label="Speed (KTS)"
+                          accent="green"
+                          value={formData.wind["speed"] || ""}
+                          onChange={handleInputChange}
+                        />
+                        {/* Wind Direction - Fixed */}
+                        <div className="grid gap-2">
+                          <Label
+                            htmlFor="wind-direction"
+                            className="font-medium text-gray-700"
+                          >
+                            Direction (Degrees)
+                          </Label>
+                          <Input
+                            id="wind-direction"
+                            name="wind-direction"
+                            type="number"
+                            min="0"
+                            max="360"
+                            value={formData.wind["wind-direction"] || ""}
+                            onChange={handleInputChange}
+                            className="border-2 border-green-300 bg-green-50 focus:border-green-500 focus:ring-green-500/30 rounded-lg py-2 px-3"
+                            placeholder="0-360 degrees"
+                          />
+                        </div>
+                      </div>
+                    </SectionCard>
+                  </TabsContent>
 
-                      {/* <div className="grid gap-2 w-full">
+                  {/* OBSERVER Tab */}
+                  {/* OBSERVER Tab */}
+                  {/* OBSERVER Tab */}
+                  {/* OBSERVER Tab */}
+                  <TabsContent value="observer">
+                    <SectionCard
+                      title="Observer Information"
+                      icon={<User className="h-6 w-6 text-orange-500" />}
+                      className="border-orange-200"
+                    >
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <InputField
+                          id="observer-initial"
+                          name="observer-initial"
+                          label="Observer Initials"
+                          accent="orange"
+                          value={formData.observer["observer-initial"] || ""}
+                          onChange={handleInputChange}
+                          required
+                        />
+
+                        {/* <div className="grid gap-2 w-full">
                         <Label
                           htmlFor="observation-time"
                           className="font-medium text-gray-700"
@@ -806,60 +808,60 @@ export default function WeatherObservationForm() {
                         </select>
                       </div> */}
 
-                      <InputField
-                        id="station-id"
-                        name="station-id"
-                        label="Station ID"
-                        accent="orange"
-                        value={session?.user?.stationId || ""}
-                        onChange={handleInputChange}
-                        disabled
-                      />
-                    </div>
-                  </SectionCard>
-                </TabsContent>
-              </div>
-            </Tabs>
+                        <InputField
+                          id="station-id"
+                          name="station-id"
+                          label="Station ID"
+                          accent="orange"
+                          value={session?.user?.stationId || ""}
+                          onChange={handleInputChange}
+                          disabled
+                        />
+                      </div>
+                    </SectionCard>
+                  </TabsContent>
+                </div>
+              </Tabs>
 
-            {/* In your form footer */}
-            <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 flex justify-between">
-              <Button
-                type="button"
-                onClick={handlePrevious}
-                disabled={currentStep === 1}
-                className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
-              >
-                Previous
-              </Button>
-
-              {currentStep < totalSteps ? (
+              {/* In your form footer */}
+              <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 flex justify-between">
                 <Button
                   type="button"
-                  onClick={handleNext}
+                  onClick={handlePrevious}
+                  disabled={currentStep === 1}
                   className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
                 >
-                  Next
+                  Previous
                 </Button>
-              ) : (
-                <Button
-                  type="submit"
-                  className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <CloudIcon className="h-5 w-5 mr-2" />
-                      Submit Observation
-                    </>
-                  )}
-                </Button>
-              )}
-            </div>
+
+                {currentStep < totalSteps ? (
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
+                  >
+                    Next
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      <>
+                        <CloudIcon className="h-5 w-5 mr-2" />
+                        Submit Observation
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
             </div>
           </form>
         </div>

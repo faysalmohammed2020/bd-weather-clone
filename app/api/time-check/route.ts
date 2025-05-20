@@ -59,6 +59,16 @@ export async function GET() {
           lte: endToday,
         },
       },
+      include: {
+        _count: {
+            select: {
+                MeteorologicalEntry: true,
+                WeatherObservation: true,
+                SynopticCode: true,
+                DailySummary: true,
+            }
+        }
+      },
       orderBy: {
         utcTime: "desc",
       },
@@ -74,6 +84,10 @@ export async function GET() {
     const isPassed = hasHoursPassed(utcTime, 3);
 
     return NextResponse.json({
+        hasMeteorologicalData: time._count.MeteorologicalEntry > 0,
+        hasWeatherObservation: time._count.WeatherObservation > 0,
+        hasSynopticCode: time._count.SynopticCode > 0,
+        hasDailySummary: time._count.DailySummary > 0,
         time: utcTime,
         isPassed,
     });

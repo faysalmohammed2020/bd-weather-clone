@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
-import { hourToUtc } from "@/lib/utils";
 
 export async function POST(request: Request) {
   try {
@@ -16,18 +15,27 @@ export async function POST(request: Request) {
 
     const data = await request.json();
 
-    const formattedObservingTime = hourToUtc(data.observingTimeId);
+
     // First, find the ObservingTime record by its UTC time
-    const observingTime = await prisma.observingTime.findUnique({
-      where: {
-        utcTime: formattedObservingTime,
+    const observingTime = await prisma.observingTime.findFirst({
+      select: {
+        id: true,
+        utcTime: true,
+        _count: {
+          select: {
+            MeteorologicalEntry: true
+          }
+        }
       },
+      orderBy: {
+        utcTime: "desc",
+      }
     });
 
-    if (!observingTime) {
+    if (!observingTime || !observingTime._count.MeteorologicalEntry) {
       return NextResponse.json(
         {
-          message: "Observation time not found",
+          message: "First card entry not found",
           error: "The selected hour does not exist in the database",
         },
         { status: 404 }
@@ -108,14 +116,10 @@ export async function POST(request: Request) {
 
     const saved = await prisma.weatherObservation.create({
       data: {
-        station: {
-          connect: {
-            id: stationRecord.id,
-          },
-        },
         ObservingTime: {
           connect: {
-            id: observingTime.id,
+            id: observingTime?.id,
+            stationId: stationRecord.id,
           },
         },
         ...observationData,
@@ -125,7 +129,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       message: "Observation saved successfully",
-      data: { id: saved.id, stationId: saved.stationId },
+      data: { id: saved.id, stationId: stationRecord.id },
     });
   } catch (error) {
     console.error("Error saving observation:", error);
