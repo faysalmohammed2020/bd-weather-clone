@@ -71,23 +71,16 @@ export default function MeasurementsTab() {
       setIsLoading(true)
       setError(null)
       try {
-        const filteredDate = selectedDate
-
         const firstCardResponse = await fetch("/api/first-card-data")
-        const firstCardData = await firstCardResponse.json()
-        const todayFirstCardData = firstCardData.entries.filter((item: any) => {
-          const itemDate = new Date(item.timestamp).toISOString().split("T")[0]
-          return itemDate === filteredDate
-        })
+        const formatedFirstCardData = await firstCardResponse.json()
+        const todayFirstCardData = await formatedFirstCardData.map((item: any) => item.MeteorologicalEntry).flat()
 
-        const observationsResponse = await fetch("/api/save-observation")
-        const weatherObservations = await observationsResponse.json()
-        const todayWeatherObservations = weatherObservations.filter((item: any) => {
-          const dateField = item.metadata?.submittedAt || item.observer?.["observation-time"]
-          if (!dateField) return false
-          const itemDate = new Date(dateField).toISOString().split("T")[0]
-          return itemDate === filteredDate
-        })
+        const observationsResponse = await fetch("/api/second-card-data")
+        const formatedObservationsData = await observationsResponse.json()
+        const todayWeatherObservations = formatedObservationsData.map((item: any) => item.WeatherObservation).flat()
+
+        console.log(todayWeatherObservations[0].rainfallLast24Hours)
+        console.log(todayWeatherObservations)
 
         const measurements = Array(16).fill("-")
 
@@ -111,19 +104,19 @@ export default function MeasurementsTab() {
 
 
         const totalPrecip = todayWeatherObservations.reduce((sum: number, item: any) => {
-          const val = Number.parseFloat(item.rainfall["last-24-hours"])
+          const val = Number.parseFloat(item.rainfallLast24Hours)
           return isNaN(val) ? sum : sum + val
         }, 0)
         if (totalPrecip > 0) measurements[6] = Math.round(totalPrecip).toString()
 
         const windSpeeds = todayWeatherObservations
-          .map((item: any) => Number.parseFloat(item.wind.speed))
+          .map((item: any) => Number.parseFloat(item.windSpeed))
           .filter((val) => !isNaN(val))
         if (windSpeeds.length > 0) {
           measurements[9] = Math.round(windSpeeds.reduce((a, b) => a + b, 0) / windSpeeds.length).toString()
         }
 
-        const directions = todayWeatherObservations.map((item: any) => item.wind["wind-direction"])
+        const directions = todayWeatherObservations.map((item: any) => item.windDirection)
         if (directions.length > 0) {
           const dirCount = directions.reduce((acc: Record<string, number>, dir: string) => {
             acc[dir] = (acc[dir] || 0) + 1
@@ -134,8 +127,8 @@ export default function MeasurementsTab() {
 
         const windData = todayWeatherObservations
           .map((item: any) => ({
-            speed: Number.parseFloat(item.wind.speed),
-            direction: item.wind["wind-direction"],
+            speed: Number.parseFloat(item.windSpeed),
+            direction: item.windDirection,
           }))
           .filter((item) => !isNaN(item.speed))
         if (windData.length > 0) {
@@ -145,16 +138,16 @@ export default function MeasurementsTab() {
         }
 
         const cloudAmounts = todayWeatherObservations
-          .map((item: any) => Number.parseFloat(item.totalCloud["total-cloud-amount"]))
+          .map((item: any) => Number.parseFloat(item.totalCloudAmount))
           .filter((val) => !isNaN(val))
         if (cloudAmounts.length > 0) {
           measurements[13] = Math.round(cloudAmounts.reduce((a, b) => a + b, 0) / cloudAmounts.length).toString()
         }
 
         const totalRainDuration = todayWeatherObservations.reduce((total: number, item: any) => {
-          if (item.rainfall["time-start"] && item.rainfall["time-end"]) {
-            const [sh, sm] = item.rainfall["time-start"].split(".").map(Number)
-            const [eh, em] = item.rainfall["time-end"].split(".").map(Number)
+          if (item.rainfallLast24Hours) {
+            const [sh, sm] = item.rainfallLast24Hours.split(".").map(Number)
+            const [eh, em] = item.rainfallLast24Hours.split(".").map(Number)
             return total + (eh * 60 + em - (sh * 60 + sm))
           }
           return total
@@ -287,7 +280,7 @@ export default function MeasurementsTab() {
       const payload = {
         userId: session?.user.id, // Replace with actual user ID
         dataType: "SY", // Replace or dynamically set from BasicInfoTab if needed
-        stationNo: session?.user.stationId, // Replace with selected station
+        stationNo: session?.user.station?.stationId, // Replace with selected station
         year: new Date(selectedDate).getFullYear().toString(),
         month: (new Date(selectedDate).getMonth() + 1).toString(),
         day: new Date(selectedDate).getDate().toString(),
