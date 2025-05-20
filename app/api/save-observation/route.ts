@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
+import { hourToUtc } from "@/lib/utils";
 
 export async function POST(request: Request) {
   try {
@@ -15,19 +16,50 @@ export async function POST(request: Request) {
 
     const data = await request.json();
 
-    const stationId = data?.metadata?.stationId;
+    const formattedObservingTime = hourToUtc(data.observingTimeId);
+    // First, find the ObservingTime record by its UTC time
+    const observingTime = await prisma.observingTime.findUnique({
+      where: {
+        utcTime: formattedObservingTime,
+      },
+    });
+
+    if (!observingTime) {
+      return NextResponse.json(
+        {
+          message: "Observation time not found",
+          error: "The selected hour does not exist in the database",
+        },
+        { status: 404 }
+      );
+    }
+
+    // Get station ID from session
+    const stationId = session.user.station?.stationId;
     if (!stationId) {
-      throw new Error("Station ID is required");
+      return NextResponse.json({
+        message: "Station ID is required",
+        status: 400,
+      });
+    }
+
+    // Find the station by stationId to get its primary key (id)
+    const stationRecord = await prisma.station.findFirst({
+      where: { stationId },
+    });
+
+    if (!stationRecord) {
+      return NextResponse.json({
+        message: `No station found with ID: ${stationId}`,
+        status: 404,
+      });
     }
 
     const observationData = {
-      userId: session.user.id,
-      stationId,
       tabActive: data.metadata?.tabActiveAtSubmission || "unknown",
 
       // Observer info
       observerInitial: data.observer?.["observer-initial"] || null,
-      observationTime: data.observer?.["observation-time"],
 
       // Cloud
       lowCloudForm: data.clouds?.low?.form || null,
@@ -75,7 +107,19 @@ export async function POST(request: Request) {
     };
 
     const saved = await prisma.weatherObservation.create({
-      data: observationData,
+      data: {
+        station: {
+          connect: {
+            id: stationRecord.id,
+          },
+        },
+        ObservingTime: {
+          connect: {
+            id: observingTime.id,
+          },
+        },
+        ...observationData,
+      },
     });
 
     return NextResponse.json({
@@ -106,7 +150,8 @@ export async function GET() {
       );
     }
 
-    const { role, stationId, id: userId } = session.user;
+    const { role, id: userId } = session.user;
+    const stationId = session.user.station?.id; // Access the station ID correctly
 
     let observations;
 
@@ -245,7 +290,8 @@ export async function PUT(request: Request) {
     const now = new Date();
     const obsTime = new Date(observation.submittedAt || now);
     const daysDiff = Math.floor((+now - +obsTime) / (1000 * 60 * 60 * 24));
-    const { role, id: userId, stationId } = session.user;
+    const { role, id: userId } = session.user;
+    const stationId = session.user.station?.id; // Access the station ID correctly
 
     const canEdit =
       (role === "super_admin" && daysDiff <= 365) ||
