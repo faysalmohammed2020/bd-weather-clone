@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar, ChevronLeft, ChevronRight, CloudSun, Filter, Loader2, AlertTriangle } from "lucide-react"
-import { format, parseISO, differenceInDays, isValid, isAfter, isBefore, isEqual } from "date-fns"
+import { format, parseISO, differenceInDays, isValid } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import { useSession } from "@/lib/auth-client"
 import {
@@ -23,10 +23,20 @@ import {
 import { toast } from "sonner"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
+interface Station {
+  id: string
+  stationId: string
+  name: string
+  securityCode: string
+  latitude: number
+  longitude: number
+  createdAt: string
+  updatedAt: string
+}
+
 interface MeteorologicalEntry {
   id: string
   observingTimeId: string
-  stationId: string
   dataType: string
   subIndicator: string
   alteredThermometer: string
@@ -60,20 +70,18 @@ interface MeteorologicalEntry {
   submittedAt?: string
   createdAt: string
   updatedAt: string
-  ObservingTime?: {
-    utcTime: string
-    localTime: string
-  }
-  station?: {
-    stationId: string
-    name: string
-  }
 }
 
-interface Station {
+interface ObservingTimeEntry {
   id: string
+  userId: string
   stationId: string
-  name: string
+  utcTime: string
+  localTime: string
+  createdAt: string
+  updatedAt: string
+  station: Station
+  MeteorologicalEntry: MeteorologicalEntry[]
 }
 
 interface FirstCardTableProps {
@@ -81,11 +89,14 @@ interface FirstCardTableProps {
 }
 
 function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
-  if (!user || !record.submittedAt) return false
+  if (!user) return false
+
+  // If no submittedAt, allow edit (newly created record)
+  if (!record.submittedAt) return true
 
   try {
     const submissionDate = parseISO(record.submittedAt)
-    if (!isValid(submissionDate)) return false
+    if (!isValid(submissionDate)) return true // If date is invalid, allow edit
 
     const now = new Date()
     const daysDifference = differenceInDays(now, submissionDate)
@@ -94,17 +105,15 @@ function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
     const role = user.role
     const userId = user.id
     const stationId = user.station?.id
-    const recordStationId = record.stationId
 
     // Super admin can edit records up to 1 year old
     if (role === "super_admin") return daysDifference <= 365
 
     // Station admin can edit records from their station up to 30 days old
-    if (role === "station_admin")
-      return daysDifference <= 30 && stationId && recordStationId && stationId === recordStationId
+    if (role === "station_admin") return daysDifference <= 30 && stationId === record.observingTimeId
 
     // Regular users can edit their own records up to 2 days old
-    if (role === "observer") return daysDifference <= 2 && userId && record.userId && userId === record.userId
+    if (role === "observer") return daysDifference <= 2
 
     return false
   } catch (e) {
@@ -114,8 +123,10 @@ function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
 }
 
 export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
-  const [data, setData] = useState<MeteorologicalEntry[]>([])
+  const [data, setData] = useState<ObservingTimeEntry[]>([])
+  const [flattenedData, setFlattenedData] = useState<MeteorologicalEntry[]>([])
   const [loading, setLoading] = useState(true)
+
   // Initialize with today's date by default
   const today = format(new Date(), "yyyy-MM-dd")
   const [startDate, setStartDate] = useState(today)
@@ -129,6 +140,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   const isSuperAdmin = user?.role === "super_admin"
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedRecord, setSelectedRecord] = useState<MeteorologicalEntry | null>(null)
+  const [selectedObservingTime, setSelectedObservingTime] = useState<ObservingTimeEntry | null>(null)
   const [editFormData, setEditFormData] = useState<Partial<MeteorologicalEntry>>({})
   const [isSaving, setIsSaving] = useState(false)
   const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false)
@@ -145,7 +157,26 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
         throw new Error("Failed to fetch data")
       }
       const result = await response.json()
-      setData(result.entries || [])
+      setData(result || [])
+
+      // Flatten the data for easier display
+      const flattened: MeteorologicalEntry[] = []
+      result.forEach((observingTime: ObservingTimeEntry) => {
+        observingTime.MeteorologicalEntry.forEach((entry: MeteorologicalEntry) => {
+          flattened.push({
+            ...entry,
+            ObservingTime: {
+              utcTime: observingTime.utcTime,
+              localTime: observingTime.localTime,
+            },
+            station: {
+              stationId: observingTime.station.stationId,
+              name: observingTime.station.name,
+            },
+          })
+        })
+      })
+      setFlattenedData(flattened)
 
       // Fetch stations if super admin
       if (isSuperAdmin) {
@@ -173,24 +204,6 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   useEffect(() => {
     fetchData()
   }, [refreshTrigger, startDate, endDate, stationFilter])
-
-  const filteredData = data.filter((item) => {
-    if (!item.ObservingTime?.utcTime) return false
-
-    const itemDate = new Date(item.ObservingTime.utcTime)
-    const start = parseISO(startDate)
-    const end = parseISO(endDate)
-    const endOfDay = new Date(end)
-    endOfDay.setHours(23, 59, 59, 999)
-
-    const matchesDate =
-      (isAfter(itemDate, start) || isEqual(itemDate, start)) &&
-      (isBefore(itemDate, endOfDay) || isEqual(itemDate, endOfDay))
-
-    const matchesStation = stationFilter === "all" || item.stationId === stationFilter
-
-    return matchesDate && matchesStation
-  })
 
   const goToPreviousWeek = () => {
     const start = new Date(startDate)
@@ -222,11 +235,10 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     const newEnd = new Date(end)
     newEnd.setDate(end.getDate() + daysInRange + 1)
 
-
     // Don't allow future dates beyond today
     const today = new Date()
     today.setHours(0, 0, 0, 0)
-    
+
     if (newStart > today) {
       setDateError("Cannot select future dates")
       return
@@ -249,9 +261,10 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     return "bg-red-500"
   }
 
-  const handleEditClick = (record: MeteorologicalEntry) => {
+  const handleEditClick = (record: MeteorologicalEntry, observingTime: ObservingTimeEntry) => {
     if (user && canEditRecord(record, user)) {
       setSelectedRecord(record)
+      setSelectedObservingTime(observingTime)
       setEditFormData(record)
       setIsEditDialogOpen(true)
     } else {
@@ -259,27 +272,27 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     }
   }
 
-  const handleDateChange = (type: 'start' | 'end', newDate: string) => {
+  const handleDateChange = (type: "start" | "end", newDate: string) => {
     const date = new Date(newDate)
-    const otherDate = type === 'start' ? new Date(endDate) : new Date(startDate)
-    
+    const otherDate = type === "start" ? new Date(endDate) : new Date(startDate)
+
     if (isNaN(date.getTime())) {
-      setDateError('Invalid date format')
+      setDateError("Invalid date format")
       return
     }
 
     // Reset error if dates are valid
     setDateError(null)
 
-    if (type === 'start') {
+    if (type === "start") {
       if (date > otherDate) {
-        setDateError('Start date cannot be after end date')
+        setDateError("Start date cannot be after end date")
         return
       }
       setStartDate(newDate)
     } else {
       if (date < otherDate) {
-        setDateError('End date cannot be before start date')
+        setDateError("End date cannot be before start date")
         return
       }
       setEndDate(newDate)
@@ -294,17 +307,10 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     }))
   }
 
-  const handleEditSelectChange = (id: string, value: string) => {
-    setEditFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }))
-  }
-
   const handleSaveEdit = async () => {
-    if (!selectedRecord) return
-
-    setIsSaving(true)
+    if (!selectedRecord) return;
+  
+    setIsSaving(true);
     try {
       const response = await fetch("/api/first-card-data", {
         method: "PUT",
@@ -312,30 +318,43 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: selectedRecord.id,
+          id: selectedRecord.id, // Make sure to include the ID
           ...editFormData,
         }),
-      })
-
+      });
+  
       if (!response.ok) {
-        throw new Error("Failed to update record")
+        throw new Error("Failed to update record");
       }
-
-      const result = await response.json()
-
-      setData((prevData) =>
-        prevData.map((item) => (item.id === selectedRecord.id ? { ...item, ...editFormData } : item)),
-      )
-
-      toast.success("Record updated successfully")
-      setIsEditDialogOpen(false)
+  
+      const result = await response.json();
+  
+      // Update the local state
+      setFlattenedData(prevData =>
+        prevData.map(item => 
+          item.id === selectedRecord.id ? { ...item, ...editFormData } : item
+        )
+      );
+  
+      // Also update the main data state if needed
+      setData(prevData =>
+        prevData.map(observingTime => ({
+          ...observingTime,
+          MeteorologicalEntry: observingTime.MeteorologicalEntry.map(entry =>
+            entry.id === selectedRecord.id ? { ...entry, ...editFormData } : entry
+          )
+        }))
+      );
+  
+      toast.success("Record updated successfully");
+      setIsEditDialogOpen(false);
     } catch (error) {
-      console.error("Error updating record:", error)
-      toast.error("Failed to update record")
+      console.error("Error updating record:", error);
+      toast.error("Failed to update record");
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const getStationNameById = (stationId: string): string => {
     const station = stations.find((s) => s.stationId === stationId)
@@ -355,23 +374,23 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                   </Button>
 
                   <div className="flex items-center gap-2">
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => handleDateChange('start', e.target.value)}
-                    max={endDate}
-                    className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
-                  />
-                  <span>to</span>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => handleDateChange('end', e.target.value)}
-                    min={startDate}
-                    max={format(new Date(), 'yyyy-MM-dd')}
-                    className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
-                  />
-                </div>
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => handleDateChange("start", e.target.value)}
+                      max={endDate}
+                      className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                    />
+                    <span>to</span>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => handleDateChange("end", e.target.value)}
+                      min={startDate}
+                      max={format(new Date(), "yyyy-MM-dd")}
+                      className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                    />
+                  </div>
                   <Button variant="outline" size="icon" onClick={goToNextWeek} className="hover:bg-slate-200">
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -398,6 +417,9 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                 </Select>
               </div>
             </div>
+            {dateError && (
+              <div className="mt-2 text-sm text-red-500 bg-red-50 p-2 rounded border border-red-200">{dateError}</div>
+            )}
           </div>
         )}
 
@@ -621,7 +643,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                         </div>
                       </td>
                     </tr>
-                  ) : filteredData.length === 0 ? (
+                  ) : data.length === 0 ? (
                     <tr>
                       <td colSpan={27} className="text-center py-12">
                         <div className="flex flex-col items-center justify-center text-slate-500">
@@ -632,147 +654,144 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                       </td>
                     </tr>
                   ) : (
-                    filteredData.map((record, index) => {
-                      const time = record.ObservingTime?.utcTime
-                        ? format(new Date(record.ObservingTime.utcTime), "HH:mm")
-                        : "--:--"
-                      const humidityClass = getWeatherStatusColor(record.relativeHumidity)
-                      const recordDate = record.ObservingTime?.utcTime
-                        ? format(new Date(record.ObservingTime.utcTime), "yyyy-MM-dd")
-                        : "--"
-                      const canEdit = user && canEditRecord(record, user)
+                    data.flatMap((observingTime, obsIndex) =>
+                      observingTime.MeteorologicalEntry.map((record, entryIndex) => {
+                        const time = observingTime.utcTime ? format(new Date(observingTime.utcTime), "HH:mm") : "--:--"
+                        const humidityClass = getWeatherStatusColor(record.relativeHumidity)
+                        const recordDate = observingTime.utcTime
+                          ? format(new Date(observingTime.utcTime), "yyyy-MM-dd")
+                          : "--"
+                        const canEdit = user && canEditRecord(record, user)
+                        const rowIndex = obsIndex * observingTime.MeteorologicalEntry.length + entryIndex
 
-                      return (
-                        <tr
-                          key={record.id}
-                          className={`text-center font-mono hover:bg-slate-50 transition-colors ${
-                            index % 2 === 0 ? "bg-white" : "bg-slate-50"
-                          }`}
-                        >
-                          <td className="border border-slate-300 p-1 font-medium text-indigo-700">
-                            {time.split(":")[0] || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">{record.subIndicator || "--"}</td>
-                          <td className="border border-slate-300 p-1 font-medium text-indigo-700">{recordDate}</td>
-                          <td className="border border-slate-300 p-1">
-                            <Badge variant="outline" className="font-mono">
-                              {record.station?.stationId || record.stationId || "--"}
-                            </Badge>
-                          </td>
-                          <td className="border border-slate-300 p-1">{record.alteredThermometer || "--"}</td>
-                          <td className="border border-slate-300 p-1 font-medium text-purple-700">
-                            {record.barAsRead || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">{record.correctedForIndex || "--"}</td>
-                          <td className="border border-slate-300 p-1">{record.heightDifference || "--"}</td>
-                          <td className="border border-slate-300 p-1 font-medium text-purple-700">
-                            {record.stationLevelPressure || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">{record.seaLevelReduction || "--"}</td>
-                          <td className="border border-slate-300 p-1 font-medium text-purple-700">
-                            {record.correctedSeaLevelPressure || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">{record.afternoonReading || "--"}</td>
-                          <td className="border border-slate-300 p-1">{record.pressureChange24h || "--"}</td>
-                          <td className="border border-slate-300 p-1 font-medium text-cyan-700">
-                            {record.dryBulbAsRead || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">{record.wetBulbAsRead || "--"}</td>
-                          <td className="border border-slate-300 p-1">{record.maxMinTempAsRead || "--"}</td>
-                          <td className="border border-slate-300 p-1 font-medium text-cyan-700">
-                            {record.dryBulbCorrected || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">{record.wetBulbCorrected || "--"}</td>
-                          <td className="border border-slate-300 p-1">{record.maxMinTempCorrected || "--"}</td>
-                          <td className="border border-slate-300 p-1 font-medium text-teal-700">{record.Td || "--"}</td>
-                          <td className="border border-slate-300 p-1">
-                            <Badge variant="outline" className={`${humidityClass} text-white`}>
-                              {record.relativeHumidity || "--"}
-                            </Badge>
-                          </td>
-                          <td className="border border-slate-300 p-1 font-medium text-amber-700">
-                            {record.squallForce || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">{record.squallDirection || "--"}</td>
-                          <td className="border border-slate-300 p-1">{record.squallTime || "--"}</td>
-                          <td className="border border-slate-300 p-1 font-medium text-blue-700">
-                            {record.horizontalVisibility
-                              ? Number.parseInt(record.horizontalVisibility) % 10 === 0
-                                ? Number.parseInt(record.horizontalVisibility, 10) / 10
-                                : (Number.parseInt(record.horizontalVisibility, 10) / 10).toFixed(1)
-                              : "--"}
-                          </td>
+                        return (
+                          <tr
+                            key={record.id}
+                            className={`text-center font-mono hover:bg-slate-50 transition-colors ${
+                              rowIndex % 2 === 0 ? "bg-white" : "bg-slate-50"
+                            }`}
+                          >
+                            <td className="border border-slate-300 p-1 font-medium text-indigo-700">
+                              {time.split(":")[0] || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.subIndicator || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-indigo-700">{recordDate}</td>
+                            <td className="border border-slate-300 p-1">
+                              <Badge variant="outline" className="font-mono">
+                                {observingTime.station.stationId || "--"}
+                              </Badge>
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.alteredThermometer || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-purple-700">
+                              {record.barAsRead || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.correctedForIndex || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.heightDifference || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-purple-700">
+                              {record.stationLevelPressure || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.seaLevelReduction || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-purple-700">
+                              {record.correctedSeaLevelPressure || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.afternoonReading || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.pressureChange24h || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-cyan-700">
+                              {record.dryBulbAsRead || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.wetBulbAsRead || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.maxMinTempAsRead || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-cyan-700">
+                              {record.dryBulbCorrected || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.wetBulbCorrected || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.maxMinTempCorrected || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-teal-700">
+                              {record.Td || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">
+                              <Badge variant="outline" className={`${humidityClass} text-white`}>
+                                {record.relativeHumidity || "--"}
+                              </Badge>
+                            </td>
+                            <td className="border border-slate-300 p-1 font-medium text-amber-700">
+                              {record.squallForce || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.squallDirection || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.squallTime || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-blue-700">
+                              {record.horizontalVisibility
+                                ? Number.parseInt(record.horizontalVisibility) % 10 === 0
+                                  ? Number.parseInt(record.horizontalVisibility, 10) / 10
+                                  : (Number.parseInt(record.horizontalVisibility, 10) / 10).toFixed(1)
+                                : "--"}
+                            </td>
 
-                          <td className="border border-slate-300 p-1">{record.miscMeteors || "--"}</td>
-                          <td className="border border-slate-300 p-1">
-                            {record.pastWeatherW1 && record.pastWeatherW2 ? `${record.pastWeatherW1}` : "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.pastWeatherW1 && record.pastWeatherW2 ? `${record.pastWeatherW2}` : "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1 font-medium text-emerald-700">
-                            {record.presentWeatherWW || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className={`h-8 w-8 p-0 ${!canEdit ? "opacity-50 cursor-not-allowed" : ""}`}
-                                    onClick={() => handleEditClick(record)}
-                                  >
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      width="16"
-                                      height="16"
-                                      viewBox="0 0 24 24"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      strokeWidth="2"
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
+                            <td className="border border-slate-300 p-1">{record.miscMeteors || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.pastWeatherW1 || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.pastWeatherW2 || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-emerald-700">
+                              {record.presentWeatherWW || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className={`h-8 w-8 p-0 ${!canEdit ? "opacity-50 cursor-not-allowed" : ""}`}
+                                      onClick={() => handleEditClick(record, observingTime)}
                                     >
-                                      <path
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
                                         strokeLinecap="round"
                                         strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                                      />
-                                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                    </svg>
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  {canEdit ? "Edit this record" : "You don't have permission to edit this record"}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          </td>
-                        </tr>
-                      )
-                    })
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                                        />
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                      </svg>
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {canEdit ? "Edit this record" : "You don't have permission to edit this record"}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </td>
+                          </tr>
+                        )
+                      }),
+                    )
                   )}
                 </tbody>
               </table>
             </div>
 
             <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
-             
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-sky-500" />
-                  <span className="text-sm text-slate-600">
-                    Date Range:{" "}
-                    <div className="text-center text-lg font-semibold text-slate-600">
-                      {`${format(parseISO(startDate), "MMM d")} - ${format(parseISO(endDate), "MMM d, yyyy")}`}
-                    </div>
-                  </span>
-                </div>
-         
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-sky-500" />
+                <span className="text-sm text-slate-600">
+                  Date Range:{" "}
+                  <div className="text-center text-lg font-semibold text-slate-600">
+                    {`${format(parseISO(startDate), "MMM d")} - ${format(parseISO(endDate), "MMM d, yyyy")}`}
+                  </div>
+                </span>
+              </div>
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="bg-sky-100 text-sky-800 hover:bg-sky-200">
-                  {filteredData.length} record(s)
+                  {data.reduce((count, item) => count + item.MeteorologicalEntry.length, 0)} record(s)
                 </Badge>
                 {stationFilter !== "all" && (
                   <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
@@ -807,10 +826,10 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                 </div>
               </DialogTitle>
               <DialogDescription className="text-slate-600">
-                Editing record from {selectedRecord?.station?.name || "Unknown Station"} (
-                {selectedRecord?.station?.stationId || selectedRecord?.stationId || "Unknown"}) on{" "}
-                {selectedRecord?.ObservingTime?.utcTime
-                  ? format(new Date(selectedRecord.ObservingTime.utcTime), "MMMM d, yyyy")
+                Editing record from {selectedObservingTime?.station?.name || "Unknown Station"} (
+                {selectedObservingTime?.station?.stationId || "Unknown"}) on{" "}
+                {selectedObservingTime?.utcTime
+                  ? format(new Date(selectedObservingTime.utcTime), "MMMM d, yyyy")
                   : "Unknown Date"}
               </DialogDescription>
               <div className="h-1 w-20 rounded-full bg-gradient-to-r from-indigo-400 to-blue-400 mt-2"></div>
