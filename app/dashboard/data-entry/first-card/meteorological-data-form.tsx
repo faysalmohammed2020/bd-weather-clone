@@ -97,11 +97,16 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     "squall",
     "V.V",
     "weather",
-    // "indicators",
+    "Observing Time",
   ];
 
   // Tab styles with gradients and more vibrant colors
   const tabStyles = {
+     "Observing Time": {
+      tab: "border border-fuchsia-500 px-4 py-3 !bg-fuchsia-50 text-fuchsia-800 hover:opacity-90 shadow-sm shadow-fuchsia-500/50",
+      card: "bg-gradient-to-br from-fuchsia-50 to-white border-l-4 border-fuchsia-200 shadow-sm",
+      icon: <Clock className="size-5 mr-2" />,
+    },
     temperature: {
       tab: "border border-blue-500 px-4 py-3 !bg-blue-50 text-blue-800 hover:opacity-90 shadow-sm shadow-blue-500/50",
       card: "bg-gradient-to-br from-blue-50 to-white border-l-4 border-blue-200 shadow-sm",
@@ -127,11 +132,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       card: "bg-gradient-to-br from-cyan-50 to-white border-l-4 border-cyan-200 shadow-sm",
       icon: <Cloud className="size-5 mr-2" />,
     },
-    // indicators: {
-    //   tab: "border border-fuchsia-500 px-4 py-3 !bg-fuchsia-50 text-fuchsia-800 hover:opacity-90 shadow-sm shadow-fuchsia-500/50",
-    //   card: "bg-gradient-to-br from-fuchsia-50 to-white border-l-4 border-fuchsia-200 shadow-sm",
-    //   icon: <Clock className="size-5 mr-2" />,
-    // },
+   
   };
 
   // Debug logging for formData changes
@@ -556,7 +557,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <TabsList className="grid w-full grid-cols-3 md:grid-cols-5 gap-3 rounded-xl p-1 border-0 bg-transparent">
+            <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-3 rounded-xl p-1 border-0 bg-transparent">
               {Object.entries(tabStyles).map(([key, style]) => (
                 <TabsTrigger
                   key={key}
@@ -574,6 +575,62 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                 </TabsTrigger>
               ))}
             </TabsList>
+
+            {/* Indicators Tab */}
+            <TabsContent
+            value="Observing Time"
+            className="mt-6 transition-all duration-500"
+          >
+            <Card className={cn("overflow-hidden", tabStyles["Observing Time"].card)}>
+              <div className="p-4 bg-gradient-to-r from-fuchsia-200 to-fuchsia-300 text-fuchsia-800">
+                <h3 className="text-lg font-semibold flex items-center">
+                  <Clock className="mr-2" /> Time Indicators
+                </h3>
+              </div>
+              <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="observationTime">
+                    GG: Time of Observation (UTC)
+                  </Label>
+                  <select
+                    id="observationTime"
+                    name="observationTime"
+                    value={formData.observationTime || ""}
+                    onChange={handleChange}
+                    required
+                    className="w-full border border-slate-600 rounded-md px-3 py-2 focus:outline-none focus:border-fuchsia-500 focus:ring-fuchsia-500/30"
+                  >
+                    <option value="">-- Select GG Time --</option>
+                    <option value="00">00 UTC</option>
+                    <option value="03">03 UTC</option>
+                    <option value="06">06 UTC</option>
+                    <option value="09">09 UTC</option>
+                    <option value="12">12 UTC</option>
+                    <option value="15">15 UTC</option>
+                    <option value="18">18 UTC</option>
+                    <option value="21">21 UTC</option>
+                  </select>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between p-6">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={prevTab}
+                    disabled={isFirstTab}
+                  >
+                    <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={nextTab}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Next <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </CardFooter>
+            </Card>
+          </TabsContent> 
 
             {/* Bar Pressure Tab */}
             <TabsContent
@@ -1277,66 +1334,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
               </Card>
             </TabsContent>
 
-            {/* Indicators Tab */}
-            {/* <TabsContent
-            value="indicators"
-            className="mt-6 transition-all duration-500"
-          >
-            <Card className={cn("overflow-hidden", tabStyles.indicators.card)}>
-              <div className="p-4 bg-gradient-to-r from-fuchsia-200 to-fuchsia-300 text-fuchsia-800">
-                <h3 className="text-lg font-semibold flex items-center">
-                  <Clock className="mr-2" /> Time Indicators
-                </h3>
-              </div>
-              <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="observationTime">
-                    GG: Time of Observation (UTC)
-                  </Label>
-                  <select
-                    id="observationTime"
-                    name="observationTime"
-                    value={formData.observationTime || ""}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-slate-600 rounded-md px-3 py-2 focus:outline-none focus:border-fuchsia-500 focus:ring-fuchsia-500/30"
-                  >
-                    <option value="">-- Select GG Time --</option>
-                    <option value="00">00 UTC</option>
-                    <option value="03">03 UTC</option>
-                    <option value="06">06 UTC</option>
-                    <option value="09">09 UTC</option>
-                    <option value="12">12 UTC</option>
-                    <option value="15">15 UTC</option>
-                    <option value="18">18 UTC</option>
-                    <option value="21">21 UTC</option>
-                  </select>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between p-6">
-                <Button type="button" variant="outline" onClick={prevTab}>
-                  <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-                </Button>
-                <div className="flex gap-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="border-slate-600 hover:bg-slate-100 transition-all duration-300"
-                    onClick={handleReset}
-                  >
-                    Reset
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? "Saving..." : "Submit Data"}
-                  </Button>
-                </div>
-              </CardFooter>
-            </Card>
-          </TabsContent>  */}
+            
           </Tabs>
         </div>
       </form>
