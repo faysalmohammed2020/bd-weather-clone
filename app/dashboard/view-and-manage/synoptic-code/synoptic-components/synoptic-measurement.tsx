@@ -511,12 +511,9 @@ export default function SynopticMeasurementsTab() {
                 <CardContent className="px-2 border-none">
                   <textarea
                     rows={6}
-                    className="border-green-200 focus:border-green-500 w-full rounded-md border px-3 py-2 text-sm shadow-sm"
-                    placeholder="Enter any additional weather observations or remarks..."
+                    className="border-green-200 bg-gray-100 cursor-not-allowed w-full rounded-md border px-3 py-2 text-sm shadow-sm"
                     value={values.weatherRemark || ""}
-                    onChange={(e) =>
-                      setFieldValue("weatherRemark", e.target.value)
-                    }
+                    readOnly
                   />
                 </CardContent>
               </Card>
