@@ -5,6 +5,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { type SynopticFormValues } from "@/lib/generateSynopticCode";
+import { getRemarksFromPresentWeather } from "@/lib/generateSynopticCode";
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -231,6 +233,11 @@ export default function SynopticMeasurementsTab() {
         setFieldValue("year", generatedValues.year);
         setFieldValue("month", generatedValues.month);
         setFieldValue("day", generatedValues.day);
+        const presentWeather = generatedValues.measurements[8].substring(1, 3); // '7' বাদ দিয়ে শুধু 'ww' নেওয়া
+        const weatherRemark = getRemarksFromPresentWeather(presentWeather);
+
+        // Form এর weatherRemark মান সেট করুন
+        setFieldValue("weatherRemark", weatherRemark);
       } catch (error) {
         console.error("Error fetching synoptic data:", error);
         setDataStatus({
@@ -517,15 +524,15 @@ export default function SynopticMeasurementsTab() {
           </CardContent>
         </Card>
       </div>
-       <div className="flex justify-end mt-6">
-            <Button
-              type="button"
-              className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-md shadow-sm text-lg"
-              onClick={handleSubmit}
-            >
-              Submit
-            </Button>
-          </div>
+      <div className="flex justify-end mt-6">
+        <Button
+          type="button"
+          className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-md shadow-sm text-lg"
+          onClick={handleSubmit}
+        >
+          Submit
+        </Button>
+      </div>
     </div>
   );
 }

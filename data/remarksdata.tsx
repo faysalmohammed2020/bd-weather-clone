@@ -1,4 +1,9 @@
-const remarksData = {
+interface Remark {
+  symbol: string;
+  description: string;
+}
+
+const remarksData: Record<string, Remark> = {
   "00": {
     symbol: "⚪",
     description:

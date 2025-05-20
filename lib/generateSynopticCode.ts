@@ -66,46 +66,49 @@ export function generateSynopticCode(): SynopticFormValues {
 
   // 3. iRiXhvv (22-26) - 32 + low cloud height (2 digits) + visibility (1 digit)
   // "iRiXhW 22-26" field data will come from : 32 is constant + "clouds>low>height" fields+ "horizontalVisibility" of "first-card-data.json"
-  const lowCloudHeight = (weatherObs.clouds?.low?.height || 0);
-  const visibility = pad((Number(firstCard.horizontalVisibility?.toString()?.[0]) || 0) * 10, 2);
+  const lowCloudHeight = weatherObs.clouds?.low?.height || 0;
+  const visibility = pad(
+    (Number(firstCard.horizontalVisibility?.toString()?.[0]) || 0) * 10,
+    2
+  );
   measurements[2] = `32${lowCloudHeight}${visibility}`;
   // 4. Nddff (27-31) - Total cloud (1 digit) + wind direction (2 digits) + wind speed (2 digits)
-const totalCloud = weatherObs.totalCloud?.["total-cloud-amount"] || "0";
-const windDirectionDeg = Number(weatherObs.wind?.direction) || 0; // in degrees (0-359)
-const windSpeedKnots = Number(weatherObs.wind?.speed) || 0; // in knots
+  const totalCloud = weatherObs.totalCloud?.["total-cloud-amount"] || "0";
+  const windDirectionDeg = Number(weatherObs.wind?.direction) || 0; // in degrees (0-359)
+  const windSpeedKnots = Number(weatherObs.wind?.speed) || 0; // in knots
 
-// Calculate dd (wind direction code)
-let dd;
-if (windSpeedKnots === 0) {
-  dd = "00"; // Calm wind
-} else {
-  // Convert wind direction to code (00-36)
-  // Each code represents a 10° range:
-  // Code XX = (XX*10 - 5)° to (XX*10 + 4)°
-  // Example: Code 09 = 85° to 94°
-  let directionCode;
-  if (windDirectionDeg >= 355) {
-    // Special case for 355-364° which wraps around to 36
-    directionCode = 36;
+  // Calculate dd (wind direction code)
+  let dd;
+  if (windSpeedKnots === 0) {
+    dd = "00"; // Calm wind
   } else {
-    directionCode = Math.floor((windDirectionDeg + 5) / 10);
+    // Convert wind direction to code (00-36)
+    // Each code represents a 10° range:
+    // Code XX = (XX*10 - 5)° to (XX*10 + 4)°
+    // Example: Code 09 = 85° to 94°
+    let directionCode;
+    if (windDirectionDeg >= 355) {
+      // Special case for 355-364° which wraps around to 36
+      directionCode = 36;
+    } else {
+      directionCode = Math.floor((windDirectionDeg + 5) / 10);
+    }
+    dd = pad(directionCode, 2);
   }
-  dd = pad(directionCode, 2);
-}
 
-// Calculate ff (wind speed)
-let ff;
-if (windSpeedKnots >= 100) {
-  // Apply the 50 rule for high winds
-  const numericDd = parseInt(dd, 10);
-  dd = pad(numericDd + 50, 2); // Add 50 to wind direction code
-  ff = pad(windSpeedKnots - 100, 2); // Subtract 100 from wind speed
-} else {
-  ff = pad(windSpeedKnots, 2); // Use wind speed as-is
-}
+  // Calculate ff (wind speed)
+  let ff;
+  if (windSpeedKnots >= 100) {
+    // Apply the 50 rule for high winds
+    const numericDd = parseInt(dd, 10);
+    dd = pad(numericDd + 50, 2); // Add 50 to wind direction code
+    ff = pad(windSpeedKnots - 100, 2); // Subtract 100 from wind speed
+  } else {
+    ff = pad(windSpeedKnots, 2); // Use wind speed as-is
+  }
 
-// Format the Nddff value (N + dd + ff)
-measurements[3] = `${totalCloud}${dd}${ff}`;
+  // Format the Nddff value (N + dd + ff)
+  measurements[3] = `${totalCloud}${dd}${ff}`;
 
   // 5. 1SnTTT (32-36) - 1 + sign + dry bulb temp (3 digits)
   // "1SnTTT 32-36" field data come from: 1 is constant + (0/1, if zero or positive then value is 0 , else 1)+"dryBulbAsRead" from "first-card-data.json"
@@ -151,11 +154,10 @@ measurements[3] = `${totalCloud}${dd}${ff}`;
   const minTemp = Number.parseFloat(firstCard.maxMinTempAsRead || "0");
   console.log("minTemp", minTemp);
   let sN, x;
-  if(minTemp>=0){
+  if (minTemp >= 0) {
     sN = 0;
     x = 1;
-  }
-  else{
+  } else {
     sN = 1;
     x = 2;
   }
@@ -210,9 +212,18 @@ measurements[3] = `${totalCloud}${dd}${ff}`;
   let mediumAmountSig = weatherObs.significantClouds?.layer2?.amount || "0";
   let highAmountSig = weatherObs.significantClouds?.layer3?.amount || "0";
 
-  let lowHeightSig = pad((Number(weatherObs.significantClouds?.layer1?.height) || 0) * 10, 2);
-  let mediumHeightSig = pad((Number(weatherObs.significantClouds?.layer2?.height) || 0) * 10,2);
-  let highHeightSig = pad((Number(weatherObs.significantClouds?.layer3?.height) || 0) * 10,2);
+  let lowHeightSig = pad(
+    (Number(weatherObs.significantClouds?.layer1?.height) || 0) * 10,
+    2
+  );
+  let mediumHeightSig = pad(
+    (Number(weatherObs.significantClouds?.layer2?.height) || 0) * 10,
+    2
+  );
+  let highHeightSig = pad(
+    (Number(weatherObs.significantClouds?.layer3?.height) || 0) * 10,
+    2
+  );
 
   measurements[18] = `8${lowAmountSig}${lowFormSig}${lowHeightSig} / 8${mediumAmountSig}${mediumFormSig}${mediumHeightSig} / 8${highAmountSig}${highFormSig}${highHeightSig}`;
 
@@ -237,3 +248,13 @@ measurements[3] = `${totalCloud}${dd}${ff}`;
 
   return formValues;
 }
+import remarksData from "../data/remarksdata";
+
+export const getRemarksFromPresentWeather = (presentWeather: string) => {
+  const remarks = remarksData[presentWeather];
+  if (remarks) {
+    return `${remarks.symbol} - ${remarks.description}`;
+  } else {
+    return "No remark available for this weather code";
+  }
+};
