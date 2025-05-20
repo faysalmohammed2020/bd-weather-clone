@@ -380,7 +380,7 @@ export default function SynopticCodeTable() {
                 {currentData && (
                   <tr className="bg-white hover:bg-blue-50 print:hover:bg-white">
                     <td className="border border-blue-200 px-4 py-3 whitespace-nowrap font-semibold text-blue-700">
-                      {Math.floor(new Date().getHours() / 3) * 3}
+                      {currentData.measurements[15]}
                     </td>
                     {currentData.measurements.map((m, i) => (
                       <td
