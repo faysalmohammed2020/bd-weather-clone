@@ -502,19 +502,25 @@ export default function SynopticMeasurementsTab() {
 
             {/* Weather Remark Field */}
             <div className="mt-4">
-              <Card className="border-none bg-white">
-                <CardHeader className="pb-2 pt-4 px-4 bg-green-50">
-                  <CardTitle className="text-sm font-medium text-green-700">
+              <Card className="border border-green-100  shadow-sm rounded-xl">
+                <CardHeader className="pb-2 pt-4 px-4 bg-green-100 rounded-t-xl">
+                  <CardTitle className="text-sm font-semibold text-green-800">
                     Weather Remark
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="px-2 border-none">
-                  <textarea
-                    rows={6}
-                    className="border-green-200 bg-gray-100 cursor-not-allowed w-full rounded-md border px-3 py-2 text-sm shadow-sm"
-                    value={values.weatherRemark || ""}
-                    readOnly
-                  />
+                <CardContent className="px-4 py-6 text-center">
+                  {values.weatherRemark ? (
+                    <div className="flex flex-col items-center space-y-2">
+                      <div className="text-6xl">
+                        {values.weatherRemark.split(" - ")[0]}
+                      </div>
+                      <div className="text-sm text-gray-700 font-medium">
+                        {values.weatherRemark.split(" - ")[1]}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 italic">No remark available</p>
+                  )}
                 </CardContent>
               </Card>
             </div>
