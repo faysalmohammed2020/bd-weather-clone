@@ -42,3 +42,47 @@ export function convertUTCToBDTime(isoString: string): string {
 
   return dhakaDate.toISOString();
 }
+
+// Get the start and end of today in UTC
+export function getTodayUtcRange(): { startToday: Date; endToday: Date } {
+  const now = new Date();
+
+  const startToday = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
+  );
+
+  const endToday = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999)
+  );
+
+  return { startToday, endToday };
+}
+
+
+/**
+ * Checks if a given UTC time has passed a specified number of hours
+ */
+export function hasHoursPassed(savedUtcTime: string, hours: number): boolean {
+  const savedDate = new Date(savedUtcTime);
+  const now = new Date();
+
+  const diffMs = now.getTime() - savedDate.getTime();
+  const diffHours = diffMs / (1000 * 60 * 60);
+
+  return diffHours >= hours;
+}
+
+/**
+ * Get the time left until a specified number of hours have passed
+ */
+export function getTimeDiffInHours(savedUtcTime: string): number {
+  const savedDate = new Date(savedUtcTime);
+  const now = new Date();
+
+  const diffMs = savedDate.getTime() - now.getTime();
+  const diffHours = diffMs / (1000 * 60 * 60);
+
+  return Number(diffHours.toFixed(2));
+}
+
+

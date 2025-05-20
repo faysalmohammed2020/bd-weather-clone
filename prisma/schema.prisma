@@ -96,30 +96,29 @@ model twoFactor {
 }
 
 model Station {
-  id                  String                @id @default(cuid())
-  stationId           String
-  name                String
-  securityCode        String
-  latitude            Float
-  longitude           Float
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  users               users[]
-  WeatherObservation  WeatherObservation[]
-  MeteorologicalEntry MeteorologicalEntry[]
-  DailySummary        DailySummary[]
-  SynopticCode        SynopticCode[]
+  id            String          @id @default(cuid())
+  stationId     String
+  name          String
+  securityCode  String
+  latitude      Float
+  longitude     Float
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  users         users[]
+  ObservingTime ObservingTime[]
 }
 
 model ObservingTime {
   id        String   @id @default(cuid())
   userId    String
+  stationId String
   utcTime   DateTime @unique
   localTime DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   user                users                 @relation(fields: [userId], references: [id], onDelete: Restrict)
+  station             Station               @relation(fields: [stationId], references: [id], onDelete: Restrict)
   MeteorologicalEntry MeteorologicalEntry[]
   WeatherObservation  WeatherObservation[]
   DailySummary        DailySummary[]
@@ -132,7 +131,6 @@ model ObservingTime {
 model MeteorologicalEntry {
   id                        String    @id @default(cuid())
   observingTimeId           String
-  stationId                 String
   dataType                  String
   subIndicator              String
   alteredThermometer        String
@@ -168,16 +166,13 @@ model MeteorologicalEntry {
   updatedAt                 DateTime  @updatedAt
 
   ObservingTime ObservingTime @relation(fields: [observingTimeId], references: [id], onDelete: Restrict)
-  station       Station       @relation(fields: [stationId], references: [id], onDelete: Restrict)
 
   @@index([observingTimeId])
-  @@index([stationId])
 }
 
 model WeatherObservation {
   id              String @id @default(cuid())
   tabActive       String
-  stationId       String
   observingTimeId String
 
   // LOW CLOUD
@@ -237,7 +232,6 @@ model WeatherObservation {
   // OBSERVER METADATA
   observerInitial String?
 
-  station       Station       @relation(fields: [stationId], references: [id], onDelete: Restrict)
   ObservingTime ObservingTime @relation(fields: [observingTimeId], references: [id], onDelete: Restrict)
 }
 
@@ -245,7 +239,6 @@ model DailySummary {
   id                    String   @id @default(cuid())
   observingTimeId       String
   dataType              String?
-  stationId             String
   avStationPressure     String?
   avSeaLevelPressure    String?
   avDryBulbTemperature  String?
@@ -266,13 +259,11 @@ model DailySummary {
   updatedAt             DateTime @updatedAt
 
   ObservingTime ObservingTime @relation(fields: [observingTimeId], references: [id], onDelete: Restrict)
-  station       Station       @relation(fields: [stationId], references: [id], onDelete: Restrict)
 }
 
 model SynopticCode {
   id                String  @id @default(cuid())
   observingTimeId   String
-  stationId         String
   dataType          String? @default("SYNOP")
   // Synoptic Measurement Fields
   C1                String? // 0
@@ -303,7 +294,4 @@ model SynopticCode {
   updatedAt DateTime @updatedAt
 
   ObservingTime ObservingTime @relation(fields: [observingTimeId], references: [id], onDelete: Restrict)
-  station       Station       @relation(fields: [stationId], references: [id], onDelete: Restrict)
-
-  @@index([stationId])
 }

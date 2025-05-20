@@ -1,7 +1,9 @@
 import prisma from "@/lib/prisma";
-import { hourToUtc } from "@/lib/utils";
+import { getTodayUtcRange, hasHoursPassed, hourToUtc } from "@/lib/utils";
+import dayjs from "dayjs";
 import { NextRequest, NextResponse } from "next/server";
 
+// Check if observing time exist or not and return each data count
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const { hour } = body;
@@ -25,8 +27,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log("Time", time);
-
     if (!time) {
       return NextResponse.json({ error: "No time found" }, { status: 404 });
     }
@@ -46,3 +46,44 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// Check if observing time is passed or not
+export async function GET() {
+  try {
+
+    const { startToday, endToday } = getTodayUtcRange();
+
+    const time = await prisma.observingTime.findFirst({
+      where: {
+        utcTime: {
+          gte: startToday,
+          lte: endToday,
+        },
+      },
+      orderBy: {
+        utcTime: "desc",
+      },
+    });
+
+    if (!time) {
+      return NextResponse.json({ error: "No time found" }, { status: 404 });
+    }
+
+    const utcTime = time.utcTime.toISOString();
+
+    // Check if 3 hours have passed since the last time
+    const isPassed = hasHoursPassed(utcTime, 3);
+
+    return NextResponse.json({
+        time: utcTime,
+        isPassed,
+    });
+  } catch (error) {
+    console.error("Error checking time:", error);
+    return NextResponse.json(
+      { error: "Failed to check time" },
+      { status: 500 }
+    );
+  }
+}
+
