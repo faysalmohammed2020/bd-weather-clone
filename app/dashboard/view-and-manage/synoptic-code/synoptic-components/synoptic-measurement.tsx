@@ -511,9 +511,11 @@ export default function SynopticMeasurementsTab() {
                 <CardContent className="px-4 py-6 text-center">
                   {values.weatherRemark ? (
                     <div className="flex flex-col items-center space-y-2">
-                      <div className="text-6xl">
-                        {values.weatherRemark.split(" - ")[0]}
-                      </div>
+                      <img
+                        src={values.weatherRemark.split(" - ")[0]}
+                        alt="Weather Symbol"
+                        className="h-16 w-16 object-contain"
+                      />
                       <div className="text-sm text-gray-700 font-medium">
                         {values.weatherRemark.split(" - ")[1]}
                       </div>
