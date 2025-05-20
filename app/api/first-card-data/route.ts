@@ -138,21 +138,56 @@ export async function GET(req: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const { searchParams } = new URL(req.url);
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+    const stationId = session.user.station?.stationId;
 
-    // Optionally: Add query parameter parsing for filtering
-    const entries = await prisma.observingTime.findFirst({
-      where: { 
-        userId,
-       },
-       include: {
-        MeteorologicalEntry: true,
-       },
-      orderBy: { createdAt: "desc" },
-      take: 100,
+    if (!stationId) {
+      return NextResponse.json(
+        { message: "Station ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Find the station by stationId to get its primary key (id)
+    const stationRecord = await prisma.station.findFirst({
+      where: { stationId }
     });
 
-    return NextResponse.json({ entries: entries?.MeteorologicalEntry }, { status: 200 });
+    if (!stationRecord) {
+      return NextResponse.json({
+        message: `No station found with ID: ${stationId}`,
+        status: 404
+      });
+    }
+
+    const startTime = startDate ? new Date(startDate) : hourToUtc("00");
+    const endTime = endDate ? new Date(endDate) : hourToUtc("23");
+
+    const entries = await prisma.meteorologicalEntry.findMany({
+      where: {
+        stationId: stationRecord.id,
+        ObservingTime: {
+          utcTime: {
+            gte: startTime,
+            lte: endTime,
+          }
+        }
+      },
+      include: {
+        ObservingTime: true,
+        station: true
+      },
+      orderBy: {
+        ObservingTime: {
+          utcTime: "desc"
+        }
+      },
+      take: 100
+    });
+
+    return NextResponse.json({ entries }, { status: 200 });
   } catch (error: any) {
     console.error("Error fetching meteorological entries:", error);
     return NextResponse.json(
@@ -169,12 +204,34 @@ export async function PUT(req: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const userId = session.user.id;
     const { id, ...data } = await req.json();
+    const stationId = session.user.station?.stationId;
 
-    // Verify the entry belongs to the user before updating
+    if (!stationId) {
+      return NextResponse.json(
+        { message: "Station ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Find the station by stationId to get its primary key (id)
+    const stationRecord = await prisma.station.findFirst({
+      where: { stationId }
+    });
+
+    if (!stationRecord) {
+      return NextResponse.json({
+        message: `No station found with ID: ${stationId}`,
+        status: 404
+      });
+    }
+
+    // Verify the entry belongs to the user's station before updating
     const existingEntry = await prisma.meteorologicalEntry.findFirst({
-      where: { id, userId },
+      where: { 
+        id,
+        stationId: stationRecord.id 
+      },
     });
 
     if (!existingEntry) {
@@ -184,113 +241,53 @@ export async function PUT(req: Request) {
       );
     }
 
-    // Convert segmented fields (objects) to full strings if they exist
-    const dataType = data.dataType
-      ? Object.values(data.dataType).join("")
-      : undefined;
-    const stationNo = data.stationNo
-      ? Object.values(data.stationNo).join("")
-      : undefined;
-    const year = data.year ? Object.values(data.year).join("") : undefined;
-
     // Prepare the update data object
     const updateData: any = {
-      ...(dataType !== undefined && { dataType }),
-      ...(stationNo !== undefined && { stationNo }),
-      ...(year !== undefined && { year }),
-      ...(data.stationName !== undefined && {
-        stationName: data.stationName || "",
-      }),
-      ...(data.subIndicator !== undefined && {
-        subIndicator: data.subIndicator || "",
-      }),
-      ...(data.alteredThermometer !== undefined && {
-        alteredThermometer: data.alteredThermometer || "",
-      }),
-      ...(data.barAsRead !== undefined && { barAsRead: data.barAsRead || "" }),
-      ...(data.correctedForIndex !== undefined && {
-        correctedForIndex: data.correctedForIndex || "",
-      }),
-      ...(data.heightDifference !== undefined && {
-        heightDifference: data.heightDifference || "",
-      }),
-      ...(data.correctionForTemp !== undefined && {
-        correctionForTemp: data.correctionForTemp || "",
-      }),
-      ...(data.stationLevelPressure !== undefined && {
-        stationLevelPressure: data.stationLevelPressure || "",
-      }),
-      ...(data.seaLevelReduction !== undefined && {
-        seaLevelReduction: data.seaLevelReduction || "",
-      }),
-      ...(data.correctedSeaLevelPressure !== undefined && {
-        correctedSeaLevelPressure: data.correctedSeaLevelPressure || "",
-      }),
-      ...(data.afternoonReading !== undefined && {
-        afternoonReading: data.afternoonReading || "",
-      }),
-      ...(data.pressureChange24h !== undefined && {
-        pressureChange24h: data.pressureChange24h || "",
-      }),
-      ...(data.dryBulbAsRead !== undefined && {
-        dryBulbAsRead: data.dryBulbAsRead || "",
-      }),
-      ...(data.wetBulbAsRead !== undefined && {
-        wetBulbAsRead: data.wetBulbAsRead || "",
-      }),
-      ...(data.maxMinTempAsRead !== undefined && {
-        maxMinTempAsRead: data.maxMinTempAsRead || "",
-      }),
-      ...(data.dryBulbCorrected !== undefined && {
-        dryBulbCorrected: data.dryBulbCorrected || "",
-      }),
-      ...(data.wetBulbCorrected !== undefined && {
-        wetBulbCorrected: data.wetBulbCorrected || "",
-      }),
-      ...(data.maxMinTempCorrected !== undefined && {
-        maxMinTempCorrected: data.maxMinTempCorrected || "",
-      }),
-      ...(data.Td !== undefined && { Td: data.Td || "" }),
-      ...(data.relativeHumidity !== undefined && {
-        relativeHumidity: data.relativeHumidity || "",
-      }),
-      ...(data.squallConfirmed !== undefined && {
-        squallConfirmed: String(data.squallConfirmed ?? ""),
-      }),
-      ...(data.squallForce !== undefined && {
-        squallForce: data.squallForce || "",
-      }),
-      ...(data.squallDirection !== undefined && {
-        squallDirection: data.squallDirection || "",
-      }),
-      ...(data.squallTime !== undefined && {
-        squallTime: data.squallTime || "",
-      }),
-      ...(data.horizontalVisibility !== undefined && {
-        horizontalVisibility: data.horizontalVisibility || "",
-      }),
-      ...(data.miscMeteors !== undefined && {
-        miscMeteors: data.miscMeteors || "",
-      }),
-      ...(data.pastWeatherW1 !== undefined && {
-        pastWeatherW1: data.pastWeatherW1 || "",
-      }),
-      ...(data.pastWeatherW2 !== undefined && {
-        pastWeatherW2: data.pastWeatherW2 || "",
-      }),
-      ...(data.presentWeatherWW !== undefined && {
-        presentWeatherWW: data.presentWeatherWW || "",
-      }),
-      ...(data.c2Indicator !== undefined && {
-        c2Indicator: data.c2Indicator || "",
-      }),
-      ...(data.observationTime !== undefined && {
-        observationTime: data.observationTime || "",
-      }),
-      ...(data.timestamp !== undefined && {
-        timestamp: data.timestamp || new Date().toISOString(),
-      }),
+      dataType: data.dataType || "",
+      subIndicator: data.subIndicator || "",
+      alteredThermometer: data.alteredThermometer || "",
+      barAsRead: data.barAsRead || "",
+      correctedForIndex: data.correctedForIndex || "",
+      heightDifference: data.heightDifference || "",
+      correctionForTemp: data.correctionForTemp || "",
+      stationLevelPressure: data.stationLevelPressure || "",
+      seaLevelReduction: data.seaLevelReduction || "",
+      correctedSeaLevelPressure: data.correctedSeaLevelPressure || "",
+      afternoonReading: data.afternoonReading || "",
+      pressureChange24h: data.pressureChange24h || "",
+      dryBulbAsRead: data.dryBulbAsRead || "",
+      wetBulbAsRead: data.wetBulbAsRead || "",
+      maxMinTempAsRead: data.maxMinTempAsRead || "",
+      dryBulbCorrected: data.dryBulbCorrected || "",
+      wetBulbCorrected: data.wetBulbCorrected || "",
+      maxMinTempCorrected: data.maxMinTempCorrected || "",
+      Td: data.Td || "",
+      relativeHumidity: data.relativeHumidity || "",
+      squallConfirmed: String(data.squallConfirmed ?? ""),
+      squallForce: data.squallForce || "",
+      squallDirection: data.squallDirection || "",
+      squallTime: data.squallTime || "",
+      horizontalVisibility: data.horizontalVisibility || "",
+      miscMeteors: data.miscMeteors || "",
+      pastWeatherW1: data.pastWeatherW1 || "",
+      pastWeatherW2: data.pastWeatherW2 || "",
+      presentWeatherWW: data.presentWeatherWW || "",
+      c2Indicator: data.c2Indicator || "",
     };
+
+    // Handle observing time update if provided
+    if (data.observingTimeId) {
+      const formattedObservingTime = hourToUtc(data.observingTimeId);
+      const observingTime = await prisma.observingTime.findUnique({
+        where: {
+          utcTime: formattedObservingTime
+        }
+      });
+      
+      if (observingTime) {
+        updateData.observingTimeId = observingTime.id;
+      }
+    }
 
     const updatedEntry = await prisma.meteorologicalEntry.update({
       where: { id },
