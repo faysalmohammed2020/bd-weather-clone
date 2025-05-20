@@ -1,280 +1,65 @@
-// import { NextResponse } from 'next/server';
-// import { PrismaClient } from '@prisma/client';
-
-// const prisma = new PrismaClient();
-
-// export async function GET() {
-//   try {
-//     // Get the current date
-//     const now = new Date();
-//     const today = now.toISOString().split('T')[0];
-
-//     // Fetch most recent records from database
-//     const [firstCard, weatherObs] = await Promise.all([
-//       prisma.meteorologicalEntry.findFirst({
-//         orderBy: { createdAt: 'desc' },
-//         where: {
-//           timestamp: {
-//             contains: today,
-//           },
-//         },
-//       }),
-//       prisma.weatherObservation.findFirst({
-//         orderBy: { submittedAt: 'desc' },
-//         where: {
-//           observationTime: {
-//             gte: new Date(`${today}T00:00:00.000Z`),
-//             lte: new Date(`${today}T23:59:59.999Z`),
-//           },
-//         },
-//       }),
-//     ]);
-
-//     // If no data for today, get the most recent records regardless of date
-//     const finalFirstCard = firstCard || await prisma.meteorologicalEntry.findFirst({
-//       orderBy: { createdAt: 'desc' },
-//     });
-
-//     const finalWeatherObs = weatherObs || await prisma.weatherObservation.findFirst({
-//       orderBy: { submittedAt: 'desc' },
-//     });
-
-//     if (!finalFirstCard || !finalWeatherObs) {
-//       return NextResponse.json(
-//         { error: 'No weather data available' },
-//         { status: 404 }
-//       );
-//     }
-
-//     // Initialize measurements array
-//     const measurements: string[] = Array(21).fill('');
-
-//     // Helper functions
-//     const pad = (num: number | string | null | undefined, length: number): string => {
-//       return String(num ?? 0).padStart(length, '0');
-//     };
-
-//     const getTempValue = (temp: number | null | undefined): string => {
-//       const safeTemp = temp ?? 0;
-//       const sign = safeTemp >= 0 ? '0' : '1';
-//       const absTemp = Math.abs(Math.round(safeTemp * 10));
-//       return `${sign}${pad(absTemp, 3)}`;
-//     };
-
-//     // 1. C1 (16) - Always 1
-//     measurements[0] = '1';
-
-//     // 2. Iliii (17-21) - Station number (5 digits)
-//    const stationNo = finalWeatherObs.stationId
-//     ? Object.values(finalWeatherObs.stationId).slice(0, 5).join("")
-//     : "00000";
-//   measurements[1] = stationNo;
-
-//     // 3. iRiXhvv (22-26) - 32 + low cloud height + visibility
-//     const lowCloudHeight = (finalWeatherObs.lowCloudHeight);
-//     const visibility = pad((Number(finalFirstCard.horizontalVisibility?.toString()?.[0]) || 0) * 10, 2);
-//     measurements[2] = `32${lowCloudHeight}${visibility}`;
-
-//     // 4. Nddff (27-31) - Total cloud + wind direction + speed
-//     const totalCloud = finalWeatherObs.totalCloudAmount || '0';
-//     const windDirectionDeg = Number(finalWeatherObs.windDirection) || 0;
-//     const windSpeedKnots = Number(finalWeatherObs.windSpeed) || 0;
-
-//     let dd;
-//     if (windSpeedKnots === 0) {
-//       dd = '00';
-//     } else {
-//       let directionCode;
-//       if (windDirectionDeg >= 355) {
-//         directionCode = 36;
-//       } else {
-//         directionCode = Math.floor((windDirectionDeg + 5) / 10);
-//       }
-//       dd = pad(directionCode, 2);
-//     }
-
-//     let ff;
-//     if (windSpeedKnots >= 100) {
-//       const numericDd = parseInt(dd, 10);
-//       dd = pad(numericDd + 50, 2);
-//       ff = pad(windSpeedKnots - 100, 2);
-//     } else {
-//       ff = pad(windSpeedKnots, 2);
-//     }
-//     measurements[3] = `${totalCloud}${dd}${ff}`;
-
-//     // 5. 1SnTTT (32-36) - Dry bulb temperature
-//     // const dryBulb = Number.parseFloat(finalFirstCard.dryBulbAsRead || '0');
-//     const dryBulb = Number.parseFloat(finalFirstCard.dryBulbAsRead || '0') / 10;
-
-//     measurements[4] = `1${getTempValue(dryBulb)}`;
-
-//     // 6. 2SnTdTdTd (37-41) - Dew point temperature
-//     const dewPoint = Number.parseFloat(finalFirstCard.Td || '0');
-//     measurements[5] = `2${getTempValue(dewPoint)}`;
-
-//     // 7. 3PPP/4PPP (42-46) - Station/sea level pressure
-//     const stationPressure = finalFirstCard.stationLevelPressure?.toString().replace('.', '').slice(0, 4) || '0000';
-//     const seaLevelPressure = finalFirstCard.correctedSeaLevelPressure?.toString().replace('.', '').slice(0, 4) || '0000';
-//     measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
-
-//     // 8. 6RRRtR (47-51) - Precipitation
-//     const precipitation = finalWeatherObs.rainfallLast24Hours || '0';
-//     measurements[7] = `6${pad(precipitation, 4)}`;
-
-//     // 9. 7wwW1W2 (52-56) - Weather codes
-//     const presentWeather = finalFirstCard.presentWeatherWW || '00';
-//     const pastWeather1 = finalFirstCard.pastWeatherW1 || '0';
-//     const pastWeather2 = finalFirstCard.pastWeatherW2 || '0';
-//     measurements[8] = `7${presentWeather}${pastWeather1}${pastWeather2}`;
-
-//     // 10. 8NhClCmCh (57-61) - Cloud information
-//     const lowAmount = finalWeatherObs.lowCloudAmount || '0';
-//     const lowForm = finalWeatherObs.lowCloudForm || '0';
-//     const mediumForm = finalWeatherObs.mediumCloudForm || '0';
-//     const highForm = finalWeatherObs.highCloudForm || '0';
-//     measurements[9] = `8${lowAmount}${lowForm}${mediumForm}${highForm}`;
-
-//     // 11. 2SnTnTnTn/InInInIn (62-66) - Min temperature / ground state
-//     // const minTemp = Number.parseFloat(finalFirstCard.maxMinTempAsRead || '0');
-//     const minTemp = Number.parseFloat(finalFirstCard.maxMinTempAsRead || '0') / 10;
-
-//     let sN, x;
-//     if (minTemp >= 0) {
-//       sN = 0;
-//       x = 1;
-//     } else {
-//       sN = 1;
-//       x = 2;
-//     }
-//     let conVertMinTemp = pad(Math.abs(Math.round(minTemp * 10)), 3);
-//     measurements[10] = `${x}${sN}${conVertMinTemp}`;
-
-//     // 12. 56DlDmDh (67-71) - Cloud directions
-//     const lowDir = finalWeatherObs.lowCloudDirection || '0';
-//     const mediumDir = finalWeatherObs.mediumCloudDirection || '0';
-//     const highDir = finalWeatherObs.highCloudDirection || '0';
-//     measurements[11] = `56${lowDir}${mediumDir}${highDir}`;
-
-//     // 13. 57CDaEc (72-76) - Characteristic of pressure + pressure tendency
-//     const pressureTendency = finalFirstCard.pressureChange24h?.toString()[0] || '0';
-//     measurements[12] = `57${pressureTendency}00`;
-
-//     // 14. Av. Total Cloud (56) - Total cloud amount
-//     measurements[13] = totalCloud;
-
-//     // 15. C2 (16) - Always 2
-//     measurements[14] = '2';
-
-//     // 16. GG (17-18) - Observation time (3 hour gap)
-//     let hour = '00';
-//     if (finalWeatherObs.observationTime) {
-//       const obsTime = new Date(finalWeatherObs.observationTime);
-//       const hours = obsTime.getHours();
-//       hour = pad(Math.floor(hours / 3) * 3, 2);
-//     }
-//     measurements[15] = hour;
-
-//     // 17. 58P24P24P24/59P24P24P24 (19-23) - Pressure change
-//     const pressureChange = Number.parseFloat(finalFirstCard.pressureChange24h || '0');
-//     const pressureChangeIndicator = pressureChange >= 0 ? '58' : '59';
-//     const absPressureChange = pad(Math.abs(Math.round(pressureChange * 10)), 3);
-//     measurements[16] = `${pressureChangeIndicator}${absPressureChange}`;
-
-//     // 18. (6RRRtR)/7R24R24R24 (24-28) - Precipitation
-//     measurements[17] = `(${measurements[7]})/7${pad(precipitation, 3)}`;
-
-//     // 19. 8N5Ch5h5 (29-33) - Cloud information
-//     let lowFormSig = finalWeatherObs.layer1Form || '0';
-//     let mediumFormSig = finalWeatherObs.layer2Form || '0';
-//     let highFormSig = finalWeatherObs.layer3Form || '0';
-
-//     let lowAmountSig = finalWeatherObs.layer1Amount || '0';
-//     let mediumAmountSig = finalWeatherObs.layer2Amount || '0';
-//     let highAmountSig = finalWeatherObs.layer3Amount || '0';
-
-//     let lowHeightSig = pad((Number(finalWeatherObs.layer1Height) || 0) * 10, 2);
-//     let mediumHeightSig = pad((Number(finalWeatherObs.layer2Height) || 0) * 10, 2);
-//     let highHeightSig = pad((Number(finalWeatherObs.layer3Height) || 0) * 10, 2);
-
-//     measurements[18] = `8${lowAmountSig}${lowFormSig}${lowHeightSig} / 8${mediumAmountSig}${mediumFormSig}${mediumHeightSig} / 8${highAmountSig}${highFormSig}${highHeightSig}`;
-
-//     // 20. 90dqqqt (34-38) - Dew point depression
-//     const dewDepression = dryBulb - dewPoint;
-//     measurements[19] = `90${pad(Math.round(dewDepression * 10), 3)}`;
-
-//     // 21. 91fqfqfq (39-43) - Relative humidity
-//     const humidity = finalFirstCard.relativeHumidity || '0';
-//     measurements[20] = `91${pad(humidity, 3)}`;
-
-//     // Create the form values
-//     const formValues = {
-//       dataType: 'SYNOP',
-//       stationNo,
-//       year: now.getFullYear().toString(),
-//       month: pad(now.getMonth() + 1, 2),
-//       day: pad(now.getDate(), 2),
-//       weatherRemark: finalWeatherObs.observerInitial || '',
-//       measurements,
-//     };
-
-//     return NextResponse.json(formValues);
-
-//   } catch (error) {
-//     console.error('Error generating synoptic code:', error);
-//     return NextResponse.json(
-//       { error: 'Failed to generate synoptic code' },
-//       { status: 500 }
-//     );
-//   } finally {
-//     await prisma.$disconnect();
-//   }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { getTodayUtcRange, utcToHour } from '@/lib/utils';
+import { getSession } from '@/lib/getSession';
 
 const prisma = new PrismaClient();
 
 export async function GET() {
   try {
-    // Fetch most recent records from database
-    const [firstCard, weatherObs] = await Promise.all([
-      prisma.meteorologicalEntry.findFirst({
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.weatherObservation.findFirst({
-        orderBy: { submittedAt: 'desc' },
-      }),
-    ]);
 
-    if (!firstCard || !weatherObs) {
+    const session = await getSession()
+
+    if(!session || !session.user) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+    }
+
+    const { startToday, endToday } = getTodayUtcRange()
+
+    const observingTime = await prisma.observingTime.findFirst({
+      where: {
+        AND: [
+          {
+            utcTime: {
+              gte: startToday,
+              lte: endToday,
+            },
+          },
+          {
+            stationId: session.user.station?.id,
+          }
+        ]
+      },
+      orderBy: { utcTime: 'desc' },
+      include: {
+        MeteorologicalEntry: true,
+        WeatherObservation: true,
+      }
+    });
+
+    // // Fetch most recent records from database
+    // const [firstCard, weatherObs] = await Promise.all([
+    //   prisma.meteorologicalEntry.findFirst({
+    //     orderBy: { createdAt: 'desc' },
+    //   }),
+    //   prisma.weatherObservation.findFirst({
+    //     orderBy: { submittedAt: 'desc' },
+    //   }),
+    // ]);
+
+    if (!observingTime?.MeteorologicalEntry || !observingTime?.WeatherObservation) {
       return NextResponse.json(
         { error: 'No weather data available' },
         { status: 404 }
       );
     }
 
+    const firstCard = observingTime?.MeteorologicalEntry[0];
+    const weatherObs = observingTime?.WeatherObservation[0];
+
     // Get the observation date from the most recent record
     const observationDate = weatherObs.submittedAt || firstCard.createdAt;
     const dateObj = new Date(observationDate);
-    const today = dateObj.toISOString().split('T')[0];
 
     // Initialize measurements array
     const measurements: string[] = Array(21).fill('');
@@ -295,7 +80,7 @@ export async function GET() {
     measurements[0] = '1';
 
     // 2. Iliii (17-21) - Station number (5 digits)
-    const stationNo = firstCard.stationNo || "00000";
+    const stationNo = session.user.station?.stationId as string;
     measurements[1] = stationNo;
 
     // 3. iRiXhvv (22-26) - 32 + low cloud height + visibility
@@ -372,7 +157,7 @@ export async function GET() {
       sN = 1;
       x = 2;
     }
-    let conVertMinTemp = pad(Math.abs(Math.round(minTemp * 10)), 3);
+    const conVertMinTemp = pad(Math.abs(Math.round(minTemp * 10)), 3);
     measurements[10] = `${x}${sN}${conVertMinTemp}`;
 
     // 12. 56DlDmDh (67-71) - Cloud directions
@@ -392,17 +177,9 @@ export async function GET() {
     measurements[14] = '2';
 
     // 16. GG (17-18) - Observation time (3 hour gap)
-    let hour = '00';
-    if (weatherObs.observationTime) {
-      const obsTime = new Date(weatherObs.observationTime);
-      const hours = obsTime.getHours();
-      hour = pad(Math.floor(hours / 3) * 3, 2);
-    } else {
-      // Fallback to submittedAt time
-      const hours = dateObj.getHours();
-      hour = pad(Math.floor(hours / 3) * 3, 2);
-    }
-    measurements[15] = hour;
+    
+
+    measurements[15] = utcToHour(observingTime.utcTime.toString());
 
     // 17. 58P24P24P24/59P24P24P24 (19-23) - Pressure change
     const pressureChange = Number.parseFloat(firstCard.pressureChange24h || '0');
