@@ -232,15 +232,20 @@ export async function PUT(req: Request) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
     }
 
-    const { id, ...data } = await req.json()
+    const { id, ...updateData } = await req.json()
 
-    // Find the entry to update
+    if (!id) {
+      return NextResponse.json({ message: "Entry ID is required" }, { status: 400 })
+    }
+
+    // Find the existing entry with its related observing time
     const existingEntry = await prisma.meteorologicalEntry.findUnique({
       where: { id },
       include: {
         ObservingTime: {
           include: {
             station: true,
+            user: true,
           },
         },
       },
@@ -250,84 +255,98 @@ export async function PUT(req: Request) {
       return NextResponse.json({ message: "Entry not found" }, { status: 404 })
     }
 
-    // Check permissions based on role
+    // Check permissions
     const userRole = session.user.role
     const userStationId = session.user.station?.id
     const entryStationId = existingEntry.ObservingTime.stationId
+    const entryUserId = existingEntry.ObservingTime.userId
 
     let canEdit = false
 
+    // Super admin can edit any record
     if (userRole === "super_admin") {
       canEdit = true
-    } else if (userRole === "station_admin" && userStationId === entryStationId) {
-      // Station admin can edit records from their station
+    }
+    // Station admin can edit records from their station
+    else if (userRole === "station_admin" && userStationId === entryStationId) {
       canEdit = true
-    } else if (userStationId === entryStationId) {
-      // Regular users can edit records from their station
+    }
+    // Regular users can only edit their own records
+    else if (userStationId === entryStationId && session.user.id === entryUserId) {
       canEdit = true
     }
 
     if (!canEdit) {
-      return NextResponse.json({ message: "You don't have permission to edit this record" }, { status: 403 })
+      return NextResponse.json(
+        { message: "You don't have permission to edit this record" },
+        { status: 403 }
+      )
     }
 
-    // Prepare the update data object
-    const updateData: any = {
-      dataType: data.dataType || existingEntry.dataType,
-      subIndicator: data.subIndicator || existingEntry.subIndicator,
-      alteredThermometer: data.alteredThermometer || existingEntry.alteredThermometer,
-      barAsRead: data.barAsRead || existingEntry.barAsRead,
-      correctedForIndex: data.correctedForIndex || existingEntry.correctedForIndex,
-      heightDifference: data.heightDifference || existingEntry.heightDifference,
-      correctionForTemp: data.correctionForTemp || existingEntry.correctionForTemp,
-      stationLevelPressure: data.stationLevelPressure || existingEntry.stationLevelPressure,
-      seaLevelReduction: data.seaLevelReduction || existingEntry.seaLevelReduction,
-      correctedSeaLevelPressure: data.correctedSeaLevelPressure || existingEntry.correctedSeaLevelPressure,
-      afternoonReading: data.afternoonReading || existingEntry.afternoonReading,
-      pressureChange24h: data.pressureChange24h || existingEntry.pressureChange24h,
-      dryBulbAsRead: data.dryBulbAsRead || existingEntry.dryBulbAsRead,
-      wetBulbAsRead: data.wetBulbAsRead || existingEntry.wetBulbAsRead,
-      maxMinTempAsRead: data.maxMinTempAsRead || existingEntry.maxMinTempAsRead,
-      dryBulbCorrected: data.dryBulbCorrected || existingEntry.dryBulbCorrected,
-      wetBulbCorrected: data.wetBulbCorrected || existingEntry.wetBulbCorrected,
-      maxMinTempCorrected: data.maxMinTempCorrected || existingEntry.maxMinTempCorrected,
-      Td: data.Td || existingEntry.Td,
-      relativeHumidity: data.relativeHumidity || existingEntry.relativeHumidity,
-      squallConfirmed:
-        data.squallConfirmed !== undefined ? String(data.squallConfirmed) : existingEntry.squallConfirmed,
-      squallForce: data.squallForce || existingEntry.squallForce,
-      squallDirection: data.squallDirection || existingEntry.squallDirection,
-      squallTime: data.squallTime || existingEntry.squallTime,
-      horizontalVisibility: data.horizontalVisibility || existingEntry.horizontalVisibility,
-      miscMeteors: data.miscMeteors || existingEntry.miscMeteors,
-      pastWeatherW1: data.pastWeatherW1 || existingEntry.pastWeatherW1,
-      pastWeatherW2: data.pastWeatherW2 || existingEntry.pastWeatherW2,
-      presentWeatherWW: data.presentWeatherWW || existingEntry.presentWeatherWW,
-      c2Indicator: data.c2Indicator || existingEntry.c2Indicator,
+    // Prepare the data to update
+    const dataToUpdate: any = {
+      dataType: updateData.dataType || existingEntry.dataType,
+      subIndicator: updateData.subIndicator ?? existingEntry.subIndicator,
+      alteredThermometer: updateData.alteredThermometer ?? existingEntry.alteredThermometer,
+      barAsRead: updateData.barAsRead ?? existingEntry.barAsRead,
+      correctedForIndex: updateData.correctedForIndex ?? existingEntry.correctedForIndex,
+      heightDifference: updateData.heightDifference ?? existingEntry.heightDifference,
+      correctionForTemp: updateData.correctionForTemp ?? existingEntry.correctionForTemp,
+      stationLevelPressure: updateData.stationLevelPressure ?? existingEntry.stationLevelPressure,
+      seaLevelReduction: updateData.seaLevelReduction ?? existingEntry.seaLevelReduction,
+      correctedSeaLevelPressure: updateData.correctedSeaLevelPressure ?? existingEntry.correctedSeaLevelPressure,
+      afternoonReading: updateData.afternoonReading ?? existingEntry.afternoonReading,
+      pressureChange24h: updateData.pressureChange24h ?? existingEntry.pressureChange24h,
+      dryBulbAsRead: updateData.dryBulbAsRead ?? existingEntry.dryBulbAsRead,
+      wetBulbAsRead: updateData.wetBulbAsRead ?? existingEntry.wetBulbAsRead,
+      maxMinTempAsRead: updateData.maxMinTempAsRead ?? existingEntry.maxMinTempAsRead,
+      dryBulbCorrected: updateData.dryBulbCorrected ?? existingEntry.dryBulbCorrected,
+      wetBulbCorrected: updateData.wetBulbCorrected ?? existingEntry.wetBulbCorrected,
+      maxMinTempCorrected: updateData.maxMinTempCorrected ?? existingEntry.maxMinTempCorrected,
+      Td: updateData.Td ?? existingEntry.Td,
+      relativeHumidity: updateData.relativeHumidity ?? existingEntry.relativeHumidity,
+      squallConfirmed: updateData.squallConfirmed !== undefined 
+        ? String(updateData.squallConfirmed) 
+        : existingEntry.squallConfirmed,
+      squallForce: updateData.squallForce ?? existingEntry.squallForce,
+      squallDirection: updateData.squallDirection ?? existingEntry.squallDirection,
+      squallTime: updateData.squallTime ?? existingEntry.squallTime,
+      horizontalVisibility: updateData.horizontalVisibility ?? existingEntry.horizontalVisibility,
+      miscMeteors: updateData.miscMeteors ?? existingEntry.miscMeteors,
+      pastWeatherW1: updateData.pastWeatherW1 ?? existingEntry.pastWeatherW1,
+      pastWeatherW2: updateData.pastWeatherW2 ?? existingEntry.pastWeatherW2,
+      presentWeatherWW: updateData.presentWeatherWW ?? existingEntry.presentWeatherWW,
+      c2Indicator: updateData.c2Indicator ?? existingEntry.c2Indicator,
     }
 
-    // Handle observing time update if provided
-    if (data.observingTimeId) {
-      const formattedObservingTime = hourToUtc(data.observingTimeId)
-      const observingTime = await prisma.observingTime.findUnique({
-        where: {
-          utcTime: formattedObservingTime,
-        },
-      })
-
-      if (observingTime) {
-        updateData.observingTimeId = observingTime.id
-      }
-    }
-
+    // Update the entry
     const updatedEntry = await prisma.meteorologicalEntry.update({
       where: { id },
-      data: updateData,
+      data: dataToUpdate,
+      include: {
+        ObservingTime: {
+          include: {
+            station: true,
+          },
+        },
+      },
     })
 
-    return NextResponse.json({ message: "Data updated successfully", entry: updatedEntry }, { status: 200 })
+    return NextResponse.json(
+      { 
+        message: "Data updated successfully", 
+        entry: updatedEntry 
+      },
+      { status: 200 }
+    )
   } catch (error: any) {
     console.error("Error updating meteorological entry:", error)
-    return NextResponse.json({ message: "Failed to update data", error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { 
+        message: "Failed to update data", 
+        error: error.message 
+      },
+      { status: 500 }
+    )
   }
 }

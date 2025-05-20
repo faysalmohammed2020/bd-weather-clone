@@ -308,9 +308,9 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   }
 
   const handleSaveEdit = async () => {
-    if (!selectedRecord) return
-
-    setIsSaving(true)
+    if (!selectedRecord) return;
+  
+    setIsSaving(true);
     try {
       const response = await fetch("/api/first-card-data", {
         method: "PUT",
@@ -318,34 +318,43 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: selectedRecord.id,
+          id: selectedRecord.id, // Make sure to include the ID
           ...editFormData,
         }),
-      })
-
+      });
+  
       if (!response.ok) {
-        throw new Error("Failed to update record")
+        throw new Error("Failed to update record");
       }
-
-      const result = await response.json()
-
-      // Update the data in state
-      setFlattenedData((prevData) =>
-        prevData.map((item) => (item.id === selectedRecord.id ? { ...item, ...editFormData } : item)),
-      )
-
-      toast.success("Record updated successfully")
-      setIsEditDialogOpen(false)
-
-      // Refresh data to ensure we have the latest
-      fetchData()
+  
+      const result = await response.json();
+  
+      // Update the local state
+      setFlattenedData(prevData =>
+        prevData.map(item => 
+          item.id === selectedRecord.id ? { ...item, ...editFormData } : item
+        )
+      );
+  
+      // Also update the main data state if needed
+      setData(prevData =>
+        prevData.map(observingTime => ({
+          ...observingTime,
+          MeteorologicalEntry: observingTime.MeteorologicalEntry.map(entry =>
+            entry.id === selectedRecord.id ? { ...entry, ...editFormData } : entry
+          )
+        }))
+      );
+  
+      toast.success("Record updated successfully");
+      setIsEditDialogOpen(false);
     } catch (error) {
-      console.error("Error updating record:", error)
-      toast.error("Failed to update record")
+      console.error("Error updating record:", error);
+      toast.error("Failed to update record");
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   const getStationNameById = (stationId: string): string => {
     const station = stations.find((s) => s.stationId === stationId)
