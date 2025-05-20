@@ -255,30 +255,49 @@ export async function PUT(req: Request) {
       return NextResponse.json({ message: "Entry not found" }, { status: 404 })
     }
 
-    // Check permissions
-    const userRole = session.user.role
-    const userStationId = session.user.station?.id
-    const entryStationId = existingEntry.ObservingTime.stationId
-    const entryUserId = existingEntry.ObservingTime.userId
-
-    let canEdit = false
-
-    // Super admin can edit any record
-    if (userRole === "super_admin") {
-      canEdit = true
+    // Check permissions using the same logic as the frontend canEditRecord function
+    const canEditRecord = (record: any, user: any): boolean => {
+      if (!user) return false
+    
+      // If no submittedAt, allow edit (newly created record)
+      if (!record.submittedAt) return true
+    
+      try {
+        const { parseISO, differenceInDays, isValid } = require('date-fns')
+        const submissionDate = parseISO(record.submittedAt)
+        if (!isValid(submissionDate)) return true // If date is invalid, allow edit
+    
+        const now = new Date()
+        const daysDifference = differenceInDays(now, submissionDate)
+    
+        // Role-based permissions
+        const role = user.role
+        const stationId = user.station?.id
+    
+        // Super admin can edit records up to 1 year old
+        if (role === "super_admin") return daysDifference <= 365
+    
+        // Station admin can edit records from their station up to 30 days old
+        if (role === "station_admin") return daysDifference <= 30 && stationId === record.ObservingTime.stationId
+    
+        // Regular users can edit their own records up to 2 days old
+        if (role === "observer") return daysDifference <= 2 && user.id === record.ObservingTime.userId
+    
+        return false
+      } catch (e) {
+        console.warn("Error in canEditRecord:", e)
+        return false
+      }
     }
-    // Station admin can edit records from their station
-    else if (userRole === "station_admin" && userStationId === entryStationId) {
-      canEdit = true
-    }
-    // Regular users can only edit their own records
-    else if (userStationId === entryStationId && session.user.id === entryUserId) {
-      canEdit = true
-    }
-
+    
+    // Check if user can edit this record
+    const canEdit = canEditRecord(existingEntry, session.user)
+    
     if (!canEdit) {
       return NextResponse.json(
-        { message: "You don't have permission to edit this record" },
+        { 
+          message: "You don't have permission to edit this record. It may be too old or you don't have the required permissions." 
+        },
         { status: 403 }
       )
     }
