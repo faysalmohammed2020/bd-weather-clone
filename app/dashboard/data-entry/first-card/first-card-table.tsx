@@ -116,10 +116,11 @@ function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
 export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   const [data, setData] = useState<MeteorologicalEntry[]>([])
   const [loading, setLoading] = useState(true)
-  const [startDate, setStartDate] = useState(
-    format(new Date(new Date().setDate(new Date().getDate() - 7)), "yyyy-MM-dd"),
-  )
-  const [endDate, setEndDate] = useState(format(new Date(), "yyyy-MM-dd"))
+  // Initialize with today's date by default
+  const today = format(new Date(), "yyyy-MM-dd")
+  const [startDate, setStartDate] = useState(today)
+  const [endDate, setEndDate] = useState(today)
+  const [dateError, setDateError] = useState<string | null>(null)
   const [stationFilter, setStationFilter] = useState("all")
   const [stations, setStations] = useState<Station[]>([])
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -202,8 +203,12 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     const newEnd = new Date(start)
     newEnd.setDate(start.getDate() - 1)
 
-    setStartDate(format(newStart, "yyyy-MM-dd"))
-    setEndDate(format(newEnd, "yyyy-MM-dd"))
+    // Don't update if the new range would be invalid
+    if (newStart <= newEnd) {
+      setStartDate(format(newStart, "yyyy-MM-dd"))
+      setEndDate(format(newEnd, "yyyy-MM-dd"))
+      setDateError(null)
+    }
   }
 
   const goToNextWeek = () => {
@@ -217,8 +222,22 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     const newEnd = new Date(end)
     newEnd.setDate(end.getDate() + daysInRange + 1)
 
-    setStartDate(format(newStart, "yyyy-MM-dd"))
-    setEndDate(format(newEnd, "yyyy-MM-dd"))
+
+    // Don't allow future dates beyond today
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    if (newStart > today) {
+      setDateError("Cannot select future dates")
+      return
+    }
+
+    // Don't update if the new range would be invalid
+    if (newStart <= newEnd) {
+      setStartDate(format(newStart, "yyyy-MM-dd"))
+      setEndDate(format(newEnd, "yyyy-MM-dd"))
+      setDateError(null)
+    }
   }
 
   const getWeatherStatusColor = (humidity: string) => {
@@ -237,6 +256,33 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
       setIsEditDialogOpen(true)
     } else {
       setIsPermissionDeniedOpen(true)
+    }
+  }
+
+  const handleDateChange = (type: 'start' | 'end', newDate: string) => {
+    const date = new Date(newDate)
+    const otherDate = type === 'start' ? new Date(endDate) : new Date(startDate)
+    
+    if (isNaN(date.getTime())) {
+      setDateError('Invalid date format')
+      return
+    }
+
+    // Reset error if dates are valid
+    setDateError(null)
+
+    if (type === 'start') {
+      if (date > otherDate) {
+        setDateError('Start date cannot be after end date')
+        return
+      }
+      setStartDate(newDate)
+    } else {
+      if (date < otherDate) {
+        setDateError('End date cannot be before start date')
+        return
+      }
+      setEndDate(newDate)
     }
   }
 
@@ -309,24 +355,23 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                   </Button>
 
                   <div className="flex items-center gap-2">
-                    <div className="relative">
-                      <Calendar className="absolute left-2 top-2.5 h-4 w-4 text-purple-500" />
-                      <Input
-                        type="date"
-                        className="pl-8 w-40 border-slate-300 focus:border-purple-500 focus:ring-purple-500"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                      />
-                    </div>
-                    <span className="text-slate-500">to</span>
-                    <Input
-                      type="date"
-                      className="w-40 border-slate-300 focus:border-purple-500 focus:ring-purple-500"
-                      value={endDate}
-                      onChange={(e) => setEndDate(e.target.value)}
-                    />
-                  </div>
-
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => handleDateChange('start', e.target.value)}
+                    max={endDate}
+                    className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                  />
+                  <span>to</span>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => handleDateChange('end', e.target.value)}
+                    min={startDate}
+                    max={format(new Date(), 'yyyy-MM-dd')}
+                    className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                  />
+                </div>
                   <Button variant="outline" size="icon" onClick={goToNextWeek} className="hover:bg-slate-200">
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -714,15 +759,17 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
             </div>
 
             <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-sky-500" />
-                <span className="text-sm text-slate-600">
-                  Date Range:{" "}
-                  <div className="text-center text-lg font-semibold text-slate-600">
-                    {`${format(parseISO(startDate), "MMM d")} - ${format(parseISO(endDate), "MMM d, yyyy")}`}
-                  </div>
-                </span>
-              </div>
+             
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-sky-500" />
+                  <span className="text-sm text-slate-600">
+                    Date Range:{" "}
+                    <div className="text-center text-lg font-semibold text-slate-600">
+                      {`${format(parseISO(startDate), "MMM d")} - ${format(parseISO(endDate), "MMM d, yyyy")}`}
+                    </div>
+                  </span>
+                </div>
+         
               <div className="flex items-center gap-2">
                 <Badge variant="outline" className="bg-sky-100 text-sky-800 hover:bg-sky-200">
                   {filteredData.length} record(s)
