@@ -1,3 +1,4 @@
+import { getSession } from "@/lib/getSession";
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
@@ -5,15 +6,64 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
+    const session = await getSession();
+
+    if (!session || !session.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+
+    // First, find the ObservingTime record by its UTC time
+    const observingTime = await prisma.observingTime.findFirst({
+      select: {
+        id: true,
+        utcTime: true,
+        _count: {
+          select: {
+            MeteorologicalEntry: true,
+            WeatherObservation: true,
+          }
+        }
+      },
+      orderBy: {
+        utcTime: "desc",
+      }
+    });
+
+    if (!observingTime) {
+      return NextResponse.json({
+        message: "No observing time for today",
+        status: 404,
+      });
+    }
+
+    // Get station ID from session
+    const stationId = session.user.station?.stationId;
+    if (!stationId) {
+      return NextResponse.json({
+        message: "Station ID is required",
+        status: 400,
+      });
+    }
+
+    // Find the station by stationId to get its primary key (id)
+    const stationRecord = await prisma.station.findFirst({
+      where: { stationId },
+    });
+
+    if (!stationRecord) {
+      return NextResponse.json({
+        message: `No station found with ID: ${stationId}`,
+        status: 404,
+      });
+    }
+
     const entry = await prisma.dailySummary.create({
       data: {
-        userId: body.userId,
         dataType: body.dataType,
-        stationNo: body.stationNo,
-        year: parseInt(body.year),
-        month: parseInt(body.month),
-        day: parseInt(body.day),
-
         avStationPressure: body.measurements?.[0] || null,
         avSeaLevelPressure: body.measurements?.[1] || null,
         avDryBulbTemperature: body.measurements?.[2] || null,
@@ -30,6 +80,12 @@ export async function POST(req: Request) {
         avTotalCloud: body.measurements?.[13] || null,
         lowestVisibility: body.measurements?.[14] || null,
         totalRainDuration: body.measurements?.[15] || null,
+        ObservingTime: {
+          connect: {
+            id: observingTime?.id,
+            stationId: stationRecord.id,
+          }
+        }
       },
     });
 
