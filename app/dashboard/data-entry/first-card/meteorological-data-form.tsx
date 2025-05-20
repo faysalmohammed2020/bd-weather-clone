@@ -333,13 +333,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isHourSelected) {
-      toast.error("Please select an hour");
-      return;
-    }
-
-    console.log(selectedHour);
-
     // Prevent duplicate submissions
     if (isSubmitting) return;
 
@@ -558,8 +551,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
         />
         {/*Card Body */}
         <div className="relative rounded-xl">
-          {/* Overlay that blocks interaction when no hour is selected */}
-          {!time?.isPassed && !timeError && (
+          {!time?.isPassed || !time && (
             <div className="absolute inset-0 bg-amber-50/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-xl ring-2 ring-amber-200 ring-offset-4">
               <div className="bg-white py-4 px-6 rounded-lg shadow-lg text-center border-2 border-amber-300">
                 <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/getSession";
-import { hourToUtc } from "@/lib/utils";
+import { convertUTCToBDTime, hourToUtc } from "@/lib/utils";
 
 const prisma = new PrismaClient();
 
@@ -14,21 +14,13 @@ export async function POST(req: Request) {
 
     const data = await req.json();
 
-    console.log("API", data.observingTimeId)
-
     const formattedObservingTime = hourToUtc(data.observingTimeId)
+    const localTime = convertUTCToBDTime(formattedObservingTime)
     
-    // First, find the ObservingTime record by its UTC time
-    const observingTime = await prisma.observingTime.findUnique({
-      where: {
-        utcTime: formattedObservingTime
-      }
-    });
     
-    if (!observingTime) {
+    if (!formattedObservingTime) {
       return NextResponse.json({ 
-        message: "Observation time not found", 
-        error: "The selected hour does not exist in the database" 
+        message: "Observation time id not provided", 
       }, { status: 404 });
     }
 
@@ -57,6 +49,37 @@ export async function POST(req: Request) {
         status: 404
       });
     }
+
+    // Check if the observation time already exists
+    const existingObservingTime = await prisma.observingTime.findUnique({
+      where: {
+        utcTime: formattedObservingTime,
+      },
+    });
+
+    if (existingObservingTime) {
+      return NextResponse.json({
+        message: "Observing time already exists",
+        status: 400
+      });
+    }
+
+    const createdObservingTime = await prisma.observingTime.create({
+      data: {
+        utcTime: formattedObservingTime,
+        station: {
+          connect: {
+            id: stationRecord.id
+          }
+        },
+        localTime: localTime,
+        user: {
+          connect: {
+            id: session.user.id
+          }
+        }
+      }
+    })
 
     const savedEntry = await prisma.meteorologicalEntry.create({
       data: {
@@ -97,18 +120,11 @@ export async function POST(req: Request) {
         presentWeatherWW: data.presentWeatherWW || "",
 
         c2Indicator: data.c2Indicator || "",
-        
-        // Connect to existing ObservingTime and Station records
         ObservingTime: {
           connect: {
-            id: observingTime.id
+            id: createdObservingTime.id
           }
         },
-        station: {
-          connect: {
-            id: stationRecord.id
-          }
-        }
       },
     });
 
@@ -122,10 +138,10 @@ export async function POST(req: Request) {
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error saving meteorological entry:", error);
     return NextResponse.json(
-      { message: "Failed to save data", error: error.message },
+      { message: "Failed to save data", error: error instanceof Error ? error.message : "Unexpected Error" },
       { status: 500 }
     );
   }

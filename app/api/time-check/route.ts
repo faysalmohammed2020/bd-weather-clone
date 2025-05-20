@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma";
 import { getTodayUtcRange, hasHoursPassed, hourToUtc } from "@/lib/utils";
-import dayjs from "dayjs";
 import { NextRequest, NextResponse } from "next/server";
 
 // Check if observing time exist or not and return each data count
@@ -28,7 +27,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!time) {
-      return NextResponse.json({ error: "No time found" }, { status: 404 });
+      return NextResponse.json({ time: null, error: "No time found" }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -66,7 +65,7 @@ export async function GET() {
     });
 
     if (!time) {
-      return NextResponse.json({ error: "No time found" }, { status: 404 });
+      return NextResponse.json({ time: null, isPassed: false }, { status: 404 });
     }
 
     const utcTime = time.utcTime.toISOString();
