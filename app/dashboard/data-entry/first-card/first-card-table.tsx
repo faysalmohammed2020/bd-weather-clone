@@ -92,28 +92,31 @@ function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
   if (!user) return false
 
   // If no submittedAt, allow edit (newly created record)
-  if (!record.submittedAt) return true
+  if (!record.createdAt) return true
 
   try {
-    const submissionDate = parseISO(record.submittedAt)
-    if (!isValid(submissionDate)) return true // If date is invalid, allow edit
+    const submissionDate = parseISO(record.createdAt)
+    if (!isValid(submissionDate)) return true
 
     const now = new Date()
     const daysDifference = differenceInDays(now, submissionDate)
 
-    // Role-based permissions
     const role = user.role
     const userId = user.id
-    const stationId = user.station?.id
+    const userStationId = user.station?.id
+    const recordStationId = record.ObservingTime.stationId
 
-    // Super admin can edit records up to 1 year old
+    const recordUserId = record.ObservingTime.userId
+
     if (role === "super_admin") return daysDifference <= 365
 
-    // Station admin can edit records from their station up to 30 days old
-    if (role === "station_admin") return daysDifference <= 30 && stationId === record.observingTimeId
+    if (role === "station_admin") {
+      return daysDifference <= 30 && userStationId === recordStationId
+    }
 
-    // Regular users can edit their own records up to 2 days old
-    if (role === "observer") return daysDifference <= 2
+    if (role === "observer") {
+      return daysDifference <= 2 && userId === recordUserId
+    }
 
     return false
   } catch (e) {
@@ -121,6 +124,7 @@ function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
     return false
   }
 }
+
 
 export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   const [data, setData] = useState<ObservingTimeEntry[]>([])
@@ -165,14 +169,8 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
         observingTime.MeteorologicalEntry.forEach((entry: MeteorologicalEntry) => {
           flattened.push({
             ...entry,
-            ObservingTime: {
-              utcTime: observingTime.utcTime,
-              localTime: observingTime.localTime,
-            },
-            station: {
-              stationId: observingTime.station.stationId,
-              name: observingTime.station.name,
-            },
+            observingTimeId: observingTime.id,
+            stationId: observingTime.stationId,
           })
         })
       })
@@ -364,7 +362,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
       <CardContent className="p-6">
-        {isSuperAdmin && (
+      
           <div className="mb-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 p-4 rounded-lg">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
@@ -396,7 +394,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                   </Button>
                 </div>
               </div>
-
+              {isSuperAdmin && (
               <div className="flex items-center gap-2">
                 <Filter size={16} className="text-purple-500" />
                 <Label htmlFor="stationFilter" className="whitespace-nowrap font-medium text-slate-700">
@@ -416,12 +414,10 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                   </SelectContent>
                 </Select>
               </div>
+              )}
             </div>
-            {dateError && (
-              <div className="mt-2 text-sm text-red-500 bg-red-50 p-2 rounded border border-red-200">{dateError}</div>
-            )}
           </div>
-        )}
+  
 
         <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
           <div className="p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300">
