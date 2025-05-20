@@ -23,7 +23,8 @@ export async function POST(request: Request) {
         utcTime: true,
         _count: {
           select: {
-            MeteorologicalEntry: true
+            MeteorologicalEntry: true,
+            WeatherObservation: true,
           }
         }
       },
@@ -37,6 +38,16 @@ export async function POST(request: Request) {
         {
           message: "First card entry not found",
           error: "The selected hour does not exist in the database",
+        },
+        { status: 404 }
+      );
+    }
+
+    if(observingTime._count.WeatherObservation){
+      return NextResponse.json(
+        {
+          message: "Second card entry already exists",
+          error: "The selected hour already has a second card entry",
         },
         { status: 404 }
       );
