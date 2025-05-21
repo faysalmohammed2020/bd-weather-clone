@@ -366,6 +366,76 @@ export default function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableP
   }
 
 
+
+  const exportToCSV = () => {
+    if (filteredData.length === 0) {
+      toast.error("No weather observation data available to export");
+      return;
+    }
+
+    // Define headers
+    const headers = [
+      "Time (GMT)",
+      "Station ID",
+      "Total Cloud Amount",
+      "Low Cloud Direction", "Low Cloud Height", "Low Cloud Form", "Low Cloud Amount",
+      "Medium Cloud Direction", "Medium Cloud Height", "Medium Cloud Form", "Medium Cloud Amount",
+      "High Cloud Direction", "High Cloud Height", "High Cloud Form", "High Cloud Amount",
+      "Layer1 Height", "Layer1 Form", "Layer1 Amount",
+      "Layer2 Height", "Layer2 Form", "Layer2 Amount",
+      "Layer3 Height", "Layer3 Form", "Layer3 Amount",
+      "Layer4 Height", "Layer4 Form", "Layer4 Amount",
+      "Rainfall Start Time", "Rainfall End Time", "Since Previous", "During Previous", "Last 24 Hours",
+      "Wind First Anemometer", "Wind Second Anemometer", "Wind Speed", "Wind Direction",
+      "Observer Initial"
+    ];
+
+    const time = utcToHour(filteredData[0].utcTime)
+
+    // Convert filteredData to CSV rows
+    const rows = filteredData.map((record) => {
+      const obs = record.WeatherObservation?.[0] || {};
+      return [
+        time,
+        record.station?.stationId || "--",
+        obs.totalCloudAmount || "--",
+        obs.lowCloudDirection || "--", obs.lowCloudHeight || "--", obs.lowCloudForm || "--", obs.lowCloudAmount || "--",
+        obs.mediumCloudDirection || "--", obs.mediumCloudHeight || "--", obs.mediumCloudForm || "--", obs.mediumCloudAmount || "--",
+        obs.highCloudDirection || "--", obs.highCloudHeight || "--", obs.highCloudForm || "--", obs.highCloudAmount || "--",
+        obs.layer1Height || "--", obs.layer1Form || "--", obs.layer1Amount || "--",
+        obs.layer2Height || "--", obs.layer2Form || "--", obs.layer2Amount || "--",
+        obs.layer3Height || "--", obs.layer3Form || "--", obs.layer3Amount || "--",
+        obs.layer4Height || "--", obs.layer4Form || "--", obs.layer4Amount || "--",
+        obs.rainfallTimeStart || "--", obs.rainfallTimeEnd || "--", obs.rainfallSincePrevious || "--",
+        obs.rainfallDuringPrevious || "--", obs.rainfallLast24Hours || "--",
+        obs.windFirstAnemometer || "--", obs.windSecondAnemometer || "--",
+        obs.windSpeed || "--", obs.windDirection || "--",
+        obs.observerInitial || "--"
+      ];
+    });
+
+    // Generate CSV string
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(field => `"${field}"`).join(","))
+      .join("\n");
+
+    // Create blob & download
+    const blob = new Blob([csvContent], { type: "text/plain;charset=utf-8;" });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `weather_observation_${startDate}_to_${endDate}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success("CSV export started");
+  };
+
+
+
   return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
       <CardContent className="p-6">
@@ -402,27 +472,44 @@ export default function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableP
             </div>
           </div>
 
-          {session?.user?.role === "super_admin" && (
-            <div className="flex items-center gap-2">
-              <Filter size={16} className="text-sky-500" />
-              <Label htmlFor="stationFilter" className="whitespace-nowrap font-medium text-slate-700">
-                Station:
-              </Label>
-              <Select value={stationFilter} onValueChange={setStationFilter}>
-                <SelectTrigger className="w-[200px] border-slate-300 focus:ring-sky-500">
-                  <SelectValue placeholder="All Stations" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Stations</SelectItem>
-                  {stations.map((station) => (
-                    <SelectItem key={station.id} value={station.stationId}>
-                      {station.name} ({station.stationId})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {session?.user?.role && ["super_admin", "station_admin"].includes(session?.user?.role) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={exportToCSV}
+                className="flex items-center gap-1 hover:bg-green-50 border-green-200 text-green-700"
+                disabled={filteredData.length === 0}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Export CSV
+              </Button>
+            )}
+
+            {session?.user?.role === "super_admin" && (
+              <div className="flex items-center gap-2">
+                <Filter size={16} className="text-sky-500" />
+                <Label htmlFor="stationFilter" className="whitespace-nowrap font-medium text-slate-700">
+                  Station:
+                </Label>
+                <Select value={stationFilter} onValueChange={setStationFilter}>
+                  <SelectTrigger className="w-[200px] border-slate-300 focus:ring-sky-500">
+                    <SelectValue placeholder="All Stations" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Stations</SelectItem>
+                    {stations.map((station) => (
+                      <SelectItem key={station.id} value={station.stationId}>
+                        {station.name} ({station.stationId})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Form View */}
