@@ -142,6 +142,8 @@ export function generateSynopticCode(): SynopticFormValues {
   const pastWeather2 = firstCard.pastWeatherW2 || "0";
   measurements[8] = `7${presentWeather}${pastWeather1}${pastWeather2}`;
 
+  const weatherRemark = getRemarksFromPresentWeather(presentWeather);
+
   // 10. 8NhClCmCh (57-61) - Cloud information
   // "8NhClCmCh 57-61" field data come from: 8 is constant + "clouds>low>amount" from "weather-obserbations.json"+"clouds>low>form"+"clouds>medium>form"+"clouds>high>form"
   const lowAmount = weatherObs.clouds?.low?.amount || "0";
@@ -242,7 +244,7 @@ export function generateSynopticCode(): SynopticFormValues {
     year: now.getFullYear().toString(),
     month: pad(now.getMonth() + 1, 2),
     day: pad(now.getDate(), 2),
-    weatherRemark: weatherObs.observer?.["observer-initial"] || "",
+    weatherRemark,
     measurements,
   };
 

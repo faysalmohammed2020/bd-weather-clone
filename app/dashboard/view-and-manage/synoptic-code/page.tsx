@@ -17,7 +17,9 @@ export interface SynopticFormValues {
 }
 
 export default function WeatherTabsPage() {
-  const [activeTab, setActiveTab] = useState<"weather" | "synoptic">("synoptic");
+  const [activeTab, setActiveTab] = useState<"weather" | "synoptic">(
+    "synoptic"
+  );
 
   const initialValues: SynopticFormValues = {
     dataType: "",
@@ -72,7 +74,7 @@ export default function WeatherTabsPage() {
 
           <div className="bg-white p-4 rounded-lg shadow">
             {activeTab === "synoptic" && <SynopticCodeForm />}
-            {activeTab === "weather" &&  <SynopticTable />}
+            {activeTab === "weather" && <SynopticTable />}
           </div>
         </Form>
       </Formik>
