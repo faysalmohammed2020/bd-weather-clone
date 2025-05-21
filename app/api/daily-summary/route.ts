@@ -100,43 +100,19 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const stationNo = searchParams.get("stationNo");
-    const date = searchParams.get("date");
 
     if (!stationNo) {
       return new NextResponse("Station number is required", { status: 400 });
     }
 
-    // Parse the date (format: "DD-MMM")
-    let day: number | undefined,
-      month: number | undefined,
-      year: number | undefined;
-
-    if (date) {
-      const dateParts = date.split("-");
-      if (dateParts.length === 2) {
-        day = parseInt(dateParts[0]);
-        const monthNames = [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
-        ];
-        month = monthNames.indexOf(dateParts[1]) + 1;
-        year = new Date().getFullYear(); // default to current year
-      }
-    }
-
-    // First try exact match
-    let summary = await prisma.dailySummary.findFirst({
-      where: { stationNo, day, month, year },
+    const summary = await prisma.dailySummary.findFirst({
+      where: {
+        ObservingTime: {
+          station: {
+            stationId: stationNo,
+          },
+        },
+      },
       orderBy: { createdAt: "desc" },
       select: {
         maxTemperature: true,
@@ -150,72 +126,11 @@ export async function GET(req: Request) {
       },
     });
 
-    // Try without year if not found
-    if (!summary) {
-      summary = await prisma.dailySummary.findFirst({
-        where: { stationNo, day, month },
-        orderBy: { createdAt: "desc" },
-        select: {
-          maxTemperature: true,
-          minTemperature: true,
-          totalPrecipitation: true,
-          windSpeed: true,
-          avTotalCloud: true,
-          totalRainDuration: true,
-          avRelativeHumidity: true,
-          lowestVisibility: true,
-        },
-      });
-    }
-
-    // Try partial match on stationNo
-    if (!summary) {
-      summary = await prisma.dailySummary.findFirst({
-        where: {
-          stationNo: { contains: stationNo },
-          day,
-          month,
-        },
-        orderBy: { createdAt: "desc" },
-        select: {
-          maxTemperature: true,
-          minTemperature: true,
-          totalPrecipitation: true,
-          windSpeed: true,
-          avTotalCloud: true,
-          totalRainDuration: true,
-          avRelativeHumidity: true,
-          lowestVisibility: true,
-        },
-      });
-    }
-
-    // Final fallback by station only
-    if (!summary) {
-      console.log(
-        "Final fallback - searching for any record with this station"
-      );
-      summary = await prisma.dailySummary.findFirst({
-        where: { stationNo },
-        orderBy: { createdAt: "desc" },
-        select: {
-          maxTemperature: true,
-          minTemperature: true,
-          totalPrecipitation: true,
-          windSpeed: true,
-          avTotalCloud: true,
-          totalRainDuration: true,
-          avRelativeHumidity: true,
-          lowestVisibility: true,
-        },
-      });
-    }
-
     if (!summary) {
       return new NextResponse("No data found", { status: 404 });
     }
 
-    // Transform data: divide maxTemperature and lowestVisibility by 10
+    // Normalize units
     const adjustedSummary = {
       ...summary,
       maxTemperature: summary.maxTemperature
@@ -235,3 +150,4 @@ export async function GET(req: Request) {
     return new NextResponse("Failed to fetch data", { status: 500 });
   }
 }
+

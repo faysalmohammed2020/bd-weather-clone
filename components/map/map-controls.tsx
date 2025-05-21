@@ -66,7 +66,7 @@ export default function MapControls({
           session?.user?.role === "observer"
         ) {
           const userStation = data.find(
-            (station: Station) => station.stationId === session.user.stationId
+            (station: Station) => station.stationId === session?.user?.station?.stationId
           );
           if (userStation) {
             setSelectedStation(userStation);
@@ -89,7 +89,7 @@ export default function MapControls({
     session?.user.role === "super_admin"
       ? stations
       : stations.filter(
-          (station) => station.stationId === session?.user.stationId
+          (station) => station.stationId === session?.user?.station?.stationId
         );
 
   return (
