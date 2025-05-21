@@ -507,7 +507,7 @@ export default function SynopticMeasurementsTab() {
                   {values.weatherRemark ? (
                     <div className="flex flex-col items-center space-y-2">
                       <img
-                        src={values.weatherRemark.split(" - ")[0]}
+                        src={`/${values.weatherRemark.split(" - ")[0]}`}
                         alt="Weather Symbol"
                         className="h-16 w-16 object-contain"
                       />
