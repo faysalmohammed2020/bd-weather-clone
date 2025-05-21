@@ -336,9 +336,9 @@ export default function MeasurementsTab() {
   const handleSaveMeasurements = async () => {
     try {
       const payload = {
-        userId: session?.user.id, // Replace with actual user ID
-        dataType: "SY", // Replace or dynamically set from BasicInfoTab if needed
-        stationNo: session?.user.station?.stationId, // Replace with selected station
+        userId: session?.user.id,
+        dataType: "SY",
+        stationNo: session?.user.station?.stationId,
         year: new Date(selectedDate).getFullYear().toString(),
         month: (new Date(selectedDate).getMonth() + 1).toString(),
         day: new Date(selectedDate).getDate().toString(),
