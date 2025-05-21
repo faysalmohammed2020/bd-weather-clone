@@ -161,7 +161,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
         throw new Error("Failed to fetch data")
       }
       const result = await response.json()
-      setData(result || [])
+      setData(result.entries || [])
 
       // Flatten the data for easier display
       const flattened: MeteorologicalEntry[] = []
@@ -318,8 +318,6 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
       if (!response.ok) {
         throw new Error("Failed to update record");
       }
-  
-      const result = await response.json();
   
       // Update the local state
       setFlattenedData(prevData =>
