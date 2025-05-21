@@ -1,5 +1,6 @@
 import { getSession } from "@/lib/getSession";
 import prisma from "@/lib/prisma";
+import { getTodayUtcRange } from "@/lib/utils";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -15,9 +16,16 @@ export async function POST(req: Request) {
       );
     }
 
-
+    // First, find the ObservingTime record by its UTC time
+    const { startToday, endToday } = getTodayUtcRange();
     // First, find the ObservingTime record by its UTC time
     const observingTime = await prisma.observingTime.findFirst({
+      where: {
+        utcTime: {
+          gte: startToday,
+          lte: endToday,
+        },
+      },
       select: {
         id: true,
         utcTime: true,
@@ -25,18 +33,49 @@ export async function POST(req: Request) {
           select: {
             MeteorologicalEntry: true,
             WeatherObservation: true,
-          }
-        }
+            SynopticCode: true,
+            DailySummary: true,
+          },
+        },
       },
       orderBy: {
         utcTime: "desc",
-      }
+      },
     });
 
     if (!observingTime) {
       return NextResponse.json({
         message: "No observing time for today",
         status: 404,
+      });
+    }
+
+    if (!observingTime) {
+      return NextResponse.json({
+        success: false,
+        error: "No observing time for today",
+        status: 404,
+      });
+    }
+
+    if (
+      observingTime &&
+      !observingTime._count.MeteorologicalEntry &&
+      !observingTime._count.WeatherObservation
+    ) {
+      return NextResponse.json({
+        success: false,
+        error:
+          "Meteorological entry and weather observation are not available for this time",
+        status: 400,
+      });
+    }
+
+    if (observingTime && observingTime._count.DailySummary > 0) {
+      return NextResponse.json({
+        success: false,
+        error: "Daily summary already exists for this time",
+        status: 400,
       });
     }
 
@@ -84,8 +123,8 @@ export async function POST(req: Request) {
           connect: {
             id: observingTime?.id,
             stationId: stationRecord.id,
-          }
-        }
+          },
+        },
       },
     });
 
@@ -150,4 +189,3 @@ export async function GET(req: Request) {
     return new NextResponse("Failed to fetch data", { status: 500 });
   }
 }
-
