@@ -139,7 +139,6 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   const [dateError, setDateError] = useState<string | null>(null)
   const [stationFilter, setStationFilter] = useState("all")
   const [stations, setStations] = useState<Station[]>([])
-  const [isRefreshing, setIsRefreshing] = useState(false)
   const { data: session } = useSession()
   const user = session?.user
   const isSuperAdmin = user?.role === "super_admin"
@@ -191,13 +190,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
       toast.error("Failed to fetch meteorological data")
     } finally {
       setLoading(false)
-      setIsRefreshing(false)
     }
-  }
-
-  const handleRefresh = () => {
-    setIsRefreshing(true)
-    fetchData()
   }
 
   useEffect(() => {
@@ -366,6 +359,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
       
           <div className="mb-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 p-4 rounded-lg">
+             
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="icon" onClick={goToPreviousWeek} className="hover:bg-slate-200">
@@ -395,6 +389,8 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                   </Button>
                 </div>
               </div>
+
+
               {isSuperAdmin && (
               <div className="flex items-center gap-2">
                 <Filter size={16} className="text-purple-500" />
