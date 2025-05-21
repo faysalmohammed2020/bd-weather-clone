@@ -813,7 +813,7 @@ export default function WeatherObservationForm() {
                           name="station-id"
                           label="Station ID"
                           accent="orange"
-                          value={session?.user?.stationId || ""}
+                          value={session?.user?.station.stationId || ""}
                           onChange={handleInputChange}
                           disabled
                         />
