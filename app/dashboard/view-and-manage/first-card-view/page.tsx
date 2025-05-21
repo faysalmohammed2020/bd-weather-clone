@@ -23,6 +23,7 @@ import {
 import { toast } from "sonner"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { utcToHour } from "@/lib/utils"
+import { Download } from "lucide-react";
 
 interface Station {
   id: string
@@ -127,6 +128,100 @@ function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
 }
 
 
+const exportToCSV = () => {
+  // Create CSV header
+  const headers = [
+    "Time (GMT)",
+    "Indicator",
+    "Date",
+    "Station ID",
+    "Station Name",
+    "Attached Thermometer (°C)",
+    "Bar As Read (hPa)",
+    "Corrected for Index",
+    "Height Difference Correction (hPa)",
+    "Station Level Pressure (QFE)",
+    "Sea Level Reduction",
+    "Sea Level Pressure (QNH)",
+    "Afternoon Reading",
+    "24-Hour Pressure Change",
+    "Dry Bulb As Read (°C)",
+    "Wet Bulb As Read (°C)",
+    "MAX/MIN Temp As Read (°C)",
+    "Dry Bulb Corrected (°C)",
+    "Wet Bulb Corrected (°C)",
+    "MAX/MIN Temp Corrected (°C)",
+    "Dew Point Temperature (°C)",
+    "Relative Humidity (%)",
+    "Squall Force (KTS)",
+    "Squall Direction (°)",
+    "Squall Time",
+    "Horizontal Visibility (km)",
+    "Misc Meteors (Code)",
+    "Past Weather (W₁)",
+    "Past Weather (W₂)",
+    "Present Weather (ww)",
+    "C2 Indicator"
+  ];
+
+  // Create CSV rows
+  const rows = flattenedData.map(record => {
+    const observingTime = data.find(ot => ot.id === record.observingTimeId);
+    return [
+      utcToHour(observingTime.utcTime.toString()),
+      record.subIndicator || "--",
+      format(new Date(observingTime.utcTime), "yyyy-MM-dd"),
+      observingTime?.stationId || "--",
+      observingTime?.station.name || "--",
+      record.alteredThermometer || "--",
+      record.barAsRead || "--",
+      record.correctedForIndex || "--",
+      record.heightDifference || "--",
+      record.stationLevelPressure || "--",
+      record.seaLevelReduction || "--",
+      record.correctedSeaLevelPressure || "--",
+      record.afternoonReading || "--",
+      record.pressureChange24h || "--",
+      record.dryBulbAsRead || "--",
+      record.wetBulbAsRead || "--",
+      record.maxMinTempAsRead || "--",
+      record.dryBulbCorrected || "--",
+      record.wetBulbCorrected || "--",
+      record.maxMinTempCorrected || "--",
+      record.Td || "--",
+      record.relativeHumidity || "--",
+      record.squallForce || "--",
+      record.squallDirection || "--",
+      record.squallTime || "--",
+      record.horizontalVisibility || "--",
+      record.miscMeteors || "--",
+      record.pastWeatherW1 || "--",
+      record.pastWeatherW2 || "--",
+      record.presentWeatherWW || "--",
+      record.c2Indicator || "--"
+    ];
+  });
+
+  // Combine header and rows
+  const csvContent = [headers, ...rows]
+    .map(row => row.map(field => `"${field}"`).join(","))
+    .join("\n");
+
+  // Create download link
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.setAttribute("download", `meteorological_data_${startDate}_to_${endDate}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  toast.success("CSV export started");
+};
+
+
 export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   const [data, setData] = useState<ObservingTimeEntry[]>([])
   const [flattenedData, setFlattenedData] = useState<MeteorologicalEntry[]>([])
@@ -142,6 +237,7 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
   const { data: session } = useSession()
   const user = session?.user
   const isSuperAdmin = user?.role === "super_admin"
+  const isStationAdmin = user?.role === "station_admin"
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedRecord, setSelectedRecord] = useState<MeteorologicalEntry | null>(null)
   const [selectedObservingTime, setSelectedObservingTime] = useState<ObservingTimeEntry | null>(null)
@@ -301,7 +397,7 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
 
   const handleSaveEdit = async () => {
     if (!selectedRecord) return;
-  
+
     setIsSaving(true);
     try {
       const response = await fetch("/api/first-card-data", {
@@ -314,18 +410,18 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
           ...editFormData,
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to update record");
       }
-  
+
       // Update the local state
       setFlattenedData(prevData =>
-        prevData.map(item => 
+        prevData.map(item =>
           item.id === selectedRecord.id ? { ...item, ...editFormData } : item
         )
       );
-  
+
       // Also update the main data state if needed
       setData(prevData =>
         prevData.map(observingTime => ({
@@ -335,7 +431,7 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
           )
         }))
       );
-  
+
       toast.success("Record updated successfully");
       setIsEditDialogOpen(false);
     } catch (error) {
@@ -354,42 +450,42 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
   return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
       <CardContent className="p-6">
-      
-          <div className="mb-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 p-4 rounded-lg">
-             
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+
+        <div className="mb-6">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 p-4 rounded-lg">
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" onClick={goToPreviousWeek} className="hover:bg-slate-200">
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="icon" onClick={goToPreviousWeek} className="hover:bg-slate-200">
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(e) => handleDateChange("start", e.target.value)}
-                      max={endDate}
-                      className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
-                    />
-                    <span>to</span>
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(e) => handleDateChange("end", e.target.value)}
-                      min={startDate}
-                      max={format(new Date(), "yyyy-MM-dd")}
-                      className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
-                    />
-                  </div>
-                  <Button variant="outline" size="icon" onClick={goToNextWeek} className="hover:bg-slate-200">
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => handleDateChange("start", e.target.value)}
+                    max={endDate}
+                    className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                  />
+                  <span>to</span>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => handleDateChange("end", e.target.value)}
+                    min={startDate}
+                    max={format(new Date(), "yyyy-MM-dd")}
+                    className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                  />
                 </div>
+                <Button variant="outline" size="icon" onClick={goToNextWeek} className="hover:bg-slate-200">
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
+            </div>
 
 
-              {isSuperAdmin && (
+            {isSuperAdmin && (
               <div className="flex items-center gap-2">
                 <Filter size={16} className="text-purple-500" />
                 <Label htmlFor="stationFilter" className="whitespace-nowrap font-medium text-slate-700">
@@ -409,10 +505,23 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                   </SelectContent>
                 </Select>
               </div>
-              )}
-            </div>
+            )}
+
+            {(isSuperAdmin || isStationAdmin) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={exportToCSV}
+                className="flex items-center gap-1 hover:bg-green-50 border-green-200 text-green-700"
+              >
+                <Download className="h-4 w-4" />
+                Export CSV
+              </Button>
+            )}
+
           </div>
-  
+        </div>
+
 
         <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
           <div className="p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300">
@@ -658,9 +767,8 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                         return (
                           <tr
                             key={record.id}
-                            className={`text-center font-mono hover:bg-slate-50 transition-colors ${
-                              rowIndex % 2 === 0 ? "bg-white" : "bg-slate-50"
-                            }`}
+                            className={`text-center font-mono hover:bg-slate-50 transition-colors ${rowIndex % 2 === 0 ? "bg-white" : "bg-slate-50"
+                              }`}
                           >
                             <td className="border border-slate-300 p-1 font-medium text-indigo-700">
                               {utcToHour(observingTime.utcTime.toString())}
