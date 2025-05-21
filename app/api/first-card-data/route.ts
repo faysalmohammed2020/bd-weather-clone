@@ -232,7 +232,7 @@ export async function GET(req: Request) {
       take: 100,
     });
 
-    return NextResponse.json(entries, { status: 200 });
+    return NextResponse.json({entries}, { status: 200 });
   } catch (error: any) {
     console.error("Error fetching meteorological entries:", error);
     return NextResponse.json(
