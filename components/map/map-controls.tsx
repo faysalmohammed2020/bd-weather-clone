@@ -1,26 +1,26 @@
-"use client";
+"use client"
 
-import { useState, useEffect } from "react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import { useState, useEffect } from "react"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useSession } from "@/lib/auth-client";
+} from "@/components/ui/select"
+import { useSession } from "@/lib/auth-client"
 
 interface Station {
-  id: string;
-  stationId: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  securityCode: string;
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  stationId: string
+  name: string
+  latitude: number
+  longitude: number
+  securityCode: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export default function MapControls({
@@ -33,64 +33,56 @@ export default function MapControls({
   selectedStation,
   setSelectedStation,
 }: {
-  selectedRegion: string;
-  setSelectedRegion: (region: string) => void;
-  selectedPeriod: string;
-  setSelectedPeriod: (period: string) => void;
-  selectedIndex: string;
-  setSelectedIndex: (index: string) => void;
-  selectedStation: Station | null;
-  setSelectedStation: (station: Station | null) => void;
+  selectedRegion: string
+  setSelectedRegion: (region: string) => void
+  selectedPeriod: string
+  setSelectedPeriod: (period: string) => void
+  selectedIndex: string
+  setSelectedIndex: (index: string) => void
+  selectedStation: Station | null
+  setSelectedStation: (station: Station | null) => void
 }) {
-  const { data: session } = useSession();
-  const [stations, setStations] = useState<Station[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { data: session } = useSession()
+  const [stations, setStations] = useState<Station[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  // Fetch stations based on user role
   useEffect(() => {
     const fetchStations = async () => {
-      setLoading(true);
-      setError(null);
+      setLoading(true)
+      setError(null)
       try {
-        const response = await fetch("/api/stationlocation");
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-        const data = await response.json();
-        setStations(data);
+        const res = await fetch("/api/stationlocation")
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const data: Station[] = await res.json()
+        setStations(data)
 
-        // If user is station_admin or observer, auto-select their station
-        if (
-          session?.user?.role === "station_admin" ||
-          session?.user?.role === "observer"
-        ) {
-          const userStation = data.find(
-            (station: Station) => station.stationId === session.user.stationId
-          );
-          if (userStation) {
-            setSelectedStation(userStation);
-            setSelectedRegion("station");
+        // Auto-select for station_admin or observer
+        const role = session?.user?.role
+        const userStationId = session?.user?.station?.stationId
+
+        if ((role === "station_admin" || role === "observer") && userStationId) {
+          const found = data.find((s) => s.stationId === userStationId)
+          if (found) {
+            setSelectedStation(found)
+            setSelectedRegion("station")
           }
         }
       } catch (err) {
-        setError("Failed to fetch stations");
-        console.error("Error fetching stations:", err);
+        console.error("Error fetching stations:", err)
+        setError("Failed to load stations.")
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchStations();
-  }, [session, setSelectedStation, setSelectedRegion]);
+    fetchStations()
+  }, [session, setSelectedRegion, setSelectedStation])
 
-  // Filter stations based on user role
   const permittedStations =
-    session?.user.role === "super_admin"
+    session?.user?.role === "super_admin"
       ? stations
-      : stations.filter(
-          (station) => station.stationId === session?.user.stationId
-        );
+      : stations.filter((s) => s.stationId === session?.user?.station?.stationId)
 
   return (
     <div className="p-4">
@@ -98,12 +90,12 @@ export default function MapControls({
         Map Controls
       </h3>
 
-<label className="block text-sm font-medium text-gray-700 mb-1.5">Stations</label>
+      <Label className="block text-sm font-medium text-gray-700 mb-1.5">Stations</Label>
       <Select
         value={selectedStation?.stationId || ""}
         onValueChange={(value) => {
-          const station = stations.find((s) => s.stationId === value);
-          setSelectedStation(station || null);
+          const station = stations.find((s) => s.stationId === value)
+          setSelectedStation(station || null)
         }}
         disabled={loading || permittedStations.length === 0}
       >
@@ -113,21 +105,21 @@ export default function MapControls({
               loading
                 ? "Loading..."
                 : permittedStations.length === 0
-                  ? "No stations"
-                  : "Select Station"
+                ? "No stations"
+                : "Select Station"
             }
           />
         </SelectTrigger>
         <SelectContent>
           {permittedStations.map((station) => (
             <SelectItem key={station.id} value={station.stationId}>
-              {station.name}
+              {station.name} ({station.stationId})
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
 
-      {error && <div className="mt-4 text-red-600 text-sm">Error: {error}</div>}
+      {error && <div className="mt-2 text-sm text-red-600">{error}</div>}
     </div>
-  );
+  )
 }
