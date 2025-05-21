@@ -227,7 +227,7 @@ function createWeatherMarker(
     </div>
     <div style="display: flex; justify-content: space-between;">
       <span>Wind:</span>
-      <span>${data.windSpeed} km/h</span>
+      <span>${data.windSpeed} NM</span>
     </div>
   `);
 
@@ -725,7 +725,7 @@ export default function MapComponent() {
           </div>
           <div className="flex items-center gap-1">
             <Wind className="h-4 w-4 text-gray-400" />
-            <span>12 km/h</span>
+            <span>12 NM</span>
           </div>
         </div>
       </div>
@@ -837,7 +837,7 @@ export default function MapComponent() {
           </div>
           <div className="flex items-center gap-1">
             <Wind className="h-4 w-4 text-gray-500" />
-            <span>Wind: 12 km/h</span>
+            <span>Wind: 12 NM</span>
           </div>
         </div>
         <div className="mt-3 text-sm text-gray-600 capitalize">

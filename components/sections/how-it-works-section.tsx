@@ -52,7 +52,7 @@ const currentWeatherData = [
   { name: "Temp", value: 28.5, unit: "°C" },
   { name: "Humidity", value: 78, unit: "%" },
   { name: "Rainfall", value: 12, unit: "mm" },
-  { name: "Wind", value: 8, unit: "km/h" },
+  { name: "Wind", value: 8, unit: "NM" },
 ];
 
 export default function HowItWorksSection() {

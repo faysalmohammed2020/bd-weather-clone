@@ -200,7 +200,7 @@ function StationMarkers({
                         <Wind className="h-4 w-4 mr-2 text-gray-500" />
                         <div className="text-xs">
                           <span className="font-medium">Wind Speed: </span>
-                          {weatherData.windSpeed ? `${weatherData.windSpeed} km/h` : "No data"}
+                          {weatherData.windSpeed ? `${weatherData.windSpeed} NM` : "No data"}
                         </div>
                       </div>
 
@@ -422,7 +422,7 @@ export default function MapComponent({
                   <Wind className="h-4 w-4 mr-2 text-gray-500" />
                   <div className="text-xs">
                     <span className="font-medium">Wind Speed: </span>
-                    {weatherData.windSpeed ? `${weatherData.windSpeed} km/h` : "No data"}
+                    {weatherData.windSpeed ? `${weatherData.windSpeed} NM` : "No data"}
                   </div>
                 </div>
 

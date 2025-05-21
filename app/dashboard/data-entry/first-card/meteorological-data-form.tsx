@@ -267,7 +267,10 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       correctionEntry.sea_level_pressure?.[closestPressure.toString()];
 
     return {
-      stationLevelPressure: Math.round(stationLevelPressure * 10).toString(), // e.g., "10041"
+      stationLevelPressure: Math.round(stationLevelPressure * 10)
+        .toString()
+        .padStart(5, "0"),
+      // e.g., "10041"
       heightDifference: `+${Math.round(heightCorrection * 100)}`, // e.g., "+95"
       seaLevelReduction:
         seaLevelCorrection !== undefined
@@ -326,7 +329,9 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
     return {
       seaLevelReduction: `+${Math.round(seaLevelReduction * 100)}`, // e.g., 0.95 → "+95"
-      correctedSeaLevelPressure: Math.round(seaLevelPressure * 10).toString(), // e.g., 1004.1 → "10041"
+      correctedSeaLevelPressure: Math.round(seaLevelPressure * 10)
+        .toString()
+        .padStart(5, "0"),
     };
   };
 

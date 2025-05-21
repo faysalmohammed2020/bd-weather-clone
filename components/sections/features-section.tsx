@@ -89,7 +89,7 @@ export default function FeaturesSection() {
           value={65}
           maxValue={100}
           color="purple"
-          label="km/h"
+          label="NM"
           className="h-32 w-full mt-4"
         />
       ),
