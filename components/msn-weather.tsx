@@ -11,7 +11,6 @@ import {
   Cloud,
   CloudSun,
   AlertTriangle,
-  ThermometerSnowflake,
 } from "lucide-react"
 import { useSession } from "@/lib/auth-client"
 import { useEffect, useState } from "react"
