@@ -306,11 +306,19 @@ export default function SynopticMeasurementsTab() {
         body: JSON.stringify(payload),
       });
 
-      if (response.ok) {
-        toast.success("✅ Synoptic data saved successfully");
-      } else {
-        const error = await response.json();
-        toast.error(error.message || "❌ Failed to save data");
+      const result = await response.json();
+
+
+      if(!result.success){
+        return toast.error(result.error);
+      }
+
+      if (!response.ok) {
+        return toast.error(result.error);
+      }
+
+      if (result.success) {
+        toast.success(result.message);
       }
     } catch (error) {
       console.error("Submit error:", error);
