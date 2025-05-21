@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { utcToHour } from "@/lib/utils"
 
 interface Station {
   id: string
@@ -668,10 +669,10 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                             }`}
                           >
                             <td className="border border-slate-300 p-1 font-medium text-indigo-700">
-                              {time.split(":")[0] || "--"}
+                              {utcToHour(observingTime.utcTime.toString())}
                             </td>
                             <td className="border border-slate-300 p-1">{record.subIndicator || "--"}</td>
-                            <td className="border border-slate-300 p-1 font-medium text-indigo-700">{recordDate}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-indigo-700 whitespace-nowrap">{recordDate}</td>
                             <td className="border border-slate-300 p-1">
                               <Badge variant="outline" className="font-mono">
                                 {observingTime.station.stationId || "--"}
