@@ -165,7 +165,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
 
       // Flatten the data for easier display
       const flattened: MeteorologicalEntry[] = []
-      result.forEach((observingTime: ObservingTimeEntry) => {
+      result.entries.forEach((observingTime: ObservingTimeEntry) => {
         observingTime.MeteorologicalEntry.forEach((entry: MeteorologicalEntry) => {
           flattened.push({
             ...entry,
