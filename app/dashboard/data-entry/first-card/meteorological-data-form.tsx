@@ -30,7 +30,7 @@ import { useHour } from "@/contexts/hourContext";
 type MeteorologicalFormData = {
   presentWeatherWW?: string;
   subIndicator?: string;
-  alteredThermometer?: string;
+  attachedThermometer?: string;
   barAsRead?: string;
   correctedForIndex?: string;
   heightDifference?: string;
@@ -691,13 +691,13 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="alteredThermometer">
-                      Altered Thermometer
+                    <Label htmlFor="attachedThermometer">
+                      Attached Thermometer
                     </Label>
                     <Input
-                      id="alteredThermometer"
-                      name="alteredThermometer"
-                      value={formData.alteredThermometer || ""}
+                      id="attachedThermometer"
+                      name="attachedThermometer"
+                      value={formData.attachedThermometer || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
                     />
