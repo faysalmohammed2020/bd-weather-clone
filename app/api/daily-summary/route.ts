@@ -185,7 +185,7 @@ export async function GET(req: Request) {
         ? (parseFloat(summary.minTemperature as any) / 10).toFixed(1)
         : summary.minTemperature,
       lowestVisibility: summary.lowestVisibility
-        ? (parseFloat(summary.lowestVisibility as any) / 10).toFixed(1)
+        ? parseFloat(summary.lowestVisibility as any).toFixed(1)
         : summary.lowestVisibility,
     };
 
