@@ -1,298 +1,307 @@
-"use client";
+"use client"
 
-import type React from "react";
+import type React from "react"
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  CloudSun,
-  Filter,
-  RefreshCw,
-  Loader2,
-} from "lucide-react";
-import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { useSession } from "@/lib/auth-client";
+import { useState, useEffect } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Calendar, ChevronLeft, ChevronRight, CloudSun, Filter, Loader2, AlertTriangle } from "lucide-react"
+import { format, parseISO, differenceInDays, isValid } from "date-fns"
+import { Badge } from "@/components/ui/badge"
+import { useSession } from "@/lib/auth-client"
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { toast } from "sonner";
+  DialogDescription,
+} from "@/components/ui/dialog"
+import { toast } from "sonner"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { utcToHour } from "@/lib/utils"
+
+interface Station {
+  id: string
+  stationId: string
+  name: string
+  securityCode: string
+  latitude: number
+  longitude: number
+  createdAt: string
+  updatedAt: string
+}
 
 interface MeteorologicalEntry {
-  id: string;
-  userId: string;
-  dataType: string;
-  stationNo: string;
-  stationName: string;
-  year: string;
-  subIndicator: string;
-  alteredThermometer: string;
-  barAsRead: string;
-  correctedForIndex: string;
-  heightDifference: string;
-  correctionForTemp: string;
-  stationLevelPressure: string;
-  seaLevelReduction: string;
-  correctedSeaLevelPressure: string;
-  afternoonReading: string;
-  pressureChange24h: string;
-  dryBulbAsRead: string;
-  wetBulbAsRead: string;
-  maxMinTempAsRead: string;
-  dryBulbCorrected: string;
-  wetBulbCorrected: string;
-  maxMinTempCorrected: string;
-  Td: string;
-  relativeHumidity: string;
-  squallConfirmed: string;
-  squallForce: string;
-  squallDirection: string;
-  squallTime: string;
-  horizontalVisibility: string;
-  miscMeteors: string;
-  pastWeatherW1: string;
-  pastWeatherW2: string;
-  presentWeatherWW: string;
-  c2Indicator: string;
-  observationTime: string;
-  timestamp: string;
+  id: string
+  observingTimeId: string
+  dataType: string
+  subIndicator: string
+  alteredThermometer: string
+  barAsRead: string
+  correctedForIndex: string
+  heightDifference: string
+  correctionForTemp: string
+  stationLevelPressure: string
+  seaLevelReduction: string
+  correctedSeaLevelPressure: string
+  afternoonReading: string
+  pressureChange24h: string
+  dryBulbAsRead: string
+  wetBulbAsRead: string
+  maxMinTempAsRead: string
+  dryBulbCorrected: string
+  wetBulbCorrected: string
+  maxMinTempCorrected: string
+  Td: string
+  relativeHumidity: string
+  squallConfirmed: string
+  squallForce: string
+  squallDirection: string
+  squallTime: string
+  horizontalVisibility: string
+  miscMeteors: string
+  pastWeatherW1: string
+  pastWeatherW2: string
+  presentWeatherWW: string
+  c2Indicator: string
+  submittedAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+interface ObservingTimeEntry {
+  id: string
+  userId: string
+  stationId: string
+  utcTime: string
+  localTime: string
+  createdAt: string
+  updatedAt: string
+  station: Station
+  MeteorologicalEntry: MeteorologicalEntry[]
 }
 
 interface FirstCardTableProps {
-  refreshTrigger?: number;
+  refreshTrigger?: number
 }
 
+function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
+  if (!user) return false
+
+  // If no submittedAt, allow edit (newly created record)
+  if (!record.createdAt) return true
+
+  try {
+    const submissionDate = parseISO(record.createdAt)
+    if (!isValid(submissionDate)) return true
+
+    const now = new Date()
+    const daysDifference = differenceInDays(now, submissionDate)
+
+    const role = user.role
+    const userId = user.id
+    const userStationId = user.station?.id
+    const recordStationId = record.ObservingTime.stationId
+
+    const recordUserId = record.ObservingTime.userId
+
+    if (role === "super_admin") return daysDifference <= 365
+
+    if (role === "station_admin") {
+      return daysDifference <= 30 && userStationId === recordStationId
+    }
+
+    if (role === "observer") {
+      return daysDifference <= 2 && userId === recordUserId
+    }
+
+    return false
+  } catch (e) {
+    console.warn("Error in canEditRecord:", e)
+    return false
+  }
+}
+
+
 export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
-  const [data, setData] = useState<MeteorologicalEntry[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(
-    format(new Date(), "yyyy-MM-dd")
-  );
-  const [stationFilter, setStationFilter] = useState("all");
-  const [stationNames, setStationNames] = useState<string[]>([]);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const { data: session } = useSession();
-  const user = session?.user;
+  const [data, setData] = useState<ObservingTimeEntry[]>([])
+  const [flattenedData, setFlattenedData] = useState<MeteorologicalEntry[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Edit modal state
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] =
-    useState<MeteorologicalEntry | null>(null);
-  const [editFormData, setEditFormData] = useState<
-    Partial<MeteorologicalEntry>
-  >({});
-  const [isSaving, setIsSaving] = useState(false);
+  // Initialize with today's date by default
+  const today = format(new Date(), "yyyy-MM-dd")
+  const [startDate, setStartDate] = useState(today)
+  const [endDate, setEndDate] = useState(today)
+  const [dateError, setDateError] = useState<string | null>(null)
+  const [stationFilter, setStationFilter] = useState("all")
+  const [stations, setStations] = useState<Station[]>([])
+  const { data: session } = useSession()
+  const user = session?.user
+  const isSuperAdmin = user?.role === "super_admin"
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [selectedRecord, setSelectedRecord] = useState<MeteorologicalEntry | null>(null)
+  const [selectedObservingTime, setSelectedObservingTime] = useState<ObservingTimeEntry | null>(null)
+  const [editFormData, setEditFormData] = useState<Partial<MeteorologicalEntry>>({})
+  const [isSaving, setIsSaving] = useState(false)
+  const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false)
 
-  // Fetch data from API
   const fetchData = async () => {
     try {
-      setLoading(true);
-      const response = await fetch("/api/first-card-data");
+      setLoading(true)
+
+      // Fetch meteorological data with date range
+      const response = await fetch(
+        `/api/first-card-data?startDate=${startDate}&endDate=${endDate}${stationFilter !== "all" ? `&stationId=${stationFilter}` : ""}`,
+      )
       if (!response.ok) {
-        throw new Error("Failed to fetch data");
+        throw new Error("Failed to fetch data")
       }
-      const result = await response.json();
-      setData(result.entries);
+      const result = await response.json()
+      setData(result.entries || [])
 
-      // Extract unique station names
-      const names = new Set<string>();
-      result.entries.forEach((item: MeteorologicalEntry) => {
-        if (item.stationName) {
-          names.add(item.stationName);
+      // Flatten the data for easier display
+      const flattened: MeteorologicalEntry[] = []
+      result.entries.forEach((observingTime: ObservingTimeEntry) => {
+        observingTime.MeteorologicalEntry.forEach((entry: MeteorologicalEntry) => {
+          flattened.push({
+            ...entry,
+            observingTimeId: observingTime.id,
+            stationId: observingTime.stationId,
+          })
+        })
+      })
+      setFlattenedData(flattened)
+
+      // Fetch stations if super admin
+      if (isSuperAdmin) {
+        const stationsResponse = await fetch("/api/stations")
+        if (!stationsResponse.ok) {
+          throw new Error("Failed to fetch stations")
         }
-      });
-      setStationNames(Array.from(names));
+        const stationsResult = await stationsResponse.json()
+        setStations(stationsResult)
+      }
     } catch (error) {
-      console.error("Error fetching data:", error);
-      toast.error("Failed to fetch meteorological data");
+      console.error("Error fetching data:", error)
+      toast.error("Failed to fetch meteorological data")
     } finally {
-      setLoading(false);
-      setIsRefreshing(false);
+      setLoading(false)
     }
-  };
+  }
 
-  // Refresh data manually
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    fetchData();
-  };
-
-  // Fetch data on component mount and when refreshTrigger changes
   useEffect(() => {
-    fetchData();
-  }, [refreshTrigger]);
+    fetchData()
+  }, [refreshTrigger, startDate, endDate, stationFilter])
 
-  // Filter data based on selected date and station
-  const filteredData = data.filter((item) => {
-    if (!item.timestamp) return false;
+  const goToPreviousWeek = () => {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const daysInRange = differenceInDays(end, start)
 
-    const itemDate = format(new Date(item.timestamp), "yyyy-MM-dd");
-    const matchesDate = itemDate === selectedDate;
-    const matchesStation =
-      stationFilter === "all" || item.stationName === stationFilter;
+    const newStart = new Date(start)
+    newStart.setDate(start.getDate() - daysInRange - 1)
 
-    return matchesDate && matchesStation;
-  });
+    const newEnd = new Date(start)
+    newEnd.setDate(start.getDate() - 1)
 
-  // Navigate to previous day
-  const goToPreviousDay = () => {
-    const currentDate = new Date(selectedDate);
-    const previousDay = new Date(currentDate);
-    previousDay.setDate(currentDate.getDate() - 1);
-    setSelectedDate(format(previousDay, "yyyy-MM-dd"));
-  };
+    // Don't update if the new range would be invalid
+    if (newStart <= newEnd) {
+      setStartDate(format(newStart, "yyyy-MM-dd"))
+      setEndDate(format(newEnd, "yyyy-MM-dd"))
+      setDateError(null)
+    }
+  }
 
-  // Navigate to next day
-  const goToNextDay = () => {
-    const currentDate = new Date(selectedDate);
-    const nextDay = new Date(currentDate);
-    nextDay.setDate(currentDate.getDate() + 1);
-    setSelectedDate(format(nextDay, "yyyy-MM-dd"));
-  };
+  const goToNextWeek = () => {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const daysInRange = differenceInDays(end, start)
 
-  // Export to CSV
-  const exportToCSV = () => {
-    // Create CSV content
-    const headers = [
-      "Time",
-      "Station",
-      "Bar As Read",
-      "Corrected For Index",
-      "Height Difference",
-      "Station Level Pressure",
-      "Sea Level Reduction",
-      "Sea Level Pressure",
-      "Dry Bulb As Read",
-      "Wet Bulb As Read",
-      "Max/Min Temp As Read",
-      "Dry Bulb Corrected",
-      "Wet Bulb Corrected",
-      "Dew Point",
-      "Relative Humidity",
-      "Horizontal Visibility",
-      "Present Weather",
-    ];
+    const newStart = new Date(end)
+    newStart.setDate(end.getDate() + 1)
 
-    const csvRows = [
-      headers.join(","),
-      ...filteredData.map((item) => {
-        const time = item.observationTime || "N/A";
+    const newEnd = new Date(end)
+    newEnd.setDate(end.getDate() + daysInRange + 1)
 
-        return [
-          time,
-          item.stationName || "N/A",
-          item.barAsRead || "N/A",
-          item.correctedForIndex || "N/A",
-          item.heightDifference || "N/A",
-          item.stationLevelPressure || "N/A",
-          item.seaLevelReduction || "N/A",
-          item.correctedSeaLevelPressure || "N/A",
-          item.dryBulbAsRead || "N/A",
-          item.wetBulbAsRead || "N/A",
-          item.maxMinTempAsRead || "N/A",
-          item.dryBulbCorrected || "N/A",
-          item.wetBulbCorrected || "N/A",
-          item.Td || "N/A",
-          item.relativeHumidity || "N/A",
-          item.horizontalVisibility || "N/A",
-          item.presentWeatherWW || "N/A",
-        ].join(",");
-      }),
-    ];
+    // Don't allow future dates beyond today
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
 
-    const csvContent = csvRows.join("\n");
+    if (newStart > today) {
+      setDateError("Cannot select future dates")
+      return
+    }
 
-    // Create and download the CSV file
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", `meteorological-data-${selectedDate}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
+    // Don't update if the new range would be invalid
+    if (newStart <= newEnd) {
+      setStartDate(format(newStart, "yyyy-MM-dd"))
+      setEndDate(format(newEnd, "yyyy-MM-dd"))
+      setDateError(null)
+    }
+  }
 
-  // Get weather status color based on relative humidity
   const getWeatherStatusColor = (humidity: string) => {
-    const humidityValue = Number.parseInt(humidity || "0");
-    if (humidityValue >= 80) return "bg-blue-500";
-    if (humidityValue >= 60) return "bg-green-500";
-    if (humidityValue >= 40) return "bg-yellow-500";
-    if (humidityValue >= 20) return "bg-orange-500";
-    return "bg-red-500";
-  };
+    const humidityValue = Number.parseInt(humidity || "0")
+    if (humidityValue >= 80) return "bg-blue-500"
+    if (humidityValue >= 60) return "bg-green-500"
+    if (humidityValue >= 40) return "bg-yellow-500"
+    if (humidityValue >= 20) return "bg-orange-500"
+    return "bg-red-500"
+  }
 
-  // Format data type for display (assuming it's stored as a string like "AB")
-  const formatDataType = (dataType?: string) => {
-    if (!dataType) return "--";
-    return dataType.length >= 2
-      ? `${dataType[0] || "-"}${dataType[1] || "-"}`
-      : "--";
-  };
+  const handleEditClick = (record: MeteorologicalEntry, observingTime: ObservingTimeEntry) => {
+    if (user && canEditRecord(record, user)) {
+      setSelectedRecord(record)
+      setSelectedObservingTime(observingTime)
+      setEditFormData(record)
+      setIsEditDialogOpen(true)
+    } else {
+      setIsPermissionDeniedOpen(true)
+    }
+  }
 
-  // Format station number for display (assuming it's stored as a string like "12345")
-  const formatStationNo = (stationNo?: string) => {
-    if (!stationNo) return "-----";
-    return stationNo.padEnd(5, "-").substring(0, 5);
-  };
+  const handleDateChange = (type: "start" | "end", newDate: string) => {
+    const date = new Date(newDate)
+    const otherDate = type === "start" ? new Date(endDate) : new Date(startDate)
 
-  // Format year for display (assuming it's stored as a string like "23")
-  const formatYear = (year?: string) => {
-    if (!year) return "--";
-    return year.length >= 2 ? `${year[0] || "-"}${year[1] || "-"}` : "--";
-  };
+    if (isNaN(date.getTime())) {
+      setDateError("Invalid date format")
+      return
+    }
 
-  const filteredYear = filteredData[0]?.timestamp
-    ? new Date(filteredData[0].timestamp).getFullYear().toString().slice(-2)
-    : new Date().getFullYear().toString().slice(-2);
+    // Reset error if dates are valid
+    setDateError(null)
 
-  // Handle opening the edit dialog
-  const handleEditClick = (record: MeteorologicalEntry) => {
-    setSelectedRecord(record);
-    setEditFormData(record);
-    setIsEditDialogOpen(true);
-  };
+    if (type === "start") {
+      if (date > otherDate) {
+        setDateError("Start date cannot be after end date")
+        return
+      }
+      setStartDate(newDate)
+    } else {
+      if (date < otherDate) {
+        setDateError("End date cannot be before start date")
+        return
+      }
+      setEndDate(newDate)
+    }
+  }
 
-  // Handle input changes in the edit form
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
+    const { id, value } = e.target
     setEditFormData((prev) => ({
       ...prev,
       [id]: value,
-    }));
-  };
+    }))
+  }
 
-  // Handle select changes in the edit form
-  const handleEditSelectChange = (id: string, value: string) => {
-    setEditFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
-
-  // Save the edited record
   const handleSaveEdit = async () => {
     if (!selectedRecord) return;
-
+  
     setIsSaving(true);
     try {
       const response = await fetch("/api/first-card-data", {
@@ -301,27 +310,33 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          id: selectedRecord.id,
+          id: selectedRecord.id, // Make sure to include the ID
           ...editFormData,
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error("Failed to update record");
       }
-
-      const result = await response.json();
-
-      // Update the data in the local state
-      setData((prevData) =>
-        prevData.map((item) =>
+  
+      // Update the local state
+      setFlattenedData(prevData =>
+        prevData.map(item => 
           item.id === selectedRecord.id ? { ...item, ...editFormData } : item
         )
       );
-
+  
+      // Also update the main data state if needed
+      setData(prevData =>
+        prevData.map(observingTime => ({
+          ...observingTime,
+          MeteorologicalEntry: observingTime.MeteorologicalEntry.map(entry =>
+            entry.id === selectedRecord.id ? { ...entry, ...editFormData } : entry
+          )
+        }))
+      );
+  
       toast.success("Record updated successfully");
-
-      // Close the dialog
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error("Error updating record:", error);
@@ -331,115 +346,83 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
     }
   };
 
+  const getStationNameById = (stationId: string): string => {
+    const station = stations.find((s) => s.stationId === stationId)
+    return station ? station.name : stationId
+  }
+
   return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
-      <CardHeader className="p-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <CloudSun size={24} className="text-yellow-300" />
-            <CardTitle className="text-xl font-bold">
-              Meteorological Data Dashboard
-            </CardTitle>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={handleRefresh}
-              variant="outline"
-              size="sm"
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20"
-            >
-              <RefreshCw
-                size={16}
-                className={isRefreshing ? "animate-spin" : ""}
-              />
-              <span className="ml-1">Refresh</span>
-            </Button>
-            <Button
-              onClick={exportToCSV}
-              className="gap-1 bg-emerald-500 hover:bg-emerald-600 text-white"
-              size="sm"
-            >
-              <Download size={16} /> Export CSV
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-
       <CardContent className="p-6">
-        {/* Date and Station Filters */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 bg-slate-100 p-4 rounded-lg">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={goToPreviousDay}
-              className="hover:bg-slate-200"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
+      
+          <div className="mb-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 p-4 rounded-lg">
+             
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon" onClick={goToPreviousWeek} className="hover:bg-slate-200">
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
 
-            <div className="relative">
-              <Calendar className="absolute left-2 top-2.5 h-4 w-4 text-purple-500" />
-              <Input
-                type="date"
-                className="pl-8 w-40 border-slate-300 focus:border-purple-500 focus:ring-purple-500"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-              />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="date"
+                      value={startDate}
+                      onChange={(e) => handleDateChange("start", e.target.value)}
+                      max={endDate}
+                      className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                    />
+                    <span>to</span>
+                    <input
+                      type="date"
+                      value={endDate}
+                      onChange={(e) => handleDateChange("end", e.target.value)}
+                      min={startDate}
+                      max={format(new Date(), "yyyy-MM-dd")}
+                      className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                    />
+                  </div>
+                  <Button variant="outline" size="icon" onClick={goToNextWeek} className="hover:bg-slate-200">
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+
+              {isSuperAdmin && (
+              <div className="flex items-center gap-2">
+                <Filter size={16} className="text-purple-500" />
+                <Label htmlFor="stationFilter" className="whitespace-nowrap font-medium text-slate-700">
+                  Station:
+                </Label>
+                <Select value={stationFilter} onValueChange={setStationFilter}>
+                  <SelectTrigger className="w-[200px] border-slate-300 focus:ring-purple-500">
+                    <SelectValue placeholder="All Stations" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Stations</SelectItem>
+                    {stations.map((station) => (
+                      <SelectItem key={station.id} value={station.stationId}>
+                        {station.name} ({station.stationId})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              )}
             </div>
-
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={goToNextDay}
-              className="hover:bg-slate-200"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
           </div>
+  
 
-          <div className="flex items-center gap-2">
-            <Filter size={16} className="text-purple-500" />
-            <Label
-              htmlFor="stationFilter"
-              className="whitespace-nowrap font-medium text-slate-700"
-            >
-              Station:
-            </Label>
-            <Select value={stationFilter} onValueChange={setStationFilter}>
-              <SelectTrigger className="w-[200px] border-slate-300 focus:ring-purple-500">
-                <SelectValue placeholder="All Stations" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Stations</SelectItem>
-                {stationNames.map((name) => (
-                  <SelectItem key={name} value={name}>
-                    {name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Form View */}
         <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
-          {/* Header Section */}
           <div className="p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300">
             <div className="flex justify-around gap-4">
               <div className="flex flex-col">
-                <Label
-                  htmlFor="dataType"
-                  className="text-sm font-medium text-slate-900 mb-2"
-                >
-                  DATA TYPE
-                </Label>
+                <Label className="text-sm font-medium text-slate-900 mb-2">DATA TYPE</Label>
                 <div className="flex gap-1">
                   {["S", "Y"].map((char, i) => (
                     <Input
                       key={`dataType-${i}`}
-                      id={`dataType-${i}`}
                       className="w-12 text-center p-2 bg-slate-100 border border-slate-400 shadow-sm"
                       defaultValue={char}
                       readOnly
@@ -448,19 +431,15 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                 </div>
               </div>
               <div>
-                <div className="font-bold uppercase text-slate-600 ">
-                  STATION NO
-                </div>
+                <div className="font-bold uppercase text-slate-600">STATION NO</div>
                 <div className="flex h-10 border border-slate-400 rounded-lg p-2 mx-auto">
-                  {user?.station.stationId || "N/A"}
+                  {user?.station?.stationId || "N/A"}
                 </div>
               </div>
               <div>
-                <div className="font-bold uppercase text-slate-600">
-                  STATION NAME
-                </div>
+                <div className="font-bold uppercase text-slate-600">STATION NAME</div>
                 <div className="h-10 border border-slate-400 p-2 mx-auto flex items-cente font-mono rounded-md">
-                  {user?.station.name || "N/A"}
+                  {user?.station?.name || "N/A"}
                 </div>
               </div>
 
@@ -468,17 +447,16 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                 <div className="font-bold uppercase text-slate-600">YEAR</div>
                 <div className="flex mt-1">
                   <div className="w-12 h-10 border border-slate-400 flex items-center justify-center p-2 font-mono rounded-l-md">
-                    {filteredYear[0]}
+                    {new Date().getFullYear().toString().slice(-2, -1)}
                   </div>
                   <div className="w-12 h-10 border-t border-r border-b border-slate-400 flex items-center justify-center p-2 font-mono rounded-r-md">
-                    {filteredYear[1]}
+                    {new Date().getFullYear().toString().slice(-1)}
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Main Table Section */}
           <div className="p-4">
             <div className="text-center font-bold text-xl border-b-2 border-indigo-600 pb-2 mb-4 text-indigo-800">
               METEOROLOGICAL DATA
@@ -486,7 +464,6 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
 
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
-                {/* Table Header */}
                 <thead>
                   <tr>
                     <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
@@ -494,6 +471,12 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
                       CI
+                    </th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
+                      Date
+                    </th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
+                      Station
                     </th>
                     <th
                       colSpan={9}
@@ -550,52 +533,40 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                   </tr>
                   <tr>
                     <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
-                      <div className="h-16 text-indigo-800">
-                        Time of Observation (GMT)
-                      </div>
+                      <div className="h-16 text-indigo-800">Time of Observation (GMT)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
                       <div className="h-16 text-indigo-800">Indicator</div>
                     </th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
-                      <div className="h-16 text-purple-800">
-                        Attached Thermometer (°C)
-                      </div>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
+                      <div className="h-16 text-indigo-800">Date</div>
+                    </th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
+                      <div className="h-16 text-indigo-800">Station ID</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
-                      <div className="h-16 text-purple-800">
-                        Bar As Read (hPa)
-                      </div>
+                      <div className="h-16 text-purple-800">Attached Thermometer (°C)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
-                      <div className="h-16 text-purple-800">
-                        Corrected for Index
-                      </div>
+                      <div className="h-16 text-purple-800">Bar As Read (hPa)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
-                      <div className="h-16 text-purple-800">
-                        Height Difference Correction (hPa)
-                      </div>
+                      <div className="h-16 text-purple-800">Corrected for Index</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
-                      <div className="h-16 text-purple-800">
-                        Station Level Pressure (QFE)
-                      </div>
+                      <div className="h-16 text-purple-800">Height Difference Correction (hPa)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
-                      <div className="h-16 text-purple-800">
-                        Sea Level Reduction
-                      </div>
+                      <div className="h-16 text-purple-800">Station Level Pressure (QFE)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
-                      <div className="h-16 text-purple-800">
-                        Sea Level Pressure (QNH)
-                      </div>
+                      <div className="h-16 text-purple-800">Sea Level Reduction</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
-                      <div className="h-16 text-purple-800">
-                        Afternoon Reading
-                      </div>
+                      <div className="h-16 text-purple-800">Sea Level Pressure (QNH)</div>
+                    </th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
+                      <div className="h-16 text-purple-800">Afternoon Reading</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
                       <div className="h-16 text-purple-800">24-Hour Change</div>
@@ -619,14 +590,10 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                       <div className="h-16 text-cyan-800">MAX/MIN (°C)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-teal-50 to-teal-100 text-xs p-1">
-                      <div className="h-16 text-teal-800">
-                        Dew Point Temperature (°C)
-                      </div>
+                      <div className="h-16 text-teal-800">Dew Point Temperature (°C)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-teal-50 to-teal-100 text-xs p-1">
-                      <div className="h-16 text-teal-800">
-                        Relative Humidity (%)
-                      </div>
+                      <div className="h-16 text-teal-800">Relative Humidity (%)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 text-xs p-1">
                       <div className="h-16 text-amber-800">Force (KTS)</div>
@@ -638,14 +605,10 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                       <div className="h-16 text-amber-800">Time (q1)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1">
-                      <div className="h-16 text-blue-800">
-                        Horizontal Visibility (km)
-                      </div>
+                      <div className="h-16 text-blue-800">Horizontal Visibility (km)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1">
-                      <div className="h-16 text-blue-800">
-                        Misc. Meteors (Code)
-                      </div>
+                      <div className="h-16 text-blue-800">Misc. Meteors (Code)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 text-xs p-1">
                       <div className="h-16 text-emerald-800">Past W₁</div>
@@ -664,165 +627,144 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan={25} className="text-center py-8">
+                      <td colSpan={27} className="text-center py-8">
                         <div className="flex justify-center items-center">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                          <span className="ml-3 text-indigo-600 font-medium">
-                            Loading data...
-                          </span>
+                          <span className="ml-3 text-indigo-600 font-medium">Loading data...</span>
                         </div>
                       </td>
                     </tr>
-                  ) : filteredData.length === 0 ? (
+                  ) : data.length === 0 ? (
                     <tr>
-                      <td colSpan={25} className="text-center py-12">
+                      <td colSpan={27} className="text-center py-12">
                         <div className="flex flex-col items-center justify-center text-slate-500">
                           <CloudSun size={48} className="text-slate-400 mb-3" />
-                          <p className="text-lg font-medium">
-                            No meteorological data found
-                          </p>
-                          <p className="text-sm">
-                            Try selecting a different date or station
-                          </p>
+                          <p className="text-lg font-medium">No meteorological data found</p>
+                          <p className="text-sm">Try selecting a different date or station</p>
                         </div>
                       </td>
                     </tr>
                   ) : (
-                    filteredData.map((record, index) => {
-                      const time = record.observationTime || "--:--";
-                      const humidityClass = getWeatherStatusColor(
-                        record.relativeHumidity
-                      );
+                    data.flatMap((observingTime, obsIndex) =>
+                      observingTime.MeteorologicalEntry.map((record, entryIndex) => {
+                        const time = observingTime.utcTime ? format(new Date(observingTime.utcTime), "HH:mm") : "--:--"
+                        const humidityClass = getWeatherStatusColor(record.relativeHumidity)
+                        const recordDate = observingTime.utcTime
+                          ? format(new Date(observingTime.utcTime), "yyyy-MM-dd")
+                          : "--"
+                        const canEdit = user && canEditRecord(record, user)
+                        const rowIndex = obsIndex * observingTime.MeteorologicalEntry.length + entryIndex
 
-                      return (
-                        <tr
-                          key={record.id}
-                          className="text-center font-mono hover:bg-slate-50 transition-colors"
-                        >
-                          <td className="border border-slate-300 p-1 font-medium text-indigo-700">
-                            {time.split(":")[0] || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.subIndicator || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.alteredThermometer || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1 font-medium text-purple-700">
-                            {record.barAsRead || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.correctedForIndex || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.heightDifference || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1 font-medium text-purple-700">
-                            {record.stationLevelPressure || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.seaLevelReduction || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1 font-medium text-purple-700">
-                            {record.correctedSeaLevelPressure || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.afternoonReading || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.pressureChange24h || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1 font-medium text-cyan-700">
-                            {record.dryBulbAsRead || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.wetBulbAsRead || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.maxMinTempAsRead || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1 font-medium text-cyan-700">
-                            {record.dryBulbCorrected || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.wetBulbCorrected || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.maxMinTempCorrected || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1 font-medium text-teal-700">
-                            {record.Td || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            <Badge
-                              variant="outline"
-                              className={`${humidityClass} text-white`}
-                            >
-                              {record.relativeHumidity || "--"}
-                            </Badge>
-                          </td>
-                          <td className="border border-slate-300 p-1 font-medium text-amber-700">
-                            {record.squallForce || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.squallDirection || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.squallTime || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1 font-medium text-blue-700">
-                            {record.horizontalVisibility
-                              ? parseInt(record.horizontalVisibility) % 10 === 0
-                                ? parseInt(record.horizontalVisibility, 10) / 10
-                                : (
-                                    parseInt(record.horizontalVisibility, 10) /
-                                    10
-                                  ).toFixed(1)
-                              : "--"}
-                          </td>
+                        return (
+                          <tr
+                            key={record.id}
+                            className={`text-center font-mono hover:bg-slate-50 transition-colors ${
+                              rowIndex % 2 === 0 ? "bg-white" : "bg-slate-50"
+                            }`}
+                          >
+                            <td className="border border-slate-300 p-1 font-medium text-indigo-700">
+                              {utcToHour(observingTime.utcTime.toString())}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.subIndicator || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-indigo-700 whitespace-nowrap">{recordDate}</td>
+                            <td className="border border-slate-300 p-1">
+                              <Badge variant="outline" className="font-mono">
+                                {observingTime.station.stationId || "--"}
+                              </Badge>
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.alteredThermometer || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-purple-700">
+                              {record.barAsRead || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.correctedForIndex || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.heightDifference || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-purple-700">
+                              {record.stationLevelPressure || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.seaLevelReduction || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-purple-700">
+                              {record.correctedSeaLevelPressure || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.afternoonReading || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.pressureChange24h || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-cyan-700">
+                              {record.dryBulbAsRead || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.wetBulbAsRead || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.maxMinTempAsRead || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-cyan-700">
+                              {record.dryBulbCorrected || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.wetBulbCorrected || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.maxMinTempCorrected || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-teal-700">
+                              {record.Td || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">
+                              <Badge variant="outline" className={`${humidityClass} text-white`}>
+                                {record.relativeHumidity || "--"}
+                              </Badge>
+                            </td>
+                            <td className="border border-slate-300 p-1 font-medium text-amber-700">
+                              {record.squallForce || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">{record.squallDirection || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.squallTime || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-blue-700">
+                              {record.horizontalVisibility
+                                ? Number.parseInt(record.horizontalVisibility) % 10 === 0
+                                  ? Number.parseInt(record.horizontalVisibility, 10) / 10
+                                  : (Number.parseInt(record.horizontalVisibility, 10) / 10).toFixed(1)
+                                : "--"}
+                            </td>
 
-                          <td className="border border-slate-300 p-1">
-                            {record.miscMeteors || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.pastWeatherW1 && record.pastWeatherW2
-                              ? `${record.pastWeatherW1}`
-                              : "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            {record.pastWeatherW1 && record.pastWeatherW2
-                              ? `${record.pastWeatherW2}`
-                              : "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1 font-medium text-emerald-700">
-                            {record.presentWeatherWW || "--"}
-                          </td>
-                          <td className="border border-slate-300 p-1">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 w-8 p-0"
-                              onClick={() => handleEditClick(record)}
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="16"
-                                height="16"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                              </svg>
-                            </Button>
-                          </td>
-                        </tr>
-                      );
-                    })
+                            <td className="border border-slate-300 p-1">{record.miscMeteors || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.pastWeatherW1 || "--"}</td>
+                            <td className="border border-slate-300 p-1">{record.pastWeatherW2 || "--"}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-emerald-700">
+                              {record.presentWeatherWW || "--"}
+                            </td>
+                            <td className="border border-slate-300 p-1">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className={`h-8 w-8 p-0 ${!canEdit ? "opacity-50 cursor-not-allowed" : ""}`}
+                                      onClick={() => handleEditClick(record, observingTime)}
+                                    >
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                                        />
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                      </svg>
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {canEdit ? "Edit this record" : "You don't have permission to edit this record"}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </td>
+                          </tr>
+                        )
+                      }),
+                    )
                   )}
                 </tbody>
               </table>
@@ -830,27 +772,21 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
 
             <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-purple-500" />
+                <Calendar className="h-4 w-4 text-sky-500" />
                 <span className="text-sm text-slate-600">
-                  Date:{" "}
-                  <span className="font-medium text-slate-800">
-                    {format(new Date(selectedDate), "MMMM d, yyyy")}
-                  </span>
+                  Date Range:{" "}
+                  <div className="text-center text-lg font-semibold text-slate-600">
+                    {`${format(parseISO(startDate), "MMM d")} - ${format(parseISO(endDate), "MMM d, yyyy")}`}
+                  </div>
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <Badge
-                  variant="outline"
-                  className="bg-indigo-100 text-indigo-800 hover:bg-indigo-200"
-                >
-                  {filteredData.length} record(s)
+                <Badge variant="outline" className="bg-sky-100 text-sky-800 hover:bg-sky-200">
+                  {data.reduce((count, item) => count + item.MeteorologicalEntry.length, 0)} record(s)
                 </Badge>
                 {stationFilter !== "all" && (
-                  <Badge
-                    variant="outline"
-                    className="bg-purple-100 text-purple-800 hover:bg-purple-200"
-                  >
-                    Station: {stationFilter}
+                  <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
+                    Station: {getStationNameById(stationFilter)} ({stationFilter})
                   </Badge>
                 )}
               </div>
@@ -858,7 +794,6 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
           </div>
         </div>
 
-        {/* Edit Dialog */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="w-[50vw] !max-w-[90vw] rounded-xl border-0 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 shadow-xl">
             <DialogHeader>
@@ -881,6 +816,13 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                   Edit Meteorological Data
                 </div>
               </DialogTitle>
+              <DialogDescription className="text-slate-600">
+                Editing record from {selectedObservingTime?.station?.name || "Unknown Station"} (
+                {selectedObservingTime?.station?.stationId || "Unknown"}) on{" "}
+                {selectedObservingTime?.utcTime
+                  ? format(new Date(selectedObservingTime.utcTime), "MMMM d, yyyy")
+                  : "Unknown Date"}
+              </DialogDescription>
               <div className="h-1 w-20 rounded-full bg-gradient-to-r from-indigo-400 to-blue-400 mt-2"></div>
             </DialogHeader>
 
@@ -889,12 +831,11 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                 {/* Input Fields */}
                 {[
                   {
-                    id: "observationTime",
-                    label: "Observation Time (GMT)",
-                    bg: "bg-blue-50",
+                    id: "subIndicator",
+                    label: "Indicator",
+                    bg: "bg-indigo-50",
                     readOnly: false,
                   },
-                  { id: "c2Indicator", label: "Indicator", bg: "bg-indigo-50" , readOnly: false},
                   {
                     id: "alteredThermometer",
                     label: "Attached Thermometer (°C)",
@@ -938,6 +879,18 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                     readOnly: true,
                   },
                   {
+                    id: "afternoonReading",
+                    label: "Afternoon Reading",
+                    bg: "bg-indigo-50",
+                    readOnly: false,
+                  },
+                  {
+                    id: "pressureChange24h",
+                    label: "24-Hour Pressure Change",
+                    bg: "bg-blue-50",
+                    readOnly: false,
+                  },
+                  {
                     id: "dryBulbAsRead",
                     label: "Dry Bulb As Read (°C)",
                     bg: "bg-indigo-50",
@@ -968,16 +921,40 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                     readOnly: false,
                   },
                   {
+                    id: "maxMinTempCorrected",
+                    label: "MAX/MIN Temp Corrected (°C)",
+                    bg: "bg-blue-50",
+                    readOnly: false,
+                  },
+                  {
                     id: "Td",
                     label: "Dew Point Temperature (°C)",
-                    bg: "bg-blue-50",
+                    bg: "bg-indigo-50",
                     readOnly: true,
                   },
                   {
                     id: "relativeHumidity",
                     label: "Relative Humidity (%)",
-                    bg: "bg-indigo-50",
+                    bg: "bg-blue-50",
                     readOnly: true,
+                  },
+                  {
+                    id: "squallForce",
+                    label: "Squall Force (KTS)",
+                    bg: "bg-indigo-50",
+                    readOnly: false,
+                  },
+                  {
+                    id: "squallDirection",
+                    label: "Squall Direction (°)",
+                    bg: "bg-blue-50",
+                    readOnly: false,
+                  },
+                  {
+                    id: "squallTime",
+                    label: "Squall Time",
+                    bg: "bg-indigo-50",
+                    readOnly: false,
                   },
                   {
                     id: "horizontalVisibility",
@@ -986,8 +963,8 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                     readOnly: false,
                   },
                   {
-                    id: "presentWeatherWW",
-                    label: "Present Weather (ww)",
+                    id: "miscMeteors",
+                    label: "Misc Meteors (Code)",
                     bg: "bg-indigo-50",
                     readOnly: false,
                   },
@@ -1003,23 +980,29 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                     bg: "bg-indigo-50",
                     readOnly: false,
                   },
+                  {
+                    id: "presentWeatherWW",
+                    label: "Present Weather (ww)",
+                    bg: "bg-blue-50",
+                    readOnly: false,
+                  },
+                  {
+                    id: "c2Indicator",
+                    label: "C2 Indicator",
+                    bg: "bg-indigo-50",
+                    readOnly: false,
+                  },
                 ].map((field) => (
-                  <div
-                    key={field.id}
-                    className={`space-y-1 p-3 rounded-lg ${field.bg} border border-white shadow-sm`}
-                  >
-                    <Label
-                      htmlFor={field.id}
-                      className="text-sm font-medium text-gray-700"
-                    >
+                  <div key={field.id} className={`space-y-1 p-3 rounded-lg ${field.bg} border border-white shadow-sm`}>
+                    <Label htmlFor={field.id} className="text-sm font-medium text-gray-700">
                       {field.label}
                     </Label>
                     <Input
                       id={field.id}
-                      value={editFormData[field.id] || ""}
+                      value={editFormData[field.id as keyof typeof editFormData] || ""}
                       onChange={handleEditInputChange}
                       readOnly={field.readOnly}
-                      className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 read-only:opacity-70 read-only:cursor-not-allowed"
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${field.readOnly ? "opacity-70 cursor-not-allowed" : ""}`}
                     />
                   </div>
                 ))}
@@ -1053,12 +1036,7 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     Save Changes
                   </>
@@ -1068,17 +1046,34 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
           </DialogContent>
         </Dialog>
 
-        {/* Add custom CSS for vertical text */}
-        <style jsx global>{`
-          .writing-vertical {
-            writing-mode: vertical-rl;
-            transform: rotate(180deg);
-            text-align: center;
-            margin: 0 auto;
-            white-space: nowrap;
-          }
-        `}</style>
+        {/* Permission Denied Dialog */}
+        <Dialog open={isPermissionDeniedOpen} onOpenChange={setIsPermissionDeniedOpen}>
+          <DialogContent className="max-w-md rounded-xl border-0 bg-white p-6 shadow-xl">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-red-600 flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Permission Denied
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-slate-700">You don't have permission to edit this record. This could be because:</p>
+              <ul className="mt-2 list-disc pl-5 text-sm text-slate-600 space-y-1">
+                <li>The record is too old to edit</li>
+                <li>The record belongs to a different station</li>
+                <li>You don't have the required role permissions</li>
+              </ul>
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={() => setIsPermissionDeniedOpen(false)}
+                className="bg-slate-200 text-slate-800 hover:bg-slate-300"
+              >
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
-  );
+  )
 }
