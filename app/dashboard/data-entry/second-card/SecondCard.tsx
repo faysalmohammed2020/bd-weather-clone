@@ -1217,15 +1217,6 @@ function SignificantCloudSection({
       </h3>
       <div className="grid gap-4 md:grid-cols-2">
         <SelectField
-          id={`${prefix}-height`}
-          name={`${prefix}-height`}
-          label="Height of Base (Code)"
-          accent={color}
-          value={data["height"] || ""}
-          onValueChange={(value) => onSelectChange(`${prefix}-height`, value)}
-          options={heightOptions}
-        />
-        <SelectField
           id={`${prefix}-form`}
           name={`${prefix}-form`}
           label="Form (Code)"
@@ -1235,7 +1226,7 @@ function SignificantCloudSection({
           options={cloudFormOptions.map((opt) => opt.value)}
           optionLabels={cloudFormOptions.map((opt) => opt.label)}
         />
-        <SelectField
+         <SelectField
           id={`${prefix}-amount`}
           name={`${prefix}-amount`}
           label="Amount (Octa)"
@@ -1245,6 +1236,17 @@ function SignificantCloudSection({
           options={SigcloudAmountOptions.map((opt) => opt.value)}
           optionLabels={SigcloudAmountOptions.map((opt) => opt.label)}
         />
+        <SelectField
+          id={`${prefix}-height`}
+          name={`${prefix}-height`}
+          label="Height of Base (Code)"
+          accent={color}
+          value={data["height"] || ""}
+          onValueChange={(value) => onSelectChange(`${prefix}-height`, value)}
+          options={heightOptions}
+        />
+        
+       
       </div>
     </div>
   );
