@@ -4,18 +4,27 @@ import prisma from "../lib/prisma";
 import { stations } from "../data/stations";
 
 async function main() {
-  console.log("🌱 Starting seed...");
+  await prisma.$transaction(async (tx) => {
+    console.log("🌱 Starting seed...");
 
-  // Delete all existing stations first (optional)
-  await prisma.station.deleteMany();
+  const existingStations = await tx.station.count();
+
+  if (existingStations > 0) {
+    // Delete all existing stations first (optional)
+    await tx.station.deleteMany();
+    console.log("🧹 Cleared existing stations data");
+  }
+
+
   console.log("🧹 Cleared existing stations data");
 
   // Create stations in batches
-  await prisma.station.createMany({
+  await tx.station.createMany({
     data: stations,
   });
 
   console.log(`🎉 Successfully seeded ${stations.length} stations`);
+  })
 }
 
 main()
