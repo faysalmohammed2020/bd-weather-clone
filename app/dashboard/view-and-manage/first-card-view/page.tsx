@@ -39,6 +39,7 @@ interface Station {
 interface MeteorologicalEntry {
   id: string
   observingTimeId: string
+  stationId?: string  // Added as optional since it's added later
   dataType: string
   subIndicator: string
   alteredThermometer: string
@@ -127,101 +128,6 @@ function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
   }
 }
 
-
-const exportToCSV = () => {
-  // Create CSV header
-  const headers = [
-    "Time (GMT)",
-    "Indicator",
-    "Date",
-    "Station ID",
-    "Station Name",
-    "Attached Thermometer (°C)",
-    "Bar As Read (hPa)",
-    "Corrected for Index",
-    "Height Difference Correction (hPa)",
-    "Station Level Pressure (QFE)",
-    "Sea Level Reduction",
-    "Sea Level Pressure (QNH)",
-    "Afternoon Reading",
-    "24-Hour Pressure Change",
-    "Dry Bulb As Read (°C)",
-    "Wet Bulb As Read (°C)",
-    "MAX/MIN Temp As Read (°C)",
-    "Dry Bulb Corrected (°C)",
-    "Wet Bulb Corrected (°C)",
-    "MAX/MIN Temp Corrected (°C)",
-    "Dew Point Temperature (°C)",
-    "Relative Humidity (%)",
-    "Squall Force (KTS)",
-    "Squall Direction (°)",
-    "Squall Time",
-    "Horizontal Visibility (km)",
-    "Misc Meteors (Code)",
-    "Past Weather (W₁)",
-    "Past Weather (W₂)",
-    "Present Weather (ww)",
-    "C2 Indicator"
-  ];
-
-  // Create CSV rows
-  const rows = flattenedData.map(record => {
-    const observingTime = data.find(ot => ot.id === record.observingTimeId);
-    return [
-      utcToHour(observingTime.utcTime.toString()),
-      record.subIndicator || "--",
-      format(new Date(observingTime.utcTime), "yyyy-MM-dd"),
-      observingTime?.stationId || "--",
-      observingTime?.station.name || "--",
-      record.alteredThermometer || "--",
-      record.barAsRead || "--",
-      record.correctedForIndex || "--",
-      record.heightDifference || "--",
-      record.stationLevelPressure || "--",
-      record.seaLevelReduction || "--",
-      record.correctedSeaLevelPressure || "--",
-      record.afternoonReading || "--",
-      record.pressureChange24h || "--",
-      record.dryBulbAsRead || "--",
-      record.wetBulbAsRead || "--",
-      record.maxMinTempAsRead || "--",
-      record.dryBulbCorrected || "--",
-      record.wetBulbCorrected || "--",
-      record.maxMinTempCorrected || "--",
-      record.Td || "--",
-      record.relativeHumidity || "--",
-      record.squallForce || "--",
-      record.squallDirection || "--",
-      record.squallTime || "--",
-      record.horizontalVisibility || "--",
-      record.miscMeteors || "--",
-      record.pastWeatherW1 || "--",
-      record.pastWeatherW2 || "--",
-      record.presentWeatherWW || "--",
-      record.c2Indicator || "--"
-    ];
-  });
-
-  // Combine header and rows
-  const csvContent = [headers, ...rows]
-    .map(row => row.map(field => `"${field}"`).join(","))
-    .join("\n");
-
-  // Create download link
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.setAttribute("download", `meteorological_data_${startDate}_to_${endDate}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
-
-  toast.success("CSV export started");
-};
-
-
 export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   const [data, setData] = useState<ObservingTimeEntry[]>([])
   const [flattenedData, setFlattenedData] = useState<MeteorologicalEntry[]>([])
@@ -244,6 +150,104 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
   const [editFormData, setEditFormData] = useState<Partial<MeteorologicalEntry>>({})
   const [isSaving, setIsSaving] = useState(false)
   const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false)
+
+  const exportToCSV = () => {
+    if (flattenedData.length === 0 || data.length === 0) {
+      toast.error("No data to export");
+      return;
+    }
+
+    // Create CSV header
+    const headers = [
+      "Time (GMT)",
+      "Indicator",
+      "Date",
+      "Station ID",
+      "Station Name",
+      "Attached Thermometer (°C)",
+      "Bar As Read (hPa)",
+      "Corrected for Index",
+      "Height Difference Correction (hPa)",
+      "Station Level Pressure (QFE)",
+      "Sea Level Reduction",
+      "Sea Level Pressure (QNH)",
+      "Afternoon Reading",
+      "24-Hour Pressure Change",
+      "Dry Bulb As Read (°C)",
+      "Wet Bulb As Read (°C)",
+      "MAX/MIN Temp As Read (°C)",
+      "Dry Bulb Corrected (°C)",
+      "Wet Bulb Corrected (°C)",
+      "MAX/MIN Temp Corrected (°C)",
+      "Dew Point Temperature (°C)",
+      "Relative Humidity (%)",
+      "Squall Force (KTS)",
+      "Squall Direction (°)",
+      "Squall Time",
+      "Horizontal Visibility (km)",
+      "Misc Meteors (Code)",
+      "Past Weather (W₁)",
+      "Past Weather (W₂)",
+      "Present Weather (ww)",
+      "C2 Indicator"
+    ];
+
+    // Create CSV rows
+    const rows = flattenedData.map(record => {
+      const observingTime = data.find(ot => ot.id === record.observingTimeId);
+      return [
+        utcToHour(observingTime?.utcTime || ""),
+        record.subIndicator || "--",
+        observingTime?.utcTime ? format(new Date(observingTime.utcTime), "yyyy-MM-dd") : "--",
+        observingTime?.station?.stationId || "--",
+        observingTime?.station?.name || "--",
+        record.alteredThermometer || "--",
+        record.barAsRead || "--",
+        record.correctedForIndex || "--",
+        record.heightDifference || "--",
+        record.stationLevelPressure || "--",
+        record.seaLevelReduction || "--",
+        record.correctedSeaLevelPressure || "--",
+        record.afternoonReading || "--",
+        record.pressureChange24h || "--",
+        record.dryBulbAsRead || "--",
+        record.wetBulbAsRead || "--",
+        record.maxMinTempAsRead || "--",
+        record.dryBulbCorrected || "--",
+        record.wetBulbCorrected || "--",
+        record.maxMinTempCorrected || "--",
+        record.Td || "--",
+        record.relativeHumidity || "--",
+        record.squallForce || "--",
+        record.squallDirection || "--",
+        record.squallTime || "--",
+        record.horizontalVisibility || "--",
+        record.miscMeteors || "--",
+        record.pastWeatherW1 || "--",
+        record.pastWeatherW2 || "--",
+        record.presentWeatherWW || "--",
+        record.c2Indicator || "--"
+      ];
+    });
+
+    // Combine header and rows
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(field => `"${field}"`).join(","))
+      .join("\n");
+
+    // Create download link
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `meteorological_data_${startDate}_to_${endDate}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success("CSV export started");
+  };
 
   const fetchData = async () => {
     try {
@@ -271,6 +275,10 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
         })
       })
       setFlattenedData(flattened)
+
+      console.log("flattenedData.entries", flattenedData.entries)
+      console.log("data.entries", data.entries)
+      console.log("flattened", flattened)
 
       // Fetch stations if super admin
       if (isSuperAdmin) {
@@ -485,39 +493,42 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
             </div>
 
 
-            {isSuperAdmin && (
-              <div className="flex items-center gap-2">
-                <Filter size={16} className="text-purple-500" />
-                <Label htmlFor="stationFilter" className="whitespace-nowrap font-medium text-slate-700">
-                  Station:
-                </Label>
-                <Select value={stationFilter} onValueChange={setStationFilter}>
-                  <SelectTrigger className="w-[200px] border-slate-300 focus:ring-purple-500">
-                    <SelectValue placeholder="All Stations" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Stations</SelectItem>
-                    {stations.map((station) => (
-                      <SelectItem key={station.id} value={station.stationId}>
-                        {station.name} ({station.stationId})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {(isSuperAdmin || isStationAdmin) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={exportToCSV}
+                  className="flex items-center gap-1 hover:bg-green-50 border-green-200 text-green-700"
+                  disabled={flattenedData.length === 0}
+                >
+                  <Download className="h-4 w-4" />
+                  Export CSV
+                </Button>
+              )}
 
-            {(isSuperAdmin || isStationAdmin) && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={exportToCSV}
-                className="flex items-center gap-1 hover:bg-green-50 border-green-200 text-green-700"
-              >
-                <Download className="h-4 w-4" />
-                Export CSV
-              </Button>
-            )}
+              {isSuperAdmin && (
+                <>
+                  <Filter size={16} className="text-purple-500" />
+                  <Label htmlFor="stationFilter" className="whitespace-nowrap font-medium text-slate-700">
+                    Station:
+                  </Label>
+                  <Select value={stationFilter} onValueChange={setStationFilter}>
+                    <SelectTrigger className="w-[200px] border-slate-300 focus:ring-purple-500">
+                      <SelectValue placeholder="All Stations" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Stations</SelectItem>
+                      {stations.map((station) => (
+                        <SelectItem key={station.id} value={station.stationId}>
+                          {station.name} ({station.stationId})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </>
+              )}
+            </div>
 
           </div>
         </div>
@@ -756,7 +767,7 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
                   ) : (
                     data.flatMap((observingTime, obsIndex) =>
                       observingTime.MeteorologicalEntry.map((record, entryIndex) => {
-                        const time = observingTime.utcTime ? format(new Date(observingTime.utcTime), "HH:mm") : "--:--"
+
                         const humidityClass = getWeatherStatusColor(record.relativeHumidity)
                         const recordDate = observingTime.utcTime
                           ? format(new Date(observingTime.utcTime), "yyyy-MM-dd")
@@ -1182,6 +1193,6 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
           </DialogContent>
         </Dialog>
       </CardContent>
-    </Card>
+    </Card >
   )
 }
