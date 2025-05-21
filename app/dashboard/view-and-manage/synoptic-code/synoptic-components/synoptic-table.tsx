@@ -36,7 +36,9 @@ const fetchSynopticDataForTimeSlot = async (
 };
 
 export default function SynopticCodeTable() {
-  const [currentData, setCurrentData] = useState<SynopticFormValues | null>(null);
+  const [currentData, setCurrentData] = useState<SynopticFormValues | null>(
+    null
+  );
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [headerInfo, setHeaderInfo] = useState({
@@ -55,7 +57,7 @@ export default function SynopticCodeTable() {
       const now = new Date();
       const currentHour = now.getHours();
       const currentSlot = Math.floor(currentHour / 3) * 3;
-      const timeSlot = currentSlot.toString().padStart(2, '0');
+      const timeSlot = currentSlot.toString().padStart(2, "0");
 
       const data = await fetchSynopticDataForTimeSlot(timeSlot);
       if (data) {
@@ -86,12 +88,13 @@ export default function SynopticCodeTable() {
     if (!currentData) return;
 
     // Create headers
-    let csvContent = "Time,C1,Iliii,iRiXhvv,Nddff,1SnTTT,2SnTdTdTd,3PPP/4PPP,6RRRtR,7wwW1W2,8NhClCmCh,2SnTnTnTn/InInInIn,56DlDmDh,57CDaEc,C2,GG,58P24P24P24/59P24P24P24,(6RRRtR)/7R24R24R24,8N5Ch5h5,90dqqqt,91fqfqfq,Weather Remarks\n";
+    let csvContent =
+      "Time,C1,Iliii,iRiXhvv,Nddff,1SnTTT,2SnTdTdTd,3PPP/4PPP,6RRRtR,7wwW1W2,8NhClCmCh,2SnTnTnTn/InInInIn,56DlDmDh,57CDaEc,C2,GG,58P24P24P24/59P24P24P24,(6RRRtR)/7R24R24R24,8N5Ch5h5,90dqqqt,91fqfqfq,Weather Remarks\n";
 
     // Add data row
     const timeSlot = Math.floor(new Date().getHours() / 3) * 3;
-    const timeLabel = timeSlot.toString().padStart(2, '0');
-    
+    const timeLabel = timeSlot.toString().padStart(2, "0");
+
     let row = `${timeLabel},`;
     currentData.measurements.forEach((measurement) => {
       row += `${measurement},`;
@@ -179,7 +182,9 @@ export default function SynopticCodeTable() {
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
-          <span className="ml-3 text-lg text-gray-700">Loading synoptic data...</span>
+          <span className="ml-3 text-lg text-gray-700">
+            Loading synoptic data...
+          </span>
         </div>
       ) : !currentData ? (
         <div className="flex justify-center items-center h-64 bg-blue-50/50 rounded-lg border-2 border-dashed border-blue-200">
@@ -229,7 +234,9 @@ export default function SynopticCodeTable() {
 
               <div className="flex flex-wrap justify-center gap-10 print:gap-6 max-w-5xl mx-auto">
                 <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">DATA TYPE</div>
+                  <div className="font-bold text-base mb-2 text-gray-600">
+                    DATA TYPE
+                  </div>
                   <div className="flex">
                     {headerInfo.dataType.split("").map((char, i) => (
                       <div
@@ -243,7 +250,9 @@ export default function SynopticCodeTable() {
                 </div>
 
                 <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">STATION NO.</div>
+                  <div className="font-bold text-base mb-2 text-gray-600">
+                    STATION NO.
+                  </div>
                   <div className="flex">
                     {headerInfo.stationNo.split("").map((char, i) => (
                       <div
@@ -257,7 +266,9 @@ export default function SynopticCodeTable() {
                 </div>
 
                 <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">YEAR</div>
+                  <div className="font-bold text-base mb-2 text-gray-600">
+                    YEAR
+                  </div>
                   <div className="flex">
                     {headerInfo.year.split("").map((char, i) => (
                       <div
@@ -271,7 +282,9 @@ export default function SynopticCodeTable() {
                 </div>
 
                 <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">MONTH</div>
+                  <div className="font-bold text-base mb-2 text-gray-600">
+                    MONTH
+                  </div>
                   <div className="flex">
                     {headerInfo.month.split("").map((char, i) => (
                       <div
@@ -285,7 +298,9 @@ export default function SynopticCodeTable() {
                 </div>
 
                 <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">DAY</div>
+                  <div className="font-bold text-base mb-2 text-gray-600">
+                    DAY
+                  </div>
                   <div className="flex">
                     {headerInfo.day.split("").map((char, i) => (
                       <div
@@ -393,7 +408,18 @@ export default function SynopticCodeTable() {
                       </td>
                     ))}
                     <td className="border border-blue-200 px-4 py-3 whitespace-nowrap text-left text-gray-700">
-                      {currentData.weatherRemark}
+                      {(() => {
+                        const remark = currentData.weatherRemark || "";
+                        const [symbol, description] = remark.split(" - ");
+
+                        return (
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-800">
+                              {description?.trim()}
+                            </span>
+                          </div>
+                        );
+                      })()}
                     </td>
                   </tr>
                 )}
