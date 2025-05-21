@@ -30,7 +30,7 @@ import { useHour } from "@/contexts/hourContext";
 type MeteorologicalFormData = {
   presentWeatherWW?: string;
   subIndicator?: string;
-  alteredThermometer?: string;
+  attachedThermometer?: string;
   barAsRead?: string;
   correctedForIndex?: string;
   heightDifference?: string;
@@ -454,17 +454,17 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     }
 
     // Automatically generate Present Weather (WW) from W1 and W2
-    if (name === "pastWeatherW1" || name === "pastWeatherW2") {
-      const w1 = name === "pastWeatherW1" ? value : formData.pastWeatherW1;
-      const w2 = name === "pastWeatherW2" ? value : formData.pastWeatherW2;
+    // if (name === "pastWeatherW1" || name === "pastWeatherW2") {
+    //   const w1 = name === "pastWeatherW1" ? value : formData.pastWeatherW1;
+    //   const w2 = name === "pastWeatherW2" ? value : formData.pastWeatherW2;
 
-      if (w1 && w2) {
-        setFormData((prev) => ({
-          ...prev,
-          presentWeatherWW: `${w1}${w2}`,
-        }));
-      }
-    }
+    //   if (w1 && w2) {
+    //     setFormData((prev) => ({
+    //       ...prev,
+    //       presentWeatherWW: `${w1}${w2}`,
+    //     }));
+    //   }
+    // }
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -551,19 +551,20 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
         />
         {/*Card Body */}
         <div className="relative rounded-xl">
-          {!time?.isPassed || !time && (
-            <div className="absolute inset-0 bg-amber-50/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-xl ring-2 ring-amber-200 ring-offset-4">
-              <div className="bg-white py-4 px-6 rounded-lg shadow-lg text-center border-2 border-amber-300">
-                <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />
-                <h3 className="text-lg font-medium text-amber-800">
-                  3 Hours has not passed yet
-                </h3>
-                <p className="text-sm text-amber-600 mt-1">
-                  Please wait a little longer
-                </p>
+          {!time?.isPassed ||
+            (!time && (
+              <div className="absolute inset-0 bg-amber-50/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-xl ring-2 ring-amber-200 ring-offset-4">
+                <div className="bg-white py-4 px-6 rounded-lg shadow-lg text-center border-2 border-amber-300">
+                  <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />
+                  <h3 className="text-lg font-medium text-amber-800">
+                    3 Hours has not passed yet
+                  </h3>
+                  <p className="text-sm text-amber-600 mt-1">
+                    Please wait a little longer
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            ))}
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
@@ -574,6 +575,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                 <TabsTrigger
                   key={key}
                   value={key}
+                  disabled={Boolean(timeData?.time)}
                   className={cn("border border-gray-300", {
                     [style.tab]: activeTab === key,
                   })}
@@ -684,13 +686,13 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="alteredThermometer">
-                      Altered Thermometer
+                    <Label htmlFor="attachedThermometer">
+                      Attached Thermometer 
                     </Label>
                     <Input
-                      id="alteredThermometer"
-                      name="alteredThermometer"
-                      value={formData.alteredThermometer || ""}
+                      id="attachedThermometer"
+                      name="attachedThermometer"
+                      value={formData.attachedThermometer || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
                     />
@@ -1203,7 +1205,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     type="button"
                     onClick={nextTab}
                     className="bg-blue-600 hover:bg-blue-700"
-                    
                   >
                     Next <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -1222,120 +1223,56 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     <Cloud className="mr-2" /> Weather Conditions
                   </h3>
                 </div>
-                <CardContent className="pt-6">
-                  <Tabs defaultValue="past" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 bg-cyan-50 rounded-lg">
-                      <TabsTrigger
-                        value="past"
-                        className="data-[state=active]:bg-cyan-200 data-[state=active]:text-cyan-800"
-                      >
-                        Past
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="present"
-                        className="data-[state=active]:bg-cyan-200 data-[state=active]:text-cyan-800"
-                      >
-                        Present
-                      </TabsTrigger>
-                    </TabsList>
+                <CardContent className="grid grid-cols-2 gap-4 pt-6 space-y-4">
+                  {/* Past Weather W1 */}
+                  <div className="space-y-2">
+                    <Label htmlFor="pastWeatherW1">Past Weather (W1)</Label>
+                    <Input
+                      id="pastWeatherW1"
+                      name="pastWeatherW1"
+                      placeholder="Enter past weather code (0-9)"
+                      value={formData.pastWeatherW1 || ""}
+                      onChange={handleChange}
+                      className="border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Weather code for the first part of the observation period
+                    </p>
+                  </div>
 
-                    {/* Past Weather */}
-                    <TabsContent value="past" className="mt-4">
-                      <Tabs defaultValue="w1" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 bg-cyan-50/50 rounded-lg">
-                          <TabsTrigger
-                            value="w1"
-                            className="data-[state=active]:bg-cyan-200 data-[state=active]:text-cyan-800"
-                          >
-                            W1
-                          </TabsTrigger>
-                          <TabsTrigger
-                            value="w2"
-                            className="data-[state=active]:bg-cyan-200 data-[state=active]:text-cyan-800"
-                          >
-                            W2
-                          </TabsTrigger>
-                        </TabsList>
+                  {/* Past Weather W2 */}
+                  <div className="space-y-2">
+                    <Label htmlFor="pastWeatherW2">Past Weather (W2)</Label>
+                    <Input
+                      id="pastWeatherW2"
+                      name="pastWeatherW2"
+                      placeholder="Enter past weather code (0-9)"
+                      value={formData.pastWeatherW2 || ""}
+                      onChange={handleChange}
+                      className="border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Weather code for the second part of the observation period
+                    </p>
+                  </div>
 
-                        {/* W1 Past Weather */}
-                        <TabsContent value="w1" className="mt-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="pastWeatherW1">
-                              Past Weather (W1)
-                            </Label>
-                            <Input
-                              id="pastWeatherW1"
-                              name="pastWeatherW1"
-                              placeholder="Enter past weather code (0-9)"
-                              value={formData.pastWeatherW1 || ""}
-                              onChange={handleChange}
-                              className="border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
-                            />
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Weather code for the first part of the observation
-                              period
-                            </p>
-                          </div>
-                        </TabsContent>
-
-                        {/* W2 Past Weather */}
-                        <TabsContent value="w2" className="mt-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="pastWeatherW2">
-                              Past Weather (W2)
-                            </Label>
-                            <Input
-                              id="pastWeatherW2"
-                              name="pastWeatherW2"
-                              placeholder="Enter past weather code (0-9)"
-                              value={formData.pastWeatherW2 || ""}
-                              onChange={handleChange}
-                              className="border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
-                            />
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Weather code for the second part of the
-                              observation period
-                            </p>
-                          </div>
-                        </TabsContent>
-                      </Tabs>
-                    </TabsContent>
-
-                    {/* Present Weather */}
-                    <TabsContent value="present" className="mt-4">
-                      <Tabs defaultValue="ww" className="w-full">
-                        <TabsList className="grid w-full grid-cols-1 bg-cyan-50/50 rounded-lg">
-                          <TabsTrigger
-                            value="ww"
-                            className="data-[state=active]:bg-cyan-200 data-[state=active]:text-cyan-800"
-                          >
-                            WW
-                          </TabsTrigger>
-                        </TabsList>
-
-                        {/* WW Present Weather */}
-                        <TabsContent value="ww" className="mt-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="presentWeatherWW">
-                              Present Weather (WW)
-                            </Label>
-                            <Input
-                              id="presentWeatherWW"
-                              name="presentWeatherWW"
-                              placeholder="Auto-generated from W1 + W2"
-                              value={formData.presentWeatherWW || ""}
-                              readOnly
-                              className="border-slate-600 bg-gray-100 cursor-not-allowed text-gray-700"
-                            />
-
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Current weather conditions at time of observation
-                            </p>
-                          </div>
-                        </TabsContent>
-                      </Tabs>
-                    </TabsContent>
-                  </Tabs>
+                  {/* Present Weather WW */}
+                  <div className="space-y-2">
+                    <Label htmlFor="presentWeatherWW">
+                      Present Weather (WW)
+                    </Label>
+                    <Input
+                      id="presentWeatherWW"
+                      name="presentWeatherWW"
+                      placeholder="Enter present weather"
+                      value={formData.presentWeatherWW || ""}
+                      onChange={handleChange}
+                      className="border-slate-600 text-gray-700"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Current weather conditions at time of observation
+                    </p>
+                  </div>
                 </CardContent>
                 <CardFooter className="flex justify-between p-6">
                   <Button type="button" variant="outline" onClick={prevTab}>
