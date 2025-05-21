@@ -18,6 +18,7 @@ import {
   PencilIcon,
   ChevronDown,
   Eye,
+  FileBarChart,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import {
@@ -85,6 +86,11 @@ const Sidebar = () => {
           icon: <BarChart className="w-5 h-5" />,
           href: "/dashboard/view-and-manage/daily-summery",
           label: "Daily Summary",
+        },
+        {
+          icon: <FileBarChart className="w-5 h-5" />,
+          href: "/dashboard/view-and-manage/all",
+          label: "View all & Export",
         },
       ],
     },
