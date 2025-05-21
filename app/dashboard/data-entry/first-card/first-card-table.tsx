@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { utcToHour } from "@/lib/utils"
 
 interface Station {
   id: string
@@ -92,28 +93,31 @@ function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
   if (!user) return false
 
   // If no submittedAt, allow edit (newly created record)
-  if (!record.submittedAt) return true
+  if (!record.createdAt) return true
 
   try {
-    const submissionDate = parseISO(record.submittedAt)
-    if (!isValid(submissionDate)) return true // If date is invalid, allow edit
+    const submissionDate = parseISO(record.createdAt)
+    if (!isValid(submissionDate)) return true
 
     const now = new Date()
     const daysDifference = differenceInDays(now, submissionDate)
 
-    // Role-based permissions
     const role = user.role
     const userId = user.id
-    const stationId = user.station?.id
+    const userStationId = user.station?.id
+    const recordStationId = record.ObservingTime.stationId
 
-    // Super admin can edit records up to 1 year old
+    const recordUserId = record.ObservingTime.userId
+
     if (role === "super_admin") return daysDifference <= 365
 
-    // Station admin can edit records from their station up to 30 days old
-    if (role === "station_admin") return daysDifference <= 30 && stationId === record.observingTimeId
+    if (role === "station_admin") {
+      return daysDifference <= 30 && userStationId === recordStationId
+    }
 
-    // Regular users can edit their own records up to 2 days old
-    if (role === "observer") return daysDifference <= 2
+    if (role === "observer") {
+      return daysDifference <= 2 && userId === recordUserId
+    }
 
     return false
   } catch (e) {
@@ -121,6 +125,7 @@ function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
     return false
   }
 }
+
 
 export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   const [data, setData] = useState<ObservingTimeEntry[]>([])
@@ -134,7 +139,6 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   const [dateError, setDateError] = useState<string | null>(null)
   const [stationFilter, setStationFilter] = useState("all")
   const [stations, setStations] = useState<Station[]>([])
-  const [isRefreshing, setIsRefreshing] = useState(false)
   const { data: session } = useSession()
   const user = session?.user
   const isSuperAdmin = user?.role === "super_admin"
@@ -157,22 +161,16 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
         throw new Error("Failed to fetch data")
       }
       const result = await response.json()
-      setData(result || [])
+      setData(result.entries || [])
 
       // Flatten the data for easier display
       const flattened: MeteorologicalEntry[] = []
-      result.forEach((observingTime: ObservingTimeEntry) => {
+      result.entries.forEach((observingTime: ObservingTimeEntry) => {
         observingTime.MeteorologicalEntry.forEach((entry: MeteorologicalEntry) => {
           flattened.push({
             ...entry,
-            ObservingTime: {
-              utcTime: observingTime.utcTime,
-              localTime: observingTime.localTime,
-            },
-            station: {
-              stationId: observingTime.station.stationId,
-              name: observingTime.station.name,
-            },
+            observingTimeId: observingTime.id,
+            stationId: observingTime.stationId,
           })
         })
       })
@@ -192,13 +190,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
       toast.error("Failed to fetch meteorological data")
     } finally {
       setLoading(false)
-      setIsRefreshing(false)
     }
-  }
-
-  const handleRefresh = () => {
-    setIsRefreshing(true)
-    fetchData()
   }
 
   useEffect(() => {
@@ -327,8 +319,6 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
         throw new Error("Failed to update record");
       }
   
-      const result = await response.json();
-  
       // Update the local state
       setFlattenedData(prevData =>
         prevData.map(item => 
@@ -364,9 +354,10 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
       <CardContent className="p-6">
-        {isSuperAdmin && (
+      
           <div className="mb-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 p-4 rounded-lg">
+             
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="icon" onClick={goToPreviousWeek} className="hover:bg-slate-200">
@@ -397,6 +388,8 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                 </div>
               </div>
 
+
+              {isSuperAdmin && (
               <div className="flex items-center gap-2">
                 <Filter size={16} className="text-purple-500" />
                 <Label htmlFor="stationFilter" className="whitespace-nowrap font-medium text-slate-700">
@@ -416,12 +409,10 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                   </SelectContent>
                 </Select>
               </div>
+              )}
             </div>
-            {dateError && (
-              <div className="mt-2 text-sm text-red-500 bg-red-50 p-2 rounded border border-red-200">{dateError}</div>
-            )}
           </div>
-        )}
+  
 
         <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
           <div className="p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300">
@@ -672,10 +663,10 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                             }`}
                           >
                             <td className="border border-slate-300 p-1 font-medium text-indigo-700">
-                              {time.split(":")[0] || "--"}
+                              {utcToHour(observingTime.utcTime.toString())}
                             </td>
                             <td className="border border-slate-300 p-1">{record.subIndicator || "--"}</td>
-                            <td className="border border-slate-300 p-1 font-medium text-indigo-700">{recordDate}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-indigo-700 whitespace-nowrap">{recordDate}</td>
                             <td className="border border-slate-300 p-1">
                               <Badge variant="outline" className="font-mono">
                                 {observingTime.station.stationId || "--"}

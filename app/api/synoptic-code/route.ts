@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { getSession } from "@/lib/getSession";
 
 const prisma = new PrismaClient();
 
@@ -7,13 +8,63 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const newEntry = await prisma.synopticEntry.create({
+    const session = await getSession();
+    
+        if (!session || !session.user?.id) {
+          return NextResponse.json(
+            { success: false, error: "Unauthorized" },
+            { status: 401 }
+          );
+        }
+    
+    
+        // First, find the ObservingTime record by its UTC time
+        const observingTime = await prisma.observingTime.findFirst({
+          select: {
+            id: true,
+            utcTime: true,
+            _count: {
+              select: {
+                MeteorologicalEntry: true,
+                WeatherObservation: true,
+              }
+            }
+          },
+          orderBy: {
+            utcTime: "desc",
+          }
+        });
+    
+        if (!observingTime) {
+          return NextResponse.json({
+            message: "No observing time for today",
+            status: 404,
+          });
+        }
+    
+        // Get station ID from session
+        const stationId = session.user.station?.stationId;
+        if (!stationId) {
+          return NextResponse.json({
+            message: "Station ID is required",
+            status: 400,
+          });
+        }
+    
+        // Find the station by stationId to get its primary key (id)
+        const stationRecord = await prisma.station.findFirst({
+          where: { stationId },
+        });
+    
+        if (!stationRecord) {
+          return NextResponse.json({
+            message: `No station found with ID: ${stationId}`,
+            status: 404,
+          });
+        }
+
+    const newEntry = await prisma.synopticCode.create({
       data: {
-        stationNo: body.stationNo || null,
-        stationName: body.stationName || null,
-        year: body.year || null,
-        month: body.month || null,
-        day: body.day || null,
         dataType: body.dataType || "SYNOP",
 
         // Measurement fields
@@ -40,6 +91,13 @@ export async function POST(req: Request) {
         fqfqfq91: body.fqfqfq91 || null,
 
         weatherRemark: body.weatherRemark || null,
+
+        ObservingTime: {
+          connect: {
+            id: observingTime?.id,
+            stationId: stationRecord.id,
+          },
+        },
       },
     });
 

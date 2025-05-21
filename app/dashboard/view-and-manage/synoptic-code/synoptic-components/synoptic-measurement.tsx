@@ -273,13 +273,8 @@ export default function SynopticMeasurementsTab() {
   const handleSubmit = async () => {
     try {
       const payload = {
-        stationNo: values.stationNo,
-        year: values.year,
-        month: values.month,
-        day: values.day,
         dataType: values.dataType || "SYNOP",
         weatherRemark: values.weatherRemark,
-
         // Individual measurement fields
         C1: values.measurements[0] || null,
         Iliii: values.measurements[1] || null,
@@ -311,7 +306,6 @@ export default function SynopticMeasurementsTab() {
       });
 
       if (response.ok) {
-        const data = await response.json();
         toast.success("✅ Synoptic data saved successfully");
       } else {
         const error = await response.json();
