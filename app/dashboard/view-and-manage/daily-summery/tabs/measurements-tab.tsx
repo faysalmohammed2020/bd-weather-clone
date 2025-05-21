@@ -75,18 +75,16 @@ export default function MeasurementsTab() {
       try {
         const firstCardResponse = await fetch("/api/first-card-data");
         const formatedFirstCardData = await firstCardResponse.json();
-        const todayFirstCardData = await formatedFirstCardData
+        const todayFirstCardData = await formatedFirstCardData.entries
           .map((item: any) => item.MeteorologicalEntry)
           .flat();
 
         const observationsResponse = await fetch("/api/second-card-data");
         const formatedObservationsData = await observationsResponse.json();
+
         const todayWeatherObservations = formatedObservationsData
           .map((item: any) => item.WeatherObservation)
           .flat();
-
-        console.log("Today", todayFirstCardData);
-        console.log("Today", todayWeatherObservations);
 
         const measurements = Array(16).fill("-");
 
