@@ -45,7 +45,8 @@ export async function POST(req: Request) {
 
     if (!observingTime) {
       return NextResponse.json({
-        message: "No observing time for today",
+        success: false,
+        error: "No observing time for today",
         status: 404,
       });
     }
@@ -83,7 +84,8 @@ export async function POST(req: Request) {
     const stationId = session.user.station?.stationId;
     if (!stationId) {
       return NextResponse.json({
-        message: "Station ID is required",
+        success: false,
+        error: "Station ID is required",
         status: 400,
       });
     }
@@ -95,7 +97,8 @@ export async function POST(req: Request) {
 
     if (!stationRecord) {
       return NextResponse.json({
-        message: `No station found with ID: ${stationId}`,
+        success: false,
+        error: `No station found with ID: ${stationId}`,
         status: 404,
       });
     }
@@ -131,7 +134,10 @@ export async function POST(req: Request) {
     return NextResponse.json(entry);
   } catch (err) {
     console.error("❌ DB save error:", err);
-    return new NextResponse("Failed to save data", { status: 500 });
+    return NextResponse.json({
+      success: false,
+      error: "Failed to save data",
+    }, { status: 500 });
   }
 }
 
