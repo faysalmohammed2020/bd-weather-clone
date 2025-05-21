@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/getSession";
+import { getTodayUtcRange } from "@/lib/utils";
 
 const prisma = new PrismaClient();
 
@@ -107,6 +108,61 @@ export async function POST(req: Request) {
     );
   } catch (error) {
     console.error("Failed to save synoptic entry:", error);
+    return NextResponse.json(
+      { message: "Internal server error", error: error instanceof Error ? error.message : "Unknown error" },
+      { status: 500 }
+    );
+  }
+}
+
+
+
+export async function GET(req: Request) {
+  try {
+    const session = await getSession();
+
+    if (!session || !session.user?.id) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    const stationId = session.user.station?.stationId;
+    if (!stationId) {
+      return NextResponse.json({ message: "Station ID is missing" }, { status: 400 });
+    }
+
+    const station = await prisma.station.findFirst({
+      where: { stationId },
+    });
+
+    if (!station) {
+      return NextResponse.json({ message: "Station not found" }, { status: 404 });
+    }
+
+    const { startToday, endToday } = getTodayUtcRange();
+
+    const todayEntries = await prisma.synopticCode.findMany({
+      where: {
+        ObservingTime: {
+          stationId: station.id,
+          utcTime: {
+            gte: startToday,
+            lt: endToday, // Use lt to avoid 00:00 of the next day
+          },
+        },
+      },
+      include: {
+        ObservingTime: true,
+      },
+      orderBy: {
+        ObservingTime: {
+          utcTime: "desc",
+        },
+      },
+    });
+
+    return NextResponse.json(todayEntries);
+  } catch (error) {
+    console.error("Error fetching today's synoptic data:", error);
     return NextResponse.json(
       { message: "Internal server error", error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
