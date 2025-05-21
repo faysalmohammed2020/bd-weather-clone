@@ -167,6 +167,10 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
   const [selectedRecord, setSelectedRecord] = useState<ObservationData | null>(null)
   const [editFormData, setEditFormData] = useState<Partial<WeatherObservation>>({})
   const [isSaving, setIsSaving] = useState(false)
+  const today = format(new Date(), "yyyy-MM-dd")
+  const [startDate, setStartDate] = useState(today)
+  const [endDate, setEndDate] = useState(today)
+  const [dateError, setDateError] = useState<string | null>(null)
 
   // Fetch data function
   const fetchData = async () => {
@@ -175,8 +179,8 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
 
       // Build the URL with query parameters
       const url = new URL("/api/save-observation", window.location.origin)
-      url.searchParams.append("startDate", selectedDate)
-      url.searchParams.append("endDate", selectedDate)
+      url.searchParams.append("startDate", startDate)
+      url.searchParams.append("endDate", endDate)
 
       if (stationFilter !== "all") {
         url.searchParams.append("stationId", stationFilter)
@@ -204,20 +208,13 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
       toast.error("Failed to fetch weather observation data")
     } finally {
       setLoading(false)
-      setIsRefreshing(false)
     }
-  }
-
-  // Refresh data manually
-  const handleRefresh = () => {
-    setIsRefreshing(true)
-    fetchData()
   }
 
   // Fetch data on component mount and when filters or refreshTrigger changes
   useEffect(() => {
     fetchData()
-  }, [selectedDate, stationFilter, refreshTrigger])
+  }, [selectedDate, startDate, endDate, stationFilter, refreshTrigger])
 
   // Navigate to previous day
   const goToPreviousDay = () => {
@@ -310,50 +307,138 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
   // Filter data to only show records with WeatherObservation entries
   const filteredData = data.filter((record) => record.WeatherObservation && record.WeatherObservation.length > 0)
 
+  const goToPreviousWeek = () => {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const daysInRange = differenceInDays(end, start)
+
+    const newStart = new Date(start)
+    newStart.setDate(start.getDate() - daysInRange - 1)
+
+    const newEnd = new Date(start)
+    newEnd.setDate(start.getDate() - 1)
+
+    // Don't update if the new range would be invalid
+    if (newStart <= newEnd) {
+      setStartDate(format(newStart, "yyyy-MM-dd"))
+      setEndDate(format(newEnd, "yyyy-MM-dd"))
+      setDateError(null)
+    }
+  }
+
+  const goToNextWeek = () => {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const daysInRange = differenceInDays(end, start)
+
+    const newStart = new Date(end)
+    newStart.setDate(end.getDate() + 1)
+
+    const newEnd = new Date(end)
+    newEnd.setDate(end.getDate() + daysInRange + 1)
+
+    // Don't allow future dates beyond today
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    if (newStart > today) {
+      setDateError("Cannot select future dates")
+      return
+    }
+
+    // Don't update if the new range would be invalid
+    if (newStart <= newEnd) {
+      setStartDate(format(newStart, "yyyy-MM-dd"))
+      setEndDate(format(newEnd, "yyyy-MM-dd"))
+      setDateError(null)
+    }
+  }
+
+  const handleDateChange = (type: "start" | "end", newDate: string) => {
+    const date = new Date(newDate)
+    const otherDate = type === "start" ? new Date(endDate) : new Date(startDate)
+
+    if (isNaN(date.getTime())) {
+      setDateError("Invalid date format")
+      return
+    }
+
+    // Reset error if dates are valid
+    setDateError(null)
+
+    if (type === "start") {
+      if (date > otherDate) {
+        setDateError("Start date cannot be after end date")
+        return
+      }
+      setStartDate(newDate)
+    } else {
+      if (date < otherDate) {
+        setDateError("End date cannot be before start date")
+        return
+      }
+      setEndDate(newDate)
+    }
+  }
+
+
   return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
       <CardContent className="p-6">
         {/* Date and Station Filters */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 bg-slate-100 p-4 rounded-lg">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={goToPreviousDay} className="hover:bg-slate-200">
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
 
-            <div className="relative">
-              <Calendar className="absolute left-2 top-2.5 h-4 w-4 text-sky-500" />
-              <Input
-                type="date"
-                className="pl-8 w-40 border-slate-300 focus:border-sky-500 focus:ring-sky-500"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-              />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" onClick={goToPreviousWeek} className="hover:bg-slate-200">
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => handleDateChange("start", e.target.value)}
+                  max={endDate}
+                  className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                />
+                <span>to</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => handleDateChange("end", e.target.value)}
+                  min={startDate}
+                  max={format(new Date(), "yyyy-MM-dd")}
+                  className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                />
+              </div>
+              <Button variant="outline" size="icon" onClick={goToNextWeek} className="hover:bg-slate-200">
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-
-            <Button variant="outline" size="icon" onClick={goToNextDay} className="hover:bg-slate-200">
-              <ChevronRight className="h-4 w-4" />
-            </Button>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Filter size={16} className="text-sky-500" />
-            <Label htmlFor="stationFilter" className="whitespace-nowrap font-medium text-slate-700">
-              Station:
-            </Label>
-            <Select value={stationFilter} onValueChange={setStationFilter}>
-              <SelectTrigger className="w-[200px] border-slate-300 focus:ring-sky-500">
-                <SelectValue placeholder="All Stations" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Stations</SelectItem>
-                {stations.map((station) => (
-                  <SelectItem key={station.id} value={station.stationId}>
-                    {station.name} ({station.stationId})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {session?.user?.role === "super_admin" && (
+            <div className="flex items-center gap-2">
+              <Filter size={16} className="text-sky-500" />
+              <Label htmlFor="stationFilter" className="whitespace-nowrap font-medium text-slate-700">
+                Station:
+              </Label>
+              <Select value={stationFilter} onValueChange={setStationFilter}>
+                <SelectTrigger className="w-[200px] border-slate-300 focus:ring-sky-500">
+                  <SelectValue placeholder="All Stations" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Stations</SelectItem>
+                  {stations.map((station) => (
+                    <SelectItem key={station.id} value={station.stationId}>
+                      {station.name} ({station.stationId})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
         </div>
 
         {/* Form View */}
@@ -619,7 +704,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                         >
                           <td className="border border-slate-300 p-1 font-medium text-sky-700">
                             <div className="flex flex-col">
-                            {utcToHour(record.utcTime.toString())}
+                              {utcToHour(record.utcTime.toString())}
                             </div>
                           </td>
                           <td className="border border-slate-300 p-1">
