@@ -255,6 +255,6 @@ export const getRemarksFromPresentWeather = (presentWeather: string) => {
   if (remarks) {
     return `${remarks.symbol} - ${remarks.description}`;
   } else {
-    return "No remark available for this weather code";
+    return "/remarks/default.png - No remark available for this weather code";
   }
 };
