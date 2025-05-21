@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { useSession } from "@/lib/auth-client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { toast } from "sonner"
+import { utcToHour } from "@/lib/utils"
 
 // Define the structure of weather observation data
 interface WeatherObservation {
@@ -353,17 +354,6 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
               </SelectContent>
             </Select>
           </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefresh}
-            disabled={isRefreshing}
-            className="flex items-center gap-1 hover:bg-sky-50 hover:text-sky-600 border-sky-200"
-          >
-            {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-            Refresh
-          </Button>
         </div>
 
         {/* Form View */}
@@ -629,10 +619,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                         >
                           <td className="border border-slate-300 p-1 font-medium text-sky-700">
                             <div className="flex flex-col">
-                              <span>{format(new Date(record.utcTime), "HH:mm")}</span>
-                              <span className="text-[10px] text-gray-500">
-                                {format(new Date(record.utcTime), "dd/MM/yyyy")}
-                              </span>
+                            {utcToHour(record.utcTime.toString())}
                             </div>
                           </td>
                           <td className="border border-slate-300 p-1">
