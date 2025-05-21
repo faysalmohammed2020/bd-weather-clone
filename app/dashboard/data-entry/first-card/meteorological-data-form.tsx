@@ -574,6 +574,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                 <TabsTrigger
                   key={key}
                   value={key}
+                  disabled={Boolean(timeData?.time)}
                   className={cn("border border-gray-300", {
                     [style.tab]: activeTab === key,
                   })}
