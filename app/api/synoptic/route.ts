@@ -37,22 +37,16 @@ export async function GET() {
       }
     });
 
-    // // Fetch most recent records from database
-    // const [firstCard, weatherObs] = await Promise.all([
-    //   prisma.meteorologicalEntry.findFirst({
-    //     orderBy: { createdAt: 'desc' },
-    //   }),
-    //   prisma.weatherObservation.findFirst({
-    //     orderBy: { submittedAt: 'desc' },
-    //   }),
-    // ]);
+    console.log(observingTime)
 
-    if (!observingTime?.MeteorologicalEntry || !observingTime?.WeatherObservation) {
+    if (!observingTime?.MeteorologicalEntry.length || !observingTime?.WeatherObservation.length) {
       return NextResponse.json(
-        { error: 'No weather data available' },
+        { error: 'First or second card data not found' },
         { status: 404 }
       );
     }
+
+
 
     const firstCard = observingTime?.MeteorologicalEntry[0];
     const weatherObs = observingTime?.WeatherObservation[0];

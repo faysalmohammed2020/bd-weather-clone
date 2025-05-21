@@ -201,12 +201,13 @@ export default function SynopticMeasurementsTab() {
         }));
 
         const response = await fetch("/api/synoptic");
+        const generatedValues = await response.json();
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        if (generatedValues.error) {
+          throw new Error(generatedValues.error);
         }
 
-        const generatedValues = await response.json();
+        console.log("generated synoptic", generatedValues)
 
         // Check if today's date matches the generated values
         const today = new Date();
