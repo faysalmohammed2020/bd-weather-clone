@@ -516,7 +516,7 @@ export default function HeroSection() {
                 }}
               >
                 <Wind className="h-5 w-5 text-green-500" />
-                <span className="font-bold">12km/h</span>
+                <span className="font-bold">12NM</span>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
                   Wind
                 </span>
