@@ -1,54 +1,56 @@
-import { NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-import { getSession } from "@/lib/getSession"
-import { convertUTCToBDTime, hourToUtc } from "@/lib/utils"
+import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+import { getSession } from "@/lib/getSession";
+import { convertUTCToBDTime, getTodayUtcRange, hourToUtc } from "@/lib/utils";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
-    const session = await getSession()
+    const session = await getSession();
     if (!session || !session.user) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const data = await req.json()
+    const data = await req.json();
 
-    const formattedObservingTime = hourToUtc(data.observingTimeId)
-    const localTime = convertUTCToBDTime(formattedObservingTime)
+    const formattedObservingTime = hourToUtc(data.observingTimeId);
+    const localTime = convertUTCToBDTime(formattedObservingTime);
 
     if (!formattedObservingTime) {
       return NextResponse.json(
         {
           message: "Observation time id not provided",
         },
-        { status: 404 },
-      )
+        { status: 404 }
+      );
     }
 
     const dataType =
-      typeof data.dataType === "string" ? data.dataType : Object.values(data.dataType || {}).join("") || ""
+      typeof data.dataType === "string"
+        ? data.dataType
+        : Object.values(data.dataType || {}).join("") || "";
 
     // Get station ID from session
-    const stationId = session.user.station?.stationId
+    const stationId = session.user.station?.stationId;
 
     if (!stationId) {
       return NextResponse.json({
         message: "Station ID is required",
         status: 400,
-      })
+      });
     }
 
     // Find the station by stationId to get its primary key (id)
     const stationRecord = await prisma.station.findFirst({
       where: { stationId },
-    })
+    });
 
     if (!stationRecord) {
       return NextResponse.json({
         message: `No station found with ID: ${stationId}`,
         status: 404,
-      })
+      });
     }
 
     // Check if the observation time already exists
@@ -56,13 +58,13 @@ export async function POST(req: Request) {
       where: {
         utcTime: formattedObservingTime,
       },
-    })
+    });
 
     if (existingObservingTime) {
       return NextResponse.json({
         message: "Observing time already exists",
         status: 400,
-      })
+      });
     }
 
     const createdObservingTime = await prisma.observingTime.create({
@@ -80,7 +82,7 @@ export async function POST(req: Request) {
           },
         },
       },
-    })
+    });
 
     const savedEntry = await prisma.meteorologicalEntry.create({
       data: {
@@ -128,9 +130,9 @@ export async function POST(req: Request) {
         },
         submittedAt: new Date(), // Set submission time
       },
-    })
+    });
 
-    const totalCount = await prisma.meteorologicalEntry.count()
+    const totalCount = await prisma.meteorologicalEntry.count();
 
     return NextResponse.json(
       {
@@ -138,72 +140,84 @@ export async function POST(req: Request) {
         dataCount: totalCount,
         entry: savedEntry,
       },
-      { status: 200 },
-    )
+      { status: 200 }
+    );
   } catch (error: unknown) {
-    console.error("Error saving meteorological entry:", error)
+    console.error("Error saving meteorological entry:", error);
     return NextResponse.json(
-      { message: "Failed to save data", error: error instanceof Error ? error.message : "Unexpected Error" },
-      { status: 500 },
-    )
+      {
+        message: "Failed to save data",
+        error: error instanceof Error ? error.message : "Unexpected Error",
+      },
+      { status: 500 }
+    );
   }
 }
 
 export async function GET(req: Request) {
   try {
-    const session = await getSession()
+    const session = await getSession();
     if (!session || !session.user) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url)
-    const startDate = searchParams.get("startDate")
-    const endDate = searchParams.get("endDate")
-    const stationIdParam = searchParams.get("stationId")
+    const { searchParams } = new URL(req.url);
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
+    const stationIdParam = searchParams.get("stationId");
 
     // Use the station ID from the query parameter if provided, otherwise use the user's station
-    const stationId = stationIdParam || session.user.station?.stationId
+    const stationId = stationIdParam || session.user.station?.stationId;
 
     // Super admin can view all stations if no specific station is requested
     if (!stationId && session.user.role !== "super_admin") {
-      return NextResponse.json({ message: "Station ID is required" }, { status: 400 })
+      return NextResponse.json(
+        { message: "Station ID is required" },
+        { status: 400 }
+      );
     }
 
     // Find the station by stationId to get its primary key (id)
-    let stationRecord = null
+    let stationRecord = null;
     if (stationId && stationId !== "all") {
       stationRecord = await prisma.station.findFirst({
         where: { stationId },
-      })
+      });
 
       if (!stationRecord) {
         return NextResponse.json({
           message: `No station found with ID: ${stationId}`,
           status: 404,
-        })
+        });
       }
     }
 
-    const startTime = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 7))
-    startTime.setHours(0, 0, 0, 0) // Start of day
+    const startTime = startDate
+      ? new Date(startDate)
+      : new Date(new Date().setDate(new Date().getDate() - 7));
+    startTime.setHours(0, 0, 0, 0); // Start of day
 
-    const endTime = endDate ? new Date(endDate) : new Date()
-    endTime.setHours(23, 59, 59, 999) // End of day
+    const endTime = endDate ? new Date(endDate) : new Date();
+    endTime.setHours(23, 59, 59, 999); // End of day
+
+    const { startToday, endToday } = getTodayUtcRange();
+    const start = startDate ? startTime : startToday;
+    const end = endDate ? endTime : endToday;
 
     // Build the query
     const whereClause: any = {
       utcTime: {
-        gte: startTime,
-        lte: endTime,
+        gte: start,
+        lte: end,
       },
-    }
+    };
 
     // Add station filter if not super admin or if a specific station is requested
     if (stationRecord) {
-      whereClause.stationId = stationRecord.id
+      whereClause.stationId = stationRecord.id;
     } else if (session.user.role !== "super_admin") {
       // Regular users can only see their station's data
-      whereClause.stationId = session.user.station?.id
+      whereClause.stationId = session.user.station?.id;
     }
 
     const entries = await prisma.observingTime.findMany({
@@ -216,26 +230,32 @@ export async function GET(req: Request) {
         utcTime: "desc",
       },
       take: 100,
-    })
+    });
 
-    return NextResponse.json(entries, { status: 200 })
+    return NextResponse.json(entries, { status: 200 });
   } catch (error: any) {
-    console.error("Error fetching meteorological entries:", error)
-    return NextResponse.json({ message: "Failed to fetch data", error: error.message }, { status: 500 })
+    console.error("Error fetching meteorological entries:", error);
+    return NextResponse.json(
+      { message: "Failed to fetch data", error: error.message },
+      { status: 500 }
+    );
   }
 }
 
 export async function PUT(req: Request) {
   try {
-    const session = await getSession()
+    const session = await getSession();
     if (!session || !session.user) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { id, ...updateData } = await req.json()
+    const { id, ...updateData } = await req.json();
 
     if (!id) {
-      return NextResponse.json({ message: "Entry ID is required" }, { status: 400 })
+      return NextResponse.json(
+        { message: "Entry ID is required" },
+        { status: 400 }
+      );
     }
 
     // Find the existing entry with its related observing time
@@ -249,94 +269,118 @@ export async function PUT(req: Request) {
           },
         },
       },
-    })
+    });
 
     if (!existingEntry) {
-      return NextResponse.json({ message: "Entry not found" }, { status: 404 })
+      return NextResponse.json({ message: "Entry not found" }, { status: 404 });
     }
 
     // Check permissions using the same logic as the frontend canEditRecord function
     const canEditRecord = (record: any, user: any): boolean => {
-      if (!user) return false
-    
+      if (!user) return false;
+
       // If no submittedAt, allow edit (newly created record)
-      if (!record.submittedAt) return true
-    
+      if (!record.submittedAt) return true;
+
       try {
-        const { parseISO, differenceInDays, isValid } = require('date-fns')
-        const submissionDate = parseISO(record.submittedAt)
-        if (!isValid(submissionDate)) return true // If date is invalid, allow edit
-    
-        const now = new Date()
-        const daysDifference = differenceInDays(now, submissionDate)
-    
+        const { parseISO, differenceInDays, isValid } = require("date-fns");
+        const submissionDate = parseISO(record.submittedAt);
+        if (!isValid(submissionDate)) return true; // If date is invalid, allow edit
+
+        const now = new Date();
+        const daysDifference = differenceInDays(now, submissionDate);
+
         // Role-based permissions
-        const role = user.role
-        const stationId = user.station?.id
-    
+        const role = user.role;
+        const stationId = user.station?.id;
+
         // Super admin can edit records up to 1 year old
-        if (role === "super_admin") return daysDifference <= 365
-    
+        if (role === "super_admin") return daysDifference <= 365;
+
         // Station admin can edit records from their station up to 30 days old
-        if (role === "station_admin") return daysDifference <= 30 && stationId === record.ObservingTime.stationId
-    
+        if (role === "station_admin")
+          return (
+            daysDifference <= 30 && stationId === record.ObservingTime.stationId
+          );
+
         // Regular users can edit their own records up to 2 days old
-        if (role === "observer") return daysDifference <= 2 && user.id === record.ObservingTime.userId
-    
-        return false
+        if (role === "observer")
+          return daysDifference <= 2 && user.id === record.ObservingTime.userId;
+
+        return false;
       } catch (e) {
-        console.warn("Error in canEditRecord:", e)
-        return false
+        console.warn("Error in canEditRecord:", e);
+        return false;
       }
-    }
-    
+    };
+
     // Check if user can edit this record
-    const canEdit = canEditRecord(existingEntry, session.user)
-    
+    const canEdit = canEditRecord(existingEntry, session.user);
+
     if (!canEdit) {
       return NextResponse.json(
-        { 
-          message: "You don't have permission to edit this record. It may be too old or you don't have the required permissions." 
+        {
+          message:
+            "You don't have permission to edit this record. It may be too old or you don't have the required permissions.",
         },
         { status: 403 }
-      )
+      );
     }
 
     // Prepare the data to update
     const dataToUpdate: any = {
       dataType: updateData.dataType || existingEntry.dataType,
       subIndicator: updateData.subIndicator ?? existingEntry.subIndicator,
-      alteredThermometer: updateData.alteredThermometer ?? existingEntry.alteredThermometer,
+      alteredThermometer:
+        updateData.alteredThermometer ?? existingEntry.alteredThermometer,
       barAsRead: updateData.barAsRead ?? existingEntry.barAsRead,
-      correctedForIndex: updateData.correctedForIndex ?? existingEntry.correctedForIndex,
-      heightDifference: updateData.heightDifference ?? existingEntry.heightDifference,
-      correctionForTemp: updateData.correctionForTemp ?? existingEntry.correctionForTemp,
-      stationLevelPressure: updateData.stationLevelPressure ?? existingEntry.stationLevelPressure,
-      seaLevelReduction: updateData.seaLevelReduction ?? existingEntry.seaLevelReduction,
-      correctedSeaLevelPressure: updateData.correctedSeaLevelPressure ?? existingEntry.correctedSeaLevelPressure,
-      afternoonReading: updateData.afternoonReading ?? existingEntry.afternoonReading,
-      pressureChange24h: updateData.pressureChange24h ?? existingEntry.pressureChange24h,
+      correctedForIndex:
+        updateData.correctedForIndex ?? existingEntry.correctedForIndex,
+      heightDifference:
+        updateData.heightDifference ?? existingEntry.heightDifference,
+      correctionForTemp:
+        updateData.correctionForTemp ?? existingEntry.correctionForTemp,
+      stationLevelPressure:
+        updateData.stationLevelPressure ?? existingEntry.stationLevelPressure,
+      seaLevelReduction:
+        updateData.seaLevelReduction ?? existingEntry.seaLevelReduction,
+      correctedSeaLevelPressure:
+        updateData.correctedSeaLevelPressure ??
+        existingEntry.correctedSeaLevelPressure,
+      afternoonReading:
+        updateData.afternoonReading ?? existingEntry.afternoonReading,
+      pressureChange24h:
+        updateData.pressureChange24h ?? existingEntry.pressureChange24h,
       dryBulbAsRead: updateData.dryBulbAsRead ?? existingEntry.dryBulbAsRead,
       wetBulbAsRead: updateData.wetBulbAsRead ?? existingEntry.wetBulbAsRead,
-      maxMinTempAsRead: updateData.maxMinTempAsRead ?? existingEntry.maxMinTempAsRead,
-      dryBulbCorrected: updateData.dryBulbCorrected ?? existingEntry.dryBulbCorrected,
-      wetBulbCorrected: updateData.wetBulbCorrected ?? existingEntry.wetBulbCorrected,
-      maxMinTempCorrected: updateData.maxMinTempCorrected ?? existingEntry.maxMinTempCorrected,
+      maxMinTempAsRead:
+        updateData.maxMinTempAsRead ?? existingEntry.maxMinTempAsRead,
+      dryBulbCorrected:
+        updateData.dryBulbCorrected ?? existingEntry.dryBulbCorrected,
+      wetBulbCorrected:
+        updateData.wetBulbCorrected ?? existingEntry.wetBulbCorrected,
+      maxMinTempCorrected:
+        updateData.maxMinTempCorrected ?? existingEntry.maxMinTempCorrected,
       Td: updateData.Td ?? existingEntry.Td,
-      relativeHumidity: updateData.relativeHumidity ?? existingEntry.relativeHumidity,
-      squallConfirmed: updateData.squallConfirmed !== undefined 
-        ? String(updateData.squallConfirmed) 
-        : existingEntry.squallConfirmed,
+      relativeHumidity:
+        updateData.relativeHumidity ?? existingEntry.relativeHumidity,
+      squallConfirmed:
+        updateData.squallConfirmed !== undefined
+          ? String(updateData.squallConfirmed)
+          : existingEntry.squallConfirmed,
       squallForce: updateData.squallForce ?? existingEntry.squallForce,
-      squallDirection: updateData.squallDirection ?? existingEntry.squallDirection,
+      squallDirection:
+        updateData.squallDirection ?? existingEntry.squallDirection,
       squallTime: updateData.squallTime ?? existingEntry.squallTime,
-      horizontalVisibility: updateData.horizontalVisibility ?? existingEntry.horizontalVisibility,
+      horizontalVisibility:
+        updateData.horizontalVisibility ?? existingEntry.horizontalVisibility,
       miscMeteors: updateData.miscMeteors ?? existingEntry.miscMeteors,
       pastWeatherW1: updateData.pastWeatherW1 ?? existingEntry.pastWeatherW1,
       pastWeatherW2: updateData.pastWeatherW2 ?? existingEntry.pastWeatherW2,
-      presentWeatherWW: updateData.presentWeatherWW ?? existingEntry.presentWeatherWW,
+      presentWeatherWW:
+        updateData.presentWeatherWW ?? existingEntry.presentWeatherWW,
       c2Indicator: updateData.c2Indicator ?? existingEntry.c2Indicator,
-    }
+    };
 
     // Update the entry
     const updatedEntry = await prisma.meteorologicalEntry.update({
@@ -349,23 +393,23 @@ export async function PUT(req: Request) {
           },
         },
       },
-    })
+    });
 
     return NextResponse.json(
-      { 
-        message: "Data updated successfully", 
-        entry: updatedEntry 
+      {
+        message: "Data updated successfully",
+        entry: updatedEntry,
       },
       { status: 200 }
-    )
+    );
   } catch (error: any) {
-    console.error("Error updating meteorological entry:", error)
+    console.error("Error updating meteorological entry:", error);
     return NextResponse.json(
-      { 
-        message: "Failed to update data", 
-        error: error.message 
+      {
+        message: "Failed to update data",
+        error: error.message,
       },
       { status: 500 }
-    )
+    );
   }
 }

@@ -5,23 +5,26 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const session = await getSession()
+    const session = await getSession();
     if (!session || !session.user) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const { startToday, endToday } = getTodayUtcRange()
+    const { startToday, endToday } = getTodayUtcRange();
 
     const data = await prisma.observingTime.findMany({
       where: {
-        AND: [{
-          stationId: session.user.station?.id,
-        }, {
-          utcTime: {
-            gte: startToday,
-            lte: endToday,
-          }
-        }]
+        AND: [
+          {
+            stationId: session.user.station?.id,
+          },
+          {
+            utcTime: {
+              gte: startToday,
+              lte: endToday,
+            },
+          },
+        ],
       },
       include: {
         station: true,
@@ -31,10 +34,10 @@ export async function GET() {
         utcTime: "desc",
       },
       take: 8,
-    })
+    });
 
     if (!data) {
-      return NextResponse.json({ message: "No data found" }, { status: 404 })
+      return NextResponse.json({ message: "No data found" }, { status: 404 });
     }
 
     // Return the data as JSON

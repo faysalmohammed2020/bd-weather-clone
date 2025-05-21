@@ -1,8 +1,8 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 /**
@@ -27,8 +27,8 @@ export function hourToUtc(code: string): string {
 export function utcToHour(isoString: string): string {
   const date = new Date(isoString);
   const hour = date.getUTCHours(); // always UTC
-  return hour.toString().padStart(2, '0');
-} 
+  return hour.toString().padStart(2, "0");
+}
 
 /**
  * Converts a UTC ISO string to Dhaka time (Asia/Dhaka)
@@ -48,16 +48,31 @@ export function getTodayUtcRange(): { startToday: Date; endToday: Date } {
   const now = new Date();
 
   const startToday = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0)
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      0,
+      0,
+      0,
+      0
+    )
   );
 
   const endToday = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59, 999)
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+      23,
+      59,
+      59,
+      999
+    )
   );
 
   return { startToday, endToday };
 }
-
 
 /**
  * Checks if a given UTC time has passed a specified number of hours
@@ -84,5 +99,3 @@ export function getTimeDiffInHours(savedUtcTime: string): number {
 
   return Number(diffHours.toFixed(2));
 }
-
-

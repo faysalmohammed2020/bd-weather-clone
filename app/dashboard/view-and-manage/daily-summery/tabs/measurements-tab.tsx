@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useFormikContext } from "formik"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { CalendarIcon, LineChart, AlertCircle, Loader2 } from "lucide-react"
-import BasicInfoTab from "@/components/basic-info-tab"
-import { Button } from "@/components/ui/button"
-import { toast } from "sonner"
-import { useSession } from "@/lib/auth-client"
+import { useEffect, useState } from "react";
+import { useFormikContext } from "formik";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { CalendarIcon, LineChart, AlertCircle, Loader2 } from "lucide-react";
+import BasicInfoTab from "@/components/basic-info-tab";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { useSession } from "@/lib/auth-client";
 
 const categoryColors = {
   pressure: {
@@ -52,77 +52,128 @@ const categoryColors = {
     border: "border-yellow-200",
     icon: <LineChart className="h-4 w-4" />,
   },
-}
+};
 
 export default function MeasurementsTab() {
   const { values, setFieldValue } = useFormikContext<{
-    measurements: string[]
-  }>()
+    measurements: string[];
+  }>();
 
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0])
-  const [isLoading, setIsLoading] = useState(false)
-  const [tableData, setTableData] = useState<any[]>([])
-  const [error, setError] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [tableData, setTableData] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const { data: session } = useSession()
+  const { data: session } = useSession();
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true)
-      setError(null)
+      setIsLoading(true);
+      setError(null);
       try {
-        const firstCardResponse = await fetch("/api/first-card-data")
-        const formatedFirstCardData = await firstCardResponse.json()
-        const todayFirstCardData = await formatedFirstCardData.map((item: any) => item.MeteorologicalEntry).flat()
+        const firstCardResponse = await fetch("/api/first-card-data");
+        const formatedFirstCardData = await firstCardResponse.json();
+        const todayFirstCardData = await formatedFirstCardData
+          .map((item: any) => item.MeteorologicalEntry)
+          .flat();
 
-        const observationsResponse = await fetch("/api/second-card-data")
-        const formatedObservationsData = await observationsResponse.json()
-        const todayWeatherObservations = formatedObservationsData.map((item: any) => item.WeatherObservation).flat()
+        const observationsResponse = await fetch("/api/second-card-data");
+        const formatedObservationsData = await observationsResponse.json();
+        const todayWeatherObservations = formatedObservationsData
+          .map((item: any) => item.WeatherObservation)
+          .flat();
 
-        console.log(todayWeatherObservations[0].rainfallLast24Hours)
-        console.log(todayWeatherObservations)
+        console.log("Today", todayFirstCardData);
+        console.log("Today", todayWeatherObservations);
 
-        const measurements = Array(16).fill("-")
+        const measurements = Array(16).fill("-");
 
-        const processFirstCard = (key: string, id: number, reducer: (arr: number[]) => number) => {
+        const processFirstCard = (
+          key: string,
+          id: number,
+          reducer: (arr: number[]) => number
+        ) => {
           const values = todayFirstCardData
             .map((item: any) => Number.parseFloat(item[key]))
-            .filter((val: number) => !isNaN(val))
-          if (values.length > 0) measurements[id] = Math.round(reducer(values)).toString()
-        }
+            .filter((val: number) => !isNaN(val));
+          if (values.length > 0)
+            measurements[id] = Math.round(reducer(values)).toString();
+        };
 
-        processFirstCard("stationLevelPressure", 0, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
-        processFirstCard("correctedSeaLevelPressure", 1, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
-        processFirstCard("dryBulbAsRead", 2, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
-        processFirstCard("wetBulbAsRead", 3, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
-        processFirstCard("maxMinTempAsRead", 4, (arr) => Math.max(...arr))
-        processFirstCard("maxMinTempAsRead", 5, (arr) => Math.min(...arr))
-        processFirstCard("Td", 7, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
-        processFirstCard("relativeHumidity", 8, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
+        processFirstCard(
+          "stationLevelPressure",
+          0,
+          (arr) => arr.reduce((a, b) => a + b, 0) / arr.length
+        );
+        processFirstCard(
+          "correctedSeaLevelPressure",
+          1,
+          (arr) => arr.reduce((a, b) => a + b, 0) / arr.length
+        );
+        processFirstCard(
+          "dryBulbAsRead",
+          2,
+          (arr) => arr.reduce((a, b) => a + b, 0) / arr.length
+        );
+        processFirstCard(
+          "wetBulbAsRead",
+          3,
+          (arr) => arr.reduce((a, b) => a + b, 0) / arr.length
+        );
+        processFirstCard("maxMinTempAsRead", 4, (arr) => Math.max(...arr));
+        processFirstCard("maxMinTempAsRead", 5, (arr) => Math.min(...arr));
+        processFirstCard(
+          "Td",
+          7,
+          (arr) => arr.reduce((a, b) => a + b, 0) / arr.length
+        );
+        processFirstCard(
+          "relativeHumidity",
+          8,
+          (arr) => arr.reduce((a, b) => a + b, 0) / arr.length
+        );
         // processFirstCard("horizontalVisibility", 14, (arr) => Math.min(...arr))
-        processFirstCard("horizontalVisibility", 14, (arr) => Math.min(...arr) / 10);
+        processFirstCard(
+          "horizontalVisibility",
+          14,
+          (arr) => Math.min(...arr) / 10
+        );
 
-
-        const totalPrecip = todayWeatherObservations.reduce((sum: number, item: any) => {
-          const val = Number.parseFloat(item.rainfallLast24Hours)
-          return isNaN(val) ? sum : sum + val
-        }, 0)
-        if (totalPrecip > 0) measurements[6] = Math.round(totalPrecip).toString()
+        const totalPrecip = todayWeatherObservations.reduce(
+          (sum: number, item: any) => {
+            const val = Number.parseFloat(item.rainfallLast24Hours);
+            return isNaN(val) ? sum : sum + val;
+          },
+          0
+        );
+        if (totalPrecip > 0)
+          measurements[6] = Math.round(totalPrecip).toString();
 
         const windSpeeds = todayWeatherObservations
           .map((item: any) => Number.parseFloat(item.windSpeed))
-          .filter((val) => !isNaN(val))
+          .filter((val) => !isNaN(val));
         if (windSpeeds.length > 0) {
-          measurements[9] = Math.round(windSpeeds.reduce((a, b) => a + b, 0) / windSpeeds.length).toString()
+          measurements[9] = Math.round(
+            windSpeeds.reduce((a, b) => a + b, 0) / windSpeeds.length
+          ).toString();
         }
 
-        const directions = todayWeatherObservations.map((item: any) => item.windDirection)
+        const directions = todayWeatherObservations.map(
+          (item: any) => item.windDirection
+        );
         if (directions.length > 0) {
-          const dirCount = directions.reduce((acc: Record<string, number>, dir: string) => {
-            acc[dir] = (acc[dir] || 0) + 1
-            return acc
-          }, {})
-          measurements[10] = Object.entries(dirCount).reduce((a, b) => (a[1] > b[1] ? a : b))[0]
+          const dirCount = directions.reduce(
+            (acc: Record<string, number>, dir: string) => {
+              acc[dir] = (acc[dir] || 0) + 1;
+              return acc;
+            },
+            {}
+          );
+          measurements[10] = Object.entries(dirCount).reduce((a, b) =>
+            a[1] > b[1] ? a : b
+          )[0];
         }
 
         const windData = todayWeatherObservations
@@ -130,35 +181,42 @@ export default function MeasurementsTab() {
             speed: Number.parseFloat(item.windSpeed),
             direction: item.windDirection,
           }))
-          .filter((item) => !isNaN(item.speed))
+          .filter((item) => !isNaN(item.speed));
         if (windData.length > 0) {
-          const maxWind = windData.reduce((max, item) => (item.speed > max.speed ? item : max))
-          measurements[11] = Math.round(maxWind.speed).toString()
-          measurements[12] = maxWind.direction
+          const maxWind = windData.reduce((max, item) =>
+            item.speed > max.speed ? item : max
+          );
+          measurements[11] = Math.round(maxWind.speed).toString();
+          measurements[12] = maxWind.direction;
         }
 
         const cloudAmounts = todayWeatherObservations
           .map((item: any) => Number.parseFloat(item.totalCloudAmount))
-          .filter((val) => !isNaN(val))
+          .filter((val) => !isNaN(val));
         if (cloudAmounts.length > 0) {
-          measurements[13] = Math.round(cloudAmounts.reduce((a, b) => a + b, 0) / cloudAmounts.length).toString()
+          measurements[13] = Math.round(
+            cloudAmounts.reduce((a, b) => a + b, 0) / cloudAmounts.length
+          ).toString();
         }
 
-        const totalRainDuration = todayWeatherObservations.reduce((total: number, item: any) => {
-          if (item.rainfallLast24Hours) {
-            const [sh, sm] = item.rainfallLast24Hours.split(".").map(Number)
-            const [eh, em] = item.rainfallLast24Hours.split(".").map(Number)
-            return total + (eh * 60 + em - (sh * 60 + sm))
-          }
-          return total
-        }, 0)
+        const totalRainDuration = todayWeatherObservations.reduce(
+          (total: number, item: any) => {
+            if (item.rainfallLast24Hours) {
+              const [sh, sm] = item.rainfallLast24Hours.split(".").map(Number);
+              const [eh, em] = item.rainfallLast24Hours.split(".").map(Number);
+              return total + (eh * 60 + em - (sh * 60 + sm));
+            }
+            return total;
+          },
+          0
+        );
         if (totalRainDuration > 0) {
-          const hours = Math.floor(totalRainDuration / 60)
-          const minutes = totalRainDuration % 60
-          measurements[15] = `${hours}-${minutes.toString().padStart(2, "0")}`
+          const hours = Math.floor(totalRainDuration / 60);
+          const minutes = totalRainDuration % 60;
+          measurements[15] = `${hours}-${minutes.toString().padStart(2, "0")}`;
         }
 
-        setFieldValue("measurements", measurements)
+        setFieldValue("measurements", measurements);
 
         const meta = [
           "Av. Station Pressure",
@@ -177,7 +235,7 @@ export default function MeasurementsTab() {
           "Av. Total Cloud",
           "Lowest visibility",
           "Total Duration of Rain",
-        ]
+        ];
 
         const ranges = [
           "14-18",
@@ -196,7 +254,7 @@ export default function MeasurementsTab() {
           "56",
           "57-59",
           "60-63",
-        ]
+        ];
 
         const units = [
           "hPa",
@@ -215,7 +273,7 @@ export default function MeasurementsTab() {
           "oktas",
           "km",
           "H-M",
-        ]
+        ];
 
         const categories = [
           "pressure",
@@ -234,7 +292,7 @@ export default function MeasurementsTab() {
           "cloud",
           "visibility",
           "precipitation",
-        ]
+        ];
 
         const formatted = measurements.map((val, i) => ({
           id: i,
@@ -243,28 +301,28 @@ export default function MeasurementsTab() {
           unit: units[i],
           category: categories[i],
           value: val,
-        }))
+        }));
 
-        setTableData(formatted)
+        setTableData(formatted);
       } catch (e) {
-        console.error(e)
-        setError("Failed to load weather data. Please try again later.")
+        console.error(e);
+        setError("Failed to load weather data. Please try again later.");
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchData()
-  }, [selectedDate, setFieldValue])
+    fetchData();
+  }, [selectedDate, setFieldValue]);
 
   // Group data by category for summary cards
   const groupedData = tableData.reduce((acc, item) => {
     if (!acc[item.category]) {
-      acc[item.category] = []
+      acc[item.category] = [];
     }
-    acc[item.category].push(item)
-    return acc
-  }, {})
+    acc[item.category].push(item);
+    return acc;
+  }, {});
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -272,8 +330,8 @@ export default function MeasurementsTab() {
       year: "numeric",
       month: "long",
       day: "numeric",
-    })
-  }
+    });
+  };
 
   const handleSaveMeasurements = async () => {
     try {
@@ -286,26 +344,26 @@ export default function MeasurementsTab() {
         day: new Date(selectedDate).getDate().toString(),
         measurements: tableData.map((item) => item.value),
         windDirection: tableData[10]?.value || "",
-      }
+      };
 
       const res = await fetch("/api/daily-summary", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      })
+      });
 
-      const result = await res.json()
+      const result = await res.json();
 
       if (!res.ok) {
-        throw new Error(result.message || "Failed to save")
+        throw new Error(result.message || "Failed to save");
       }
 
-      toast.success("✅ Measurements saved successfully!")
+      toast.success("✅ Measurements saved successfully!");
     } catch (error) {
-      console.error("❌ Save error:", error)
-      toast.error("Failed to save measurements")
+      console.error("❌ Save error:", error);
+      toast.error("Failed to save measurements");
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -329,7 +387,9 @@ export default function MeasurementsTab() {
               disabled={isLoading}
             />
           </div>
-          <p className="text-xs text-gray-500 mt-1">{formatDate(selectedDate)}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            {formatDate(selectedDate)}
+          </p>
         </div>
       </div>
       <BasicInfoTab />
@@ -351,33 +411,46 @@ export default function MeasurementsTab() {
           {/* Category summary cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {Object.keys(groupedData).map((category) => {
-              const categoryData = groupedData[category]
-              const style = categoryColors[category]
+              const categoryData = groupedData[category];
+              const style = categoryColors[category];
 
               // Find a representative value for the category
-              const displayItem = categoryData.find((item) => item.value !== "-") || categoryData[0]
+              const displayItem =
+                categoryData.find((item) => item.value !== "-") ||
+                categoryData[0];
 
               return (
                 <Card
                   key={category}
                   className={`overflow-hidden border ${style.border} shadow-sm hover:shadow-md transition-shadow`}
                 >
-                  <div className={`${style.bg} px-4 py-3 flex justify-between items-center`}>
-                    <h3 className={`font-medium capitalize ${style.text}`}>{category}{" "+"("+displayItem.unit+")"}</h3>
+                  <div
+                    className={`${style.bg} px-4 py-3 flex justify-between items-center`}
+                  >
+                    <h3 className={`font-medium capitalize ${style.text}`}>
+                      {category}
+                      {" " + "(" + displayItem.unit + ")"}
+                    </h3>
                     <span className={`${style.text}`}>{style.icon}</span>
                   </div>
                   <CardContent className="p-4 space-y-2">
                     <div className="flex justify-between items-baseline">
-                      <p className="text-sm text-gray-500">{displayItem.label}</p>
+                      <p className="text-sm text-gray-500">
+                        {displayItem.label}
+                      </p>
                       <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-semibold">{displayItem.value}</span>
+                        <span className="text-lg font-semibold">
+                          {displayItem.value}
+                        </span>
                         {/* <span className="text-xs text-gray-500">{displayItem.unit}</span> */}
                       </div>
                     </div>
-                    <p className="text-xs text-gray-400">Range: {displayItem.range}</p>
+                    <p className="text-xs text-gray-400">
+                      Range: {displayItem.range}
+                    </p>
                   </CardContent>
                 </Card>
-              )
+              );
             })}
           </div>
 
@@ -397,7 +470,9 @@ export default function MeasurementsTab() {
                   <thead>
                     <tr className="bg-gray-50 text-gray-600 uppercase font-bold tracking-wider">
                       <th className="px-6 py-3 text-left font-medium">#</th>
-                      <th className="px-6 py-3 text-left font-medium">Measurement</th>
+                      <th className="px-6 py-3 text-left font-medium">
+                        Measurement
+                      </th>
                       <th className="px-6 py-3 text-left font-medium">Range</th>
                       <th className="px-6 py-3 text-left font-medium">Value</th>
                       <th className="px-6 py-3 text-left font-medium">Unit</th>
@@ -405,11 +480,16 @@ export default function MeasurementsTab() {
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {tableData.map((item) => {
-                      const style = categoryColors[item.category]
+                      const style = categoryColors[item.category];
 
                       return (
-                        <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-700">{item.id + 1}</td>
+                        <tr
+                          key={item.id}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-700">
+                            {item.id + 1}
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-2">
                               <span
@@ -420,17 +500,23 @@ export default function MeasurementsTab() {
                               </span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-600">{item.range}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                            {item.range}
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-800">
                             {item.value !== "-" ? (
-                              <span className="bg-gray-100 px-2 py-1 rounded">{item.value}</span>
+                              <span className="bg-gray-100 px-2 py-1 rounded">
+                                {item.value}
+                              </span>
                             ) : (
                               <span className="text-gray-400">-</span>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-gray-500">{item.unit}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                            {item.unit}
+                          </td>
                         </tr>
-                      )
+                      );
                     })}
                   </tbody>
                 </table>
@@ -440,10 +526,13 @@ export default function MeasurementsTab() {
         </div>
       )}
       <div className="flex justify-end">
-        <Button className="bg-blue-600 text-white mt-2 px-4 py-2" onClick={handleSaveMeasurements}>
+        <Button
+          className="bg-blue-600 text-white mt-2 px-4 py-2"
+          onClick={handleSaveMeasurements}
+        >
           Submit Data
         </Button>
       </div>
     </div>
-  )
+  );
 }
