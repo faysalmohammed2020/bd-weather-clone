@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Download, Printer } from "lucide-react";
+import { useSession } from "@/lib/auth-client"
 
 // Time slots for 3-hour intervals
 const TIME_SLOTS = [
@@ -32,10 +33,14 @@ const fetchSynopticDataForTimeSlot = async (): Promise<any[]> => {
   }
 };
 
-export default function SynopticCodeTable() {
+const SynopticCodeTable = forwardRef((props, ref) => {
   const [currentData, setCurrentData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const { data: session } = useSession()
+  const user = session?.user
+  const isSuperAdmin = user?.role === "super_admin"
+  const isStationAdmin = user?.role === "station_admin"
   const [headerInfo, setHeaderInfo] = useState({
     dataType: "SY",
     stationNo: "41953",
@@ -43,6 +48,18 @@ export default function SynopticCodeTable() {
     month: "11",
     day: "03",
   });
+
+  // Expose the getData method via ref
+  useImperativeHandle(ref, () => ({
+    getData: () => {
+      return currentData.map(item => ({
+        ...item,
+        dataType: headerInfo.dataType,
+        stationNo: headerInfo.stationNo,
+        date: item.ObservingTime?.utcTime || new Date().toISOString()
+      }));
+    }
+  }));
 
   // Function to fetch the most recent data
   const fetchLatestData = async () => {
@@ -139,8 +156,9 @@ export default function SynopticCodeTable() {
     window.print();
   };
 
-  return (
-    <div className="space-y-6 print:space-y-0">
+
+return (
+   <div className="space-y-6 print:space-y-0">
       <div className="flex justify-between items-center print:hidden">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center">
           <span className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mr-3">
@@ -163,19 +181,8 @@ export default function SynopticCodeTable() {
           </span>
           Synoptic Code Data
         </h2>
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            className="flex items-center gap-2 text-blue-700 border-blue-300 hover:bg-blue-50"
-            onClick={fetchLatestData}
-            disabled={refreshing}
-          >
-            {refreshing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <span className="text-base">Refresh</span>
-            )}
-          </Button>
+        {(isSuperAdmin || isStationAdmin) && (
+          <div className="flex gap-3">
           <Button
             variant="outline"
             className="flex items-center gap-2 text-blue-700 border-blue-300 hover:bg-blue-50"
@@ -185,16 +192,9 @@ export default function SynopticCodeTable() {
             <Download size={18} />
             <span className="text-base">Export CSV</span>
           </Button>
-          <Button
-            variant="outline"
-            className="flex items-center gap-2 text-blue-700 border-blue-300 hover:bg-blue-50"
-            onClick={printTable}
-            disabled={!currentData}
-          >
-            <Printer size={18} />
-            <span className="text-base">Print</span>
-          </Button>
         </div>
+        )}
+        
       </div>
 
       {loading ? (
@@ -557,4 +557,8 @@ export default function SynopticCodeTable() {
       `}</style>
     </div>
   );
-}
+});
+
+SynopticCodeTable.displayName = "SynopticCodeTable";
+
+export default SynopticCodeTable;

@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useImperativeHandle, forwardRef } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +12,7 @@ import { useSession } from "@/lib/auth-client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { utcToHour } from "@/lib/utils"
+import { Download } from "lucide-react";
 
 // Define the structure of weather observation data
 interface WeatherObservation {
@@ -152,7 +153,7 @@ function getCloudStatusColor(amount: string | null) {
   return "bg-slate-700"
 }
 
-export default function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
+const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps, ref) => {
   const [data, setData] = useState<ObservationData[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"))
@@ -170,6 +171,21 @@ export default function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableP
   const [startDate, setStartDate] = useState(today)
   const [endDate, setEndDate] = useState(today)
   const [dateError, setDateError] = useState<string | null>(null)
+
+  // Expose getData method via ref
+  useImperativeHandle(ref, () => ({
+    getData: () => {
+      return data
+        .filter(record => record.WeatherObservation && record.WeatherObservation.length > 0)
+        .map(record => ({
+          ...record.WeatherObservation[0],
+          stationId: record.stationId,
+          stationName: record.station?.name || '',
+          utcTime: record.utcTime,
+          localTime: record.localTime
+        }));
+    }
+  }));
 
   // Fetch data function
   const fetchData = async () => {
@@ -216,28 +232,9 @@ export default function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableP
   }, [selectedDate, startDate, endDate, stationFilter, refreshTrigger])
 
 
-  // Handle opening the edit dialog
-  const handleEditClick = (record: ObservationData) => {
-    if (!record.WeatherObservation || record.WeatherObservation.length === 0) {
-      toast.error("No weather observation data found for this record")
-      return
-    }
 
-    setSelectedRecord(record)
-    // Populate form with the weather observation data
-    setEditFormData({ ...record.WeatherObservation[0] })
-    setIsEditDialogOpen(true)
-  }
 
-  // Handle input changes in the edit form
-  const handleEditInputChange = (field: string, value: string) => {
-    setEditFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }))
-  }
-
-  // Handle saving the edited data
+// Handle saving the edited data
   const handleSaveEdit = async () => {
     if (!selectedRecord || !selectedRecord.WeatherObservation?.[0]) return
 
@@ -365,9 +362,9 @@ export default function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableP
     }
   }
 
-
-
   const exportToCSV = () => {
+    const filteredData = data.filter(record => record.WeatherObservation && record.WeatherObservation.length > 0);
+    
     if (filteredData.length === 0) {
       toast.error("No weather observation data available to export");
       return;
@@ -390,13 +387,11 @@ export default function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableP
       "Observer Initial"
     ];
 
-    const time = utcToHour(filteredData[0].utcTime)
-
     // Convert filteredData to CSV rows
     const rows = filteredData.map((record) => {
       const obs = record.WeatherObservation?.[0] || {};
       return [
-        time,
+        utcToHour(record.utcTime),
         record.station?.stationId || "--",
         obs.totalCloudAmount || "--",
         obs.lowCloudDirection || "--", obs.lowCloudHeight || "--", obs.lowCloudForm || "--", obs.lowCloudAmount || "--",
@@ -435,8 +430,7 @@ export default function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableP
   };
 
 
-
-  return (
+return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
       <CardContent className="p-6">
         {/* Date and Station Filters */}
@@ -1327,4 +1321,8 @@ export default function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableP
       </CardContent>
     </Card>
   )
-}
+});
+
+SecondCardTable.displayName = "SecondCardTable";
+
+export default SecondCardTable;

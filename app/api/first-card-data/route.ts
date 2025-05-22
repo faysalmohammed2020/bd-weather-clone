@@ -32,7 +32,7 @@ export async function POST(req: Request) {
         : Object.values(data.dataType || {}).join("") || "";
 
     // Get station ID from session
-    const stationId = session.user.station?.stationId;
+    const stationId = session.user.station?.id;
 
     if (!stationId) {
       return NextResponse.json({
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
     // Find the station by stationId to get its primary key (id)
     const stationRecord = await prisma.station.findFirst({
-      where: { stationId },
+      where: { id: stationId },
     });
 
     if (!stationRecord) {
@@ -54,9 +54,16 @@ export async function POST(req: Request) {
     }
 
     // Check if the observation time already exists
-    const existingObservingTime = await prisma.observingTime.findUnique({
+    const existingObservingTime = await prisma.observingTime.findFirst({
       where: {
-        utcTime: formattedObservingTime,
+        AND: [
+          {
+            utcTime: formattedObservingTime,
+          },
+          {
+            stationId: stationRecord.id,
+          },
+        ],
       },
     });
 
@@ -167,7 +174,7 @@ export async function GET(req: Request) {
     const stationIdParam = searchParams.get("stationId");
 
     // Use the station ID from the query parameter if provided, otherwise use the user's station
-    const stationId = stationIdParam || session.user.station?.stationId;
+    const stationId = stationIdParam || session.user.station?.id;
 
     // Super admin can view all stations if no specific station is requested
     if (!stationId && session.user.role !== "super_admin") {
@@ -181,7 +188,7 @@ export async function GET(req: Request) {
     let stationRecord = null;
     if (stationId && stationId !== "all") {
       stationRecord = await prisma.station.findFirst({
-        where: { stationId },
+        where: { id: stationId },
       });
 
       if (!stationRecord) {

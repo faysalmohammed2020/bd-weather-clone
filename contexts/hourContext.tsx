@@ -48,12 +48,8 @@ export function HourProvider({ children }: { children: ReactNode }) {
           body: JSON.stringify({ hour: selectedHour }),
         });
         
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to fetch time data");
-        }
-        
         const data = await response.json();
+        console.log("data", data)
         setTimeData(data);
         setError("");
       } catch (err) {

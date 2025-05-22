@@ -33,7 +33,7 @@ import * as Yup from "yup";
 type MeteorologicalFormData = {
   presentWeatherWW?: string;
   subIndicator?: string;
-  alteredThermometer?: string;
+  attachedThermometer?: string;
   barAsRead?: string;
   correctedForIndex?: string;
   heightDifference?: string;
@@ -190,6 +190,8 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     dewPoint: "",
     relativeHumidity: "",
   });
+
+  console.log("timeData", timeData)
 
   const { data: session } = useSession();
 
@@ -657,7 +659,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     formik.handleChange(e);
 
@@ -692,6 +694,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
           barAsRead,
           stationId
         );
+        
         if (pressureData) {
           formik.setFieldValue(
             "stationLevelPressure",
@@ -707,6 +710,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
             pressureData.stationLevelPressure,
             stationId
           );
+          
           if (seaData) {
             formik.setFieldValue(
               "seaLevelReduction",
@@ -1111,8 +1115,8 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="alteredThermometer">
-                      Altered Thermometer
+                    <Label htmlFor="attachedThermometer">
+                      Attached Thermometer
                     </Label>
                     <Input
                       id="alteredThermometer"
@@ -1186,7 +1190,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       value={formik.values.stationLevelPressure || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
-                      readOnly
                     />
                   </div>
 
@@ -1241,6 +1244,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       value={formik.values.pressureChange24h || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
+                      readOnly
                     />
                   </div>
                 </CardContent>
