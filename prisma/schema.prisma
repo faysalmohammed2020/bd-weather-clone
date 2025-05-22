@@ -112,7 +112,7 @@ model ObservingTime {
   id        String   @id @default(cuid())
   userId    String
   stationId String
-  utcTime   DateTime @unique
+  utcTime   DateTime
   localTime DateTime
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -124,7 +124,7 @@ model ObservingTime {
   DailySummary        DailySummary[]
   SynopticCode        SynopticCode[]
 
-  @@index([userId])
+  @@unique([utcTime, stationId])
   @@index([localTime])
 }
 

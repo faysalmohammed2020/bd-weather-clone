@@ -21,10 +21,17 @@ export async function POST(req: Request) {
     // First, find the ObservingTime record by its UTC time
     const observingTime = await prisma.observingTime.findFirst({
       where: {
-        utcTime: {
-          gte: startToday,
-          lte: endToday,
-        },
+        AND: [
+          {
+            utcTime: {
+              gte: startToday,
+              lte: endToday,
+            },
+          },
+          {
+            stationId: session.user.station?.id,
+          },
+        ],
       },
       select: {
         id: true,
@@ -81,7 +88,7 @@ export async function POST(req: Request) {
     }
 
     // Get station ID from session
-    const stationId = session.user.station?.stationId;
+    const stationId = session.user.station?.id;
     if (!stationId) {
       return NextResponse.json({
         success: false,
@@ -92,7 +99,7 @@ export async function POST(req: Request) {
 
     // Find the station by stationId to get its primary key (id)
     const stationRecord = await prisma.station.findFirst({
-      where: { stationId },
+      where: { id: stationId },
     });
 
     if (!stationRecord) {
@@ -131,7 +138,10 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json(entry);
+    return NextResponse.json({
+      success: true,
+      message: "Daily summary saved successfully",
+    });
   } catch (err) {
     console.error("❌ DB save error:", err);
     return NextResponse.json({
