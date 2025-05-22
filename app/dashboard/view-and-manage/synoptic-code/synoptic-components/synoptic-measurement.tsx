@@ -191,8 +191,6 @@ export default function SynopticMeasurementsTab() {
     isLoading: true,
   });
 
-  // List of editable measurement IDs
-  const editableMeasurements = [2, 7, 12, 19, 20];
 
   useEffect(() => {
     const fetchSynopticData = async () => {
@@ -463,16 +461,9 @@ export default function SynopticMeasurementsTab() {
                       id={`measurement-${item.id}`}
                       value={values.measurements[item.id] || ""}
                       onChange={(e) => 
-                        editableMeasurements.includes(item.id)
-                          ? handleMeasurementChange(item.id, e.target.value)
-                          : null
+                        handleMeasurementChange(item.id, e.target.value)
                       }
-                      className={`border-green-200 ${
-                        editableMeasurements.includes(item.id)
-                          ? "bg-white cursor-text"
-                          : "bg-gray-50 cursor-not-allowed"
-                      }`}
-                      readOnly={!editableMeasurements.includes(item.id)}
+                      className={`border-green-200 bg-white cursor-text`}
                     />
                   </div>
                 </div>
@@ -513,16 +504,9 @@ export default function SynopticMeasurementsTab() {
                       id={`measurement-${item.id}`}
                       value={values.measurements[item.id] || ""}
                       onChange={(e) => 
-                        editableMeasurements.includes(item.id)
-                          ? handleMeasurementChange(item.id, e.target.value)
-                          : null
+                        handleMeasurementChange(item.id, e.target.value)
                       }
-                      className={`border-green-200 ${
-                        editableMeasurements.includes(item.id)
-                          ? "bg-white cursor-text"
-                          : "bg-gray-50 cursor-not-allowed"
-                      }`}
-                      readOnly={!editableMeasurements.includes(item.id)}
+                      className={`border-green-200 bg-white cursor-text`}
                     />
                   </div>
                 </div>
