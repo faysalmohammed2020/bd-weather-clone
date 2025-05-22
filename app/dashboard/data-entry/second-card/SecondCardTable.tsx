@@ -395,6 +395,12 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
   }
 
 
+  const getStationNameById = (stationId: string): string => {
+    const station = stations.find((s) => s.id === stationId);
+    return station ? station.name : stationId;
+  };
+
+
   return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
       <CardContent className="p-6">
@@ -444,7 +450,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                 <SelectContent>
                   <SelectItem value="all">All Stations</SelectItem>
                   {stations.map((station) => (
-                    <SelectItem key={station.id} value={station.stationId}>
+                    <SelectItem key={station.id} value={station.id}>
                       {station.name} ({station.stationId})
                     </SelectItem>
                   ))}
@@ -965,7 +971,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                 </Badge>
                 {stationFilter !== "all" && (
                   <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
-                    Station: {stationFilter}
+                    Station: {getStationNameById(stationFilter)}
                   </Badge>
                 )}
               </div>

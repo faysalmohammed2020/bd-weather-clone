@@ -382,7 +382,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   };
 
   const getStationNameById = (stationId: string): string => {
-    const station = stations.find((s) => s.stationId === stationId);
+    const station = stations.find((s) => s.id === stationId);
     return station ? station.name : stationId;
   };
 
@@ -447,7 +447,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                   <SelectContent>
                     <SelectItem value="all">All Stations</SelectItem>
                     {stations.map((station) => (
-                      <SelectItem key={station.id} value={station.stationId}>
+                      <SelectItem key={station.id} value={station.id}>
                         {station.name} ({station.stationId})
                       </SelectItem>
                     ))}
@@ -927,8 +927,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     variant="outline"
                     className="bg-blue-100 text-blue-800 hover:bg-blue-200"
                   >
-                    Station: {getStationNameById(stationFilter)} (
-                    {stationFilter})
+                    Station: {getStationNameById(stationFilter)} 
                   </Badge>
                 )}
               </div>

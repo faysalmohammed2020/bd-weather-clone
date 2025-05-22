@@ -136,7 +136,7 @@ export default function MeasurementsTab() {
         processFirstCard(
           "horizontalVisibility",
           14,
-          (arr) => Math.min(...arr) / 10
+          (arr) => Math.min(...arr)
         );
 
         const totalPrecip = todayWeatherObservations.reduce(
