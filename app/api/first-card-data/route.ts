@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/getSession";
-import { convertUTCToBDTime, getTodayUtcRange, hourToUtc } from "@/lib/utils";
+import { convertUTCToBDTime, getTodayBDRange, getTodayUtcRange, hourToUtc } from "@/lib/utils";
 
 const prisma = new PrismaClient();
 
@@ -191,7 +191,8 @@ export async function GET(req: Request) {
     const endTime = endDate ? new Date(endDate) : new Date();
     endTime.setHours(23, 59, 59, 999); // End of day
 
-    const { startToday, endToday } = getTodayUtcRange();
+    const { startToday, endToday } = getTodayBDRange();
+
     const start = startDate ? startTime : startToday;
     const end = endDate ? endTime : endToday;
 

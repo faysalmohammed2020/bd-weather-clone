@@ -146,7 +146,7 @@ export async function GET() {
     const utcTime = time.utcTime.toISOString();
 
     // Check if 3 hours have passed since the last time
-    const isPassed = hasHoursPassed(utcTime, 3);
+    const isPassed = hasHoursPassed(utcTime, 3) && time.stationId == session.user.station?.id;
 
     return NextResponse.json({
       hasMeteorologicalData: time._count.MeteorologicalEntry > 0,
