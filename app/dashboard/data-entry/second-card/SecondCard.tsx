@@ -145,7 +145,7 @@ const rainfallSchema = Yup.object({
       .required("During previous 6 hours is required")
       .matches(
         /^(0[0-9]{2}|[1-8][0-9]{2}|9[0-8][0-9])$/,
-        "Must be a 3-digit integer between 000 and 989"
+        "Must be a 3-digit integer between 000 to 989"
       ),
 
     "last-24-hours": Yup.string()
@@ -159,6 +159,7 @@ const rainfallSchema = Yup.object({
       ),
   }),
 });
+
 
 // Update the windSchema to enforce the specific validation requirements
 const windSchema = Yup.object({
@@ -1140,14 +1141,14 @@ export default function WeatherObservationForm() {
                               htmlFor="time-start"
                               className="font-medium text-gray-700"
                             >
-                              Time of Start (HH:MM UTC){" "}
+                              Time of Start (HH UTC){" "}
                               <span className="text-red-500">*</span>
                             </Label>
                             <Input
                               id="time-start"
                               name="time-start"
                               type="text"
-                              placeholder="00:00"
+                              placeholder="00"
                               pattern="^([01]\d|2[0-3]):([0-5]\d)$"
                               value={formik.values.rainfall["time-start"] || ""}
                               onChange={handleInputChange}
@@ -1163,7 +1164,7 @@ export default function WeatherObservationForm() {
                             />
                             {renderErrorMessage("rainfall.time-start")}
                             <p className="text-xs text-gray-500 mt-1">
-                              Format: HH (e.g., 00, 01, 23)
+                              Format: HH (e.g., 03, 06, 23)
                             </p>
                           </div>
 
@@ -1172,14 +1173,14 @@ export default function WeatherObservationForm() {
                               htmlFor="time-end"
                               className="font-medium text-gray-700"
                             >
-                              Time of Ending (HH:MM UTC){" "}
+                              Time of Ending (HH UTC){" "}
                               <span className="text-red-500">*</span>
                             </Label>
                             <Input
                               id="time-end"
                               name="time-end"
                               type="text"
-                              placeholder="00:00"
+                              placeholder="00"
                               pattern="^([01]\d|2[0-3]):([0-5]\d)$"
                               value={formik.values.rainfall["time-end"] || ""}
                               onChange={handleInputChange}
@@ -1194,7 +1195,7 @@ export default function WeatherObservationForm() {
                             />
                             {renderErrorMessage("rainfall.time-end")}
                             <p className="text-xs text-gray-500 mt-1">
-                              Format: HH:MM (e.g., 09:30, 14:45)
+                              Format: HH (e.g., 03, 06, 23)
                             </p>
                           </div>
 
@@ -1213,21 +1214,34 @@ export default function WeatherObservationForm() {
                             required
                             numeric={true}
                           />
-                          <InputField
-                            id="during-previous"
-                            name="during-previous"
-                            label="During Previous 6 Hours (At 00, 06, 12, 18 UTC)"
-                            accent="cyan"
-                            value={
-                              formik.values.rainfall["during-previous"] || ""
-                            }
-                            onChange={handleInputChange}
-                            error={renderErrorMessage(
-                              "rainfall.during-previous"
-                            )}
-                            required
-                            numeric={true}
-                          />
+                          <div className="grid gap-2">
+                            <Label
+                              htmlFor="during-previous"
+                              className="font-medium text-gray-700"
+                            >
+                              During Previous 6 Hours Rainfall (At 00, 06, 12,
+                              18 UTC)
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="during-previous"
+                              name="during-previous"
+                              placeholder="Enter code 000 to 989"
+                              value={
+                                formik.values.rainfall["during-previous"] || ""
+                              }
+                              onChange={handleInputChange}
+                              className={cn(
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                {
+                                  "border-red-500": formik.errors.rainfall?.["during-previous"],
+                                }
+                              )}
+                              required
+                            />
+                            <p className="text-red-500 text-sm mt-1 flex items-start">{formik.errors.rainfall?.["during-previous"]}</p>
+                            
+                          </div>
                           <div className="md:col-span-2">
                             <InputField
                               id="last-24-hours"
@@ -1283,32 +1297,63 @@ export default function WeatherObservationForm() {
                       </div>
                       <CardContent className="pt-6">
                         <div className="grid gap-6 md:grid-cols-2">
-                          <InputField
-                            id="first-anemometer"
-                            name="first-anemometer"
-                            label="1st Anemometer Reading"
-                            accent="green"
-                            value={formik.values.wind["first-anemometer"] || ""}
-                            onChange={handleInputChange}
-                            error={renderErrorMessage("wind.first-anemometer")}
-                            required
-                            numeric={true}
-                          />
-                          <InputField
-                            id="second-anemometer"
-                            name="second-anemometer"
-                            label="2nd Anemometer Reading"
-                            accent="green"
-                            value={
-                              formik.values.wind["second-anemometer"] || ""
-                            }
-                            onChange={handleInputChange}
-                            error={renderErrorMessage("wind.second-anemometer")} // ✅ এইটা গুরুত্বপূর্ণ
-                            required
-                            numeric={true}
-                          />
+                          <div className="grid gap-2">
+                            <Label
+                              htmlFor="first-anemometer"
+                              className="font-medium text-gray-700"
+                            >
+                              First Anenometer
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="first-anemometer"
+                              name="first-anemometer"
+                              placeholder="Enter 5 Digit"
+                              value={
+                                formik.values.wind?.["first-anemometer"] || ""
+                              }
+                              onChange={handleInputChange}
+                              className={cn(
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                {
+                                  "border-red-500": formik.errors.wind?.["first-anemometer"],
+                                }
+                              )}
+                              required
+                            />
+                            <p className="text-red-500 text-sm mt-1 flex items-start">{formik.errors.wind?.["first-anemometer"]}</p>
+                            
+                          </div>
+                          
+                          <div className="grid gap-2">
+                            <Label
+                              htmlFor="second-anemometer"
+                              className="font-medium text-gray-700"
+                            >
+                              Second Anenometer
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="second-anemometer"
+                              name="second-anemometer"
+                              placeholder="Enter 5 Digit"
+                              value={
+                                formik.values.wind?.["second-anemometer"] || ""
+                              }
+                              onChange={handleInputChange}
+                              className={cn(
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                {
+                                  "border-red-500": formik.errors.wind?.["second-anemometer"],
+                                }
+                              )}
+                              required
+                            />
+                            <p className="text-red-500 text-sm mt-1 flex items-start">{formik.errors.wind?.["second-anemometer"]}</p>
+                            
+                          </div>
 
-                          <InputField
+                          {/* <InputField
                             id="speed"
                             name="speed"
                             label="Speed (KTS)"
@@ -1318,7 +1363,35 @@ export default function WeatherObservationForm() {
                             error={renderErrorMessage("wind.speed")}
                             required
                             numeric={true}
-                          />
+                          /> */}
+
+                          <div className="grid gap-2">
+                            <Label
+                              htmlFor="speed"
+                              className="font-medium text-gray-700"
+                            >
+                              speed
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="speed"
+                              name="speed"
+                              placeholder="Enter 3 Digit"
+                              value={
+                                formik.values.wind?.["speed"] || ""
+                              }
+                              onChange={handleInputChange}
+                              className={cn(
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                {
+                                  "border-red-500": formik.errors.wind?.["speed"],
+                                }
+                              )}
+                              required
+                            />
+                            <p className="text-red-500 text-sm mt-1 flex items-start">{formik.errors.wind?.["speed"]}</p>
+                            
+                          </div>
                           {/* Wind Direction - Fixed */}
                           <div className="grid gap-2">
                             <Label
@@ -1344,7 +1417,7 @@ export default function WeatherObservationForm() {
                                   ),
                                 }
                               )}
-                              placeholder="0-360 degrees"
+                              placeholder="0-99 code"
                               required
                               inputMode="numeric"
                             />
@@ -1407,7 +1480,7 @@ export default function WeatherObservationForm() {
                             name="station-id"
                             label="Station ID"
                             accent="orange"
-                            value={session?.user?.stationId || ""}
+                            value={session?.user?.station.stationId || ""}
                             onChange={handleInputChange}
                             disabled
                           />
