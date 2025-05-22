@@ -113,28 +113,32 @@ interface SecondCardTableProps {
 
 // Helper function to determine if a user can edit an observation
 function canEditObservation(record: ObservationData, sessionUser: any) {
-  if (!sessionUser || !record.WeatherObservation?.[0]?.submittedAt) return false
+  if (!sessionUser || !record.WeatherObservation?.[0]?.createdAt) return false;
 
   try {
-    const observationDate = parseISO(record.WeatherObservation[0].submittedAt || "")
-    if (!isValid(observationDate)) return false
+    // createdAt is already a Date object from Prisma
+    const observationDate = new Date(record.WeatherObservation[0].createdAt);
+    const now = new Date();
+    const daysDifference = differenceInDays(now, observationDate);
 
-    const now = new Date()
-    const daysDifference = differenceInDays(now, observationDate)
+    const role = sessionUser.role;
+    const userId = sessionUser.id;
+    const userStationId = sessionUser.station?.stationId;
+    const recordStationId = record.station?.stationId;
+    const recordUserId = record.user?.id;
 
-    const role = sessionUser.role
-    const userId = sessionUser.id
-    const userStationId = sessionUser.station?.stationId
-    const recordStationId = record.station?.stationId
+    if (role === "super_admin") return daysDifference <= 365;
+    if (role === "station_admin") {
+      return daysDifference <= 30 && userStationId === recordStationId;
+    }
+    if (role === "observer") {
+      return daysDifference <= 1 && userId === recordUserId;
+    }
 
-    if (role === "super_admin") return daysDifference <= 365
-    if (role === "station_admin") return daysDifference <= 30 && userStationId === recordStationId
-    if (role === "observer") return daysDifference <= 1 && userId === record.userId
-
-    return false
+    return false;
   } catch (e) {
-    console.warn("Error in canEditObservation:", e)
-    return false
+    console.warn("Error in canEditObservation:", e);
+    return false;
   }
 }
 
@@ -235,15 +239,19 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
   // Handle opening the edit dialog
   const handleEditClick = (record: ObservationData) => {
     if (!record.WeatherObservation || record.WeatherObservation.length === 0) {
-      toast.error("No weather observation data found for this record")
-      return
+      toast.error("No weather observation data found for this record");
+      return;
     }
 
-    setSelectedRecord(record)
-    // Populate form with the weather observation data
-    setEditFormData({ ...record.WeatherObservation[0] })
-    setIsEditDialogOpen(true)
-  }
+    if (!canEditObservation(record, session?.user)) {
+      toast.error("You don't have permission to edit this record");
+      return;
+    }
+
+    setSelectedRecord(record);
+    setEditFormData({ ...record.WeatherObservation[0] });
+    setIsEditDialogOpen(true);
+  };
 
   // Handle input changes in the edit form
   const handleEditInputChange = (field: string, value: string) => {
@@ -255,9 +263,9 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
 
   // Handle saving the edited data
   const handleSaveEdit = async () => {
-    if (!selectedRecord || !selectedRecord.WeatherObservation?.[0]) return
+    if (!selectedRecord || !selectedRecord.WeatherObservation?.[0]) return;
 
-    setIsSaving(true)
+    setIsSaving(true);
     try {
       const response = await fetch("/api/save-observation", {
         method: "PUT",
@@ -266,16 +274,21 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
         },
         body: JSON.stringify({
           id: selectedRecord.WeatherObservation[0].id,
-          type: "weather", // Specify that we're updating a weather observation
+          type: "weather", // Add this parameter
           ...editFormData,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to update record")
+        const errorData = await response.json();
+        console.error("Error response:", errorData);
+        throw new Error(errorData.message || "Failed to update record");
       }
 
-      // Update the data in the local state
+      const result = await response.json();
+      console.log("Update successful:", result);
+
+      // Update the local state
       setData((prevData) =>
         prevData.map((item) => {
           if (item.id === selectedRecord.id) {
@@ -288,21 +301,21 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                   submittedAt: new Date().toISOString(),
                 },
               ],
-            }
+            };
           }
-          return item
-        }),
-      )
+          return item;
+        })
+      );
 
-      toast.success("Weather observation updated successfully")
-      setIsEditDialogOpen(false)
+      toast.success("Weather observation updated successfully");
+      setIsEditDialogOpen(false);
     } catch (error) {
-      console.error("Error updating record:", error)
-      toast.error("Failed to update weather observation")
+      console.error("Error updating record:", error);
+      toast.error(`Failed to update record: ${error.message}`);
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   // Filter data to only show records with WeatherObservation entries
   const filteredData = data.filter((record) => record.WeatherObservation && record.WeatherObservation.length > 0)
@@ -1225,6 +1238,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
               >
                 Cancel
               </Button>
+
               <Button
                 onClick={handleSaveEdit}
                 disabled={isSaving}
@@ -1250,6 +1264,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                   </>
                 )}
               </Button>
+
             </DialogFooter>
           </DialogContent>
         </Dialog>

@@ -220,15 +220,16 @@ export async function GET(request: Request) {
   }
 }
 
+
+
 export async function PUT(request: Request) {
   try {
     const session = await getSession();
-
     if (!session || !session.user?.id) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id, type, ...updateData } = await request.json(); // Add type parameter
+    const { id, type, ...updateData } = await request.json();
 
     if (!id) {
       return NextResponse.json({ success: false, error: "Entry ID is required" }, { status: 400 });

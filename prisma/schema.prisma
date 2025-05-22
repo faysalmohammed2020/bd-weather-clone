@@ -170,6 +170,7 @@ model MeteorologicalEntry {
   @@index([observingTimeId])
 }
 
+
 model WeatherObservation {
   id              String @id @default(cuid())
   tabActive       String

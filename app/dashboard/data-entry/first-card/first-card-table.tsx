@@ -108,10 +108,9 @@ interface FirstCardTableProps {
   refreshTrigger?: number;
 }
 
-function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
+// Update the canEditRecord function to use ObservingTime instead of observingTime
+const canEditRecord = (record: MeteorologicalEntry, user: any): boolean => {
   if (!user) return false;
-
-  // If no submittedAt, allow edit (newly created record)
   if (!record.createdAt) return true;
 
   try {
@@ -120,30 +119,27 @@ function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
 
     const now = new Date();
     const daysDifference = differenceInDays(now, submissionDate);
-
     const role = user.role;
     const userId = user.id;
     const userStationId = user.station?.id;
-    const recordStationId = record.ObservingTime.stationId;
-
-    const recordUserId = record.ObservingTime.userId;
+    
+    // Access ObservingTime instead of observingTime
+    const recordStationId = record.ObservingTime?.stationId;
+    const recordUserId = record.ObservingTime?.userId;
 
     if (role === "super_admin") return daysDifference <= 365;
-
     if (role === "station_admin") {
       return daysDifference <= 30 && userStationId === recordStationId;
     }
-
     if (role === "observer") {
       return daysDifference <= 2 && userId === recordUserId;
     }
-
     return false;
   } catch (e) {
     console.warn("Error in canEditRecord:", e);
     return false;
   }
-}
+};
 
 export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
   const [data, setData] = useState<ObservingTimeEntry[]>([]);
@@ -327,34 +323,43 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     }));
   };
 
+
   const handleSaveEdit = async () => {
     if (!selectedRecord) return;
-
+  
     setIsSaving(true);
     try {
+      const payload = {
+        id: selectedRecord.id,
+        ...editFormData,
+      };
+  
+      console.log("Sending payload:", payload); // Debug log
+  
       const response = await fetch("/api/first-card-data", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          id: selectedRecord.id, // Make sure to include the ID
-          ...editFormData,
-        }),
+        body: JSON.stringify(payload),
       });
-
+  
       if (!response.ok) {
-        throw new Error("Failed to update record");
+        const errorData = await response.json();
+        console.error("Error response:", errorData); // Debug log
+        throw new Error(errorData.message || "Failed to update record");
       }
-
+  
+      const result = await response.json();
+      console.log("Update successful:", result); // Debug log
+  
       // Update the local state
       setFlattenedData((prevData) =>
         prevData.map((item) =>
           item.id === selectedRecord.id ? { ...item, ...editFormData } : item
         )
       );
-
-      // Also update the main data state if needed
+  
       setData((prevData) =>
         prevData.map((observingTime) => ({
           ...observingTime,
@@ -365,12 +370,12 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
           ),
         }))
       );
-
+  
       toast.success("Record updated successfully");
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error("Error updating record:", error);
-      toast.error("Failed to update record");
+      toast.error(`Failed to update record: ${error.message}`);
     } finally {
       setIsSaving(false);
     }
