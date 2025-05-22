@@ -191,7 +191,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     relativeHumidity: "",
   });
 
-  console.log("timeData", timeData)
+  console.log("timeData", timeData);
 
   const { data: session } = useSession();
 
@@ -377,6 +377,21 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
     // Validate only the fields in the current tab
     return fieldsToValidate.every((field) => !formik.errors[field]);
+  };
+
+  // Enhanced setActiveTab function that validates before changing tabs
+  const handleTabChange = (tabName) => {
+    // If trying to navigate away from current tab, validate it first
+    if (activeTab !== tabName) {
+      if (!validateTab(activeTab)) {
+        toast.error("অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন", {
+          description:
+            "অন্য ট্যাবে যাওয়ার আগে বর্তমান ট্যাবের সকল তথ্য পূরণ করুন",
+        });
+        return;
+      }
+    }
+    setActiveTab(tabName);
   };
 
   // Debug logging for formData changes
@@ -694,7 +709,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
           barAsRead,
           stationId
         );
-        
+
         if (pressureData) {
           formik.setFieldValue(
             "stationLevelPressure",
@@ -710,7 +725,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
             pressureData.stationLevelPressure,
             stationId
           );
-          
+
           if (seaData) {
             formik.setFieldValue(
               "seaLevelReduction",
@@ -987,7 +1002,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
             ))}
           <Tabs
             value={activeTab}
-            onValueChange={setActiveTab}
+            onValueChange={handleTabChange}
             className="w-full"
           >
             <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-3 rounded-xl p-1 border-0 bg-transparent">
@@ -1001,6 +1016,20 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     "!border-red-500 !text-red-700":
                       !isTabValid(key) && formik.submitCount > 0,
                   })}
+                  onClick={(e) => {
+                    // Prevent tab navigation if current tab is invalid
+                    if (activeTab !== key && !validateTab(activeTab)) {
+                      e.preventDefault();
+                      toast.error(
+                        "অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন",
+                        {
+                          description:
+                            "অন্য ট্যাবে যাওয়ার আগে বর্তমান ট্যাবের সকল তথ্য পূরণ করুন",
+                        }
+                      );
+                      return false;
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-center">
                     {style.icon}
