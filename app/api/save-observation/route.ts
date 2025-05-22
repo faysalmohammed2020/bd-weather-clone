@@ -189,14 +189,14 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: false, error: "Station ID is required" }, { status: 400 });
     }
 
-    let stationRecord = null;
-    if (stationId && stationId !== "all") {
-      stationRecord = await prisma.station.findFirst({ where: { id: stationId } });
+    // let stationRecord = null;
+    // if (stationId && stationId !== "all") {
+    //   stationRecord = await prisma.station.findFirst({ where: { id: stationId } });
 
-      if (!stationRecord) {
-        return NextResponse.json({ success: false, error: `No station found with ID: ${stationId}` }, { status: 404 });
-      }
-    }
+    //   if (!stationRecord) {
+    //     return NextResponse.json({ success: false, error: `No station found with ID: ${stationId}` }, { status: 404 });
+    //   }
+    // }
 
     const startTime = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 7));
     startTime.setHours(0, 0, 0, 0);
@@ -210,19 +210,29 @@ export async function GET(request: Request) {
       },
     };
 
-    if (stationRecord) {
-      whereClause.stationId = stationRecord.id;
-    } else if (session.user.role !== "super_admin") {
-      whereClause.stationId = session.user.station?.id;
-    }
+    // if (stationRecord) {
+    //   whereClause.stationId = stationRecord.id;
+    // } else if (session.user.role !== "super_admin") {
+    //   whereClause.stationId = session.user.station?.id;
+    // }
 
     const entries = await prisma.observingTime.findMany({
-      where: whereClause,
+      where: {
+        AND: [
+          {
+            utcTime: {
+              gte: startTime,
+              lte: endTime,
+            },
+          },
+          stationIdParam ? { stationId: stationIdParam } : {},
+        ],
+      },
       include: {
         station: true,
         user: true,
         MeteorologicalEntry: true,
-        WeatherObservation: true, // Add this to include WeatherObservation data
+        WeatherObservation: true,
       },
       orderBy: { utcTime: "desc" },
       take: 100,
