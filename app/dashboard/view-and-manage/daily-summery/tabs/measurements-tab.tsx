@@ -352,11 +352,17 @@ export default function MeasurementsTab() {
 
       const result = await res.json();
 
-      if (!res.ok) {
-        throw new Error(result.message || "Failed to save");
+      if (!result.success) {
+        return toast.error(result.error);
       }
 
-      toast.success("✅ Measurements saved successfully!");
+      if (!res.ok) {
+        return toast.error(result.error);
+      }
+
+      if (result.success) {
+        toast.success(result.message);
+      }
     } catch (error) {
       console.error("❌ Save error:", error);
       toast.error("Failed to save measurements");

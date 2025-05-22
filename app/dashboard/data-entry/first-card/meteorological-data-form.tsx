@@ -18,6 +18,7 @@ import {
   ChevronRight,
   ChevronLeft,
   Clock,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { hygrometricTable } from "@/data/hygrometric-table"; // Import the hygrometric table data
@@ -26,6 +27,8 @@ import { useSession } from "@/lib/auth-client";
 import { stationDataMap } from "@/data/station-data-map";
 import BasicInfoTab from "@/components/basic-info-tab";
 import { useHour } from "@/contexts/hourContext";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 type MeteorologicalFormData = {
   presentWeatherWW?: string;
@@ -64,8 +67,111 @@ type MeteorologicalFormData = {
   // Add any other fields you use in formData here
 };
 
+// Validation schemas for each tab
+const observingTimeSchema = Yup.object({
+  observationTime: Yup.string().required("সময় অবশ্যই নির্বাচন করতে হবে"),
+});
+
+const temperatureSchema = Yup.object({
+  dryBulbAsRead: Yup.string()
+    .required("Dry-bulb অবশ্যই পূরণ করতে হবে")
+    .matches(/^\d{3}$/, "Must be exactly 3 digits (e.g., 256 for 25.6°C)")
+    .test("is-numeric", "Only numeric values allowed", (value) =>
+      /^\d+$/.test(value || "")
+    ),
+  wetBulbAsRead: Yup.string()
+    .required("Wet-bulb অবশ্যই পূরণ করতে হবে")
+    .matches(/^\d{3}$/, "Must be exactly 3 digits (e.g., 256 for 25.6°C)")
+    .test("is-numeric", "Only numeric values allowed", (value) =>
+      /^\d+$/.test(value || "")
+    ),
+  maxMinTempAsRead: Yup.string()
+    .required("MAX/MIN অবশ্যই পূরণ করতে হবে")
+    .matches(/^\d{3}$/, "Must be exactly 3 digits (e.g., 256 for 25.6°C)")
+    .test("is-numeric", "Only numeric values allowed", (value) =>
+      /^\d+$/.test(value || "")
+    ),
+});
+
+const pressureSchema = Yup.object({
+  barAsRead: Yup.string()
+    .required("Bar As Read অবশ্যই পূরণ করতে হবে")
+    .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10142 for 1014.2 hPa)")
+    .test("is-numeric", "Only numeric values allowed", (value) =>
+      /^\d+$/.test(value || "")
+    ),
+  correctedForIndex: Yup.string()
+    .required("Corrected for Index অবশ্যই পূরণ করতে হবে")
+    .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10142 for 1014.2 hPa)")
+    .test("is-numeric", "Only numeric values allowed", (value) =>
+      /^\d+$/.test(value || "")
+    ),
+});
+
+const squallSchema = Yup.object({
+  // Conditional validation for squall fields
+  squallForce: Yup.string().when("squallConfirmed", {
+    is: true,
+    then: (schema) =>
+      schema
+        .required("Squall Force অবশ্যই পূরণ করতে হবে")
+        .test("is-numeric", "Only numeric values allowed", (value) =>
+          /^\d+$/.test(value || "")
+        ),
+    otherwise: (schema) => schema,
+  }),
+  squallDirection: Yup.string().when("squallConfirmed", {
+    is: true,
+    then: (schema) =>
+      schema
+        .required("Squall Direction অবশ্যই পূরণ করতে হবে")
+        .test("is-numeric", "Only numeric values allowed", (value) =>
+          /^\d+$/.test(value || "")
+        ),
+    otherwise: (schema) => schema,
+  }),
+  squallTime: Yup.string().when("squallConfirmed", {
+    is: true,
+    then: (schema) => schema.required("Squall Time অবশ্যই পূরণ করতে হবে"),
+    otherwise: (schema) => schema,
+  }),
+});
+
+const visibilitySchema = Yup.object({
+  horizontalVisibility: Yup.string()
+    .required("Horizontal Visibility অবশ্যই পূরণ করতে হবে")
+    .matches(/^\d{3}$/, "Must be exactly 3 digits (e.g., 050, 999)")
+    .test("is-numeric", "Only numeric values allowed", (value) =>
+      /^\d+$/.test(value || "")
+    ),
+});
+
+const weatherSchema = Yup.object({
+  pastWeatherW1: Yup.string()
+    .required("Past Weather (W1) অবশ্যই পূরণ করতে হবে")
+    .matches(/^[0-9]$/, "Past Weather (W1) শুধুমাত্র 0-9 সংখ্যা হতে হবে"),
+  pastWeatherW2: Yup.string()
+    .required("Past Weather (W2) অবশ্যই পূরণ করতে হবে")
+    .matches(/^[0-9]$/, "Past Weather (W2) শুধুমাত্র 0-9 সংখ্যা হতে হবে"),
+  presentWeatherWW: Yup.string()
+    .required("Present Weather অবশ্যই পূরণ করতে হবে")
+    .matches(/^\d{2}$/, "Must be exactly 2 digits (e.g., 01, 23, 99)")
+    .test("is-numeric", "Only numeric values allowed", (value) =>
+      /^\d+$/.test(value || "")
+    ),
+});
+
+// Combined schema for the entire form
+const validationSchema = Yup.object({
+  ...observingTimeSchema.fields,
+  ...temperatureSchema.fields,
+  ...pressureSchema.fields,
+  ...squallSchema.fields,
+  ...visibilitySchema.fields,
+  ...weatherSchema.fields,
+});
+
 export function MeteorologicalDataForm({ onDataSubmitted }) {
-  const [formData, setFormData] = useState<MeteorologicalFormData>({});
   const [activeTab, setActiveTab] = useState("Observing Time");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { time, error: timeError } = useTimeCheck();
@@ -84,6 +190,8 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     dewPoint: "",
     relativeHumidity: "",
   });
+
+  console.log("timeData", timeData)
 
   const { data: session } = useSession();
 
@@ -142,10 +250,145 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     },
   };
 
+  // Initialize Formik
+  const formik = useFormik({
+    initialValues: {
+      presentWeatherWW: "",
+      subIndicator: "1",
+      alteredThermometer: "",
+      barAsRead: "",
+      correctedForIndex: "",
+      heightDifference: "",
+      stationLevelPressure: "",
+      seaLevelReduction: "",
+      correctedSeaLevelPressure: "",
+      afternoonReading: "",
+      pressureChange24h: "",
+      dryBulbAsRead: "",
+      wetBulbAsRead: "",
+      maxMinTempAsRead: "",
+      dryBulbCorrected: "",
+      wetBulbCorrected: "",
+      maxMinTempCorrected: "",
+      Td: "",
+      relativeHumidity: "",
+      squallConfirmed: false,
+      squallForce: "",
+      squallDirection: "",
+      squallTime: "",
+      horizontalVisibility: "",
+      miscMeteors: "",
+      pastWeatherW1: "",
+      pastWeatherW2: "",
+      c2Indicator: "",
+      observationTime: "",
+      stationNo: session?.user?.station?.id || "",
+      year: new Date().getFullYear().toString().slice(2),
+      cloudCover: "",
+      visibility: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: handleSubmit,
+  });
+
+  // Function to check if a tab is valid
+  const isTabValid = (tabName) => {
+    const errors = formik.errors;
+    const touched = formik.touched;
+
+    switch (tabName) {
+      case "Observing Time":
+        return !(
+          (touched.observationTime && errors.observationTime) ||
+          Boolean(timeData?.time)
+        );
+      case "temperature":
+        return !(
+          (touched.dryBulbAsRead && errors.dryBulbAsRead) ||
+          (touched.wetBulbAsRead && errors.wetBulbAsRead) ||
+          (touched.maxMinTempAsRead && errors.maxMinTempAsRead)
+        );
+      case "pressure":
+        return !(
+          (touched.barAsRead && errors.barAsRead) ||
+          (touched.correctedForIndex && errors.correctedForIndex)
+        );
+      case "squall":
+        if (!formik.values.squallConfirmed) return true;
+        return !(
+          (touched.squallForce && errors.squallForce) ||
+          (touched.squallDirection && errors.squallDirection) ||
+          (touched.squallTime && errors.squallTime)
+        );
+      case "V.V":
+        return !(touched.horizontalVisibility && errors.horizontalVisibility);
+      case "weather":
+        return !(
+          (touched.pastWeatherW1 && errors.pastWeatherW1) ||
+          (touched.pastWeatherW2 && errors.pastWeatherW2) ||
+          (touched.presentWeatherWW && errors.presentWeatherWW)
+        );
+      default:
+        return true;
+    }
+  };
+
+  // Function to validate current tab before proceeding
+  const validateTab = (tabName) => {
+    let fieldsToValidate = [];
+
+    switch (tabName) {
+      case "Observing Time":
+        fieldsToValidate = ["observationTime"];
+        break;
+      case "temperature":
+        fieldsToValidate = [
+          "dryBulbAsRead",
+          "wetBulbAsRead",
+          "maxMinTempAsRead",
+        ];
+        break;
+      case "pressure":
+        fieldsToValidate = ["barAsRead", "correctedForIndex"];
+        break;
+      case "squall":
+        if (formik.values.squallConfirmed) {
+          fieldsToValidate = ["squallForce", "squallDirection", "squallTime"];
+        }
+        break;
+      case "V.V":
+        fieldsToValidate = ["horizontalVisibility"];
+        break;
+      case "weather":
+        fieldsToValidate = [
+          "pastWeatherW1",
+          "pastWeatherW2",
+          "presentWeatherWW",
+        ];
+        break;
+    }
+
+    // Touch all fields in the current tab to trigger validation
+    const touchedFields = {};
+    fieldsToValidate.forEach((field) => {
+      touchedFields[field] = true;
+    });
+    formik.setTouched({ ...formik.touched, ...touchedFields }, true);
+
+    // Validate only the fields in the current tab
+    return fieldsToValidate.every((field) => !formik.errors[field]);
+  };
+
   // Debug logging for formData changes
   useEffect(() => {
-    console.log("Form data updated:", formData);
-  }, [formData]);
+    console.log("Form data updated:", formik.values);
+  }, [formik.values]);
+
+  useEffect(() => {
+    const year = new Date().getFullYear().toString(); // e.g., "2025"
+    formik.setFieldValue("year", year.slice(2)); // only "25" for last two digits
+    formik.setFieldValue("stationNo", session?.user?.station?.id || "");
+  }, []);
 
   const calculateDewPointAndHumidity = (dryBulbInput, wetBulbInput) => {
     if (!dryBulbInput || !wetBulbInput) return;
@@ -198,24 +441,11 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       relativeHumidity: RH.toString(),
     });
 
-    setFormData((prev) => ({
-      ...prev,
-      Td: DpT.toString(),
-      relativeHumidity: RH.toString(),
-    }));
+    formik.setFieldValue("Td", DpT.toString());
+    formik.setFieldValue("relativeHumidity", RH.toString());
 
     toast.success("Dew point and relative humidity calculated successfully");
   };
-
-  useEffect(() => {
-    const year = new Date().getFullYear().toString(); // e.g., "2025"
-    setFormData((prev) => ({
-      ...prev,
-      subIndicator: "1",
-      year: year.slice(2), // only "25" for last two digits
-      stationNo: session?.user?.station?.id || "",
-    }));
-  }, []);
 
   const calculatePressureValues = (
     dryBulb: string,
@@ -335,18 +565,16 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     };
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  async function handleSubmit(values) {
     // Prevent duplicate submissions
     if (isSubmitting) return;
 
     setIsSubmitting(true);
 
     try {
-      // Prepare data (removed redundant stationInfo nesting)
+      // Prepare data
       const submissionData = {
-        ...formData,
+        ...values,
         ...hygrometricData, // Include hygrometric data directly
         observingTimeId: selectedHour,
       };
@@ -369,14 +597,42 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
       });
 
       // Reset only measurement fields (preserves station info)
-      setFormData((prev) => ({
-        stationNo: prev.stationNo,
-        year: prev.year,
+      const resetValues = {
+        stationNo: values.stationNo,
+        year: values.year,
+        subIndicator: values.subIndicator,
         // Clear other fields
+        presentWeatherWW: "",
+        alteredThermometer: "",
+        barAsRead: "",
+        correctedForIndex: "",
+        heightDifference: "",
+        stationLevelPressure: "",
+        seaLevelReduction: "",
+        correctedSeaLevelPressure: "",
+        afternoonReading: "",
+        pressureChange24h: "",
+        dryBulbAsRead: "",
+        wetBulbAsRead: "",
+        maxMinTempAsRead: "",
+        dryBulbCorrected: "",
+        wetBulbCorrected: "",
+        maxMinTempCorrected: "",
+        Td: "",
+        relativeHumidity: "",
+        squallConfirmed: false,
+        squallForce: "",
+        squallDirection: "",
+        squallTime: "",
+        horizontalVisibility: "",
+        miscMeteors: "",
+        pastWeatherW1: "",
+        pastWeatherW2: "",
         cloudCover: "",
         visibility: "",
-        // ... other fields to reset
-      }));
+      };
+
+      formik.resetForm({ values: resetValues });
 
       setHygrometricData({
         dryBulb: "",
@@ -401,16 +657,18 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    formik.handleChange(e);
 
     // Dew point & humidity calculation
     if (name === "dryBulbAsRead" || name === "wetBulbAsRead") {
-      const dryBulb = name === "dryBulbAsRead" ? value : formData.dryBulbAsRead;
-      const wetBulb = name === "wetBulbAsRead" ? value : formData.wetBulbAsRead;
+      const dryBulb =
+        name === "dryBulbAsRead" ? value : formik.values.dryBulbAsRead;
+      const wetBulb =
+        name === "wetBulbAsRead" ? value : formik.values.wetBulbAsRead;
 
       if (dryBulb && wetBulb) {
         calculateDewPointAndHumidity(dryBulb, wetBulb);
@@ -419,8 +677,119 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
     // Station level + Sea level pressure calculation
     if (name === "dryBulbAsRead" || name === "barAsRead") {
-      const dryBulb = name === "dryBulbAsRead" ? value : formData.dryBulbAsRead;
-      const barAsRead = name === "barAsRead" ? value : formData.barAsRead;
+      const dryBulb =
+        name === "dryBulbAsRead" ? value : formik.values.dryBulbAsRead;
+      const barAsRead = name === "barAsRead" ? value : formik.values.barAsRead;
+
+      if (dryBulb && barAsRead) {
+        const stationId = session?.user?.station?.stationId;
+
+        if (!stationId) {
+          toast.error("Station ID is missing");
+          return;
+        }
+
+        const pressureData = calculatePressureValues(
+          dryBulb,
+          barAsRead,
+          stationId
+        );
+        
+        if (pressureData) {
+          formik.setFieldValue(
+            "stationLevelPressure",
+            pressureData.stationLevelPressure
+          );
+          formik.setFieldValue(
+            "heightDifference",
+            pressureData.heightDifference
+          );
+
+          const seaData = calculateSeaLevelPressure(
+            dryBulb,
+            pressureData.stationLevelPressure,
+            stationId
+          );
+          
+          if (seaData) {
+            formik.setFieldValue(
+              "seaLevelReduction",
+              seaData.seaLevelReduction
+            );
+            formik.setFieldValue(
+              "correctedSeaLevelPressure",
+              seaData.correctedSeaLevelPressure
+            );
+          }
+        }
+      }
+    }
+  };
+
+  // Add this function after the handleChange function
+  const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    // Only allow numeric input
+    if (!/^\d*$/.test(value)) {
+      return;
+    }
+
+    // Apply specific validation based on field type
+    switch (name) {
+      case "dryBulbAsRead":
+      case "wetBulbAsRead":
+      case "maxMinTempAsRead":
+        // Limit to 3 digits for temperature fields
+        if (value.length <= 3) {
+          formik.setFieldValue(name, value);
+        }
+        break;
+
+      case "barAsRead":
+      case "correctedForIndex":
+        // Limit to 5 digits for pressure fields
+        if (value.length <= 5) {
+          formik.setFieldValue(name, value);
+        }
+        break;
+
+      case "horizontalVisibility":
+        // Limit to 3 digits for visibility
+        if (value.length <= 3) {
+          formik.setFieldValue(name, value);
+        }
+        break;
+
+      case "presentWeatherWW":
+        // Limit to 2 digits for present weather
+        if (value.length <= 2) {
+          formik.setFieldValue(name, value);
+        }
+        break;
+
+      default:
+        // For other numeric fields, just update the value
+        formik.setFieldValue(name, value);
+    }
+
+    // Continue with other calculations as in the original handleChange
+    if (name === "dryBulbAsRead" || name === "wetBulbAsRead") {
+      const dryBulb =
+        name === "dryBulbAsRead" ? value : formik.values.dryBulbAsRead;
+      const wetBulb =
+        name === "wetBulbAsRead" ? value : formik.values.wetBulbAsRead;
+
+      if (dryBulb && wetBulb) {
+        calculateDewPointAndHumidity(dryBulb, wetBulb);
+      }
+    }
+
+    // Station level + Sea level pressure calculation
+    if (name === "dryBulbAsRead" || name === "barAsRead") {
+      const dryBulb =
+        name === "dryBulbAsRead" ? value : formik.values.dryBulbAsRead;
+      const barAsRead = name === "barAsRead" ? value : formik.values.barAsRead;
 
       if (dryBulb && barAsRead) {
         const stationId = session?.user?.station?.stationId;
@@ -436,11 +805,14 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
           stationId
         );
         if (pressureData) {
-          setFormData((prev) => ({
-            ...prev,
-            stationLevelPressure: pressureData.stationLevelPressure,
-            heightDifference: pressureData.heightDifference,
-          }));
+          formik.setFieldValue(
+            "stationLevelPressure",
+            pressureData.stationLevelPressure
+          );
+          formik.setFieldValue(
+            "heightDifference",
+            pressureData.heightDifference
+          );
 
           const seaData = calculateSeaLevelPressure(
             dryBulb,
@@ -448,32 +820,22 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
             stationId
           );
           if (seaData) {
-            setFormData((prev) => ({
-              ...prev,
-              seaLevelReduction: seaData.seaLevelReduction,
-              correctedSeaLevelPressure: seaData.correctedSeaLevelPressure,
-            }));
+            formik.setFieldValue(
+              "seaLevelReduction",
+              seaData.seaLevelReduction
+            );
+            formik.setFieldValue(
+              "correctedSeaLevelPressure",
+              seaData.correctedSeaLevelPressure
+            );
           }
         }
       }
     }
-
-    // Automatically generate Present Weather (WW) from W1 and W2
-    // if (name === "pastWeatherW1" || name === "pastWeatherW2") {
-    //   const w1 = name === "pastWeatherW1" ? value : formData.pastWeatherW1;
-    //   const w2 = name === "pastWeatherW2" ? value : formData.pastWeatherW2;
-
-    //   if (w1 && w2) {
-    //     setFormData((prev) => ({
-    //       ...prev,
-    //       presentWeatherWW: `${w1}${w2}`,
-    //     }));
-    //   }
-    // }
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    formik.setFieldValue(name, value);
   };
 
   // Handle segmented input (for multi-box inputs like station number, year, etc.)
@@ -484,13 +846,10 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     key: string
   ) => {
     const value = e.target.value.slice(0, 1); // ensure single digit
-    const updated = (formData[key] || "").split("");
+    const updated = (formik.values[key] || "").split("");
     updated[index] = value;
 
-    setFormData((prev) => ({
-      ...prev,
-      [key]: updated.join(""),
-    }));
+    formik.setFieldValue(key, updated.join(""));
 
     // Auto-focus next input
     if (value && refs[index + 1]) {
@@ -505,12 +864,49 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     }
     clearError();
     setSelectedHour(value);
+    formik.setFieldValue("observationTime", value);
   };
 
   // Reset form function
   const handleReset = () => {
-    // Clear all form data
-    setFormData({});
+    // Clear all form data except station info
+    const resetValues = {
+      stationNo: formik.values.stationNo,
+      year: formik.values.year,
+      subIndicator: formik.values.subIndicator,
+      // Clear other fields
+      presentWeatherWW: "",
+      alteredThermometer: "",
+      barAsRead: "",
+      correctedForIndex: "",
+      heightDifference: "",
+      stationLevelPressure: "",
+      seaLevelReduction: "",
+      correctedSeaLevelPressure: "",
+      afternoonReading: "",
+      pressureChange24h: "",
+      dryBulbAsRead: "",
+      wetBulbAsRead: "",
+      maxMinTempAsRead: "",
+      dryBulbCorrected: "",
+      wetBulbCorrected: "",
+      maxMinTempCorrected: "",
+      Td: "",
+      relativeHumidity: "",
+      squallConfirmed: false,
+      squallForce: "",
+      squallDirection: "",
+      squallTime: "",
+      horizontalVisibility: "",
+      miscMeteors: "",
+      pastWeatherW1: "",
+      pastWeatherW2: "",
+      cloudCover: "",
+      visibility: "",
+    };
+
+    formik.resetForm({ values: resetValues });
+
     setHygrometricData({
       dryBulb: "",
       wetBulb: "",
@@ -528,6 +924,15 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
 
   // Navigation functions
   const nextTab = () => {
+    // Validate current tab before proceeding
+    if (!validateTab(activeTab)) {
+      toast.error("অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন", {
+        description:
+          "পরবর্তী ট্যাবে যাওয়ার আগে বর্তমান ট্যাবের সকল তথ্য পূরণ করুন",
+      });
+      return;
+    }
+
     const currentIndex = tabOrder.indexOf(activeTab);
     if (currentIndex < tabOrder.length - 1) {
       setActiveTab(tabOrder[currentIndex + 1]);
@@ -545,13 +950,23 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
   const isLastTab = tabOrder.indexOf(activeTab) === tabOrder.length - 1;
   const isFirstTab = tabOrder.indexOf(activeTab) === 0;
 
+  // Helper function to render error message
+  const renderErrorMessage = (fieldName) => {
+    return formik.touched[fieldName] && formik.errors[fieldName] ? (
+      <div className="text-red-500 text-sm mt-1 flex items-start">
+        <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+        <span>{formik.errors[fieldName]}</span>
+      </div>
+    ) : null;
+  };
+
   return (
     <>
-      <form onSubmit={handleSubmit} className="w-full mx-auto">
+      <form onSubmit={formik.handleSubmit} className="w-full mx-auto">
         {/* <BasicInfoTab /> */}
         <BasicInfoTab
           onFieldChange={(name, value) => {
-            setFormData((prev) => ({ ...prev, [name]: value }));
+            formik.setFieldValue(name, value);
           }}
         />
         {/*Card Body */}
@@ -583,6 +998,8 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                   disabled={Boolean(timeData?.time)}
                   className={cn("border border-gray-300", {
                     [style.tab]: activeTab === key,
+                    "!border-red-500 !text-red-700":
+                      !isTabValid(key) && formik.submitCount > 0,
                   })}
                 >
                   <div className="flex items-center justify-center">
@@ -625,8 +1042,14 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       className={cn(
                         "w-full border rounded-md px-3 py-2 focus:outline-none",
                         {
-                          "border-red-500": error || timeData?.time,
-                          "border-emerald-500": !timeData?.time,
+                          "border-red-500":
+                            (formik.touched.observationTime &&
+                              formik.errors.observationTime) ||
+                            timeData?.time,
+                          "border-emerald-500":
+                            !timeData?.time &&
+                            formik.values.observationTime &&
+                            !formik.errors.observationTime,
                         }
                       )}
                     >
@@ -643,6 +1066,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     {timeData?.time && (
                       <p className="text-red-500">Time Already Exist</p>
                     )}
+                    {renderErrorMessage("observationTime")}
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between p-6">
@@ -683,7 +1107,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     <Input
                       id="subIndicator"
                       name="subIndicator"
-                      value={formData.subIndicator || ""}
+                      value={formik.values.subIndicator || ""}
                       onChange={handleChange}
                       readOnly
                       className="border-slate-600 bg-gray-100 cursor-not-allowed text-gray-700 transition-all focus:border-rose-400 focus:ring-rose-500/30"
@@ -695,9 +1119,9 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       Attached Thermometer
                     </Label>
                     <Input
-                      id="attachedThermometer"
-                      name="attachedThermometer"
-                      value={formData.attachedThermometer || ""}
+                      id="alteredThermometer"
+                      name="alteredThermometer"
+                      value={formik.values.alteredThermometer || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
                     />
@@ -708,10 +1132,17 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     <Input
                       id="barAsRead"
                       name="barAsRead"
-                      value={formData.barAsRead || ""}
-                      onChange={handleChange}
-                      className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
+                      value={formik.values.barAsRead || ""}
+                      onChange={handleNumericInput}
+                      className={cn(
+                        "border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30",
+                        {
+                          "border-red-500":
+                            formik.touched.barAsRead && formik.errors.barAsRead,
+                        }
+                      )}
                     />
+                    {renderErrorMessage("barAsRead")}
                   </div>
 
                   <div className="space-y-2">
@@ -721,10 +1152,18 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     <Input
                       id="correctedForIndex"
                       name="correctedForIndex"
-                      value={formData.correctedForIndex || ""}
-                      onChange={handleChange}
-                      className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
+                      value={formik.values.correctedForIndex || ""}
+                      onChange={handleNumericInput}
+                      className={cn(
+                        "border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30",
+                        {
+                          "border-red-500":
+                            formik.touched.correctedForIndex &&
+                            formik.errors.correctedForIndex,
+                        }
+                      )}
                     />
+                    {renderErrorMessage("correctedForIndex")}
                   </div>
 
                   <div className="space-y-2">
@@ -734,7 +1173,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     <Input
                       id="heightDifference"
                       name="heightDifference"
-                      value={formData.heightDifference || ""}
+                      value={formik.values.heightDifference || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
                       readOnly
@@ -748,10 +1187,9 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     <Input
                       id="stationLevelPressure"
                       name="stationLevelPressure"
-                      value={formData.stationLevelPressure || ""}
+                      value={formik.values.stationLevelPressure || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
-                      readOnly
                     />
                   </div>
 
@@ -762,7 +1200,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     <Input
                       id="seaLevelReduction"
                       name="seaLevelReduction"
-                      value={formData.seaLevelReduction || ""}
+                      value={formik.values.seaLevelReduction || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
                       readOnly
@@ -776,7 +1214,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     <Input
                       id="correctedSeaLevelPressure"
                       name="correctedSeaLevelPressure"
-                      value={formData.correctedSeaLevelPressure || ""}
+                      value={formik.values.correctedSeaLevelPressure || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
                       readOnly
@@ -790,7 +1228,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     <Input
                       id="afternoonReading"
                       name="afternoonReading"
-                      value={formData.afternoonReading || ""}
+                      value={formik.values.afternoonReading || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
                     />
@@ -803,9 +1241,10 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     <Input
                       id="pressureChange24h"
                       name="pressureChange24h"
-                      value={formData.pressureChange24h || ""}
+                      value={formik.values.pressureChange24h || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
+                      readOnly
                     />
                   </div>
                 </CardContent>
@@ -872,10 +1311,19 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                               <Input
                                 id="dryBulbAsRead"
                                 name="dryBulbAsRead"
-                                value={formData.dryBulbAsRead || ""}
-                                onChange={handleChange}
-                                className="border-slate-600 transition-all focus:border-blue-400 focus:ring-blue-500/30"
+                                value={formik.values.dryBulbAsRead || ""}
+                                onChange={handleNumericInput}
+                                onBlur={formik.handleBlur}
+                                className={cn(
+                                  "border-slate-600 transition-all focus:border-blue-400 focus:ring-blue-500/30",
+                                  {
+                                    "border-red-500":
+                                      formik.touched.dryBulbAsRead &&
+                                      formik.errors.dryBulbAsRead,
+                                  }
+                                )}
                               />
+                              {renderErrorMessage("dryBulbAsRead")}
                             </div>
 
                             <div className="space-y-2">
@@ -885,10 +1333,19 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                               <Input
                                 id="wetBulbAsRead"
                                 name="wetBulbAsRead"
-                                value={formData.wetBulbAsRead || ""}
-                                onChange={handleChange}
-                                className=" border-slate-600 transition-all focus:border-blue-400 focus:ring-blue-500/30"
+                                value={formik.values.wetBulbAsRead || ""}
+                                onChange={handleNumericInput}
+                                onBlur={formik.handleBlur}
+                                className={cn(
+                                  "border-slate-600 transition-all focus:border-blue-400 focus:ring-blue-500/30",
+                                  {
+                                    "border-red-500":
+                                      formik.touched.wetBulbAsRead &&
+                                      formik.errors.wetBulbAsRead,
+                                  }
+                                )}
                               />
+                              {renderErrorMessage("wetBulbAsRead")}
                             </div>
 
                             <div className="space-y-2">
@@ -898,10 +1355,19 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                               <Input
                                 id="maxMinTempAsRead"
                                 name="maxMinTempAsRead"
-                                value={formData.maxMinTempAsRead || ""}
-                                onChange={handleChange}
-                                className="border-slate-600 transition-all focus:border-blue-400 focus:ring-blue-500/30"
+                                value={formik.values.maxMinTempAsRead || ""}
+                                onChange={handleNumericInput}
+                                onBlur={formik.handleBlur}
+                                className={cn(
+                                  "border-slate-600 transition-all focus:border-blue-400 focus:ring-blue-500/30",
+                                  {
+                                    "border-red-500":
+                                      formik.touched.maxMinTempAsRead &&
+                                      formik.errors.maxMinTempAsRead,
+                                  }
+                                )}
                               />
+                              {renderErrorMessage("maxMinTempAsRead")}
                             </div>
                           </div>
                         </TabsContent>
@@ -916,7 +1382,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                               <Input
                                 id="dryBulbCorrected"
                                 name="dryBulbCorrected"
-                                value={formData.dryBulbCorrected || ""}
+                                value={formik.values.dryBulbCorrected || ""}
                                 onChange={handleChange}
                                 className="transition-all focus:border-blue-400 focus:ring-blue-500/30"
                               />
@@ -929,7 +1395,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                               <Input
                                 id="wetBulbCorrected"
                                 name="wetBulbCorrected"
-                                value={formData.wetBulbCorrected || ""}
+                                value={formik.values.wetBulbCorrected || ""}
                                 onChange={handleChange}
                                 className="border-slate-600 transition-all focus:border-blue-400 focus:ring-blue-500/30"
                               />
@@ -942,7 +1408,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                               <Input
                                 id="maxMinTempCorrected"
                                 name="maxMinTempCorrected"
-                                value={formData.maxMinTempCorrected || ""}
+                                value={formik.values.maxMinTempCorrected || ""}
                                 onChange={handleChange}
                                 className="border-slate-600 transition-all focus:border-blue-400 focus:ring-blue-500/30"
                               />
@@ -966,7 +1432,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                             <Input
                               id="Td"
                               name="Td"
-                              value={formData.Td || ""}
+                              value={formik.values.Td || ""}
                               onChange={handleChange}
                               className="border-slate-600 transition-all focus:border-emerald-500 focus:ring-emerald-500/30"
                               readOnly
@@ -988,7 +1454,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                             <Input
                               id="relativeHumidity"
                               name="relativeHumidity"
-                              value={formData.relativeHumidity || ""}
+                              value={formik.values.relativeHumidity || ""}
                               onChange={handleChange}
                               className="border-slate-600 transition-all focus:border-violet-500 focus:ring-violet-500/30"
                               readOnly
@@ -1032,7 +1498,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                   </h3>
                 </div>
                 <CardContent className="pt-6 space-y-4">
-                  {formData.squallConfirmed === undefined ? (
+                  {formik.values.squallConfirmed === undefined ? (
                     <div className="p-4 bg-amber-50 border border-amber-200 rounded-md">
                       <p className="text-amber-800 font-medium mb-3">
                         Are you sure you want to fill up squall measurements?
@@ -1043,13 +1509,10 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                           variant="outline"
                           className="border-amber-500 text-amber-700 hover:bg-amber-50"
                           onClick={() => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              squallConfirmed: false,
-                              squallForce: "",
-                              squallDirection: "",
-                              squallTime: "",
-                            }));
+                            formik.setFieldValue("squallConfirmed", false);
+                            formik.setFieldValue("squallForce", "");
+                            formik.setFieldValue("squallDirection", "");
+                            formik.setFieldValue("squallTime", "");
                             nextTab();
                           }}
                         >
@@ -1059,27 +1522,33 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                           type="button"
                           className="bg-amber-500 hover:bg-amber-600"
                           onClick={() => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              squallConfirmed: true,
-                            }));
+                            formik.setFieldValue("squallConfirmed", true);
                           }}
                         >
                           Yes, Continue
                         </Button>
                       </div>
                     </div>
-                  ) : formData.squallConfirmed ? (
+                  ) : formik.values.squallConfirmed ? (
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="squallForce">Force (KTS)</Label>
                         <Input
                           id="squallForce"
                           name="squallForce"
-                          value={formData.squallForce || ""}
+                          value={formik.values.squallForce || ""}
                           onChange={handleChange}
-                          className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
+                          onBlur={formik.handleBlur}
+                          className={cn(
+                            "border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30",
+                            {
+                              "border-red-500":
+                                formik.touched.squallForce &&
+                                formik.errors.squallForce,
+                            }
+                          )}
                         />
+                        {renderErrorMessage("squallForce")}
                       </div>
 
                       <div className="space-y-2">
@@ -1090,22 +1559,21 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                           type="number"
                           min="0"
                           max="360"
-                          value={formData.squallDirection || ""}
+                          value={formik.values.squallDirection || ""}
                           onChange={handleChange}
-                          className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
+                          onBlur={formik.handleBlur}
+                          className={cn(
+                            "border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30",
+                            {
+                              "border-red-500":
+                                formik.touched.squallDirection &&
+                                formik.errors.squallDirection,
+                            }
+                          )}
                         />
+                        {renderErrorMessage("squallDirection")}
                       </div>
 
-                      {/* <div className="space-y-2">
-                          <Label htmlFor="squallTime">Time (qt)</Label>
-                          <Input
-                            id="squallTime"
-                            name="squallTime"
-                            value={formData.squallTime || ""}
-                            onChange={handleChange}
-                            className="border-slate-600 transition-all focus:border-amber-500 focus:ring-amber-500/30"
-                          />
-                        </div> */}
                       <div className="space-y-2">
                         <Label htmlFor="squallTime">
                           GG: Time of Observation (UTC)
@@ -1113,10 +1581,19 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                         <select
                           id="squallTime"
                           name="squallTime"
-                          value={formData.squallTime || ""}
-                          onChange={handleChange}
-                          required
-                          className="w-full border border-slate-600 rounded-md px-3 py-2 focus:outline-none focus:border-fuchsia-500 focus:ring-fuchsia-500/30"
+                          value={formik.values.squallTime || ""}
+                          onChange={(e) =>
+                            formik.setFieldValue("squallTime", e.target.value)
+                          }
+                          onBlur={formik.handleBlur}
+                          className={cn(
+                            "w-full border border-slate-600 rounded-md px-3 py-2 focus:outline-none focus:border-fuchsia-500 focus:ring-fuchsia-500/30",
+                            {
+                              "border-red-500":
+                                formik.touched.squallTime &&
+                                formik.errors.squallTime,
+                            }
+                          )}
                         >
                           <option value="">-- Select GG Time --</option>
                           <option value="00">00 UTC</option>
@@ -1128,6 +1605,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                           <option value="18">18 UTC</option>
                           <option value="21">21 UTC</option>
                         </select>
+                        {renderErrorMessage("squallTime")}
                       </div>
                     </div>
                   ) : (
@@ -1140,10 +1618,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          setFormData((prev) => ({
-                            ...prev,
-                            squallConfirmed: true,
-                          }));
+                          formik.setFieldValue("squallConfirmed", true);
                         }}
                       >
                         Fill Measurements
@@ -1185,10 +1660,19 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     <Input
                       id="horizontalVisibility"
                       name="horizontalVisibility"
-                      value={formData.horizontalVisibility || ""}
-                      onChange={handleChange}
-                      className="border-slate-600 transition-all focus:border-orange-500 focus:ring-orange-500/30"
+                      value={formik.values.horizontalVisibility || ""}
+                      onChange={handleNumericInput}
+                      onBlur={formik.handleBlur}
+                      className={cn(
+                        "border-slate-600 transition-all focus:border-orange-500 focus:ring-orange-500/30",
+                        {
+                          "border-red-500":
+                            formik.touched.horizontalVisibility &&
+                            formik.errors.horizontalVisibility,
+                        }
+                      )}
                     />
+                    {renderErrorMessage("horizontalVisibility")}
                   </div>
 
                   <div className="space-y-2">
@@ -1196,7 +1680,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                     <Input
                       id="miscMeteors"
                       name="miscMeteors"
-                      value={formData.miscMeteors || ""}
+                      value={formik.values.miscMeteors || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-orange-500 focus:ring-orange-500/30"
                     />
@@ -1236,10 +1720,19 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       id="pastWeatherW1"
                       name="pastWeatherW1"
                       placeholder="Enter past weather code (0-9)"
-                      value={formData.pastWeatherW1 || ""}
+                      value={formik.values.pastWeatherW1 || ""}
                       onChange={handleChange}
-                      className="border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
+                      onBlur={formik.handleBlur}
+                      className={cn(
+                        "border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30",
+                        {
+                          "border-red-500":
+                            formik.touched.pastWeatherW1 &&
+                            formik.errors.pastWeatherW1,
+                        }
+                      )}
                     />
+                    {renderErrorMessage("pastWeatherW1")}
                     <p className="text-xs text-muted-foreground mt-1">
                       Weather code for the first part of the observation period
                     </p>
@@ -1252,10 +1745,19 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       id="pastWeatherW2"
                       name="pastWeatherW2"
                       placeholder="Enter past weather code (0-9)"
-                      value={formData.pastWeatherW2 || ""}
+                      value={formik.values.pastWeatherW2 || ""}
                       onChange={handleChange}
-                      className="border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30"
+                      onBlur={formik.handleBlur}
+                      className={cn(
+                        "border-slate-600 transition-all focus:border-cyan-500 focus:ring-cyan-500/30",
+                        {
+                          "border-red-500":
+                            formik.touched.pastWeatherW2 &&
+                            formik.errors.pastWeatherW2,
+                        }
+                      )}
                     />
+                    {renderErrorMessage("pastWeatherW2")}
                     <p className="text-xs text-muted-foreground mt-1">
                       Weather code for the second part of the observation period
                     </p>
@@ -1270,10 +1772,16 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       id="presentWeatherWW"
                       name="presentWeatherWW"
                       placeholder="Enter present weather"
-                      value={formData.presentWeatherWW || ""}
-                      onChange={handleChange}
-                      className="border-slate-600 text-gray-700"
+                      value={formik.values.presentWeatherWW || ""}
+                      onChange={handleNumericInput}
+                      onBlur={formik.handleBlur}
+                      className={cn("border-slate-600 text-gray-700", {
+                        "border-red-500":
+                          formik.touched.presentWeatherWW &&
+                          formik.errors.presentWeatherWW,
+                      })}
                     />
+                    {renderErrorMessage("presentWeatherWW")}
                     <p className="text-xs text-muted-foreground mt-1">
                       Current weather conditions at time of observation
                     </p>

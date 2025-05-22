@@ -11,6 +11,9 @@ import {
   Sun,
   Loader2,
   Clock,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -23,13 +26,221 @@ import {
 } from "@/components/ui/select";
 import { useSession } from "@/lib/auth-client";
 import { useWeatherObservationForm } from "@/stores/useWeatherObservationForm";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import HourSelector from "@/components/hour-selector";
-import { useHour } from "@/contexts/hourContext";
 import { useTimeCheck } from "@/hooks/useTimeCheck";
 import { utcToHour } from "@/lib/utils";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { cn } from "@/lib/utils";
+
+// Define the form data type
+type WeatherObservationFormData = {
+  clouds: {
+    low: {
+      form?: string;
+      amount?: string;
+      height?: string;
+      direction?: string;
+    };
+    medium: {
+      form?: string;
+      amount?: string;
+      height?: string;
+      direction?: string;
+    };
+    high: {
+      form?: string;
+      amount?: string;
+      height?: string;
+      direction?: string;
+    };
+  };
+  totalCloud: {
+    "total-cloud-amount"?: string;
+  };
+  significantClouds: {
+    layer1: {
+      form?: string;
+      amount?: string;
+      height?: string;
+    };
+    layer2: {
+      form?: string;
+      amount?: string;
+      height?: string;
+    };
+    layer3: {
+      form?: string;
+      amount?: string;
+      height?: string;
+    };
+    layer4: {
+      form?: string;
+      amount?: string;
+      height?: string;
+    };
+  };
+  rainfall: {
+    "time-start"?: string;
+    "time-end"?: string;
+    "since-previous"?: string;
+    "during-previous"?: string;
+    "last-24-hours"?: string;
+  };
+  wind: {
+    "first-anemometer"?: string;
+    "second-anemometer"?: string;
+    speed?: string;
+    "wind-direction"?: string;
+  };
+  observer: {
+    "observer-initial"?: string;
+    "observation-time"?: string;
+  };
+  metadata: {
+    stationId?: string;
+    submittedAt?: string;
+  };
+};
+
+// Update the validation schemas to enforce numeric validation for all numeric fields
+
+// Update the validation schemas to use English error messages and add time format validation
+const rainfallSchema = Yup.object({
+  rainfall: Yup.object({
+    "time-start": Yup.string()
+      .required("Time of start is required")
+      .matches(
+        /^(0[0-9]|1[0-9]|2[0-3])$/,
+        "Please enter a valid hour (00 to 23)"
+      ),
+    "time-end": Yup.string()
+      .required("Time of ending is required")
+      .matches(
+        /^([01]\d|2[0-3]):([0-5]\d)$/,
+        "Please enter a valid time in HH:MM format (00:00 to 23:59)"
+      ),
+    "since-previous": Yup.string()
+      .required("Since previous observation is required")
+      .matches(/^[0-9]+(\.[0-9]+)?$/, "Please enter numbers only"),
+    "during-previous": Yup.string()
+      .required("During previous 6 hours is required")
+      .matches(
+        /^(0[0-9]{2}|[1-8][0-9]{2}|9[0-8][0-9])$/,
+        "Please enter a valid 3-digit number (000 to 989)"
+      ),
+
+    "last-24-hours": Yup.string()
+      .required("Last 24 hours precipitation is required")
+      .matches(/^[0-9]+(\.[0-9]+)?$/, "Please enter numbers only"),
+  }),
+});
+
+// Update the windSchema to use English error messages
+const windSchema = Yup.object({
+  wind: Yup.object({
+    "first-anemometer": Yup.string()
+      .required("1st Anemometer reading is required")
+      .matches(/^\d{5}$/, "Please enter exactly 5-digit number"),
+
+    "second-anemometer": Yup.string()
+      .required("2nd Anemometer reading is required")
+      .matches(/^[0-9]+(\.[0-9]+)?$/, "Please enter numbers only"),
+    speed: Yup.string()
+      .required("Wind speed is required")
+      .matches(/^\d{3}$/, "Please enter exactly 3-digit speed"),
+    "wind-direction": Yup.string()
+      .required("Wind direction is required")
+      .matches(/^\d{2}$/, "Please enter a valid 2-digit direction (00 to 99)"),
+  }),
+});
+
+// Update the cloudSchema to use English error messages
+const cloudSchema = Yup.object({
+  clouds: Yup.object({
+    low: Yup.object({
+      form: Yup.string().required("Low cloud form is required"),
+      amount: Yup.string().required("Low cloud amount is required"),
+      height: Yup.string().required("Low cloud height is required"),
+      direction: Yup.string().required("Low cloud direction is required"),
+    }),
+    medium: Yup.object({
+      form: Yup.string().required("Medium cloud form is required"),
+      amount: Yup.string().required("Medium cloud amount is required"),
+      height: Yup.string().required("Medium cloud height is required"),
+      direction: Yup.string().required("Medium cloud direction is required"),
+    }),
+    high: Yup.object({
+      form: Yup.string().required("High cloud form is required"),
+      amount: Yup.string().required("High cloud amount is required"),
+      height: Yup.string().required("High cloud height is required"),
+      direction: Yup.string().required("High cloud direction is required"),
+    }),
+  }),
+});
+
+// Update the totalCloudSchema to use English error messages
+const totalCloudSchema = Yup.object({
+  totalCloud: Yup.object({
+    "total-cloud-amount": Yup.string().required(
+      "Total cloud amount is required"
+    ),
+  }),
+});
+
+// Update the significantCloudSchema to use English error messages
+const significantCloudSchema = Yup.object({
+  significantClouds: Yup.object({
+    layer1: Yup.object({
+      form: Yup.string().required("Layer 1 form is required"),
+      amount: Yup.string().required("Layer 1 amount is required"),
+      height: Yup.string()
+        .required("Layer 1 height is required")
+        .matches(/^[0-9]+$/, "Please enter numbers only"),
+    }),
+    layer2: Yup.object({
+      form: Yup.string(),
+      amount: Yup.string(),
+      height: Yup.string().matches(/^[0-9]*$/, "Please enter numbers only"),
+    }),
+    layer3: Yup.object({
+      form: Yup.string(),
+      amount: Yup.string(),
+      height: Yup.string().matches(/^[0-9]*$/, "Please enter numbers only"),
+    }),
+    layer4: Yup.object({
+      form: Yup.string(),
+      amount: Yup.string(),
+      height: Yup.string().matches(/^[0-9]*$/, "Please enter numbers only"),
+    }),
+  }),
+});
+
+// Update the observerSchema to use English error messages
+const observerSchema = Yup.object({
+  observer: Yup.object({
+    "observer-initial": Yup.string().required("Observer initials are required"),
+    "observation-time": Yup.string().required("Observation time is required"),
+  }),
+});
+
+// Combined schema for the entire form
+const validationSchema = Yup.object({
+  ...cloudSchema.fields,
+  ...totalCloudSchema.fields,
+  ...significantCloudSchema.fields,
+  ...rainfallSchema.fields,
+  ...windSchema.fields,
+  ...observerSchema.fields,
+});
 
 export default function WeatherObservationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,12 +251,264 @@ export default function WeatherObservationForm() {
 
   const { time, error: timeError } = useTimeCheck();
 
+  // Get the persistent form store
+  const { formData, updateFields, resetForm, checkAndResetIfExpired } =
+    useWeatherObservationForm();
+
+  // Tab styles with gradients and more vibrant colors
+  const tabStyles = {
+    cloud: {
+      tab: "border border-blue-500 px-4 py-3 !bg-blue-50 text-blue-800 hover:opacity-90 shadow-sm shadow-blue-500/50",
+      card: "bg-gradient-to-br from-blue-50 to-white border-l-4 border-blue-200 shadow-sm",
+      icon: <CloudIcon className="size-5 mr-2" />,
+    },
+    n: {
+      tab: "border border-yellow-500 px-4 py-3 !bg-yellow-50 text-yellow-800 hover:opacity-90 shadow-sm shadow-yellow-500/50",
+      card: "bg-gradient-to-br from-yellow-50 to-white border-l-4 border-yellow-200 shadow-sm",
+      icon: <Sun className="size-5 mr-2" />,
+    },
+    "significant-cloud": {
+      tab: "border border-purple-500 px-4 py-3 !bg-purple-50 text-purple-800 hover:opacity-90 shadow-sm shadow-purple-500/50",
+      card: "bg-gradient-to-br from-purple-50 to-white border-l-4 border-purple-200 shadow-sm",
+      icon: <CloudIcon className="size-5 mr-2" />,
+    },
+    rainfall: {
+      tab: "border border-cyan-500 px-4 py-3 !bg-cyan-50 text-cyan-800 hover:opacity-90 shadow-sm shadow-cyan-500/50",
+      card: "bg-gradient-to-br from-cyan-50 to-white border-l-4 border-cyan-200 shadow-sm",
+      icon: <CloudRainIcon className="size-5 mr-2" />,
+    },
+    wind: {
+      tab: "border border-green-500 px-4 py-3 !bg-green-50 text-green-800 hover:opacity-90 shadow-sm shadow-green-500/50",
+      card: "bg-gradient-to-br from-green-50 to-white border-l-4 border-green-200 shadow-sm",
+      icon: <Wind className="size-5 mr-2" />,
+    },
+    observer: {
+      tab: "border border-orange-500 px-4 py-3 !bg-orange-50 text-orange-800 hover:opacity-90 shadow-sm shadow-orange-500/50",
+      card: "bg-gradient-to-br from-orange-50 to-white border-l-4 border-orange-200 shadow-sm",
+      icon: <User className="size-5 mr-2" />,
+    },
+  };
+
+  // Initialize Formik
+  const formik = useFormik<WeatherObservationFormData>({
+    initialValues: {
+      clouds: {
+        low: formData?.clouds?.low || {},
+        medium: formData?.clouds?.medium || {},
+        high: formData?.clouds?.high || {},
+      },
+      totalCloud: formData?.totalCloud || {},
+      significantClouds: {
+        layer1: formData?.significantClouds?.layer1 || {},
+        layer2: formData?.significantClouds?.layer2 || {},
+        layer3: formData?.significantClouds?.layer3 || {},
+        layer4: formData?.significantClouds?.layer4 || {},
+      },
+      rainfall: formData?.rainfall || {},
+      wind: formData?.wind || {},
+      observer: {
+        "observer-initial": session?.user?.name || "",
+        "observation-time": new Date()
+          .getUTCHours()
+          .toString()
+          .padStart(2, "0"),
+        ...formData?.observer,
+      },
+      metadata: {
+        stationId: session?.user?.stationId || "",
+        ...formData?.metadata,
+      },
+    },
+    validationSchema: validationSchema,
+    onSubmit: handleSubmit,
+  });
+
+  // Function to check if a tab is valid
+  const isTabValid = (tabName: string) => {
+    const errors = formik.errors;
+    const touched = formik.touched;
+
+    switch (tabName) {
+      case "cloud":
+        return !(
+          (touched.clouds?.low && errors.clouds?.low) ||
+          (touched.clouds?.medium && errors.clouds?.medium) ||
+          (touched.clouds?.high && errors.clouds?.high)
+        );
+      case "n":
+        return !(
+          touched.totalCloud?.["total-cloud-amount"] &&
+          errors.totalCloud?.["total-cloud-amount"]
+        );
+      case "significant-cloud":
+        return !(
+          touched.significantClouds?.layer1 && errors.significantClouds?.layer1
+        );
+      case "rainfall":
+        return !(
+          (touched.rainfall?.["time-start"] &&
+            errors.rainfall?.["time-start"]) ||
+          (touched.rainfall?.["time-end"] && errors.rainfall?.["time-end"]) ||
+          (touched.rainfall?.["since-previous"] &&
+            errors.rainfall?.["since-previous"]) ||
+          (touched.rainfall?.["during-previous"] &&
+            errors.rainfall?.["during-previous"]) ||
+          (touched.rainfall?.["last-24-hours"] &&
+            errors.rainfall?.["last-24-hours"])
+        );
+      case "wind":
+        return !(
+          (touched.wind?.["first-anemometer"] &&
+            errors.wind?.["first-anemometer"]) ||
+          (touched.wind?.["second-anemometer"] &&
+            errors.wind?.["second-anemometer"]) ||
+          (touched.wind?.speed && errors.wind?.speed) ||
+          (touched.wind?.["wind-direction"] && errors.wind?.["wind-direction"])
+        );
+      case "observer":
+        return !(
+          (touched.observer?.["observer-initial"] &&
+            errors.observer?.["observer-initial"]) ||
+          (touched.observer?.["observation-time"] &&
+            errors.observer?.["observation-time"])
+        );
+      default:
+        return true;
+    }
+  };
+
+  // Function to validate current tab before proceeding
+  // Update the validateTab function to validate all fields in the tab
+  const validateTab = (tabName: string) => {
+    let fieldsToValidate: string[] = [];
+
+    switch (tabName) {
+      case "cloud":
+        fieldsToValidate = [
+          "clouds.low.form",
+          "clouds.low.amount",
+          "clouds.low.height",
+          "clouds.low.direction",
+          "clouds.medium.form",
+          "clouds.medium.amount",
+          "clouds.medium.height",
+          "clouds.medium.direction",
+          "clouds.high.form",
+          "clouds.high.amount",
+          "clouds.high.height",
+          "clouds.high.direction",
+        ];
+        break;
+      case "n":
+        fieldsToValidate = ["totalCloud.total-cloud-amount"];
+        break;
+      case "significant-cloud":
+        fieldsToValidate = [
+          "significantClouds.layer1.form",
+          "significantClouds.layer1.amount",
+          "significantClouds.layer1.height",
+          "significantClouds.layer2.height",
+          "significantClouds.layer3.height",
+          "significantClouds.layer4.height",
+        ];
+        break;
+      case "rainfall":
+        fieldsToValidate = [
+          "rainfall.time-start",
+          "rainfall.time-end",
+          "rainfall.since-previous",
+          "rainfall.during-previous",
+          "rainfall.last-24-hours",
+        ];
+        break;
+      case "wind":
+        fieldsToValidate = [
+          "wind.first-anemometer",
+          "wind.second-anemometer",
+          "wind.speed",
+          "wind.wind-direction",
+        ];
+        break;
+      case "observer":
+        fieldsToValidate = [
+          "observer.observer-initial",
+          "observer.observation-time",
+        ];
+        break;
+    }
+
+    // Touch all fields in the current tab to trigger validation
+    const touchedFields = {};
+    fieldsToValidate.forEach((field) => {
+      const fieldParts = field.split(".");
+      if (fieldParts.length === 2) {
+        touchedFields[fieldParts[0]] = {
+          ...formik.touched[fieldParts[0]],
+          [fieldParts[1]]: true,
+        };
+      } else if (fieldParts.length === 3) {
+        touchedFields[fieldParts[0]] = {
+          ...formik.touched[fieldParts[0]],
+          [fieldParts[1]]: {
+            ...formik.touched[fieldParts[0]]?.[fieldParts[1]],
+            [fieldParts[2]]: true,
+          },
+        };
+      }
+    });
+
+    formik.setTouched({ ...formik.touched, ...touchedFields }, true);
+
+    // Check if there are any errors in the validated fields
+    return !fieldsToValidate.some((field) => {
+      const fieldParts = field.split(".");
+      if (fieldParts.length === 2) {
+        return formik.errors[fieldParts[0]]?.[fieldParts[1]];
+      } else if (fieldParts.length === 3) {
+        return formik.errors[fieldParts[0]]?.[fieldParts[1]]?.[fieldParts[2]];
+      }
+      return false;
+    });
+  };
+
+  // Initialize session-specific values when session is available
+  useEffect(() => {
+    if (session?.user) {
+      formik.setFieldValue(
+        "observer.observer-initial",
+        session.user.name || ""
+      );
+      formik.setFieldValue("metadata.stationId", session.user.stationId || "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session]);
+
+  // Set observation time on initial load (only runs once)
+  useEffect(() => {
+    if (!formik.values.observer["observation-time"]) {
+      const utcHour = new Date().getUTCHours().toString().padStart(2, "0");
+      formik.setFieldValue("observer.observation-time", utcHour);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Sync formik values with the store
+  useEffect(() => {
+    updateFields(formik.values);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values]);
+
   const handleNext = () => {
-    // Add validation for current step before proceeding
-    if (validateStep(currentStep)) {
+    // Validate current tab before proceeding
+    if (validateTab(activeTab)) {
       const nextStep = Math.min(currentStep + 1, totalSteps);
       setCurrentStep(nextStep);
       setActiveTab(getTabForStep(nextStep));
+    } else {
+      toast.error("অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন", {
+        description:
+          "পরবর্তী ট্যাবে যাওয়ার আগে বর্তমান ট্যাবের সকল তথ্য পূরণ করুন",
+      });
     }
   };
 
@@ -67,174 +530,75 @@ export default function WeatherObservationForm() {
     return steps[step - 1] || "cloud";
   };
 
-  // This section was removed to avoid duplicate declarations
-
-  const validateStep = (step: number) => {
-    switch (step) {
-      case 1: // Cloud
-        return (
-          !!safeFormData.clouds.low.form ||
-          !!safeFormData.clouds.medium.form ||
-          !!safeFormData.clouds.high.form
-        );
-      case 2: // Total Cloud
-        return !!safeFormData.totalCloud["total-cloud-amount"];
-      // Add validation for other steps as needed
-      default:
-        return true;
-    }
-  };
-
-  // Get the persistent form store
-  const { formData, updateFields, resetForm, checkAndResetIfExpired } =
-    useWeatherObservationForm();
-
-  // Create a safe default value for form data to prevent TypeScript errors
-  const safeFormData = {
-    clouds: {
-      low: formData?.clouds?.low || {},
-      medium: formData?.clouds?.medium || {},
-      high: formData?.clouds?.high || {},
-    },
-    significantClouds: {
-      layer1: formData?.significantClouds?.layer1 || {},
-      layer2: formData?.significantClouds?.layer2 || {},
-      layer3: formData?.significantClouds?.layer3 || {},
-      layer4: formData?.significantClouds?.layer4 || {},
-    },
-    rainfall: formData?.rainfall || {},
-    wind: formData?.wind || {},
-    observer: formData?.observer || {},
-    totalCloud: formData?.totalCloud || {},
-    metadata: formData?.metadata || {},
-  };
-
-  // Initialize session-specific values when session is available
-  useEffect(() => {
-    if (session?.user) {
-      // Set the observer name from session if available
-      updateFields({
-        observer: {
-          ...(formData?.observer || {}),
-          "observer-initial": session.user.name || "",
-        },
-        metadata: {
-          ...(formData?.metadata || {}),
-          stationId: session.user.stationId || "",
-        },
-      });
-    }
-    // We intentionally omit formData from dependencies to prevent infinite loops
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, updateFields]);
-
-  // Set observation time on initial load (only runs once)
-  // Set observation time on initial load (only runs once)
-  // Set observation time on initial load (only runs once)
-  useEffect(() => {
-    if (!formData?.observer || !formData?.observer["observation-time"]) {
-      const utcHour = new Date().getUTCHours().toString().padStart(2, "0"); // "03", "15", etc.
-      updateFields({
-        observer: {
-          ...(formData?.observer || {}),
-          "observation-time": utcHour,
-        },
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   // Handle input changes and update the form data state
+  // Update the handleInputChange function to validate numeric fields immediately
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    formik.setFieldTouched(name, true, true);
+
+    // For numeric fields, validate immediately
+    const numericFields = [
+      "since-previous",
+      "during-previous",
+      "last-24-hours",
+      "first-anemometer",
+      "second-anemometer",
+      "speed",
+      "wind-direction",
+    ];
+
+    // Check if this is a numeric field and contains non-numeric characters
+    const isNumericField = numericFields.some((field) => name.includes(field));
+    if (isNumericField && value !== "" && !/^[0-9]+(\.[0-9]+)?$/.test(value)) {
+      // Touch the field to trigger validation
+      const fieldPath = name.includes("rainfall")
+        ? `rainfall.${name.replace("rainfall-", "")}`
+        : `wind.${name}`;
+
+      formik.setFieldTouched(fieldPath, true, false);
+
+      // Show toast for immediate feedback
+      formik.setFieldTouched(name, true, false);
+
+      toast.error("Please enter numbers only", {
+        description: `${name} field should contain numbers only`,
+        duration: 3000,
+      });
+    }
+
+    // Validate time fields
+    if (name === "time-start" || name === "time-end") {
+      if (value !== "" && !/^([01]\d|2[0-3]):([0-5]\d)$/.test(value)) {
+        formik.setFieldTouched(`rainfall.${name}`, true, false);
+        toast.error("Invalid time format", {
+          description: "Please enter time in HH:MM format (00:00 to 23:59)",
+          duration: 3000,
+        });
+      }
+    }
 
     // Update the appropriate section of the form data based on the input name
     if (name.startsWith("low-cloud-")) {
       const field = name.replace("low-cloud-", "");
-      // Ensure we have all required properties for clouds
-      updateFields({
-        clouds: {
-          low: { ...(safeFormData.clouds?.low || {}), [field]: value },
-          medium: { ...(safeFormData.clouds?.medium || {}) },
-          high: { ...(safeFormData.clouds?.high || {}) },
-        },
-      });
+      formik.setFieldValue(`clouds.low.${field}`, value);
     } else if (name.startsWith("medium-cloud-")) {
       const field = name.replace("medium-cloud-", "");
-      // Ensure we have all required properties for clouds
-      updateFields({
-        clouds: {
-          low: { ...(safeFormData.clouds?.low || {}) },
-          medium: { ...(safeFormData.clouds?.medium || {}), [field]: value },
-          high: { ...(safeFormData.clouds?.high || {}) },
-        },
-      });
+      formik.setFieldValue(`clouds.medium.${field}`, value);
     } else if (name.startsWith("high-cloud-")) {
       const field = name.replace("high-cloud-", "");
-      // Ensure we have all required properties for clouds
-      updateFields({
-        clouds: {
-          low: { ...(safeFormData.clouds?.low || {}) },
-          medium: { ...(safeFormData.clouds?.medium || {}) },
-          high: { ...(safeFormData.clouds?.high || {}), [field]: value },
-        },
-      });
+      formik.setFieldValue(`clouds.high.${field}`, value);
     } else if (name.startsWith("sig-cloud-layer1-")) {
       const field = name.replace("sig-cloud-layer1-", "");
-      // Ensure we have all required properties for significantClouds
-      updateFields({
-        significantClouds: {
-          layer1: {
-            ...(safeFormData.significantClouds?.layer1 || {}),
-            [field]: value,
-          },
-          layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
-          layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) },
-        },
-      });
+      formik.setFieldValue(`significantClouds.layer1.${field}`, value);
     } else if (name.startsWith("sig-cloud-layer2-")) {
       const field = name.replace("sig-cloud-layer2-", "");
-      // Ensure we have all required properties for significantClouds
-      updateFields({
-        significantClouds: {
-          layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
-          layer2: {
-            ...(safeFormData.significantClouds?.layer2 || {}),
-            [field]: value,
-          },
-          layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) },
-        },
-      });
+      formik.setFieldValue(`significantClouds.layer2.${field}`, value);
     } else if (name.startsWith("sig-cloud-layer3-")) {
       const field = name.replace("sig-cloud-layer3-", "");
-      // Ensure we have all required properties for significantClouds
-      updateFields({
-        significantClouds: {
-          layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
-          layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
-          layer3: {
-            ...(safeFormData.significantClouds?.layer3 || {}),
-            [field]: value,
-          },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) },
-        },
-      });
+      formik.setFieldValue(`significantClouds.layer3.${field}`, value);
     } else if (name.startsWith("sig-cloud-layer4-")) {
       const field = name.replace("sig-cloud-layer4-", "");
-      // Ensure we have all required properties for significantClouds
-      updateFields({
-        significantClouds: {
-          layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
-          layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
-          layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
-          layer4: {
-            ...(safeFormData.significantClouds?.layer4 || {}),
-            [field]: value,
-          },
-        },
-      });
+      formik.setFieldValue(`significantClouds.layer4.${field}`, value);
     } else if (
       name.startsWith("rainfall-") ||
       name.startsWith("time-") ||
@@ -246,21 +610,16 @@ export default function WeatherObservationForm() {
       const field = name.startsWith("rainfall-")
         ? name.replace("rainfall-", "")
         : name;
-      updateFields({
-        rainfall: { ...(safeFormData.rainfall || {}), [field]: value },
-      });
+      formik.setFieldValue(`rainfall.${field}`, value);
     } else if (
       name === "first-anemometer" ||
       name === "second-anemometer" ||
       name === "speed" ||
-      name === "wind-direction" // এই লাইনটি নিশ্চিত করুন
+      name === "wind-direction"
     ) {
-      updateFields({
-        wind: {
-          ...(safeFormData.wind || {}),
-          [name]: value,
-        },
-      });
+      formik.setFieldValue(`wind.${name}`, value);
+    } else if (name === "observer-initial") {
+      formik.setFieldValue("observer.observer-initial", value);
     }
   };
 
@@ -268,137 +627,91 @@ export default function WeatherObservationForm() {
   const handleSelectChange = (name: string, value: string) => {
     if (name.startsWith("low-cloud-")) {
       const field = name.replace("low-cloud-", "");
-      updateFields({
-        clouds: {
-          low: { ...(safeFormData.clouds?.low || {}), [field]: value },
-          medium: { ...(safeFormData.clouds?.medium || {}) },
-          high: { ...(safeFormData.clouds?.high || {}) },
-        },
-      });
+      formik.setFieldValue(`clouds.low.${field}`, value);
     } else if (name.startsWith("medium-cloud-")) {
       const field = name.replace("medium-cloud-", "");
-      updateFields({
-        clouds: {
-          low: { ...(safeFormData.clouds?.low || {}) },
-          medium: { ...(safeFormData.clouds?.medium || {}), [field]: value },
-          high: { ...(safeFormData.clouds?.high || {}) },
-        },
-      });
-    } // Add this case to your handleInputChange function
-    // Update your handleSelectChange to include observation-time
-    else if (name === "observation-time") {
-      updateFields({
-        observer: {
-          ...(safeFormData.observer || {}),
-          "observation-time": value,
-        },
-      });
+      formik.setFieldValue(`clouds.medium.${field}`, value);
+    } else if (name === "observation-time") {
+      formik.setFieldValue("observer.observation-time", value);
     } else if (name.startsWith("high-cloud-")) {
       const field = name.replace("high-cloud-", "");
-      updateFields({
-        clouds: {
-          low: { ...(safeFormData.clouds?.low || {}) },
-          medium: { ...(safeFormData.clouds?.medium || {}) },
-          high: { ...(safeFormData.clouds?.high || {}), [field]: value },
-        },
-      });
+      formik.setFieldValue(`clouds.high.${field}`, value);
     } else if (name.startsWith("layer1-")) {
-      // Handle significant cloud layer1
       const field = name.replace("layer1-", "");
-      updateFields({
-        significantClouds: {
-          layer1: {
-            ...(safeFormData.significantClouds?.layer1 || {}),
-            [field]: value,
-          },
-          layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
-          layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) },
-        },
-      });
+      formik.setFieldValue(`significantClouds.layer1.${field}`, value);
     } else if (name.startsWith("layer2-")) {
-      // Handle significant cloud layer2
       const field = name.replace("layer2-", "");
-      updateFields({
-        significantClouds: {
-          layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
-          layer2: {
-            ...(safeFormData.significantClouds?.layer2 || {}),
-            [field]: value,
-          },
-          layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) },
-        },
-      });
+      formik.setFieldValue(`significantClouds.layer2.${field}`, value);
     } else if (name.startsWith("layer3-")) {
-      // Handle significant cloud layer3
       const field = name.replace("layer3-", "");
-      updateFields({
-        significantClouds: {
-          layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
-          layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
-          layer3: {
-            ...(safeFormData.significantClouds?.layer3 || {}),
-            [field]: value,
-          },
-          layer4: { ...(safeFormData.significantClouds?.layer4 || {}) },
-        },
-      });
+      formik.setFieldValue(`significantClouds.layer3.${field}`, value);
     } else if (name.startsWith("layer4-")) {
-      // Handle significant cloud layer4
       const field = name.replace("layer4-", "");
-      updateFields({
-        significantClouds: {
-          layer1: { ...(safeFormData.significantClouds?.layer1 || {}) },
-          layer2: { ...(safeFormData.significantClouds?.layer2 || {}) },
-          layer3: { ...(safeFormData.significantClouds?.layer3 || {}) },
-          layer4: {
-            ...(safeFormData.significantClouds?.layer4 || {}),
-            [field]: value,
-          },
-        },
-      });
+      formik.setFieldValue(`significantClouds.layer4.${field}`, value);
     } else if (name === "total-cloud-amount") {
-      updateFields({
-        totalCloud: { ...(safeFormData.totalCloud || {}), [name]: value },
-      });
+      formik.setFieldValue("totalCloud.total-cloud-amount", value);
     } else if (
       name.startsWith("time-") ||
       name.startsWith("since-") ||
       name.startsWith("during-") ||
       name.startsWith("last-")
     ) {
-      // Handle rainfall fields
-      updateFields({
-        rainfall: { ...(safeFormData.rainfall || {}), [name]: value },
-      });
+      formik.setFieldValue(`rainfall.${name}`, value);
     }
   };
 
-  // Update the handleSubmit function to ensure session values are included in the submission
-  // Update your handleSubmit function to this:
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Reset form function
+  const handleReset = () => {
+    // Clear all form data except station info
+    const resetValues = {
+      clouds: {
+        low: {},
+        medium: {},
+        high: {},
+      },
+      totalCloud: {},
+      significantClouds: {
+        layer1: {},
+        layer2: {},
+        layer3: {},
+        layer4: {},
+      },
+      rainfall: {},
+      wind: {},
+      observer: {
+        "observer-initial": session?.user?.name || "",
+        "observation-time": new Date()
+          .getUTCHours()
+          .toString()
+          .padStart(2, "0"),
+      },
+      metadata: {
+        stationId: session?.user?.stationId || "",
+      },
+    };
 
-    // Only allow submission from the observer tab
-    if (activeTab !== "observer" || currentStep !== totalSteps) {
-      return;
-    }
+    formik.resetForm({ values: resetValues });
+    resetForm();
+
+    // Show toast notification
+    toast.info("All form data has been cleared.");
+
+    // Reset to first tab
+    setCurrentStep(1);
+    setActiveTab("cloud");
+  };
+
+  async function handleSubmit(values: WeatherObservationFormData) {
+    // Prevent duplicate submissions
+    if (isSubmitting) return;
 
     setIsSubmitting(true);
 
     try {
       const submissionData = {
-        clouds: safeFormData.clouds,
-        significantClouds: safeFormData.significantClouds,
-        rainfall: safeFormData.rainfall,
-        wind: safeFormData.wind,
-        observer: {
-          ...safeFormData.observer,
-        },
-        totalCloud: safeFormData.totalCloud,
+        ...values,
         metadata: {
-          ...safeFormData.metadata,
+          ...values.metadata,
           submittedAt: new Date().toISOString(),
           stationId: session?.user?.station?.id || "",
         },
@@ -419,6 +732,7 @@ export default function WeatherObservationForm() {
       await response.json();
       toast.success("Observation submitted successfully!");
       resetForm();
+      formik.resetForm();
       setCurrentStep(1);
       setActiveTab("cloud");
     } catch (error) {
@@ -427,20 +741,32 @@ export default function WeatherObservationForm() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  // Helper function to render error message
+  const renderErrorMessage = (fieldPath: string) => {
+    const fieldParts = fieldPath.split(".");
+    let error = null;
+
+    if (fieldParts.length === 2) {
+      error =
+        formik.touched[fieldParts[0]]?.[fieldParts[1]] &&
+        formik.errors[fieldParts[0]]?.[fieldParts[1]];
+    } else if (fieldParts.length === 3) {
+      error =
+        formik.touched[fieldParts[0]]?.[fieldParts[1]]?.[fieldParts[2]] &&
+        formik.errors[fieldParts[0]]?.[fieldParts[1]]?.[fieldParts[2]];
+    }
+
+    return error ? (
+      <div className="text-red-500 text-sm mt-1 flex items-start">
+        <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
+        <span>{error}</span>
+      </div>
+    ) : null;
   };
 
-  // Define tab colors for different sections
-  const tabColors: Record<string, string> = {
-    cloud: "bg-blue-100 hover:bg-blue-200 data-[state=active]:bg-blue-500",
-    n: "bg-yellow-100 hover:bg-yellow-200 data-[state=active]:bg-yellow-500",
-    "significant-cloud":
-      "bg-purple-100 hover:bg-purple-200 data-[state=active]:bg-purple-500",
-    rainfall: "bg-cyan-100 hover:bg-cyan-200 data-[state=active]:bg-cyan-500",
-    wind: "bg-green-100 hover:bg-green-200 data-[state=active]:bg-green-500",
-    observer:
-      "bg-orange-100 hover:bg-orange-200 data-[state=active]:bg-orange-500",
-  };
-   const cloudAmountOptions = [
+  const cloudAmountOptions = [
     { value: "0", label: "0 - No cloud" },
     { value: "1", label: "1 - 1 octa or less (1/10 or less but not zero)" },
     { value: "2", label: "2 - 2 octas (2/10 to 3/10)" },
@@ -450,21 +776,26 @@ export default function WeatherObservationForm() {
     { value: "6", label: "6 - 6 octas (7/10 to 8/10)" },
     { value: "7", label: "7 - 7 octas (9/10 or more but not 10/10)" },
     { value: "8", label: "8 - 8 octas (10/10)" },
-    { value: "9", label: "9 - sky obscured or cloud amount cannot be estimated." },
+    {
+      value: "9",
+      label: "9 - sky obscured or cloud amount cannot be estimated.",
+    },
     {
       value: "/",
       label: "/ - Key obscured or cloud amount cannot be estimated",
     },
   ];
+
   // Prevent form submission on Enter key and other unwanted submissions
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      if (currentStep < totalSteps) {
-        handleNext();
-      }
     }
   };
+
+  // Check if current tab is the last one
+  const isLastTab = currentStep === totalSteps;
+  const isFirstTab = currentStep === 1;
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
@@ -478,9 +809,12 @@ export default function WeatherObservationForm() {
           </p>
         </header>
 
-        {/* Wrap in a div to prevent form submission issues */}
         <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <form onSubmit={handleSubmit} className="w-full">
+          <form
+            onSubmit={formik.handleSubmit}
+            className="w-full"
+            onKeyDown={handleKeyDown}
+          >
             <div className="relative rounded-xl">
               {/* Overlay that blocks interaction when no hour is selected */}
               {!time && !timeError && !time?.hasMeteorologicalData && (
@@ -488,10 +822,15 @@ export default function WeatherObservationForm() {
                   <div className="bg-white py-4 px-6 rounded-lg shadow-lg text-center border-2 border-amber-300">
                     <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />
                     <h3 className="text-lg font-medium text-amber-800">
-                      {time?.isPassed ? "3 Hours has not passed yet" : "Check first card"}
+                      {time?.isPassed
+                        ? "3 Hours has not passed yet"
+                        : "Check first card"}
                     </h3>
                     <p className="text-sm text-amber-600 mt-1">
-                      Last update hour: {utcToHour(time?.time) === "NaN" ? "" : utcToHour(time?.time)}
+                      Last update hour:{" "}
+                      {utcToHour(time?.time) === "NaN"
+                        ? ""
+                        : utcToHour(time?.time)}
                     </p>
                   </div>
                 </div>
@@ -502,364 +841,620 @@ export default function WeatherObservationForm() {
                 onValueChange={setActiveTab}
                 className="w-full"
               >
-                <TabsList className="flex w-full bg-gray-100 p-1 rounded-none">
-                  <TabTrigger
-                    value="cloud"
-                    icon={<CloudIcon className="h-5 w-5" />}
-                    label="CLOUD"
-                    colorClass={tabColors.cloud}
-                  />
-                  <TabTrigger
-                    value="n"
-                    icon={<Sun className="h-5 w-5" />}
-                    label="TOTAL CLOUD"
-                    colorClass={tabColors.n}
-                  />
-                  <TabTrigger
-                    value="significant-cloud"
-                    icon={<CloudIcon className="h-5 w-5" />}
-                    label="SIG CLOUD"
-                    colorClass={tabColors["significant-cloud"]}
-                  />
-                  <TabTrigger
-                    value="rainfall"
-                    icon={<CloudRainIcon className="h-5 w-5" />}
-                    label="RAINFALL"
-                    colorClass={tabColors.rainfall}
-                  />
-                  <TabTrigger
-                    value="wind"
-                    icon={<Wind className="h-5 w-5" />}
-                    label="WIND"
-                    colorClass={tabColors.wind}
-                  />
-                  <TabTrigger
-                    value="observer"
-                    icon={<User className="h-5 w-5" />}
-                    label="OBSERVER"
-                    colorClass={tabColors.observer}
-                  />
+                <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-3 rounded-xl p-1 border-0 bg-transparent">
+                  {Object.entries(tabStyles).map(([key, style]) => (
+                    <TabsTrigger
+                      key={key}
+                      value={key}
+                      className={cn("border border-gray-300", {
+                        [style.tab]: activeTab === key,
+                        "!border-red-500 !text-red-700":
+                          !isTabValid(key) && formik.submitCount > 0,
+                      })}
+                    >
+                      <div className="flex items-center justify-center">
+                        {style.icon}
+                        <span className="hidden md:inline">
+                          {key === "n" ? "Total Cloud" : key}
+                        </span>
+                      </div>
+                    </TabsTrigger>
+                  ))}
                 </TabsList>
 
                 <div className="p-6">
                   {/* CLOUD Tab */}
-                  <TabsContent value="cloud">
-                    <SectionCard
-                      title="Cloud Observation"
-                      icon={<CloudIcon className="h-6 w-6 text-blue-500" />}
-                      className="border-blue-200"
+                  <TabsContent
+                    value="cloud"
+                    className="mt-6 transition-all duration-500"
+                  >
+                    <Card
+                      className={cn("overflow-hidden", tabStyles.cloud.card)}
                     >
-                      <div className="space-y-8">
-                        <CloudLevelSection
-                          title="Low Cloud"
-                          prefix="low-cloud"
-                          color="blue"
-                          data={safeFormData.clouds.low}
-                          onChange={handleInputChange}
-                          onSelectChange={handleSelectChange}
-                        />
-                        <CloudLevelSection
-                          title="Medium Cloud"
-                          prefix="medium-cloud"
-                          color="purple"
-                          data={safeFormData.clouds.medium}
-                          onChange={handleInputChange}
-                          onSelectChange={handleSelectChange}
-                        />
-                        <CloudLevelSection
-                          title="High Cloud"
-                          prefix="high-cloud"
-                          color="cyan"
-                          data={safeFormData.clouds.high}
-                          onChange={handleInputChange}
-                          onSelectChange={handleSelectChange}
-                        />
+                      <div className="p-4 bg-gradient-to-r from-blue-200 to-blue-300 text-blue-800">
+                        <h3 className="text-lg font-semibold flex items-center">
+                          <CloudIcon className="mr-2" /> Cloud Observation
+                        </h3>
                       </div>
-                    </SectionCard>
+                      <CardContent className="pt-6">
+                        <div className="space-y-8">
+                          <CloudLevelSection
+                            title="Low Cloud"
+                            prefix="low-cloud"
+                            color="blue"
+                            data={formik.values.clouds.low}
+                            onChange={handleInputChange}
+                            onSelectChange={handleSelectChange}
+                            renderError={(field) =>
+                              renderErrorMessage(`clouds.low.${field}`)
+                            }
+                          />
+                          <CloudLevelSection
+                            title="Medium Cloud"
+                            prefix="medium-cloud"
+                            color="purple"
+                            data={formik.values.clouds.medium}
+                            onChange={handleInputChange}
+                            onSelectChange={handleSelectChange}
+                            renderError={(field) =>
+                              renderErrorMessage(`clouds.medium.${field}`)
+                            }
+                          />
+                          <CloudLevelSection
+                            title="High Cloud"
+                            prefix="high-cloud"
+                            color="cyan"
+                            data={formik.values.clouds.high}
+                            onChange={handleInputChange}
+                            onSelectChange={handleSelectChange}
+                            renderError={(field) =>
+                              renderErrorMessage(`clouds.high.${field}`)
+                            }
+                          />
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex justify-between p-6">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handlePrevious}
+                          disabled={isFirstTab}
+                        >
+                          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={handleNext}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          Next <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </CardFooter>
+                    </Card>
                   </TabsContent>
 
                   {/* TOTAL CLOUD Tab */}
-                  <TabsContent value="n">
-                    <SectionCard
-                      title="Total Cloud Amount"
-                      icon={<Sun className="h-6 w-6 text-yellow-500" />}
-                      className="border-yellow-200"
-                    >
-                      <div className="grid gap-6">
-                        <SelectField
-                          id="total-cloud-amount"
-                          name="total-cloud-amount"
-                          label="Total Cloud Amount (Octa)"
-                          accent="yellow"
-                          value={
-                            formData.totalCloud["total-cloud-amount"] || ""
-                          }
-                          onValueChange={(value) =>
-                            handleSelectChange("total-cloud-amount", value)
-                          }
-                          options={cloudAmountOptions.map((opt) => opt.value)}
-                          optionLabels={cloudAmountOptions.map(
-                            (opt) => opt.label
-                          )}
-                        />
+                  <TabsContent
+                    value="n"
+                    className="mt-6 transition-all duration-500"
+                  >
+                    <Card className={cn("overflow-hidden", tabStyles.n.card)}>
+                      <div className="p-4 bg-gradient-to-r from-yellow-200 to-yellow-300 text-yellow-800">
+                        <h3 className="text-lg font-semibold flex items-center">
+                          <Sun className="mr-2" /> Total Cloud Amount
+                        </h3>
                       </div>
-                    </SectionCard>
+                      <CardContent className="pt-6">
+                        <div className="grid gap-6">
+                          <SelectField
+                            id="total-cloud-amount"
+                            name="total-cloud-amount"
+                            label="Total Cloud Amount (Octa)"
+                            accent="yellow"
+                            value={
+                              formik.values.totalCloud["total-cloud-amount"] ||
+                              ""
+                            }
+                            onValueChange={(value) =>
+                              handleSelectChange("total-cloud-amount", value)
+                            }
+                            options={cloudAmountOptions.map((opt) => opt.value)}
+                            optionLabels={cloudAmountOptions.map(
+                              (opt) => opt.label
+                            )}
+                            error={renderErrorMessage(
+                              "totalCloud.total-cloud-amount"
+                            )}
+                            required
+                          />
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex justify-between p-6">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handlePrevious}
+                          disabled={isFirstTab}
+                        >
+                          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={handleNext}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          Next <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </CardFooter>
+                    </Card>
                   </TabsContent>
 
                   {/* SIGNIFICANT CLOUD Tab */}
-                  <TabsContent value="significant-cloud">
-                    <SectionCard
-                      title="Significant Cloud"
-                      icon={<CloudIcon className="h-6 w-6 text-purple-500" />}
-                      className="border-purple-200"
+                  <TabsContent
+                    value="significant-cloud"
+                    className="mt-6 transition-all duration-500"
+                  >
+                    <Card
+                      className={cn(
+                        "overflow-hidden",
+                        tabStyles["significant-cloud"].card
+                      )}
                     >
-                      <div className="space-y-8">
-                        <SignificantCloudSection
-                          title="1st Layer"
-                          prefix="layer1"
-                          color="purple"
-                          data={formData.significantClouds.layer1}
-                          onSelectChange={handleSelectChange}
-                        />
-                        <SignificantCloudSection
-                          title="2nd Layer"
-                          prefix="layer2"
-                          color="fuchsia"
-                          data={formData.significantClouds.layer2}
-                          onSelectChange={handleSelectChange}
-                        />
-                        <SignificantCloudSection
-                          title="3rd Layer"
-                          prefix="layer3"
-                          color="violet"
-                          data={formData.significantClouds.layer3}
-                          onSelectChange={handleSelectChange}
-                        />
-                        <SignificantCloudSection
-                          title="4th Layer"
-                          prefix="layer4"
-                          color="indigo"
-                          data={formData.significantClouds.layer4}
-                          onSelectChange={handleSelectChange}
-                        />
+                      <div className="p-4 bg-gradient-to-r from-purple-200 to-purple-300 text-purple-800">
+                        <h3 className="text-lg font-semibold flex items-center">
+                          <CloudIcon className="mr-2" /> Significant Cloud
+                        </h3>
                       </div>
-                    </SectionCard>
+                      <CardContent className="pt-6">
+                        <div className="space-y-8">
+                          <SignificantCloudSection
+                            title="1st Layer"
+                            prefix="layer1"
+                            color="purple"
+                            data={formik.values.significantClouds.layer1}
+                            onSelectChange={handleSelectChange}
+                            renderError={(field) =>
+                              renderErrorMessage(
+                                `significantClouds.layer1.${field}`
+                              )
+                            }
+                          />
+                          <SignificantCloudSection
+                            title="2nd Layer"
+                            prefix="layer2"
+                            color="fuchsia"
+                            data={formik.values.significantClouds.layer2}
+                            onSelectChange={handleSelectChange}
+                            renderError={(field) =>
+                              renderErrorMessage(
+                                `significantClouds.layer2.${field}`
+                              )
+                            }
+                          />
+                          <SignificantCloudSection
+                            title="3rd Layer"
+                            prefix="layer3"
+                            color="violet"
+                            data={formik.values.significantClouds.layer3}
+                            onSelectChange={handleSelectChange}
+                            renderError={(field) =>
+                              renderErrorMessage(
+                                `significantClouds.layer3.${field}`
+                              )
+                            }
+                          />
+                          <SignificantCloudSection
+                            title="4th Layer"
+                            prefix="layer4"
+                            color="indigo"
+                            data={formik.values.significantClouds.layer4}
+                            onSelectChange={handleSelectChange}
+                            renderError={(field) =>
+                              renderErrorMessage(
+                                `significantClouds.layer4.${field}`
+                              )
+                            }
+                          />
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex justify-between p-6">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handlePrevious}
+                          disabled={isFirstTab}
+                        >
+                          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={handleNext}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          Next <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </CardFooter>
+                    </Card>
                   </TabsContent>
 
                   {/* RAINFALL Tab */}
-                  <TabsContent value="rainfall">
-                    <SectionCard
-                      title="Rainfall Measurement (mm)"
-                      icon={<CloudRainIcon className="h-6 w-6 text-cyan-500" />}
-                      className="border-cyan-200"
+
+                  <TabsContent
+                    value="rainfall"
+                    className="mt-6 transition-all duration-500"
+                  >
+                    <Card
+                      className={cn("overflow-hidden", tabStyles.rainfall.card)}
                     >
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <InputField
-                          id="time-start"
-                          name="time-start"
-                          label="Time of Start (HH:MM UTC)"
-                          accent="cyan"
-                          value={formData.rainfall["time-start"] || ""}
-                          onChange={handleInputChange}
-                        />
-                        <InputField
-                          id="time-end"
-                          name="time-end"
-                          label="Time of Ending (HH:MM UTC)"
-                          accent="cyan"
-                          value={formData.rainfall["time-end"] || ""}
-                          onChange={handleInputChange}
-                        />
-                        <InputField
-                          id="since-previous"
-                          name="since-previous"
-                          label="Since Previous Observation"
-                          accent="cyan"
-                          value={formData.rainfall["since-previous"] || ""}
-                          onChange={handleInputChange}
-                        />
-                        <InputField
-                          id="during-previous"
-                          name="during-previous"
-                          label="During Previous 6 Hours (At 00, 06, 12, 18 UTC)"
-                          accent="cyan"
-                          value={formData.rainfall["during-previous"] || ""}
-                          onChange={handleInputChange}
-                        />
-                        <div className="md:col-span-2">
-                          <InputField
-                            id="last-24-hours"
-                            name="last-24-hours"
-                            label="Last 24 Hours Precipitation"
-                            accent="cyan"
-                            value={formData.rainfall["last-24-hours"] || ""}
-                            onChange={handleInputChange}
-                          />
-                        </div>
+                      <div className="p-4 bg-gradient-to-r from-cyan-200 to-cyan-300 text-cyan-800">
+                        <h3 className="text-lg font-semibold flex items-center">
+                          <CloudRainIcon className="mr-2" /> Rainfall
+                          Measurement (mm)
+                        </h3>
                       </div>
-                    </SectionCard>
+                      <CardContent className="pt-6">
+                        <div className="grid gap-6 md:grid-cols-2">
+                          <div className="grid gap-2">
+                            <Label
+                              htmlFor="time-start"
+                              className="font-medium text-gray-700"
+                            >
+                              Time of Start (HH:MM UTC){" "}
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="time-start"
+                              name="time-start"
+                              type="text"
+                              placeholder="00:00"
+                              pattern="^([01]\d|2[0-3]):([0-5]\d)$"
+                              value={formik.values.rainfall["time-start"] || ""}
+                              onChange={handleInputChange}
+                              className={cn(
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                {
+                                  "border-red-500": renderErrorMessage(
+                                    "rainfall.time-start"
+                                  ),
+                                }
+                              )}
+                              required
+                            />
+                            {renderErrorMessage("rainfall.time-start")}
+                            <p className="text-xs text-gray-500 mt-1">
+                              Format: HH:MM (e.g., 09:30, 14:45)
+                            </p>
+                          </div>
+
+                          <div className="grid gap-2">
+                            <Label
+                              htmlFor="time-end"
+                              className="font-medium text-gray-700"
+                            >
+                              Time of Ending (HH:MM UTC){" "}
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="time-end"
+                              name="time-end"
+                              type="text"
+                              placeholder="00:00"
+                              pattern="^([01]\d|2[0-3]):([0-5]\d)$"
+                              value={formik.values.rainfall["time-end"] || ""}
+                              onChange={handleInputChange}
+                              className={cn(
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                {
+                                  "border-red-500":
+                                    renderErrorMessage("rainfall.time-end"),
+                                }
+                              )}
+                              required
+                            />
+                            {renderErrorMessage("rainfall.time-end")}
+                            <p className="text-xs text-gray-500 mt-1">
+                              Format: HH:MM (e.g., 09:30, 14:45)
+                            </p>
+                          </div>
+
+                          <InputField
+                            id="since-previous"
+                            name="since-previous"
+                            label="Since Previous Observation"
+                            accent="cyan"
+                            value={
+                              formik.values.rainfall["since-previous"] || ""
+                            }
+                            onChange={handleInputChange}
+                            error={renderErrorMessage(
+                              "rainfall.since-previous"
+                            )}
+                            required
+                            numeric={true}
+                          />
+                          <InputField
+                            id="during-previous"
+                            name="during-previous"
+                            label="During Previous 6 Hours (At 00, 06, 12, 18 UTC)"
+                            accent="cyan"
+                            value={
+                              formik.values.rainfall["during-previous"] || ""
+                            }
+                            onChange={handleInputChange}
+                            error={renderErrorMessage(
+                              "rainfall.during-previous"
+                            )}
+                            required
+                            numeric={true}
+                          />
+                          <div className="md:col-span-2">
+                            <InputField
+                              id="last-24-hours"
+                              name="last-24-hours"
+                              label="Last 24 Hours Precipitation"
+                              accent="cyan"
+                              value={
+                                formik.values.rainfall["last-24-hours"] || ""
+                              }
+                              onChange={handleInputChange}
+                              error={renderErrorMessage(
+                                "rainfall.last-24-hours"
+                              )}
+                              required
+                              numeric={true}
+                            />
+                          </div>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex justify-between p-6">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handlePrevious}
+                          disabled={isFirstTab}
+                        >
+                          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={handleNext}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          Next <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </CardFooter>
+                    </Card>
                   </TabsContent>
 
                   {/* WIND Tab */}
-                  <TabsContent value="wind">
-                    <SectionCard
-                      title="Wind Measurement"
-                      icon={<Wind className="h-6 w-6 text-green-500" />}
-                      className="border-green-200"
+
+                  <TabsContent
+                    value="wind"
+                    className="mt-6 transition-all duration-500"
+                  >
+                    <Card
+                      className={cn("overflow-hidden", tabStyles.wind.card)}
                     >
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <InputField
-                          id="first-anemometer"
-                          name="first-anemometer"
-                          label="1st Anemometer Reading"
-                          accent="green"
-                          value={formData.wind["first-anemometer"] || ""}
-                          onChange={handleInputChange}
-                        />
-                        <InputField
-                          id="second-anemometer"
-                          name="second-anemometer"
-                          label="2nd Anemometer Reading"
-                          accent="green"
-                          value={formData.wind["second-anemometer"] || ""}
-                          onChange={handleInputChange}
-                        />
-                        <InputField
-                          id="speed"
-                          name="speed"
-                          label="Speed (KTS)"
-                          accent="green"
-                          value={formData.wind["speed"] || ""}
-                          onChange={handleInputChange}
-                        />
-                        {/* Wind Direction - Fixed */}
-                        <div className="grid gap-2">
-                          <Label
-                            htmlFor="wind-direction"
-                            className="font-medium text-gray-700"
-                          >
-                            Direction (Degrees)
-                          </Label>
-                          <Input
-                            id="wind-direction"
-                            name="wind-direction"
-                            type="number"
-                            min="0"
-                            max="360"
-                            value={formData.wind["wind-direction"] || ""}
-                            onChange={handleInputChange}
-                            className="border-2 border-green-300 bg-green-50 focus:border-green-500 focus:ring-green-500/30 rounded-lg py-2 px-3"
-                            placeholder="0-360 degrees"
-                          />
-                        </div>
+                      <div className="p-4 bg-gradient-to-r from-green-200 to-green-300 text-green-800">
+                        <h3 className="text-lg font-semibold flex items-center">
+                          <Wind className="mr-2" /> Wind Measurement
+                        </h3>
                       </div>
-                    </SectionCard>
+                      <CardContent className="pt-6">
+                        <div className="grid gap-6 md:grid-cols-2">
+                          <InputField
+                            id="first-anemometer"
+                            name="first-anemometer"
+                            label="1st Anemometer Reading"
+                            accent="green"
+                            value={formik.values.wind["first-anemometer"] || ""}
+                            onChange={handleInputChange}
+                            error={renderErrorMessage("wind.first-anemometer")}
+                            required
+                            numeric={true}
+                          />
+                          <InputField
+                            id="second-anemometer"
+                            name="second-anemometer"
+                            label="2nd Anemometer Reading"
+                            accent="green"
+                            value={
+                              formik.values.wind["second-anemometer"] || ""
+                            }
+                            onChange={handleInputChange}
+                            error={renderErrorMessage("wind.second-anemometer")}
+                            required
+                            numeric={true}
+                          />
+                          <InputField
+                            id="speed"
+                            name="speed"
+                            label="Speed (KTS)"
+                            accent="green"
+                            value={formik.values.wind["speed"] || ""}
+                            onChange={handleInputChange}
+                            error={renderErrorMessage("wind.speed")}
+                            required
+                            numeric={true}
+                          />
+                          {/* Wind Direction - Fixed */}
+                          <div className="grid gap-2">
+                            <Label
+                              htmlFor="wind-direction"
+                              className="font-medium text-gray-700"
+                            >
+                              Direction (Degrees){" "}
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="wind-direction"
+                              name="wind-direction"
+                              type="number"
+                              min="0"
+                              max="360"
+                              value={formik.values.wind["wind-direction"] || ""}
+                              onChange={handleInputChange}
+                              className={cn(
+                                "border-2 border-green-300 bg-green-50 focus:border-green-500 focus:ring-green-500/30 rounded-lg py-2 px-3",
+                                {
+                                  "border-red-500": renderErrorMessage(
+                                    "wind.wind-direction"
+                                  ),
+                                }
+                              )}
+                              placeholder="0-360 degrees"
+                              required
+                              inputMode="numeric"
+                            />
+                            {renderErrorMessage("wind.wind-direction")}
+                          </div>
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex justify-between p-6">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handlePrevious}
+                          disabled={isFirstTab}
+                        >
+                          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={handleNext}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          Next <ChevronRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </CardFooter>
+                    </Card>
                   </TabsContent>
 
                   {/* OBSERVER Tab */}
-                  <TabsContent value="observer">
-                    <SectionCard
-                      title="Observer Information"
-                      icon={<User className="h-6 w-6 text-orange-500" />}
-                      className="border-orange-200"
+                  <TabsContent
+                    value="observer"
+                    className="mt-6 transition-all duration-500"
+                  >
+                    <Card
+                      className={cn("overflow-hidden", tabStyles.observer.card)}
                     >
-                      <div className="grid gap-6 md:grid-cols-2">
-                        <InputField
-                          id="observer-initial"
-                          name="observer-initial"
-                          label="Observer Initials"
-                          accent="orange"
-                          value={formData.observer["observer-initial"] || ""}
-                          onChange={handleInputChange}
-                          required
-                        />
-
-                        {/* <div className="grid gap-2 w-full">
-                        <Label
-                          htmlFor="observation-time"
-                          className="font-medium text-gray-700"
-                        >
-                          Observation Time (UTC) *
-                        </Label>
-                        <select
-                          id="observation-time"
-                          name="observation-time"
-                          value={formData.observer["observation-time"] || ""}
-                          onChange={(e) =>
-                            handleSelectChange(
-                              "observation-time",
-                              e.target.value
-                            )
-                          }
-                          required
-                          className="w-full border border-orange-300 bg-orange-50 focus:border-orange-500 focus:ring-orange-500/30 rounded-lg px-3 py-2 transition-all"
-                        >
-                          <option value="">-- Select GG Time --</option>
-                          <option value="00">00 UTC</option>
-                          <option value="03">03 UTC</option>
-                          <option value="06">06 UTC</option>
-                          <option value="09">09 UTC</option>
-                          <option value="12">12 UTC</option>
-                          <option value="15">15 UTC</option>
-                          <option value="18">18 UTC</option>
-                          <option value="21">21 UTC</option>
-                        </select>
-                      </div> */}
-
-                        <InputField
-                          id="station-id"
-                          name="station-id"
-                          label="Station ID"
-                          accent="orange"
-                          value={session?.user?.stationId || ""}
-                          onChange={handleInputChange}
-                          disabled
-                        />
+                      <div className="p-4 bg-gradient-to-r from-orange-200 to-orange-300 text-orange-800">
+                        <h3 className="text-lg font-semibold flex items-center">
+                          <User className="mr-2" /> Observer Information
+                        </h3>
                       </div>
-                    </SectionCard>
+                      <CardContent className="pt-6">
+                        <div className="grid gap-6 md:grid-cols-2">
+                          <InputField
+                            id="observer-initial"
+                            name="observer-initial"
+                            label="Observer Initials"
+                            accent="orange"
+                            value={
+                              formik.values.observer["observer-initial"] || ""
+                            }
+                            onChange={handleInputChange}
+                            required
+                            error={renderErrorMessage(
+                              "observer.observer-initial"
+                            )}
+                          />
+
+                          <div className="grid gap-2 w-full">
+                            <Label
+                              htmlFor="observation-time"
+                              className="font-medium text-gray-700"
+                            >
+                              Observation Time (UTC){" "}
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <select
+                              id="observation-time"
+                              name="observation-time"
+                              value={
+                                formik.values.observer["observation-time"] || ""
+                              }
+                              onChange={(e) =>
+                                handleSelectChange(
+                                  "observation-time",
+                                  e.target.value
+                                )
+                              }
+                              required
+                              className={cn(
+                                "w-full border border-orange-300 bg-orange-50 focus:border-orange-500 focus:ring-orange-500/30 rounded-lg px-3 py-2 transition-all",
+                                {
+                                  "border-red-500": renderErrorMessage(
+                                    "observer.observation-time"
+                                  ),
+                                }
+                              )}
+                            >
+                              <option value="">-- Select GG Time --</option>
+                              <option value="00">00 UTC</option>
+                              <option value="03">03 UTC</option>
+                              <option value="06">06 UTC</option>
+                              <option value="09">09 UTC</option>
+                              <option value="12">12 UTC</option>
+                              <option value="15">15 UTC</option>
+                              <option value="18">18 UTC</option>
+                              <option value="21">21 UTC</option>
+                            </select>
+                            {renderErrorMessage("observer.observation-time")}
+                          </div>
+
+                          <InputField
+                            id="station-id"
+                            name="station-id"
+                            label="Station ID"
+                            accent="orange"
+                            value={session?.user?.stationId || ""}
+                            onChange={handleInputChange}
+                            disabled
+                          />
+                        </div>
+                      </CardContent>
+                      <CardFooter className="flex justify-between p-6">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handlePrevious}
+                          disabled={isFirstTab}
+                        >
+                          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                        </Button>
+                        <div className="flex gap-4">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="border-slate-600 hover:bg-slate-100 transition-all duration-300"
+                            onClick={handleReset}
+                          >
+                            Reset
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
+                            disabled={isSubmitting}
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                                Submitting...
+                              </>
+                            ) : (
+                              <>
+                                <CloudIcon className="h-5 w-5 mr-2" />
+                                Submit Observation
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </CardFooter>
+                    </Card>
                   </TabsContent>
                 </div>
               </Tabs>
-
-              {/* In your form footer */}
-              <div className="bg-gradient-to-r from-blue-600 to-cyan-600 px-6 py-4 flex justify-between">
-                <Button
-                  type="button"
-                  onClick={handlePrevious}
-                  disabled={currentStep === 1}
-                  className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
-                >
-                  Previous
-                </Button>
-
-                {currentStep < totalSteps ? (
-                  <Button
-                    type="button"
-                    onClick={handleNext}
-                    className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
-                  >
-                    Next
-                  </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    className="bg-white text-blue-600 hover:bg-blue-50 hover:text-blue-700 font-bold py-3 px-6 rounded-lg shadow-md"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                        Submitting...
-                      </>
-                    ) : (
-                      <>
-                        <CloudIcon className="h-5 w-5 mr-2" />
-                        Submit Observation
-                      </>
-                    )}
-                  </Button>
-                )}
-              </div>
             </div>
           </form>
         </div>
@@ -869,29 +1464,6 @@ export default function WeatherObservationForm() {
 }
 
 // Reusable Components
-function TabTrigger({
-  value,
-  icon,
-  label,
-  colorClass,
-}: {
-  value: string;
-  icon: React.ReactNode;
-  label: string;
-  colorClass: string;
-}) {
-  return (
-    <TabsTrigger
-      value={value}
-      className={`flex-1 flex items-center justify-center gap-2 py-3 px-2 rounded-md transition-all 
-                 ${colorClass} data-[state=active]:text-white font-medium`}
-    >
-      {icon}
-      <span>{label}</span>
-    </TabsTrigger>
-  );
-}
-
 function SectionCard({
   title,
   icon,
@@ -916,7 +1488,8 @@ function SectionCard({
   );
 }
 
-// Update the InputField component to support disabled state
+// Update the InputField component to support disabled state and error display
+
 function InputField({
   id,
   name,
@@ -924,8 +1497,11 @@ function InputField({
   type = "text",
   accent = "blue",
   value,
-  disabled = false, // Add disabled prop with default value
+  disabled = false,
+  required = false,
   onChange,
+  error,
+  numeric = false,
 }: {
   id: string;
   name: string;
@@ -934,7 +1510,10 @@ function InputField({
   accent?: string;
   value: string;
   disabled?: boolean;
+  required?: boolean;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  error?: React.ReactNode;
+  numeric?: boolean;
 }) {
   const focusClasses: Record<string, string> = {
     blue: "focus:ring-blue-500 focus:border-blue-500",
@@ -948,20 +1527,44 @@ function InputField({
     indigo: "focus:ring-indigo-500 focus:border-indigo-500",
   };
 
+  // Handle input validation for numeric fields
+  const handleInputValidation = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+
+    // For numeric fields, validate immediately
+    if (numeric && value !== "" && !/^[0-9]+(\.[0-9]+)?$/.test(value)) {
+      // Show error styling immediately
+      e.target.classList.add("border-red-500");
+    } else {
+      e.target.classList.remove("border-red-500");
+    }
+
+    onChange(e);
+  };
+
   return (
     <div className="grid gap-2">
       <Label htmlFor={id} className="font-medium text-gray-700">
-        {label}
+        {label} {required && <span className="text-red-500">*</span>}
       </Label>
       <Input
         id={id}
         name={name}
         type={type}
         value={value}
-        onChange={onChange}
-        className={`${focusClasses[accent]} border-gray-300 rounded-lg py-2 px-3 ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
+        onChange={numeric ? handleInputValidation : onChange}
+        className={cn(
+          `${focusClasses[accent]} border-gray-300 rounded-lg py-2 px-3`,
+          {
+            "bg-gray-100 cursor-not-allowed": disabled,
+            "border-red-500": error,
+          }
+        )}
         disabled={disabled}
+        required={required}
+        inputMode={numeric ? "decimal" : "text"}
       />
+      {error}
     </div>
   );
 }
@@ -975,6 +1578,8 @@ function SelectField({
   onValueChange,
   options,
   optionLabels,
+  error,
+  required = false,
 }: {
   id: string;
   name: string;
@@ -984,6 +1589,8 @@ function SelectField({
   onValueChange: (value: string) => void;
   options: string[];
   optionLabels?: string[];
+  error?: React.ReactNode;
+  required?: boolean;
 }) {
   const accentColors: Record<string, string> = {
     blue: "border-blue-200 bg-blue-50/50 focus-within:ring-blue-500 focus-within:border-blue-500",
@@ -1007,12 +1614,17 @@ function SelectField({
   return (
     <div className="grid gap-2 w-full">
       <Label htmlFor={id} className="font-medium text-gray-700">
-        {label}
+        {label} {required && <span className="text-red-500">*</span>}
       </Label>
       <Select name={name} value={value} onValueChange={onValueChange}>
         <SelectTrigger
           id={id}
-          className={`w-full border-2 ${accentColors[accent]} rounded-lg py-2.5 px-4 transition-all duration-200 shadow-sm hover:bg-white focus:shadow-md`}
+          className={cn(
+            `w-full border-2 ${accentColors[accent]} rounded-lg py-2.5 px-4 transition-all duration-200 shadow-sm hover:bg-white focus:shadow-md`,
+            {
+              "border-red-500": error,
+            }
+          )}
         >
           <SelectValue placeholder="Select..." className="text-gray-600" />
         </SelectTrigger>
@@ -1028,6 +1640,7 @@ function SelectField({
           ))}
         </SelectContent>
       </Select>
+      {error}
     </div>
   );
 }
@@ -1039,6 +1652,7 @@ function CloudLevelSection({
   data,
   onChange,
   onSelectChange,
+  renderError,
 }: {
   title: string;
   prefix: string;
@@ -1046,6 +1660,7 @@ function CloudLevelSection({
   data: Record<string, string>;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSelectChange: (name: string, value: string) => void;
+  renderError: (field: string) => React.ReactNode;
 }) {
   const cloudFormOptions = [
     { value: "0", label: "0 - No Sc, St, Cu or Cb" },
@@ -1098,7 +1713,10 @@ function CloudLevelSection({
     { value: "6", label: "6 - 6 octas (7/10 to 8/10)" },
     { value: "7", label: "7 - 7 octas (9/10 or more but not 10/10)" },
     { value: "8", label: "8 - 8 octas (10/10)" },
-    { value: "9", label: "9 - sky obscured or cloud amount cannot be estimated." },
+    {
+      value: "9",
+      label: "9 - sky obscured or cloud amount cannot be estimated.",
+    },
     {
       value: "/",
       label: "/ - Key obscured or cloud amount cannot be estimated",
@@ -1120,6 +1738,8 @@ function CloudLevelSection({
           onValueChange={(value) => onSelectChange(`${prefix}-form`, value)}
           options={cloudFormOptions.map((opt) => opt.value)}
           optionLabels={cloudFormOptions.map((opt) => opt.label)}
+          error={renderError("form")}
+          required
         />
 
         <SelectField
@@ -1131,6 +1751,8 @@ function CloudLevelSection({
           onValueChange={(value) => onSelectChange(`${prefix}-amount`, value)}
           options={cloudAmountOptions.map((opt) => opt.value)}
           optionLabels={cloudAmountOptions.map((opt) => opt.label)}
+          error={renderError("amount")}
+          required
         />
 
         <SelectField
@@ -1142,8 +1764,10 @@ function CloudLevelSection({
           onValueChange={(value) => onSelectChange(`${prefix}-height`, value)}
           options={cloudHeightOptions.map((opt) => opt.value)}
           optionLabels={cloudHeightOptions.map((opt) => opt.label)}
+          error={renderError("height")}
+          required
         />
-        
+
         <SelectField
           id={`${prefix}-direction`}
           name={`${prefix}-direction`}
@@ -1155,10 +1779,9 @@ function CloudLevelSection({
           }
           options={cloudDirectionOptions.map((opt) => opt.value)}
           optionLabels={cloudDirectionOptions.map((opt) => opt.label)}
+          error={renderError("direction")}
+          required
         />
-        
-        
-        
       </div>
     </div>
   );
@@ -1170,12 +1793,14 @@ function SignificantCloudSection({
   color = "purple",
   data,
   onSelectChange,
+  renderError,
 }: {
   title: string;
   prefix: string;
   color?: string;
   data: Record<string, string>;
   onSelectChange: (name: string, value: string) => void;
+  renderError: (field: string) => React.ReactNode;
 }) {
   // Generate height options from 0 to 99
   const heightOptions = Array.from({ length: 100 }, (_, i) => i.toString());
@@ -1210,6 +1835,9 @@ function SignificantCloudSection({
     },
   ];
 
+  // Determine if this is the first layer (required) or other layers (optional)
+  const isRequired = prefix === "layer1";
+
   return (
     <div className="bg-gradient-to-r from-white to-gray-50 p-4 rounded-lg border border-gray-200">
       <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>
@@ -1225,8 +1853,10 @@ function SignificantCloudSection({
           onValueChange={(value) => onSelectChange(`${prefix}-form`, value)}
           options={cloudFormOptions.map((opt) => opt.value)}
           optionLabels={cloudFormOptions.map((opt) => opt.label)}
+          error={renderError("form")}
+          required={isRequired}
         />
-         <SelectField
+        <SelectField
           id={`${prefix}-amount`}
           name={`${prefix}-amount`}
           label="Amount (Octa)"
@@ -1235,6 +1865,8 @@ function SignificantCloudSection({
           onValueChange={(value) => onSelectChange(`${prefix}-amount`, value)}
           options={SigcloudAmountOptions.map((opt) => opt.value)}
           optionLabels={SigcloudAmountOptions.map((opt) => opt.label)}
+          error={renderError("amount")}
+          required={isRequired}
         />
         <SelectField
           id={`${prefix}-height`}
@@ -1244,9 +1876,9 @@ function SignificantCloudSection({
           value={data["height"] || ""}
           onValueChange={(value) => onSelectChange(`${prefix}-height`, value)}
           options={heightOptions}
+          error={renderError("height")}
+          required={isRequired}
         />
-        
-       
       </div>
     </div>
   );

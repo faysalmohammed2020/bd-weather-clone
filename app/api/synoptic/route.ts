@@ -37,8 +37,6 @@ export async function GET() {
       }
     });
 
-    console.log(observingTime)
-
     if (!observingTime?.MeteorologicalEntry.length || !observingTime?.WeatherObservation.length) {
       return NextResponse.json(
         { error: 'First or second card data not found' },

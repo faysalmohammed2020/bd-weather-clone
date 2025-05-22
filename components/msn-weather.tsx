@@ -88,7 +88,9 @@ export default function WeatherDashboard({
 
         if (session?.user?.role === "super_admin") {
           stationToQuery =
-            selectedStation?.stationId || session?.user?.station?.stationId || "";
+            selectedStation?.stationId ||
+            session?.user?.station?.stationId ||
+            "";
           nameToDisplay = selectedStation?.name || "No Station";
         } else {
           stationToQuery = session?.user?.station?.stationId || "";
@@ -106,8 +108,18 @@ export default function WeatherDashboard({
         const today = new Date();
         const day = today.getDate();
         const monthNames = [
-          "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+          "Jan",
+          "Feb",
+          "Mar",
+          "Apr",
+          "May",
+          "Jun",
+          "Jul",
+          "Aug",
+          "Sep",
+          "Oct",
+          "Nov",
+          "Dec",
         ];
         const month = monthNames[today.getMonth()];
         const dateString = `${day}-${month}`;
@@ -165,14 +177,20 @@ export default function WeatherDashboard({
 
   const data = weatherData
     ? {
-        maxTemperature: weatherData.maxTemperature || defaultValues.maxTemperature,
-        minTemperature: weatherData.minTemperature || defaultValues.minTemperature,
-        totalPrecipitation: weatherData.totalPrecipitation || defaultValues.totalPrecipitation,
+        maxTemperature:
+          weatherData.maxTemperature || defaultValues.maxTemperature,
+        minTemperature:
+          weatherData.minTemperature || defaultValues.minTemperature,
+        totalPrecipitation:
+          weatherData.totalPrecipitation || defaultValues.totalPrecipitation,
         windSpeed: weatherData.windSpeed || defaultValues.windSpeed,
         avTotalCloud: weatherData.avTotalCloud || defaultValues.avTotalCloud,
-        avRelativeHumidity: weatherData.avRelativeHumidity || defaultValues.avRelativeHumidity,
-        lowestVisibility: weatherData.lowestVisibility || defaultValues.lowestVisibility,
-        totalRainDuration: weatherData.totalRainDuration || defaultValues.totalRainDuration,
+        avRelativeHumidity:
+          weatherData.avRelativeHumidity || defaultValues.avRelativeHumidity,
+        lowestVisibility:
+          weatherData.lowestVisibility || defaultValues.lowestVisibility,
+        totalRainDuration:
+          weatherData.totalRainDuration || defaultValues.totalRainDuration,
       }
     : defaultValues;
 
@@ -194,7 +212,9 @@ export default function WeatherDashboard({
     <div className="w-full p-6 bg-gray-50">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-800">Weather Dashboard</h2>
+          <h2 className="text-2xl font-bold text-gray-800">
+            Weather Dashboard
+          </h2>
           <p className="text-gray-600">{todayFormatted}</p>
         </div>
         <div className="flex items-center gap-2 mt-2 md:mt-0">
@@ -263,9 +283,7 @@ export default function WeatherDashboard({
         <WeatherCard
           icon={<Wind className="text-teal-600" size={24} />}
           title="Wind Speed"
-          value={
-            data.windSpeed !== "N/A" ? `${data.windSpeed} NM` : "N/A"
-          }
+          value={data.windSpeed !== "N/A" ? `${data.windSpeed} NM` : "N/A"}
           status="Current wind conditions"
           description="Average wind speed"
           color="bg-gradient-to-br from-teal-50 to-green-100"
@@ -297,12 +315,12 @@ export default function WeatherDashboard({
           title="Visibility"
           value={
             data.lowestVisibility !== "N/A"
-              ? `${data.lowestVisibility} km`
+              ? `${(parseFloat(data.lowestVisibility) / 10).toFixed(1)} km`
               : "N/A"
           }
           status={
             data.lowestVisibility !== "N/A"
-              ? parseFloat(data.lowestVisibility) > 10
+              ? parseFloat(data.lowestVisibility) / 10 > 10
                 ? "Excellent"
                 : "Good"
               : "No Data"

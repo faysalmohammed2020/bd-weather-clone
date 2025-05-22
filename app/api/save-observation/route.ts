@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
+import { getTodayUtcRange } from "@/lib/utils";
 
 export async function POST(request: Request) {
   try {
@@ -15,9 +16,23 @@ export async function POST(request: Request) {
 
     const data = await request.json();
 
+    const { startToday, endToday } = getTodayUtcRange();
 
     // First, find the ObservingTime record by its UTC time
     const observingTime = await prisma.observingTime.findFirst({
+      where: {
+        AND: [
+          {
+            utcTime: {
+              gte: startToday,
+              lte: endToday,
+            },
+          },
+          {
+            stationId: session.user.station?.id,
+          },
+        ],
+      },
       select: {
         id: true,
         utcTime: true,
@@ -43,7 +58,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if(observingTime._count.WeatherObservation){
+    if (observingTime._count.WeatherObservation) {
       return NextResponse.json(
         {
           message: "Second card entry already exists",
@@ -54,7 +69,7 @@ export async function POST(request: Request) {
     }
 
     // Get station ID from session
-    const stationId = session.user.station?.stationId;
+    const stationId = session.user.station?.id;
     if (!stationId) {
       return NextResponse.json({
         message: "Station ID is required",
@@ -64,7 +79,7 @@ export async function POST(request: Request) {
 
     // Find the station by stationId to get its primary key (id)
     const stationRecord = await prisma.station.findFirst({
-      where: { stationId },
+      where: { id: stationId },
     });
 
     if (!stationRecord) {
@@ -168,7 +183,7 @@ export async function GET(request: Request) {
     const endDate = searchParams.get("endDate");
     const stationIdParam = searchParams.get("stationId");
 
-    const stationId = stationIdParam || session.user.station?.stationId;
+    const stationId = stationIdParam || session.user.station?.id;
 
     if (!stationId && session.user.role !== "super_admin") {
       return NextResponse.json({ success: false, error: "Station ID is required" }, { status: 400 });
@@ -176,7 +191,7 @@ export async function GET(request: Request) {
 
     let stationRecord = null;
     if (stationId && stationId !== "all") {
-      stationRecord = await prisma.station.findFirst({ where: { stationId } });
+      stationRecord = await prisma.station.findFirst({ where: { id: stationId } });
 
       if (!stationRecord) {
         return NextResponse.json({ success: false, error: `No station found with ID: ${stationId}` }, { status: 404 });
@@ -223,16 +238,49 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     const session = await getSession();
-
     if (!session || !session.user?.id) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id, type, ...updateData } = await request.json(); // Add type parameter
+    const { id, type, ...updateData } = await request.json();
 
     if (!id) {
       return NextResponse.json({ success: false, error: "Entry ID is required" }, { status: 400 });
     }
+
+    const canEditRecord = (record: any, user: any): boolean => {
+      if (!user) return false;
+
+      // If no createdAt date (shouldn't happen with Prisma defaults)
+      if (!record.createdAt) return true;
+
+      try {
+        const { differenceInDays } = require("date-fns");
+
+        // createdAt is already a Date object from Prisma
+        const submissionDate = record.createdAt;
+        const now = new Date();
+        const daysDifference = differenceInDays(now, submissionDate);
+
+        const role = user.role;
+        const userId = user.id;
+        const userStationId = user.station?.id;
+        const recordStationId = record.ObservingTime?.stationId;
+        const recordUserId = record.ObservingTime?.userId;
+
+        if (role === "super_admin") return daysDifference <= 365;
+        if (role === "station_admin") {
+          return daysDifference <= 30 && userStationId === recordStationId;
+        }
+        if (role === "observer") {
+          return daysDifference <= 1 && userId === recordUserId;
+        }
+        return false;
+      } catch (e) {
+        console.warn("Error in canEditRecord:", e);
+        return false;
+      }
+    };
 
     if (type === "weather") {
       // Handle weather observation update
@@ -253,13 +301,21 @@ export async function PUT(request: Request) {
       }
 
       const userRole = session.user.role;
-      const userStationId = session.user.station?.stationId;
+      const userStationId = session.user.station?.id;
       const isOwner = session.user.id === existing.ObservingTime?.userId;
 
       let canEdit = false;
       if (userRole === "super_admin") canEdit = true;
-      else if (userRole === "station_admin" && userStationId === existing.ObservingTime?.station?.stationId) canEdit = true;
+      else if (userRole === "station_admin" && userStationId === existing.ObservingTime?.station?.id) canEdit = true;
       else if (userRole === "observer" && isOwner) canEdit = true;
+
+      // Add the time-based permission check
+      if (canEdit && !canEditRecord(existing, session.user)) {
+        return NextResponse.json({
+          success: false,
+          error: "Editing period has expired for this record"
+        }, { status: 403 });
+      }
 
       if (!canEdit) {
         return NextResponse.json({ success: false, error: "Permission denied" }, { status: 403 });
@@ -278,54 +334,15 @@ export async function PUT(request: Request) {
         }
       });
 
-      return NextResponse.json({ 
-        success: true, 
-        message: "Weather observation updated", 
-        data: updated 
+      return NextResponse.json({
+        success: true,
+        message: "Weather observation updated",
+        data: updated
       });
-    } else {
-      // Handle observing time update (your existing code)
-      const existing = await prisma.observingTime.findUnique({
-        where: { id },
-        include: {
-          user: true,
-          station: true,
-        },
-      });
-
-      if (!existing) {
-        return NextResponse.json({ success: false, error: "Entry not found" }, { status: 404 });
-      }
-
-      const userRole = session.user.role;
-      const userStationId = session.user.station?.stationId;
-      const isOwner = session.user.id === existing.userId;
-
-      let canEdit = false;
-      if (userRole === "super_admin") canEdit = true;
-      else if (userRole === "station_admin" && userStationId === existing.station.stationId) canEdit = true;
-      else if (userRole === "observer" && isOwner) canEdit = true;
-
-      if (!canEdit) {
-        return NextResponse.json({ success: false, error: "Permission denied" }, { status: 403 });
-      }
-
-      const updated = await prisma.observingTime.update({
-        where: { id },
-        data: {
-          utcTime: updateData.utcTime ? new Date(updateData.utcTime) : existing.utcTime,
-          localTime: updateData.localTime ? new Date(updateData.localTime) : existing.localTime,
-        },
-        include: {
-          user: true,
-          station: true,
-        },
-      });
-
-      return NextResponse.json({ success: true, message: "Entry updated", data: updated });
     }
   } catch (error) {
     console.error("Error updating entry:", error);
     return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
   }
 }
+

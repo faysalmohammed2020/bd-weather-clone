@@ -32,7 +32,7 @@ export async function POST(req: Request) {
         : Object.values(data.dataType || {}).join("") || "";
 
     // Get station ID from session
-    const stationId = session.user.station?.stationId;
+    const stationId = session.user.station?.id;
 
     if (!stationId) {
       return NextResponse.json({
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
     // Find the station by stationId to get its primary key (id)
     const stationRecord = await prisma.station.findFirst({
-      where: { stationId },
+      where: { id: stationId },
     });
 
     if (!stationRecord) {
@@ -54,9 +54,16 @@ export async function POST(req: Request) {
     }
 
     // Check if the observation time already exists
-    const existingObservingTime = await prisma.observingTime.findUnique({
+    const existingObservingTime = await prisma.observingTime.findFirst({
       where: {
-        utcTime: formattedObservingTime,
+        AND: [
+          {
+            utcTime: formattedObservingTime,
+          },
+          {
+            stationId: stationRecord.id,
+          },
+        ],
       },
     });
 
@@ -167,7 +174,7 @@ export async function GET(req: Request) {
     const stationIdParam = searchParams.get("stationId");
 
     // Use the station ID from the query parameter if provided, otherwise use the user's station
-    const stationId = stationIdParam || session.user.station?.stationId;
+    const stationId = stationIdParam || session.user.station?.id;
 
     // Super admin can view all stations if no specific station is requested
     if (!stationId && session.user.role !== "super_admin") {
@@ -181,7 +188,7 @@ export async function GET(req: Request) {
     let stationRecord = null;
     if (stationId && stationId !== "all") {
       stationRecord = await prisma.station.findFirst({
-        where: { stationId },
+        where: { id: stationId },
       });
 
       if (!stationRecord) {
@@ -275,38 +282,34 @@ export async function PUT(req: Request) {
       return NextResponse.json({ message: "Entry not found" }, { status: 404 });
     }
 
-    // Check permissions using the same logic as the frontend canEditRecord function
+    // Check permissions
     const canEditRecord = (record: any, user: any): boolean => {
       if (!user) return false;
-
-      // If no submittedAt, allow edit (newly created record)
-      if (!record.submittedAt) return true;
+      
+      // If no createdAt date (shouldn't happen with Prisma defaults)
+      if (!record.createdAt) return true;
 
       try {
-        const { parseISO, differenceInDays, isValid } = require("date-fns");
-        const submissionDate = parseISO(record.submittedAt);
-        if (!isValid(submissionDate)) return true; // If date is invalid, allow edit
-
+        const { differenceInDays } = require("date-fns");
+        
+        // createdAt is already a Date object from Prisma
+        const submissionDate = record.createdAt;
         const now = new Date();
         const daysDifference = differenceInDays(now, submissionDate);
-
-        // Role-based permissions
+        
         const role = user.role;
-        const stationId = user.station?.id;
+        const userId = user.id;
+        const userStationId = user.station?.id;
+        const recordStationId = record.ObservingTime.stationId;
+        const recordUserId = record.ObservingTime.userId;
 
-        // Super admin can edit records up to 1 year old
         if (role === "super_admin") return daysDifference <= 365;
-
-        // Station admin can edit records from their station up to 30 days old
-        if (role === "station_admin")
-          return (
-            daysDifference <= 30 && stationId === record.ObservingTime.stationId
-          );
-
-        // Regular users can edit their own records up to 2 days old
-        if (role === "observer")
-          return daysDifference <= 2 && user.id === record.ObservingTime.userId;
-
+        if (role === "station_admin") {
+          return daysDifference <= 30 && userStationId === recordStationId;
+        }
+        if (role === "observer") {
+          return daysDifference <= 2 && userId === recordUserId;
+        }
         return false;
       } catch (e) {
         console.warn("Error in canEditRecord:", e);
@@ -314,78 +317,23 @@ export async function PUT(req: Request) {
       }
     };
 
-    // Check if user can edit this record
     const canEdit = canEditRecord(existingEntry, session.user);
-
     if (!canEdit) {
       return NextResponse.json(
         {
-          message:
-            "You don't have permission to edit this record. It may be too old or you don't have the required permissions.",
+          message: "You don't have permission to edit this record.",
         },
         { status: 403 }
       );
     }
 
-    // Prepare the data to update
-    const dataToUpdate: any = {
-      dataType: updateData.dataType || existingEntry.dataType,
-      subIndicator: updateData.subIndicator ?? existingEntry.subIndicator,
-      alteredThermometer:
-        updateData.alteredThermometer ?? existingEntry.alteredThermometer,
-      barAsRead: updateData.barAsRead ?? existingEntry.barAsRead,
-      correctedForIndex:
-        updateData.correctedForIndex ?? existingEntry.correctedForIndex,
-      heightDifference:
-        updateData.heightDifference ?? existingEntry.heightDifference,
-      correctionForTemp:
-        updateData.correctionForTemp ?? existingEntry.correctionForTemp,
-      stationLevelPressure:
-        updateData.stationLevelPressure ?? existingEntry.stationLevelPressure,
-      seaLevelReduction:
-        updateData.seaLevelReduction ?? existingEntry.seaLevelReduction,
-      correctedSeaLevelPressure:
-        updateData.correctedSeaLevelPressure ??
-        existingEntry.correctedSeaLevelPressure,
-      afternoonReading:
-        updateData.afternoonReading ?? existingEntry.afternoonReading,
-      pressureChange24h:
-        updateData.pressureChange24h ?? existingEntry.pressureChange24h,
-      dryBulbAsRead: updateData.dryBulbAsRead ?? existingEntry.dryBulbAsRead,
-      wetBulbAsRead: updateData.wetBulbAsRead ?? existingEntry.wetBulbAsRead,
-      maxMinTempAsRead:
-        updateData.maxMinTempAsRead ?? existingEntry.maxMinTempAsRead,
-      dryBulbCorrected:
-        updateData.dryBulbCorrected ?? existingEntry.dryBulbCorrected,
-      wetBulbCorrected:
-        updateData.wetBulbCorrected ?? existingEntry.wetBulbCorrected,
-      maxMinTempCorrected:
-        updateData.maxMinTempCorrected ?? existingEntry.maxMinTempCorrected,
-      Td: updateData.Td ?? existingEntry.Td,
-      relativeHumidity:
-        updateData.relativeHumidity ?? existingEntry.relativeHumidity,
-      squallConfirmed:
-        updateData.squallConfirmed !== undefined
-          ? String(updateData.squallConfirmed)
-          : existingEntry.squallConfirmed,
-      squallForce: updateData.squallForce ?? existingEntry.squallForce,
-      squallDirection:
-        updateData.squallDirection ?? existingEntry.squallDirection,
-      squallTime: updateData.squallTime ?? existingEntry.squallTime,
-      horizontalVisibility:
-        updateData.horizontalVisibility ?? existingEntry.horizontalVisibility,
-      miscMeteors: updateData.miscMeteors ?? existingEntry.miscMeteors,
-      pastWeatherW1: updateData.pastWeatherW1 ?? existingEntry.pastWeatherW1,
-      pastWeatherW2: updateData.pastWeatherW2 ?? existingEntry.pastWeatherW2,
-      presentWeatherWW:
-        updateData.presentWeatherWW ?? existingEntry.presentWeatherWW,
-      c2Indicator: updateData.c2Indicator ?? existingEntry.c2Indicator,
-    };
-
     // Update the entry
     const updatedEntry = await prisma.meteorologicalEntry.update({
       where: { id },
-      data: dataToUpdate,
+      data: {
+        ...updateData,
+        updatedAt: new Date(),
+      },
       include: {
         ObservingTime: {
           include: {
