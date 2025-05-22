@@ -193,6 +193,8 @@ export async function GET(request: Request) {
     const endTime = endDate ? new Date(endDate) : new Date();
     endTime.setHours(23, 59, 59, 999);
 
+    const superFilter = session.user.role === "super_admin";
+
     const entries = await prisma.observingTime.findMany({
       where: {
         AND: [
@@ -202,7 +204,10 @@ export async function GET(request: Request) {
               lte: endTime,
             },
           },
-          stationIdParam ? { stationId: stationIdParam } : {},
+          ...(superFilter 
+            ? (stationIdParam ? [{ stationId: stationIdParam }] : []) 
+            : [{ stationId: session.user.station?.id }]
+          ),
         ],
       },
       include: {

@@ -845,7 +845,7 @@ export default function WeatherObservationForm() {
           >
             <div className="relative rounded-xl">
               {/* Overlay that blocks interaction when no hour is selected */}
-              {(!time?.isPassed || !time?.hasMeteorologicalData) && (
+              {/* {(!time?.isPassed || !time?.hasMeteorologicalData) && (
                 <div className="absolute inset-0 bg-amber-50/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-xl ring-2 ring-amber-200 ring-offset-4">
                   <div className="bg-white py-4 px-6 rounded-lg shadow-lg text-center border-2 border-amber-300">
                     <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />
@@ -859,7 +859,7 @@ export default function WeatherObservationForm() {
                     </p>
                   </div>
                 </div>
-              )}
+              )} */}
 
               <Tabs
                 value={activeTab}
