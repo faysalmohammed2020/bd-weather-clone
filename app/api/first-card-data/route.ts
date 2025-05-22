@@ -184,21 +184,6 @@ export async function GET(req: Request) {
       );
     }
 
-    // Find the station by stationId to get its primary key (id)
-    let stationRecord = null;
-    if (stationId && stationId !== "all") {
-      stationRecord = await prisma.station.findFirst({
-        where: { id: stationId },
-      });
-
-      if (!stationRecord) {
-        return NextResponse.json({
-          message: `No station found with ID: ${stationId}`,
-          status: 404,
-        });
-      }
-    }
-
     const startTime = startDate
       ? new Date(startDate)
       : new Date(new Date().setDate(new Date().getDate() - 7));
@@ -211,24 +196,19 @@ export async function GET(req: Request) {
     const start = startDate ? startTime : startToday;
     const end = endDate ? endTime : endToday;
 
-    // Build the query
-    const whereClause: any = {
-      utcTime: {
-        gte: start,
-        lte: end,
-      },
-    };
-
-    // Add station filter if not super admin or if a specific station is requested
-    if (stationRecord) {
-      whereClause.stationId = stationRecord.id;
-    } else if (session.user.role !== "super_admin") {
-      // Regular users can only see their station's data
-      whereClause.stationId = session.user.station?.id;
-    }
 
     const entries = await prisma.observingTime.findMany({
-      where: whereClause,
+      where: {
+        AND: [
+          {
+            utcTime: {
+              gte: start,
+              lte: end,
+            },
+          },
+          stationIdParam ? { stationId: stationIdParam } : {},
+        ],
+      },
       include: {
         station: true,
         MeteorologicalEntry: true,
