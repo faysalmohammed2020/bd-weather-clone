@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Download, Printer } from "lucide-react";
 import { useSession } from "@/lib/auth-client"
@@ -33,7 +33,7 @@ const fetchSynopticDataForTimeSlot = async (): Promise<any[]> => {
   }
 };
 
-export default function SynopticCodeTable() {
+const SynopticCodeTable = forwardRef((props, ref) => {
   const [currentData, setCurrentData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
@@ -48,6 +48,18 @@ export default function SynopticCodeTable() {
     month: "11",
     day: "03",
   });
+
+  // Expose the getData method via ref
+  useImperativeHandle(ref, () => ({
+    getData: () => {
+      return currentData.map(item => ({
+        ...item,
+        dataType: headerInfo.dataType,
+        stationNo: headerInfo.stationNo,
+        date: item.ObservingTime?.utcTime || new Date().toISOString()
+      }));
+    }
+  }));
 
   // Function to fetch the most recent data
   const fetchLatestData = async () => {
@@ -144,8 +156,9 @@ export default function SynopticCodeTable() {
     window.print();
   };
 
-  return (
-    <div className="space-y-6 print:space-y-0">
+
+return (
+   <div className="space-y-6 print:space-y-0">
       <div className="flex justify-between items-center print:hidden">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center">
           <span className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mr-3">
@@ -544,4 +557,8 @@ export default function SynopticCodeTable() {
       `}</style>
     </div>
   );
-}
+});
+
+SynopticCodeTable.displayName = "SynopticCodeTable";
+
+export default SynopticCodeTable;

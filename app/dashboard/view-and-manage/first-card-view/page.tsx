@@ -1,8 +1,7 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useEffect } from "react"
+import { useState, useEffect, useImperativeHandle, forwardRef } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -39,7 +38,7 @@ interface Station {
 interface MeteorologicalEntry {
   id: string
   observingTimeId: string
-  stationId?: string  // Added as optional since it's added later
+  stationId?: string
   dataType: string
   subIndicator: string
   alteredThermometer: string
@@ -73,6 +72,12 @@ interface MeteorologicalEntry {
   submittedAt?: string
   createdAt: string
   updatedAt: string
+  ObservingTime?: {
+    stationId: string
+    userId: string
+    utcTime: string
+    station: Station
+  }
 }
 
 interface ObservingTimeEntry {
@@ -107,9 +112,9 @@ function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
     const role = user.role
     const userId = user.id
     const userStationId = user.station?.id
-    const recordStationId = record.ObservingTime.stationId
+    const recordStationId = record.ObservingTime?.stationId
 
-    const recordUserId = record.ObservingTime.userId
+    const recordUserId = record.ObservingTime?.userId
 
     if (role === "super_admin") return daysDifference <= 365
 
@@ -128,12 +133,10 @@ function canEditRecord(record: MeteorologicalEntry, user: any): boolean {
   }
 }
 
-export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
+const FirstCardTable = forwardRef(({ refreshTrigger = 0 }: FirstCardTableProps, ref) => {
   const [data, setData] = useState<ObservingTimeEntry[]>([])
   const [flattenedData, setFlattenedData] = useState<MeteorologicalEntry[]>([])
   const [loading, setLoading] = useState(true)
-
-  // Initialize with today's date by default
   const today = format(new Date(), "yyyy-MM-dd")
   const [startDate, setStartDate] = useState(today)
   const [endDate, setEndDate] = useState(today)
@@ -150,6 +153,22 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
   const [editFormData, setEditFormData] = useState<Partial<MeteorologicalEntry>>({})
   const [isSaving, setIsSaving] = useState(false)
   const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false)
+
+  // Expose getData method via ref
+  useImperativeHandle(ref, () => ({
+    getData: () => {
+      return flattenedData.map(record => {
+        const observingTime = data.find(ot => ot.id === record.observingTimeId);
+        return {
+          ...record,
+          stationId: observingTime?.stationId || '',
+          stationName: observingTime?.station?.name || '',
+          utcTime: observingTime?.utcTime || '',
+          localTime: observingTime?.localTime || ''
+        };
+      });
+    }
+  }));
 
   const exportToCSV = () => {
     if (flattenedData.length === 0 || data.length === 0) {
@@ -248,8 +267,7 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
 
     toast.success("CSV export started");
   };
-
-  const fetchData = async () => {
+const fetchData = async () => {
     try {
       setLoading(true)
 
@@ -454,7 +472,6 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
     const station = stations.find((s) => s.stationId === stationId)
     return station ? station.name : stationId
   }
-
   return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
       <CardContent className="p-6">
@@ -1195,4 +1212,6 @@ export default function FirstCardTable({ refreshTrigger = 0 }: FirstCardTablePro
       </CardContent>
     </Card >
   )
-}
+});
+FirstCardTable.displayName = "FirstCardTable";
+export default FirstCardTable;
