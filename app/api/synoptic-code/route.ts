@@ -22,10 +22,17 @@ export async function POST(req: Request) {
     // First, find the ObservingTime record by its UTC time
     const observingTime = await prisma.observingTime.findFirst({
       where: {
-        utcTime: {
-          gte: startToday,
-          lte: endToday,
-        },
+        AND: [
+          {
+            utcTime: {
+              gte: startToday,
+              lte: endToday,
+            },
+          },
+          {
+            stationId: session.user.station?.id,
+          },
+        ],
       },
       select: {
         id: true,
@@ -84,7 +91,7 @@ export async function POST(req: Request) {
 
     // Find the station by stationId to get its primary key (id)
     const stationRecord = await prisma.station.findFirst({
-      where: { stationId },
+      where: { id: session.user.station?.id },
     });
 
     if (!stationRecord) {
@@ -150,27 +157,26 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request) {
-  try {
-    const session = await getSession();
+export async function GET() {
+  const session = await getSession();
 
-    if (!session || !session.user?.id) {
-      return NextResponse.json(
+  if (!session || !session.user?.id) {
+    return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    const stationId = session.user.station?.stationId;
+    const stationId = session.user.station?.id;
     if (!stationId) {
       return NextResponse.json(
         { message: "Station ID is missing" },
         { status: 400 }
       );
     }
-
+try {
     const station = await prisma.station.findFirst({
-      where: { stationId },
+      where: { id: stationId },
     });
 
     if (!station) {

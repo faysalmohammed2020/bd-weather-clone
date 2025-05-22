@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
+import { getTodayUtcRange } from "@/lib/utils";
 
 export async function POST(request: Request) {
   try {
@@ -15,9 +16,23 @@ export async function POST(request: Request) {
 
     const data = await request.json();
 
+    const { startToday, endToday } = getTodayUtcRange();
 
     // First, find the ObservingTime record by its UTC time
     const observingTime = await prisma.observingTime.findFirst({
+      where: {
+        AND: [
+          {
+            utcTime: {
+              gte: startToday,
+              lte: endToday,
+            },
+          },
+          {
+            stationId: session.user.station?.id,
+          },
+        ],
+      },
       select: {
         id: true,
         utcTime: true,
@@ -54,7 +69,7 @@ export async function POST(request: Request) {
     }
 
     // Get station ID from session
-    const stationId = session.user.station?.stationId;
+    const stationId = session.user.station?.id;
     if (!stationId) {
       return NextResponse.json({
         message: "Station ID is required",
@@ -64,7 +79,7 @@ export async function POST(request: Request) {
 
     // Find the station by stationId to get its primary key (id)
     const stationRecord = await prisma.station.findFirst({
-      where: { stationId },
+      where: { id: stationId },
     });
 
     if (!stationRecord) {
@@ -168,7 +183,7 @@ export async function GET(request: Request) {
     const endDate = searchParams.get("endDate");
     const stationIdParam = searchParams.get("stationId");
 
-    const stationId = stationIdParam || session.user.station?.stationId;
+    const stationId = stationIdParam || session.user.station?.id;
 
     if (!stationId && session.user.role !== "super_admin") {
       return NextResponse.json({ success: false, error: "Station ID is required" }, { status: 400 });
@@ -176,7 +191,7 @@ export async function GET(request: Request) {
 
     let stationRecord = null;
     if (stationId && stationId !== "all") {
-      stationRecord = await prisma.station.findFirst({ where: { stationId } });
+      stationRecord = await prisma.station.findFirst({ where: { id: stationId } });
 
       if (!stationRecord) {
         return NextResponse.json({ success: false, error: `No station found with ID: ${stationId}` }, { status: 404 });
@@ -254,12 +269,12 @@ export async function PUT(request: Request) {
       }
 
       const userRole = session.user.role;
-      const userStationId = session.user.station?.stationId;
+      const userStationId = session.user.station?.id;
       const isOwner = session.user.id === existing.ObservingTime?.userId;
 
       let canEdit = false;
       if (userRole === "super_admin") canEdit = true;
-      else if (userRole === "station_admin" && userStationId === existing.ObservingTime?.station?.stationId) canEdit = true;
+      else if (userRole === "station_admin" && userStationId === existing.ObservingTime?.station?.id) canEdit = true;
       else if (userRole === "observer" && isOwner) canEdit = true;
 
       if (!canEdit) {
@@ -299,12 +314,12 @@ export async function PUT(request: Request) {
       }
 
       const userRole = session.user.role;
-      const userStationId = session.user.station?.stationId;
+      const userStationId = session.user.station?.id;
       const isOwner = session.user.id === existing.userId;
 
       let canEdit = false;
       if (userRole === "super_admin") canEdit = true;
-      else if (userRole === "station_admin" && userStationId === existing.station.stationId) canEdit = true;
+      else if (userRole === "station_admin" && userStationId === existing.station.id) canEdit = true;
       else if (userRole === "observer" && isOwner) canEdit = true;
 
       if (!canEdit) {

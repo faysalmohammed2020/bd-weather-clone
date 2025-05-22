@@ -85,6 +85,8 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     relativeHumidity: "",
   });
 
+  console.log("timeData", timeData)
+
   const { data: session } = useSession();
 
   // Refs for multi-box inputs to handle auto-focus
@@ -403,8 +405,10 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
+    // First update the changed field
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Dew point & humidity calculation
@@ -435,11 +439,26 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
           barAsRead,
           stationId
         );
+        
         if (pressureData) {
+          // First update stationLevelPressure
           setFormData((prev) => ({
             ...prev,
             stationLevelPressure: pressureData.stationLevelPressure,
             heightDifference: pressureData.heightDifference,
+          }));
+
+          console.log("timeData", timeData)
+
+          // Then calculate 24-hour pressure change
+          const yesterdayPressure = timeData?.yesterday?.MeteorologicalEntry?.[0]?.stationLevelPressure;
+          const pressureChange24hInHpa = yesterdayPressure !== undefined 
+            ? yesterdayPressure - Number(pressureData.stationLevelPressure) 
+            : 0;
+          
+          setFormData((prev) => ({
+            ...prev,
+            pressureChange24h: String(pressureChange24hInHpa),
           }));
 
           const seaData = calculateSeaLevelPressure(
@@ -447,6 +466,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
             pressureData.stationLevelPressure,
             stationId
           );
+          
           if (seaData) {
             setFormData((prev) => ({
               ...prev,
@@ -457,20 +477,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
         }
       }
     }
-
-    // Automatically generate Present Weather (WW) from W1 and W2
-    // if (name === "pastWeatherW1" || name === "pastWeatherW2") {
-    //   const w1 = name === "pastWeatherW1" ? value : formData.pastWeatherW1;
-    //   const w2 = name === "pastWeatherW2" ? value : formData.pastWeatherW2;
-
-    //   if (w1 && w2) {
-    //     setFormData((prev) => ({
-    //       ...prev,
-    //       presentWeatherWW: `${w1}${w2}`,
-    //     }));
-    //   }
-    // }
-  };
+};
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -751,7 +758,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       value={formData.stationLevelPressure || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
-                      readOnly
                     />
                   </div>
 
@@ -806,6 +812,7 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       value={formData.pressureChange24h || ""}
                       onChange={handleChange}
                       className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
+                      readOnly
                     />
                   </div>
                 </CardContent>

@@ -74,6 +74,39 @@ export function getTodayUtcRange(): { startToday: Date; endToday: Date } {
   return { startToday, endToday };
 }
 
+// Get the start and end of yesterday in UTC
+export function getYesterdayRange(): { startYesterday: Date; endYesterday: Date } {
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setUTCDate(now.getUTCDate() - 1);
+
+  const startYesterday = new Date(
+    Date.UTC(
+      yesterday.getUTCFullYear(),
+      yesterday.getUTCMonth(),
+      yesterday.getUTCDate(),
+      0,
+      0,
+      0,
+      0
+    )
+  );
+
+  const endYesterday = new Date(
+    Date.UTC(
+      yesterday.getUTCFullYear(),
+      yesterday.getUTCMonth(),
+      yesterday.getUTCDate(),
+      23,
+      59,
+      59,
+      999
+    )
+  );
+
+  return { startYesterday, endYesterday };
+}
+
 /**
  * Checks if a given UTC time has passed a specified number of hours
  */
