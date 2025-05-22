@@ -77,13 +77,7 @@ export default function SynopticCodeForm() {
   };
 
   return (
-    <Formik
-      initialValues={initialValues}
-      validationSchema={validationSchema}
-      onSubmit={(values, actions) => handleSubmit(values, actions)}
-    >
-      {({ values, errors, touched, isSubmitting, resetForm }) => (
-        <Form>
+    
           <Card className="shadow-lg border-t-4 border-t-blue-500">
             <CardContent className="pt-6">
               <div>
@@ -101,8 +95,6 @@ export default function SynopticCodeForm() {
 
           
           </Card>
-        </Form>
-      )}
-    </Formik>
+        
   );
 }
