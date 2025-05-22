@@ -497,7 +497,7 @@ export default function WeatherObservationForm() {
         "observer.observer-initial",
         session.user.name || ""
       );
-      formik.setFieldValue("metadata.stationId", session.user.stationId || "");
+      formik.setFieldValue("metadata.stationId", session.user.station?.stationId || "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
