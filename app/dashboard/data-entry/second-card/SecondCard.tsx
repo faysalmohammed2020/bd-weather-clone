@@ -114,6 +114,7 @@ type WeatherObservationFormData = {
 // Update the validation schemas to enforce numeric validation for all numeric fields
 
 // Update the validation schemas to use English error messages and add time format validation
+// Update the rainfallSchema to enforce the specific validation requirements
 const rainfallSchema = Yup.object({
   rainfall: Yup.object({
     "time-start": Yup.string()
@@ -122,44 +123,61 @@ const rainfallSchema = Yup.object({
         /^(0[0-9]|1[0-9]|2[0-3])$/,
         "Please enter a valid hour (00 to 23)"
       ),
+
     "time-end": Yup.string()
       .required("Time of ending is required")
       .matches(
-        /^([01]\d|2[0-3]):([0-5]\d)$/,
-        "Please enter a valid time in HH:MM format (00:00 to 23:59)"
+        /^(0[0-9]|1[0-9]|2[0-3])$/,
+        "Please enter a valid hour (00 to 23)"
       ),
+
     "since-previous": Yup.string()
       .required("Since previous observation is required")
-      .matches(/^[0-9]+(\.[0-9]+)?$/, "Please enter numbers only"),
+      .test(
+        "is-non-negative-number",
+        "Please enter a non-negative number",
+        (value) =>
+          !value ||
+          (Number.parseFloat(value) >= 0 && !isNaN(Number.parseFloat(value)))
+      ),
+
     "during-previous": Yup.string()
       .required("During previous 6 hours is required")
       .matches(
         /^(0[0-9]{2}|[1-8][0-9]{2}|9[0-8][0-9])$/,
-        "Please enter a valid 3-digit number (000 to 989)"
+        "Must be a 3-digit integer between 000 and 989"
       ),
 
     "last-24-hours": Yup.string()
       .required("Last 24 hours precipitation is required")
-      .matches(/^[0-9]+(\.[0-9]+)?$/, "Please enter numbers only"),
+      .test(
+        "is-non-negative-number",
+        "Please enter a non-negative number",
+        (value) =>
+          !value ||
+          (Number.parseFloat(value) >= 0 && !isNaN(Number.parseFloat(value)))
+      ),
   }),
 });
 
-// Update the windSchema to use English error messages
+// Update the windSchema to enforce the specific validation requirements
 const windSchema = Yup.object({
   wind: Yup.object({
     "first-anemometer": Yup.string()
       .required("1st Anemometer reading is required")
-      .matches(/^\d{5}$/, "Please enter exactly 5-digit number"),
+      .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10123)"),
 
     "second-anemometer": Yup.string()
       .required("2nd Anemometer reading is required")
-      .matches(/^[0-9]+(\.[0-9]+)?$/, "Please enter numbers only"),
+      .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10123)"),
+
     speed: Yup.string()
       .required("Wind speed is required")
-      .matches(/^\d{3}$/, "Please enter exactly 3-digit speed"),
+      .matches(/^\d{3}$/, "Must be exactly 3 digits (e.g., 025, 100)"),
+
     "wind-direction": Yup.string()
       .required("Wind direction is required")
-      .matches(/^\d{2}$/, "Please enter a valid 2-digit direction (00 to 99)"),
+      .matches(/^[0-9]{2}$/, "Must be a 2-digit integer between 00 and 99"),
   }),
 });
 
@@ -498,6 +516,7 @@ export default function WeatherObservationForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formik.values]);
 
+  // Update the handleNext function to validate the current tab before proceeding
   const handleNext = () => {
     // Validate current tab before proceeding
     if (validateTab(activeTab)) {
@@ -505,9 +524,8 @@ export default function WeatherObservationForm() {
       setCurrentStep(nextStep);
       setActiveTab(getTabForStep(nextStep));
     } else {
-      toast.error("অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন", {
-        description:
-          "পরবর্তী ট্যাবে যাওয়ার আগে বর্তমান ট্যাবের সকল তথ্য পূরণ করুন",
+      toast.error("Please fill in all required fields correctly", {
+        description: "You need to complete the current tab before proceeding",
       });
     }
   };
@@ -618,6 +636,7 @@ export default function WeatherObservationForm() {
       name === "wind-direction"
     ) {
       formik.setFieldValue(`wind.${name}`, value);
+      // formik.setFieldTouched(`wind.${name}`, true, true);
     } else if (name === "observer-initial") {
       formik.setFieldValue("observer.observer-initial", value);
     }
@@ -797,6 +816,7 @@ export default function WeatherObservationForm() {
   const isLastTab = currentStep === totalSteps;
   const isFirstTab = currentStep === 1;
 
+  // Update the Tabs component to prevent direct tab navigation when current tab is invalid
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
       <div className="max-w-7xl mx-auto">
@@ -838,7 +858,28 @@ export default function WeatherObservationForm() {
 
               <Tabs
                 value={activeTab}
-                onValueChange={setActiveTab}
+                onValueChange={(value) => {
+                  // Only allow tab change if current tab is valid or going backwards
+                  const currentTabIndex =
+                    Object.keys(tabStyles).indexOf(activeTab);
+                  const newTabIndex = Object.keys(tabStyles).indexOf(value);
+
+                  if (
+                    newTabIndex <= currentTabIndex ||
+                    validateTab(activeTab)
+                  ) {
+                    setActiveTab(value);
+                    setCurrentStep(newTabIndex + 1);
+                  } else {
+                    toast.error(
+                      "Please fill in all required fields correctly",
+                      {
+                        description:
+                          "You need to complete the current tab before proceeding",
+                      }
+                    );
+                  }
+                }}
                 className="w-full"
               >
                 <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-3 rounded-xl p-1 border-0 bg-transparent">
@@ -1122,7 +1163,7 @@ export default function WeatherObservationForm() {
                             />
                             {renderErrorMessage("rainfall.time-start")}
                             <p className="text-xs text-gray-500 mt-1">
-                              Format: HH:MM (e.g., 09:30, 14:45)
+                              Format: HH (e.g., 00, 01, 23)
                             </p>
                           </div>
 
@@ -1262,10 +1303,11 @@ export default function WeatherObservationForm() {
                               formik.values.wind["second-anemometer"] || ""
                             }
                             onChange={handleInputChange}
-                            error={renderErrorMessage("wind.second-anemometer")}
+                            error={renderErrorMessage("wind.second-anemometer")} // ✅ এইটা গুরুত্বপূর্ণ
                             required
                             numeric={true}
                           />
+
                           <InputField
                             id="speed"
                             name="speed"
@@ -1359,49 +1401,6 @@ export default function WeatherObservationForm() {
                               "observer.observer-initial"
                             )}
                           />
-
-                          <div className="grid gap-2 w-full">
-                            <Label
-                              htmlFor="observation-time"
-                              className="font-medium text-gray-700"
-                            >
-                              Observation Time (UTC){" "}
-                              <span className="text-red-500">*</span>
-                            </Label>
-                            <select
-                              id="observation-time"
-                              name="observation-time"
-                              value={
-                                formik.values.observer["observation-time"] || ""
-                              }
-                              onChange={(e) =>
-                                handleSelectChange(
-                                  "observation-time",
-                                  e.target.value
-                                )
-                              }
-                              required
-                              className={cn(
-                                "w-full border border-orange-300 bg-orange-50 focus:border-orange-500 focus:ring-orange-500/30 rounded-lg px-3 py-2 transition-all",
-                                {
-                                  "border-red-500": renderErrorMessage(
-                                    "observer.observation-time"
-                                  ),
-                                }
-                              )}
-                            >
-                              <option value="">-- Select GG Time --</option>
-                              <option value="00">00 UTC</option>
-                              <option value="03">03 UTC</option>
-                              <option value="06">06 UTC</option>
-                              <option value="09">09 UTC</option>
-                              <option value="12">12 UTC</option>
-                              <option value="15">15 UTC</option>
-                              <option value="18">18 UTC</option>
-                              <option value="21">21 UTC</option>
-                            </select>
-                            {renderErrorMessage("observer.observation-time")}
-                          </div>
 
                           <InputField
                             id="station-id"
@@ -1564,7 +1563,7 @@ function InputField({
         required={required}
         inputMode={numeric ? "decimal" : "text"}
       />
-      {error}
+      {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
     </div>
   );
 }
@@ -1640,7 +1639,7 @@ function SelectField({
           ))}
         </SelectContent>
       </Select>
-      {error}
+      {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
     </div>
   );
 }
