@@ -620,7 +620,7 @@ return (
                   </tr>
                   <tr>
                     <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 text-xs p-1">
-                      <div className="h-16 text-sky-800">Time of Observation (GMT)</div>
+                      <div className="h-16 text-sky-800">Time of Observation (UTC)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 text-xs p-1">
                       <div className="h-16 text-sky-800">Station ID</div>

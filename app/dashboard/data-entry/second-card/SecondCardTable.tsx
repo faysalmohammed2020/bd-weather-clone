@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, ChevronLeft, ChevronRight, CloudSun, Filter, Loader2, RefreshCw } from "lucide-react"
-import { format, parseISO, differenceInDays, isValid } from "date-fns"
+import { Calendar, ChevronLeft, ChevronRight, CloudSun, Filter, Loader2 } from "lucide-react"
+import { format, differenceInDays } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import { useSession } from "@/lib/auth-client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -574,7 +574,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                   </tr>
                   <tr>
                     <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 text-xs p-1">
-                      <div className="h-16 text-sky-800">Time of Observation (GMT)</div>
+                      <div className="h-16 text-sky-800">Time of Observation (UTC)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 text-xs p-1">
                       <div className="h-16 text-sky-800">Station ID</div>

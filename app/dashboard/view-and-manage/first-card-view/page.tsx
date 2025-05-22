@@ -670,7 +670,7 @@ const fetchData = async () => {
                   </tr>
                   <tr>
                     <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
-                      <div className="h-16 text-indigo-800">Time of Observation (GMT)</div>
+                      <div className="h-16 text-indigo-800">Time of Observation (UTC)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
                       <div className="h-16 text-indigo-800">Indicator</div>
