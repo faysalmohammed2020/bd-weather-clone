@@ -191,6 +191,9 @@ export default function SynopticMeasurementsTab() {
     isLoading: true,
   });
 
+  // List of editable measurement IDs
+  const editableMeasurements = [2, 7, 12, 19, 20];
+
   useEffect(() => {
     const fetchSynopticData = async () => {
       try {
@@ -207,7 +210,7 @@ export default function SynopticMeasurementsTab() {
           throw new Error(generatedValues.error);
         }
 
-        console.log("generated synoptic", generatedValues)
+        console.log("generated synoptic", generatedValues);
 
         // Check if today's date matches the generated values
         const today = new Date();
@@ -308,7 +311,6 @@ export default function SynopticMeasurementsTab() {
 
       const result = await response.json();
 
-
       if(!result.success){
         return toast.error(result.error);
       }
@@ -324,6 +326,12 @@ export default function SynopticMeasurementsTab() {
       console.error("Submit error:", error);
       toast.error("❌ Something went wrong");
     }
+  };
+
+  const handleMeasurementChange = (index: number, value: string) => {
+    const newMeasurements = [...values.measurements];
+    newMeasurements[index] = value;
+    setFieldValue("measurements", newMeasurements);
   };
 
   return (
@@ -454,8 +462,17 @@ export default function SynopticMeasurementsTab() {
                     <Input
                       id={`measurement-${item.id}`}
                       value={values.measurements[item.id] || ""}
-                      className="border-green-200 bg-gray-50 cursor-not-allowed"
-                      readOnly
+                      onChange={(e) => 
+                        editableMeasurements.includes(item.id)
+                          ? handleMeasurementChange(item.id, e.target.value)
+                          : null
+                      }
+                      className={`border-green-200 ${
+                        editableMeasurements.includes(item.id)
+                          ? "bg-white cursor-text"
+                          : "bg-gray-50 cursor-not-allowed"
+                      }`}
+                      readOnly={!editableMeasurements.includes(item.id)}
                     />
                   </div>
                 </div>
@@ -495,8 +512,17 @@ export default function SynopticMeasurementsTab() {
                     <Input
                       id={`measurement-${item.id}`}
                       value={values.measurements[item.id] || ""}
-                      className="border-green-200 bg-gray-50 cursor-not-allowed"
-                      readOnly
+                      onChange={(e) => 
+                        editableMeasurements.includes(item.id)
+                          ? handleMeasurementChange(item.id, e.target.value)
+                          : null
+                      }
+                      className={`border-green-200 ${
+                        editableMeasurements.includes(item.id)
+                          ? "bg-white cursor-text"
+                          : "bg-gray-50 cursor-not-allowed"
+                      }`}
+                      readOnly={!editableMeasurements.includes(item.id)}
                     />
                   </div>
                 </div>
@@ -544,3 +570,4 @@ export default function SynopticMeasurementsTab() {
     </div>
   );
 }
+

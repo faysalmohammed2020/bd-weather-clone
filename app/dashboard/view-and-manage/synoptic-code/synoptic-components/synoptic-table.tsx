@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Loader2, Download, Printer } from "lucide-react";
+import { useSession } from "@/lib/auth-client"
 
 // Time slots for 3-hour intervals
 const TIME_SLOTS = [
@@ -36,6 +37,10 @@ export default function SynopticCodeTable() {
   const [currentData, setCurrentData] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const { data: session } = useSession()
+  const user = session?.user
+  const isSuperAdmin = user?.role === "super_admin"
+  const isStationAdmin = user?.role === "station_admin"
   const [headerInfo, setHeaderInfo] = useState({
     dataType: "SY",
     stationNo: "41953",
@@ -163,19 +168,8 @@ export default function SynopticCodeTable() {
           </span>
           Synoptic Code Data
         </h2>
-        <div className="flex gap-3">
-          <Button
-            variant="outline"
-            className="flex items-center gap-2 text-blue-700 border-blue-300 hover:bg-blue-50"
-            onClick={fetchLatestData}
-            disabled={refreshing}
-          >
-            {refreshing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <span className="text-base">Refresh</span>
-            )}
-          </Button>
+        {(isSuperAdmin || isStationAdmin) && (
+          <div className="flex gap-3">
           <Button
             variant="outline"
             className="flex items-center gap-2 text-blue-700 border-blue-300 hover:bg-blue-50"
@@ -185,16 +179,9 @@ export default function SynopticCodeTable() {
             <Download size={18} />
             <span className="text-base">Export CSV</span>
           </Button>
-          <Button
-            variant="outline"
-            className="flex items-center gap-2 text-blue-700 border-blue-300 hover:bg-blue-50"
-            onClick={printTable}
-            disabled={!currentData}
-          >
-            <Printer size={18} />
-            <span className="text-base">Print</span>
-          </Button>
         </div>
+        )}
+        
       </div>
 
       {loading ? (
