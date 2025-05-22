@@ -125,6 +125,7 @@ model ObservingTime {
   SynopticCode        SynopticCode[]
 
   @@unique([utcTime, stationId])
+  @@index([userId])
   @@index([localTime])
 }
 

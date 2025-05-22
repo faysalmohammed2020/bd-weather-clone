@@ -74,70 +74,69 @@ export async function POST(req: Request) {
       });
     }
 
-    const createdObservingTime = await prisma.observingTime.create({
+    // All Data
+    const meteorologicalData = {
+      dataType,
+      subIndicator: data.subIndicator || "",
+      alteredThermometer: data.alteredThermometer || "",
+      barAsRead: data.barAsRead || "",
+      correctedForIndex: data.correctedForIndex || "",
+      heightDifference: data.heightDifference || "",
+      correctionForTemp: data.correctionForTemp || "",
+      stationLevelPressure: data.stationLevelPressure || "",
+      seaLevelReduction: data.seaLevelReduction || "",
+      correctedSeaLevelPressure: data.correctedSeaLevelPressure || "",
+      afternoonReading: data.afternoonReading || "",
+      pressureChange24h: data.pressureChange24h || "",
+
+      dryBulbAsRead: data.dryBulbAsRead || "",
+      wetBulbAsRead: data.wetBulbAsRead || "",
+      maxMinTempAsRead: data.maxMinTempAsRead || "",
+
+      dryBulbCorrected: data.dryBulbCorrected || "",
+      wetBulbCorrected: data.wetBulbCorrected || "",
+      maxMinTempCorrected: data.maxMinTempCorrected || "",
+
+      Td: data.Td || "",
+      relativeHumidity: data.relativeHumidity || "",
+
+      squallConfirmed: String(data.squallConfirmed ?? ""),
+      squallForce: data.squallForce || "",
+      squallDirection: data.squallDirection || "",
+      squallTime: data.squallTime || "",
+
+      horizontalVisibility: data.horizontalVisibility || "",
+      miscMeteors: data.miscMeteors || "",
+
+      pastWeatherW1: data.pastWeatherW1 || "",
+      pastWeatherW2: data.pastWeatherW2 || "",
+      presentWeatherWW: data.presentWeatherWW || "",
+
+      c2Indicator: data.c2Indicator || "",
+      submittedAt: new Date(),
+    }
+
+    const savedEntry = await prisma.observingTime.create({
       data: {
         utcTime: formattedObservingTime,
+        MeteorologicalEntry: {
+          create: {
+            ...meteorologicalData,
+          }
+        },
         station: {
           connect: {
-            id: stationRecord.id,
+              id: stationRecord.id,
+            },
+          },
+          localTime: localTime,
+          user: {
+            connect: {
+              id: session.user.id,
+            },
           },
         },
-        localTime: localTime,
-        user: {
-          connect: {
-            id: session.user.id,
-          },
-        },
-      },
-    });
-
-    const savedEntry = await prisma.meteorologicalEntry.create({
-      data: {
-        dataType,
-        subIndicator: data.subIndicator || "",
-        alteredThermometer: data.alteredThermometer || "",
-        barAsRead: data.barAsRead || "",
-        correctedForIndex: data.correctedForIndex || "",
-        heightDifference: data.heightDifference || "",
-        correctionForTemp: data.correctionForTemp || "",
-        stationLevelPressure: data.stationLevelPressure || "",
-        seaLevelReduction: data.seaLevelReduction || "",
-        correctedSeaLevelPressure: data.correctedSeaLevelPressure || "",
-        afternoonReading: data.afternoonReading || "",
-        pressureChange24h: data.pressureChange24h || "",
-
-        dryBulbAsRead: data.dryBulbAsRead || "",
-        wetBulbAsRead: data.wetBulbAsRead || "",
-        maxMinTempAsRead: data.maxMinTempAsRead || "",
-
-        dryBulbCorrected: data.dryBulbCorrected || "",
-        wetBulbCorrected: data.wetBulbCorrected || "",
-        maxMinTempCorrected: data.maxMinTempCorrected || "",
-
-        Td: data.Td || "",
-        relativeHumidity: data.relativeHumidity || "",
-
-        squallConfirmed: String(data.squallConfirmed ?? ""),
-        squallForce: data.squallForce || "",
-        squallDirection: data.squallDirection || "",
-        squallTime: data.squallTime || "",
-
-        horizontalVisibility: data.horizontalVisibility || "",
-        miscMeteors: data.miscMeteors || "",
-
-        pastWeatherW1: data.pastWeatherW1 || "",
-        pastWeatherW2: data.pastWeatherW2 || "",
-        presentWeatherWW: data.presentWeatherWW || "",
-
-        c2Indicator: data.c2Indicator || "",
-        ObservingTime: {
-          connect: {
-            id: createdObservingTime.id,
-          },
-        },
-        submittedAt: new Date(), // Set submission time
-      },
-    });
+      });
 
     const totalCount = await prisma.meteorologicalEntry.count();
 
@@ -196,7 +195,6 @@ export async function GET(req: Request) {
     const start = startDate ? startTime : startToday;
     const end = endDate ? endTime : endToday;
 
-
     const entries = await prisma.observingTime.findMany({
       where: {
         AND: [
@@ -219,7 +217,7 @@ export async function GET(req: Request) {
       take: 100,
     });
 
-    return NextResponse.json({entries}, { status: 200 });
+    return NextResponse.json({ entries }, { status: 200 });
   } catch (error: any) {
     console.error("Error fetching meteorological entries:", error);
     return NextResponse.json(
@@ -265,18 +263,18 @@ export async function PUT(req: Request) {
     // Check permissions
     const canEditRecord = (record: any, user: any): boolean => {
       if (!user) return false;
-      
+
       // If no createdAt date (shouldn't happen with Prisma defaults)
       if (!record.createdAt) return true;
 
       try {
         const { differenceInDays } = require("date-fns");
-        
+
         // createdAt is already a Date object from Prisma
         const submissionDate = record.createdAt;
         const now = new Date();
         const daysDifference = differenceInDays(now, submissionDate);
-        
+
         const role = user.role;
         const userId = user.id;
         const userStationId = user.station?.id;

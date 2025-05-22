@@ -191,8 +191,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     relativeHumidity: "",
   });
 
-  console.log("timeData", timeData);
-
   const { data: session } = useSession();
 
   // Refs for multi-box inputs to handle auto-focus
@@ -986,20 +984,19 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
         />
         {/*Card Body */}
         <div className="relative rounded-xl">
-          {!time?.isPassed ||
-            (!time && (
-              <div className="absolute inset-0 bg-amber-50/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-xl ring-2 ring-amber-200 ring-offset-4">
-                <div className="bg-white py-4 px-6 rounded-lg shadow-lg text-center border-2 border-amber-300">
-                  <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />
-                  <h3 className="text-lg font-medium text-amber-800">
-                    3 Hours has not passed yet
-                  </h3>
-                  <p className="text-sm text-amber-600 mt-1">
-                    Please wait a little longer
-                  </p>
-                </div>
+          {!time?.isPassed && (
+            <div className="absolute inset-0 bg-amber-50/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-xl ring-2 ring-amber-200 ring-offset-4">
+              <div className="bg-white py-4 px-6 rounded-lg shadow-lg text-center border-2 border-amber-300">
+                <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />
+                <h3 className="text-lg font-medium text-amber-800">
+                  3 Hours has not passed yet
+                </h3>
+                <p className="text-sm text-amber-600 mt-1">
+                  Please wait a little longer
+                </p>
               </div>
-            ))}
+            </div>
+          )}
           <Tabs
             value={activeTab}
             onValueChange={handleTabChange}
