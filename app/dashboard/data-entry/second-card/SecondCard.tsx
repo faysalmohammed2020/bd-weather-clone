@@ -270,7 +270,7 @@ export default function WeatherObservationForm() {
   const { time, error: timeError } = useTimeCheck();
 
   // Get the persistent form store
-  const { formData, updateFields, resetForm, checkAndResetIfExpired } =
+  const { formData, updateFields, resetForm } =
     useWeatherObservationForm();
 
   // Tab styles with gradients and more vibrant colors
@@ -333,7 +333,7 @@ export default function WeatherObservationForm() {
         ...formData?.observer,
       },
       metadata: {
-        stationId: session?.user?.stationId || "",
+        stationId: session?.user?.station?.stationId || "",
         ...formData?.metadata,
       },
     },
@@ -754,6 +754,7 @@ export default function WeatherObservationForm() {
       formik.resetForm();
       setCurrentStep(1);
       setActiveTab("cloud");
+      updateFields({});
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("Failed to submit. Please try again.");
