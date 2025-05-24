@@ -222,46 +222,55 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
     const end = new Date(endDate);
     const daysInRange = differenceInDays(end, start);
 
+    // Calculate the new date range
     const newStart = new Date(start);
-    newStart.setDate(start.getDate() - daysInRange - 1);
+    newStart.setDate(start.getDate() - (daysInRange + 1));
 
     const newEnd = new Date(start);
     newEnd.setDate(start.getDate() - 1);
 
-    // Don't update if the new range would be invalid
-    if (newStart <= newEnd) {
-      setStartDate(format(newStart, "yyyy-MM-dd"));
-      setEndDate(format(newEnd, "yyyy-MM-dd"));
-      setDateError(null);
-    }
+    // Always update the dates when going back
+    setStartDate(format(newStart, "yyyy-MM-dd"));
+    setEndDate(format(newEnd, "yyyy-MM-dd"));
+    setDateError(null);
   };
 
   const goToNextWeek = () => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const daysInRange = differenceInDays(end, start);
-
-    const newStart = new Date(end);
-    newStart.setDate(end.getDate() + 1);
-
-    const newEnd = new Date(end);
-    newEnd.setDate(end.getDate() + daysInRange + 1);
-
-    // Don't allow future dates beyond today
+    
+    // Calculate the new date range
+    const newStart = new Date(start);
+    newStart.setDate(start.getDate() + (daysInRange + 1));
+    
+    const newEnd = new Date(newStart);
+    newEnd.setDate(newStart.getDate() + daysInRange);
+    
+    // Get today's date at midnight for comparison
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    if (newStart > today) {
-      setDateError("Cannot select future dates");
-      return;
-    }
-
-    // Don't update if the new range would be invalid
-    if (newStart <= newEnd) {
+    
+    // If the new range would go beyond today, adjust it
+    if (newEnd > today) {
+      // If we're already at or beyond today, don't go further
+      if (end >= today) {
+        return;
+      }
+      // Otherwise, set the end to today and adjust the start accordingly
+      const adjustedEnd = new Date(today);
+      const adjustedStart = new Date(adjustedEnd);
+      adjustedStart.setDate(adjustedEnd.getDate() - daysInRange);
+      
+      setStartDate(format(adjustedStart, "yyyy-MM-dd"));
+      setEndDate(format(adjustedEnd, "yyyy-MM-dd"));
+    } else {
+      // Update to the new range if it's valid
       setStartDate(format(newStart, "yyyy-MM-dd"));
       setEndDate(format(newEnd, "yyyy-MM-dd"));
-      setDateError(null);
     }
+    
+    setDateError(null);
   };
 
   const getWeatherStatusColor = (humidity: string) => {
@@ -730,18 +739,9 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                     data.flatMap((observingTime, obsIndex) =>
                       observingTime.MeteorologicalEntry.map(
                         (record, entryIndex) => {
-                          const time = observingTime.utcTime
-                            ? format(new Date(observingTime.utcTime), "HH:mm")
-                            : "--:--";
                           const humidityClass = getWeatherStatusColor(
                             record.relativeHumidity
                           );
-                          const recordDate = observingTime.utcTime
-                            ? format(
-                                new Date(observingTime.utcTime),
-                                "yyyy-MM-dd"
-                              )
-                            : "--";
                           const canEdit = user && canEditRecord(record, user);
                           const rowIndex =
                             obsIndex *
