@@ -35,9 +35,6 @@ export default function WeatherTabsPage() {
 
   return (
     <main className="container mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6 text-blue-800 text-center">
-        Weather Data Management System
-      </h1>
 
       <Formik<SynopticFormValues>
         initialValues={initialValues}

@@ -316,7 +316,6 @@ export async function PUT(req: Request) {
       where: { id },
       data: {
         ...updateData,
-        updatedAt: new Date(),
       },
       include: {
         ObservingTime: {
