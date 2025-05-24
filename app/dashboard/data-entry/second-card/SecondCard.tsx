@@ -176,7 +176,16 @@ const windSchema = Yup.object({
 
     "wind-direction": Yup.string()
       .required("Wind direction is required")
-      .matches(/^[0-9]{2}$/, "Must be a 2-digit integer between 00 and 99"),
+      .test(
+        "is-valid-direction",
+        "Must be wind direction between 5 to 360 degrees",
+        (value) => {
+          if (!value) return false;
+          if (value === "00") return true;
+          const num = Number(value);
+          return Number.isInteger(num) && num >= 5 && num <= 360;
+        }
+      ),
   }),
 });
 
@@ -1427,7 +1436,7 @@ export default function WeatherObservationForm() {
                                   ),
                                 }
                               )}
-                              placeholder="0-99 code"
+                              placeholder="wind direction 5 degree to 364 degree from code book"
                               required
                               inputMode="numeric"
                             />
