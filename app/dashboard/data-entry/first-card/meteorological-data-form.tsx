@@ -100,12 +100,12 @@ const pressureSchema = Yup.object({
     .test("is-numeric", "Only numeric values allowed", (value) =>
       /^\d+$/.test(value || "")
     ),
-  correctedForIndex: Yup.string()
-    .required("Corrected for Index অবশ্যই পূরণ করতে হবে")
-    .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10142 for 1014.2 hPa)")
-    .test("is-numeric", "Only numeric values allowed", (value) =>
-      /^\d+$/.test(value || "")
-    ),
+  // correctedForIndex: Yup.string()
+  //   .required("Corrected for Index অবশ্যই পূরণ করতে হবে")
+  //   .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10142 for 1014.2 hPa)")
+  //   .test("is-numeric", "Only numeric values allowed", (value) =>
+  //     /^\d+$/.test(value || "")
+  //   ),
 });
 
 const squallSchema = Yup.object({
@@ -190,8 +190,6 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
     dewPoint: "",
     relativeHumidity: "",
   });
-
-  console.log("timeData", timeData);
 
   const { data: session } = useSession();
 
@@ -829,6 +827,37 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
             pressureData.heightDifference
           );
 
+          // Get yesterday's and current station level pressure
+          const prevStationLevelPressure = timeData?.yesterday?.meteorologicalEntry?.[0]?.stationLevelPressure || "0";
+          
+          // Use the pressureData directly since we just set it
+          const currentPressureStr = pressureData.stationLevelPressure;
+          
+          console.log("prevStationLevelPressure", prevStationLevelPressure);
+          console.log("currentPressureStr", currentPressureStr);
+          
+          // Convert to numbers
+          const prevPressure = Number(prevStationLevelPressure) || 0;
+          const currentPressure = Number(currentPressureStr) || 0;
+          
+          // Calculate the difference
+          const pressureChange = prevPressure - currentPressure;
+          
+          // Format with sign and leading zeros (always 4 chars total: sign + 3 digits)
+          const sign = pressureChange > 0 ? '+' : '-';
+          const absValue = Math.abs(pressureChange);
+          const paddedNumber = String(absValue).padStart(3, '0');
+          const formattedValue = `${sign}${paddedNumber}`;
+          
+          formik.setFieldValue("pressureChange24h", formattedValue);
+          
+          console.log({
+            prevPressure,
+            currentPressure,
+            pressureChange,
+            formattedValue
+          });
+
           const seaData = calculateSeaLevelPressure(
             dryBulb,
             pressureData.stationLevelPressure,
@@ -986,20 +1015,19 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
         />
         {/*Card Body */}
         <div className="relative rounded-xl">
-          {!time?.isPassed ||
-            (!time && (
-              <div className="absolute inset-0 bg-amber-50/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-xl ring-2 ring-amber-200 ring-offset-4">
-                <div className="bg-white py-4 px-6 rounded-lg shadow-lg text-center border-2 border-amber-300">
-                  <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />
-                  <h3 className="text-lg font-medium text-amber-800">
-                    3 Hours has not passed yet
-                  </h3>
-                  <p className="text-sm text-amber-600 mt-1">
-                    Please wait a little longer
-                  </p>
-                </div>
+          {/* {!time?.isPassed && (
+            <div className="absolute inset-0 bg-amber-50/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-xl ring-2 ring-amber-200 ring-offset-4">
+              <div className="bg-white py-4 px-6 rounded-lg shadow-lg text-center border-2 border-amber-300">
+                <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />
+                <h3 className="text-lg font-medium text-amber-800">
+                  3 Hours has not passed yet
+                </h3>
+                <p className="text-sm text-amber-600 mt-1">
+                  Please wait a little longer
+                </p>
               </div>
-            ))}
+            </div>
+          )} */}
           <Tabs
             value={activeTab}
             onValueChange={handleTabChange}
@@ -1182,17 +1210,10 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       id="correctedForIndex"
                       name="correctedForIndex"
                       value={formik.values.correctedForIndex || ""}
-                      onChange={handleNumericInput}
-                      className={cn(
-                        "border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30",
-                        {
-                          "border-red-500":
-                            formik.touched.correctedForIndex &&
-                            formik.errors.correctedForIndex,
-                        }
-                      )}
+                      onChange={handleChange}
+                      className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
                     />
-                    {renderErrorMessage("correctedForIndex")}
+                  
                   </div>
 
                   <div className="space-y-2">

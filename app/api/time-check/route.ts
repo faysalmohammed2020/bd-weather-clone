@@ -69,23 +69,17 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    if (!time) {
-      return NextResponse.json(
-        { time: null, error: "No time found", yesterday: yesterdayObservingTime.length > 0 ? yesterdayObservingTime[0] : null },
-        { status: 404 }
-      );
-    }
 
     return NextResponse.json({
-      time: time.utcTime,
+      time: time?.utcTime ?? null,
       yesterday: {
-        utcTime: yesterdayObservingTime[0]?.utcTime,
-        meteorologicalEntry: yesterdayObservingTime[0]?.MeteorologicalEntry,
+        utcTime: yesterdayObservingTime[0]?.utcTime ?? null,
+        meteorologicalEntry: yesterdayObservingTime[0]?.MeteorologicalEntry ?? null,
       },
-      hasMeteorologicalData: time._count.MeteorologicalEntry > 0,
-      hasWeatherObservation: time._count.WeatherObservation > 0,
-      hasSynopticCode: time._count.SynopticCode > 0,
-      hasDailySummary: time._count.DailySummary > 0,
+      hasMeteorologicalData: time?._count?.MeteorologicalEntry ? time._count.MeteorologicalEntry > 0 : false,
+      hasWeatherObservation: time?._count?.WeatherObservation ? time._count.WeatherObservation > 0 : false,
+      hasSynopticCode: time?._count?.SynopticCode ? time._count.SynopticCode > 0 : false,
+      hasDailySummary: time?._count?.DailySummary ? time._count.DailySummary > 0 : false,
     });
   } catch (error) {
     console.error("Error checking time:", error);
@@ -136,23 +130,16 @@ export async function GET() {
       },
     });
 
-    if (!time) {
-      return NextResponse.json(
-        { time: null, isPassed: false },
-        { status: 404 }
-      );
-    }
-
-    const utcTime = time.utcTime.toISOString();
+    const utcTime = time?.utcTime?.toISOString() ?? null;
 
     // Check if 3 hours have passed since the last time
-    const isPassed = hasHoursPassed(utcTime, 3);
+    const isPassed = utcTime && hasHoursPassed(utcTime, 3) && time?.stationId == session.user.station?.id;
 
     return NextResponse.json({
-      hasMeteorologicalData: time._count.MeteorologicalEntry > 0,
-      hasWeatherObservation: time._count.WeatherObservation > 0,
-      hasSynopticCode: time._count.SynopticCode > 0,
-      hasDailySummary: time._count.DailySummary > 0,
+      hasMeteorologicalData: time?._count?.MeteorologicalEntry ? time._count.MeteorologicalEntry > 0 : false,
+      hasWeatherObservation: time?._count?.WeatherObservation ? time._count.WeatherObservation > 0 : false,
+      hasSynopticCode: time?._count?.SynopticCode ? time._count.SynopticCode > 0 : false,
+      hasDailySummary: time?._count?.DailySummary ? time._count.DailySummary > 0 : false,
       time: utcTime,
       isPassed,
     });

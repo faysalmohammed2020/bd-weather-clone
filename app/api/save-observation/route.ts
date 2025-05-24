@@ -51,20 +51,20 @@ export async function POST(request: Request) {
     if (!observingTime || !observingTime._count.MeteorologicalEntry) {
       return NextResponse.json(
         {
-          message: "First card entry not found",
-          error: "The selected hour does not exist in the database",
+          success: false,
+          error: "First card entry not found",
         },
-        { status: 404 }
+        { status: 400 }
       );
     }
 
     if (observingTime._count.WeatherObservation) {
       return NextResponse.json(
         {
-          message: "Second card entry already exists",
-          error: "The selected hour already has a second card entry",
+          success: false,
+          error: "Second card entry already exists",
         },
-        { status: 404 }
+        { status: 400 }
       );
     }
 
@@ -72,9 +72,9 @@ export async function POST(request: Request) {
     const stationId = session.user.station?.id;
     if (!stationId) {
       return NextResponse.json({
-        message: "Station ID is required",
-        status: 400,
-      });
+        success: false,
+        error: "Station ID is required",
+      }, { status: 400 });
     }
 
     // Find the station by stationId to get its primary key (id)
@@ -84,9 +84,9 @@ export async function POST(request: Request) {
 
     if (!stationRecord) {
       return NextResponse.json({
-        message: `No station found with ID: ${stationId}`,
-        status: 404,
-      });
+        success: false,
+        error: `No station found with ID: ${stationId}`,
+      }, { status: 404 });
     }
 
     const observationData = {
@@ -154,11 +154,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      message: "Observation saved successfully",
+      error: "Observation saved successfully",
       data: { id: saved.id, stationId: stationRecord.id },
     });
   } catch (error) {
-    console.error("Error saving observation:", error);
     return NextResponse.json(
       {
         success: false,
@@ -189,32 +188,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: false, error: "Station ID is required" }, { status: 400 });
     }
 
-    // let stationRecord = null;
-    // if (stationId && stationId !== "all") {
-    //   stationRecord = await prisma.station.findFirst({ where: { id: stationId } });
-
-    //   if (!stationRecord) {
-    //     return NextResponse.json({ success: false, error: `No station found with ID: ${stationId}` }, { status: 404 });
-    //   }
-    // }
-
     const startTime = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 7));
     startTime.setHours(0, 0, 0, 0);
     const endTime = endDate ? new Date(endDate) : new Date();
     endTime.setHours(23, 59, 59, 999);
 
-    const whereClause: any = {
-      utcTime: {
-        gte: startTime,
-        lte: endTime,
-      },
-    };
-
-    // if (stationRecord) {
-    //   whereClause.stationId = stationRecord.id;
-    // } else if (session.user.role !== "super_admin") {
-    //   whereClause.stationId = session.user.station?.id;
-    // }
+    const superFilter = session.user.role === "super_admin";
 
     const entries = await prisma.observingTime.findMany({
       where: {
@@ -225,7 +204,10 @@ export async function GET(request: Request) {
               lte: endTime,
             },
           },
-          stationIdParam ? { stationId: stationIdParam } : {},
+          ...(superFilter 
+            ? (stationIdParam ? [{ stationId: stationIdParam }] : []) 
+            : [{ stationId: session.user.station?.id }]
+          ),
         ],
       },
       include: {

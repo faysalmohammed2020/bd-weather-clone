@@ -107,6 +107,53 @@ export function getYesterdayRange(): { startYesterday: Date; endYesterday: Date 
   return { startYesterday, endYesterday };
 }
 
+// Get the start and end of today in Bangladesh time
+export function getTodayBDRange(): { startToday: Date; endToday: Date } {
+  const now = new Date();
+
+  // Convert current UTC time to BDT using Intl
+  const bdNowStr = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Dhaka',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).format(now); // Gives: "2025-05-22"
+
+  const [year, month, day] = bdNowStr.split('-').map(Number);
+
+  // Define the start and end of today in BDT (local times)
+  const startBDT = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+  const endBDT = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+
+  // Now treat these as BDT and convert to UTC by subtracting 6 hours
+  const startToday = new Date(startBDT.getTime() - 6 * 60 * 60 * 1000);
+  const endToday = new Date(endBDT.getTime() - 6 * 60 * 60 * 1000);
+
+  return { startToday, endToday };
+}
+
+
+// Get the start and end of yesterday in Bangladesh time
+export function getYesterdayBDRange(): { startYesterday: Date; endYesterday: Date } {
+  const now = new Date();
+
+  // Convert now to BDT
+  const bdNow = new Date(now.getTime() + 6 * 60 * 60 * 1000);
+  bdNow.setUTCDate(bdNow.getUTCDate() - 1); // Go back one BDT day
+
+  const year = bdNow.getUTCFullYear();
+  const month = bdNow.getUTCMonth();
+  const day = bdNow.getUTCDate();
+
+  const startYesterday = new Date(Date.UTC(year, month, day, 0, 0, 0) - 6 * 60 * 60 * 1000);
+  const endYesterday = new Date(Date.UTC(year, month, day, 23, 59, 59, 999) - 6 * 60 * 60 * 1000);
+
+  return { startYesterday, endYesterday };
+}
+
+
+
+
 /**
  * Checks if a given UTC time has passed a specified number of hours
  */
@@ -132,3 +179,10 @@ export function getTimeDiffInHours(savedUtcTime: string): number {
 
   return Number(diffHours.toFixed(2));
 }
+
+
+// const startDateParam = startDate ? moment(startDate).utc().add(1, "day").startOf("day").toDate() : null;
+// const endDateParam = endDate ? moment(endDate).utc().add(1, "day").endOf("day").toDate() : null;
+
+// const statTime = startDateParam || moment().utc().startOf("day").toDate();
+// const endTime = endDateParam || moment().utc().endOf("day").toDate();

@@ -19,7 +19,6 @@ export async function POST(req: Request) {
     }
 
     const { startToday, endToday } = getTodayUtcRange();
-    // First, find the ObservingTime record by its UTC time
     const observingTime = await prisma.observingTime.findFirst({
       where: {
         AND: [
@@ -79,7 +78,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // Get station ID from session
     const stationId = session.user.station?.stationId;
     if (!stationId) {
       return NextResponse.json({
@@ -89,7 +87,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // Find the station by stationId to get its primary key (id)
     const stationRecord = await prisma.station.findFirst({
       where: { id: session.user.station?.id },
     });
@@ -105,8 +102,6 @@ export async function POST(req: Request) {
     const newEntry = await prisma.synopticCode.create({
       data: {
         dataType: body.dataType || "SYNOP",
-
-        // Measurement fields
         C1: body.C1 || null,
         Iliii: body.Iliii || null,
         iRiXhvv: body.iRiXhvv || null,
@@ -128,9 +123,7 @@ export async function POST(req: Request) {
         NsChshs: body.NsChshs || null,
         dqqqt90: body.dqqqt90 || null,
         fqfqfq91: body.fqfqfq91 || null,
-
         weatherRemark: body.weatherRemark || null,
-
         ObservingTime: {
           connect: {
             id: observingTime?.id,
@@ -157,49 +150,61 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   const session = await getSession();
 
   if (!session || !session.user?.id) {
     return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+      { success: false, error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
 
-    const stationId = session.user.station?.id;
-    if (!stationId) {
-      return NextResponse.json(
-        { message: "Station ID is missing" },
-        { status: 400 }
-      );
-    }
-try {
-    const station = await prisma.station.findFirst({
-      where: { id: stationId },
-    });
+  const { searchParams } = new URL(req.url);
+  const startDate = searchParams.get("startDate");
+  const endDate = searchParams.get("endDate");
+  const stationIdParam = searchParams.get("stationId");
 
-    if (!station) {
-      return NextResponse.json(
-        { message: "Station not found" },
-        { status: 404 }
-      );
-    }
+  const userStationId = session.user.station?.id;
+  const isSuperAdmin = session.user.role === "super_admin";
 
-    const { startToday, endToday } = getTodayUtcRange();
+  // Calculate start and end date
+  const today = new Date();
+  const startTime = startDate
+    ? new Date(startDate)
+    : new Date(today.setHours(0, 0, 0, 0));
+  const endTime = endDate
+    ? new Date(endDate)
+    : new Date(new Date().setHours(23, 59, 59, 999));
 
-    const todayEntries = await prisma.synopticCode.findMany({
+  // Determine which station ID to use
+  const stationId = stationIdParam || (!isSuperAdmin ? userStationId : undefined);
+
+  // For non-super admins, station ID is mandatory
+  if (!stationId && !isSuperAdmin) {
+    return NextResponse.json(
+      { message: "Station ID is required" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const entries = await prisma.synopticCode.findMany({
       where: {
         ObservingTime: {
-          stationId: station.id,
+          ...(stationId ? { stationId } : {}), // Optional station filter
           utcTime: {
-            gte: startToday,
-            lt: endToday, // Use lt to avoid 00:00 of the next day
+            gte: startTime,
+            lte: endTime,
           },
         },
       },
       include: {
-        ObservingTime: true,
+        ObservingTime: {
+          include: {
+            station: true,
+          },
+        },
       },
       orderBy: {
         ObservingTime: {
@@ -208,11 +213,69 @@ try {
       },
     });
 
-    return NextResponse.json(todayEntries);
+    return NextResponse.json(entries);
   } catch (error) {
-    console.error("Error fetching today's synoptic data:", error);
+    console.error("Error fetching synoptic data:", error);
     return NextResponse.json(
       {
+        message: "Internal server error",
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
+  }
+}
+
+
+export async function PUT(req: Request) {
+  try {
+    const session = await getSession();
+    if (!session || !session.user?.id) {
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const body = await req.json();
+    const { id, ObservingTime, ...updateData } = body;
+
+    const existingRecord = await prisma.synopticCode.findUnique({
+      where: { id },
+      include: { ObservingTime: true },
+    });
+
+    if (!existingRecord) {
+      return NextResponse.json(
+        { success: false, error: "Record not found" },
+        { status: 404 }
+      );
+    }
+
+    const userStationId = session.user.station?.id;
+    const recordStationId = existingRecord.ObservingTime?.stationId;
+
+    if (session.user.role !== "super_admin" && userStationId !== recordStationId) {
+      return NextResponse.json(
+        { success: false, error: "Permission denied" },
+        { status: 403 }
+      );
+    }
+
+    const updatedRecord = await prisma.synopticCode.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return NextResponse.json(
+      { success: true, data: updatedRecord },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error updating synoptic record:", error);
+    return NextResponse.json(
+      {
+        success: false,
         message: "Internal server error",
         error: error instanceof Error ? error.message : "Unknown error",
       },

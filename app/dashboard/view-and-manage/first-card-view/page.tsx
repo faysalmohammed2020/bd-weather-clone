@@ -670,7 +670,7 @@ const fetchData = async () => {
                   </tr>
                   <tr>
                     <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
-                      <div className="h-16 text-indigo-800">Time of Observation (GMT)</div>
+                      <div className="h-16 text-indigo-800">Time of Observation (UTC)</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
                       <div className="h-16 text-indigo-800">Indicator</div>
@@ -802,7 +802,7 @@ const fetchData = async () => {
                               {utcToHour(observingTime.utcTime.toString())}
                             </td>
                             <td className="border border-slate-300 p-1">{record.subIndicator || "--"}</td>
-                            <td className="border border-slate-300 p-1 font-medium text-indigo-700 whitespace-nowrap">{recordDate}</td>
+                            <td className="border border-slate-300 p-1 font-medium text-indigo-700 whitespace-nowrap">   {new Date(observingTime.utcTime).toLocaleDateString()}</td>
                             <td className="border border-slate-300 p-1">
                               <Badge variant="outline" className="font-mono">
                                 {observingTime.station.stationId || "--"}

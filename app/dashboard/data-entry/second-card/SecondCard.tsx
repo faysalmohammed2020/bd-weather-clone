@@ -36,7 +36,6 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useTimeCheck } from "@/hooks/useTimeCheck";
-import { utcToHour } from "@/lib/utils";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { cn } from "@/lib/utils";
@@ -276,11 +275,10 @@ export default function WeatherObservationForm() {
   const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
   const { data: session } = useSession();
 
-  const { time, error: timeError } = useTimeCheck();
+  const { time } = useTimeCheck();
 
   // Get the persistent form store
-  const { formData, updateFields, resetForm, checkAndResetIfExpired } =
-    useWeatherObservationForm();
+  const { formData, updateFields, resetForm } = useWeatherObservationForm();
 
   // Tab styles with gradients and more vibrant colors
   const tabStyles = {
@@ -342,7 +340,7 @@ export default function WeatherObservationForm() {
         ...formData?.observer,
       },
       metadata: {
-        stationId: session?.user?.stationId || "",
+        stationId: session?.user?.station?.stationId || "",
         ...formData?.metadata,
       },
     },
@@ -505,7 +503,10 @@ export default function WeatherObservationForm() {
         "observer.observer-initial",
         session.user.name || ""
       );
-      formik.setFieldValue("metadata.stationId", session.user.stationId || "");
+      formik.setFieldValue(
+        "metadata.stationId",
+        session.user.station?.stationId || ""
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
@@ -714,7 +715,7 @@ export default function WeatherObservationForm() {
           .padStart(2, "0"),
       },
       metadata: {
-        stationId: session?.user?.stationId || "",
+        stationId: session?.user?.station?.stationId || "",
       },
     };
 
@@ -754,15 +755,22 @@ export default function WeatherObservationForm() {
         body: JSON.stringify(submissionData),
       });
 
-      if (!response.ok)
-        throw new Error(`HTTP error! status: ${response.status}`);
 
-      await response.json();
-      toast.success("Observation submitted successfully!");
-      resetForm();
-      formik.resetForm();
-      setCurrentStep(1);
-      setActiveTab("cloud");
+      const data = await response.json();
+
+      if (!data.success) {
+        toast.error(data.error);
+        return;
+      }
+
+      if (data.success) {
+        toast.success("Observation submitted successfully!");
+        resetForm();
+        formik.resetForm();
+        setCurrentStep(1);
+        setActiveTab("cloud");
+        updateFields({});
+      }
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("Failed to submit. Please try again.");
@@ -846,7 +854,7 @@ export default function WeatherObservationForm() {
           >
             <div className="relative rounded-xl">
               {/* Overlay that blocks interaction when no hour is selected */}
-              {!time && !timeError && !time?.hasMeteorologicalData && (
+              {/* {(!time?.isPassed || !time?.hasMeteorologicalData) && (
                 <div className="absolute inset-0 bg-amber-50/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-xl ring-2 ring-amber-200 ring-offset-4">
                   <div className="bg-white py-4 px-6 rounded-lg shadow-lg text-center border-2 border-amber-300">
                     <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />
@@ -856,14 +864,11 @@ export default function WeatherObservationForm() {
                         : "Check first card"}
                     </h3>
                     <p className="text-sm text-amber-600 mt-1">
-                      Last update hour:{" "}
-                      {utcToHour(time?.time) === "NaN"
-                        ? ""
-                        : utcToHour(time?.time)}
+                      Last update hour:
                     </p>
                   </div>
                 </div>
-              )}
+              )} */}
 
               <Tabs
                 value={activeTab}

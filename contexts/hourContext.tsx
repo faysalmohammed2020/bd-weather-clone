@@ -1,9 +1,14 @@
 "use client";
 
+import { MeteorologicalEntry } from "@prisma/client";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 type TimeData = {
   time: string;
+  yesterday: {
+    utcTime: string;
+    meteorologicalEntry: MeteorologicalEntry[];
+  };
   hasMeteorologicalData: boolean;
   hasWeatherObservation: boolean;
   hasSynopticCode: boolean;

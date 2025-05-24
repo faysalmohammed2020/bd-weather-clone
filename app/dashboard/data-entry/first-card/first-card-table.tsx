@@ -584,7 +584,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                   <tr>
                     <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
                       <div className="h-16 text-indigo-800">
-                        Time of Observation (GMT)
+                        Time of Observation (UTC)
                       </div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
@@ -762,7 +762,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                                 {record.subIndicator || "--"}
                               </td>
                               <td className="border border-slate-300 p-1 font-medium text-indigo-700 whitespace-nowrap">
-                                {recordDate}
+                              {new Date(observingTime.utcTime).toLocaleDateString()}
                               </td>
                               <td className="border border-slate-300 p-1">
                                 <Badge variant="outline" className="font-mono">
