@@ -142,10 +142,7 @@ const rainfallSchema = Yup.object({
 
     "during-previous": Yup.string()
       .required("During previous 6 hours is required")
-      .matches(
-        /^(0[0-9]{2}|[1-8][0-9]{2}|9[0-8][0-9])$/,
-        "Must be a 3-digit integer between 000 to 989"
-      ),
+      .matches(/^\d{4}$/, "Must be a 4-digit integer between 0000 and 9999"),
 
     "last-24-hours": Yup.string()
       .required("Last 24 hours precipitation is required")
@@ -755,7 +752,6 @@ export default function SecondCardForm() {
         body: JSON.stringify(submissionData),
       });
 
-
       const data = await response.json();
 
       if (!data.success) {
@@ -850,7 +846,6 @@ export default function SecondCardForm() {
             onKeyDown={handleKeyDown}
           >
             <div className="relative rounded-xl">
-
               <Tabs
                 value={activeTab}
                 onValueChange={(value) => {
@@ -1220,7 +1215,7 @@ export default function SecondCardForm() {
                             <Input
                               id="during-previous"
                               name="during-previous"
-                              placeholder="Enter code 000 to 989"
+                              placeholder="Enter 4 digits (e.g., 0000)"
                               value={
                                 formik.values.rainfall["during-previous"] || ""
                               }
