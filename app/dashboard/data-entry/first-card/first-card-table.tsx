@@ -762,7 +762,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                                 {record.subIndicator || "--"}
                               </td>
                               <td className="border border-slate-300 p-1 font-medium text-indigo-700 whitespace-nowrap">
-                                {recordDate}
+                              {new Date(observingTime.utcTime).toLocaleDateString()}
                               </td>
                               <td className="border border-slate-300 p-1">
                                 <Badge variant="outline" className="font-mono">

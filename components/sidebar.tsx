@@ -60,6 +60,16 @@ const Sidebar = () => {
           href: "/dashboard/data-entry/second-card",
           label: "Second Card",
         },
+        {
+          icon: <Codesandbox className="w-5 h-5" />,
+          href: "/dashboard/data-entry/synoptic-code",
+          label: "Synoptic Code",
+        },
+        {
+          icon: <BarChart className="w-5 h-5" />,
+          href: "/dashboard/data-entry/daily-summery",
+          label: "Daily Summery",
+        },
       ],
     },
     {

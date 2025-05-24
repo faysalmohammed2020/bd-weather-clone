@@ -514,8 +514,8 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                 {/* Table Header */}
                 <thead>
                   <tr>
-                    <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800">
-                      TIME
+                    <th colSpan={2} className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800">
+                      TIME & Date
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800">
                       STATION
@@ -575,6 +575,9 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                   <tr>
                     <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 text-xs p-1">
                       <div className="h-16 text-sky-800">Time of Observation (UTC)</div>
+                    </th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 text-xs p-1">
+                      <div className="h-16 text-sky-800">Observation Date</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 text-xs p-1">
                       <div className="h-16 text-sky-800">Station ID</div>
@@ -725,6 +728,9 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                             <div className="flex flex-col">
                               {utcToHour(record.utcTime.toString())}
                             </div>
+                          </td>
+                          <td className="border border-slate-300 p-1">
+                          {new Date(record.utcTime).toLocaleDateString()}
                           </td>
                           <td className="border border-slate-300 p-1">
                             <Badge variant="outline" className="font-mono">
