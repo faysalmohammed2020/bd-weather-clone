@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/getSession";
-import { getTodayUtcRange } from "@/lib/utils";
+import { getTodayBDRange, getTodayUtcRange } from "@/lib/utils";
 
 const prisma = new PrismaClient();
 
@@ -168,14 +168,18 @@ export async function GET(req: Request) {
   const userStationId = session.user.station?.id;
   const isSuperAdmin = session.user.role === "super_admin";
 
-  // Calculate start and end date
-  const today = new Date();
-  const startTime = startDate
-    ? new Date(startDate)
-    : new Date(today.setHours(0, 0, 0, 0));
-  const endTime = endDate
-    ? new Date(endDate)
-    : new Date(new Date().setHours(23, 59, 59, 999));
+const startTime = startDate
+      ? new Date(startDate)
+      : new Date(new Date().setDate(new Date().getDate() - 7));
+    startTime.setHours(0, 0, 0, 0); // Start of day
+
+    const endTime = endDate ? new Date(endDate) : new Date();
+    endTime.setHours(23, 59, 59, 999); // End of day
+
+    const { startToday, endToday } = getTodayBDRange();
+
+    const start = startDate ? startTime : startToday;
+    const end = endDate ? endTime : endToday;
 
   // Determine which station ID to use
   const stationId = stationIdParam || (!isSuperAdmin ? userStationId : undefined);
@@ -194,8 +198,8 @@ export async function GET(req: Request) {
         ObservingTime: {
           ...(stationId ? { stationId } : {}), // Optional station filter
           utcTime: {
-            gte: startTime,
-            lte: endTime,
+            gte: start,
+            lte: end,
           },
         },
       },
