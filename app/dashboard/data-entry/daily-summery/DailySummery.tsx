@@ -831,21 +831,6 @@ export function DailySummaryForm() {
           </span>
           Daily Summary Measurements
         </h2>
-
-        <div className="relative">
-          <div className="flex items-center gap-2 bg-white rounded-lg border border-gray-200 shadow-sm px-4 py-2 focus-within:ring-2 focus-within:ring-blue-400 focus-within:border-blue-400">
-            <CalendarIcon className="h-4 w-4 text-gray-400" />
-            <input
-              type="date"
-              id="observation-date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="border-0 p-0 text-sm focus:outline-none focus:ring-0"
-              disabled={dataStatus.isLoading}
-            />
-          </div>
-          <p className="text-xs text-gray-500 mt-1">{formatDate(selectedDate)}</p>
-        </div>
       </div>
 
       {/* Status Messages */}
@@ -859,9 +844,8 @@ export function DailySummaryForm() {
       ) : (
         dataStatus.message && (
           <div
-            className={`p-3 rounded-md text-sm ${
-              dataStatus.hasToday ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800"
-            }`}
+            className={`p-3 rounded-md text-sm ${dataStatus.hasToday ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800"
+              }`}
           >
             <div className="flex items-center">
               {dataStatus.hasToday ? (
@@ -977,24 +961,9 @@ export function DailySummaryForm() {
                 </CardHeader>
                 <CardContent className="px-4 py-6">
                   <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="text-gray-600">Station:</span>
-                      <div className="font-medium">{values.stationNo}</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Date:</span>
-                      <div className="font-medium">
-                        {values.year}-{values.month}-{values.day}
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Data Type:</span>
-                      <div className="font-medium">{values.dataType}</div>
-                    </div>
-                    <div>
-                      <span className="text-gray-600">Measurements:</span>
-                      <div className="font-medium">{values.measurements.filter((m) => m && m !== "").length} / 16</div>
-                    </div>
+
+                    {values.measurements.filter((m) => m && m !== "").length} / 16
+
                   </div>
                 </CardContent>
               </Card>

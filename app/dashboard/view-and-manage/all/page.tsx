@@ -4,11 +4,11 @@ import { useRef, useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import FirstCardTable from "../first-card-view/page";
 import SecondCardTable from "../second-card-view/page";
-import SynopticCodeTable from "../synoptic-code/synoptic-components/synoptic-table";
 import DailySummaryPage from "../daily-summery/page";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import SynopticCodeTable from "../synoptic-code/page";
 
 export default function AllViewAndManagePage() {
    const [activeTab, setActiveTab] = useState("first-card");
