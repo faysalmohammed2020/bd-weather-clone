@@ -827,6 +827,18 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
             pressureData.heightDifference
           );
 
+          // Get yesterday's and current station level pressure
+          const prevStationLevelPressure = timeData?.yesterday?.meteorologicalEntry?.stationLevelPressure || "0";
+          const currentStationLevelPressure = formik.values.stationLevelPressure || "0";
+          
+          // Convert to numbers for calculation
+          const prevPressure = Number(prevStationLevelPressure) || 0;
+          const currentPressure = Number(currentStationLevelPressure) || 0;
+          
+          // Calculate the difference and convert to string
+          const pressureChange = prevPressure - currentPressure;
+          formik.setFieldValue("pressureChange24h", String(pressureChange));
+
           const seaData = calculateSeaLevelPressure(
             dryBulb,
             pressureData.stationLevelPressure,

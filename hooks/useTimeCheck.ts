@@ -28,7 +28,5 @@ export function useTimeCheck() {
     fetchTime();
   }, []);
 
-  console.log("Time",time);
-
   return { time, isLoading, error };
 }
