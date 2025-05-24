@@ -517,10 +517,6 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
           </div>
 
           <div className="p-4">
-            <div className="text-center font-bold text-xl border-b-2 border-indigo-600 pb-2 mb-4 text-indigo-800">
-              METEOROLOGICAL DATA
-            </div>
-
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
@@ -727,7 +723,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                         <div className="flex flex-col items-center justify-center text-slate-500">
                           <CloudSun size={48} className="text-slate-400 mb-3" />
                           <p className="text-lg font-medium">
-                            No meteorological data found
+                            No first card data found
                           </p>
                           <p className="text-sm">
                             Try selecting a different date or station
@@ -954,7 +950,7 @@ export function FirstCardTable({ refreshTrigger = 0 }: FirstCardTableProps) {
                       d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                     />
                   </svg>
-                  Edit Meteorological Data
+                  Edit First Card Data
                 </div>
               </DialogTitle>
               <DialogDescription className="text-slate-600">

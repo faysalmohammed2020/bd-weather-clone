@@ -1,18 +1,28 @@
 "use client"
 import { useState, useEffect, useImperativeHandle, forwardRef } from "react"
+import type React from "react"
+
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar, ChevronLeft, ChevronRight, CloudSun, Filter, Loader2, RefreshCw } from "lucide-react"
+import { Calendar, ChevronLeft, ChevronRight, CloudSun, Filter, Loader2, AlertTriangle } from "lucide-react"
 import { format, parseISO, differenceInDays, isValid } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import { useSession } from "@/lib/auth-client"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { utcToHour } from "@/lib/utils"
-import { Download } from "lucide-react";
+import { Download } from "lucide-react"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 // Define the structure of weather observation data
 interface WeatherObservation {
@@ -55,6 +65,8 @@ interface WeatherObservation {
   windSpeed: string | null
   windDirection: string | null
   submittedAt: string | null
+  createdAt: string
+  updatedAt: string
   [key: string]: any
 }
 
@@ -80,6 +92,8 @@ interface MeteorologicalEntry {
   pastWeatherW2: string
   presentWeatherWW: string
   submittedAt: string | null
+  createdAt: string
+  updatedAt: string
   [key: string]: any
 }
 
@@ -114,10 +128,10 @@ interface SecondCardTableProps {
 
 // Helper function to determine if a user can edit an observation
 function canEditObservation(record: ObservationData, sessionUser: any) {
-  if (!sessionUser || !record.WeatherObservation?.[0]?.submittedAt) return false
+  if (!sessionUser || !record.WeatherObservation?.[0]) return false
 
   try {
-    const observationDate = parseISO(record.WeatherObservation[0].submittedAt || "")
+    const observationDate = parseISO(record.WeatherObservation[0].createdAt || "")
     if (!isValid(observationDate)) return false
 
     const now = new Date()
@@ -125,12 +139,12 @@ function canEditObservation(record: ObservationData, sessionUser: any) {
 
     const role = sessionUser.role
     const userId = sessionUser.id
-    const userStationId = sessionUser.station?.stationId
-    const recordStationId = record.station?.stationId
+    const userStationId = sessionUser.station?.id
+    const recordStationId = record.station?.id
 
     if (role === "super_admin") return daysDifference <= 365
     if (role === "station_admin") return daysDifference <= 30 && userStationId === recordStationId
-    if (role === "observer") return daysDifference <= 1 && userId === record.userId
+    if (role === "observer") return daysDifference <= 2 && userId === record.userId
 
     return false
   } catch (e) {
@@ -156,7 +170,6 @@ function getCloudStatusColor(amount: string | null) {
 const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps, ref) => {
   const [data, setData] = useState<ObservationData[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"))
   const [stationFilter, setStationFilter] = useState("all")
   const [stations, setStations] = useState<{ id: string; stationId: string; name: string }[]>([])
   const { data: session } = useSession()
@@ -167,6 +180,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
   const [selectedRecord, setSelectedRecord] = useState<ObservationData | null>(null)
   const [editFormData, setEditFormData] = useState<Partial<WeatherObservation>>({})
   const [isSaving, setIsSaving] = useState(false)
+  const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false)
+
   const today = format(new Date(), "yyyy-MM-dd")
   const [startDate, setStartDate] = useState(today)
   const [endDate, setEndDate] = useState(today)
@@ -176,16 +191,16 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
   useImperativeHandle(ref, () => ({
     getData: () => {
       return data
-        .filter(record => record.WeatherObservation && record.WeatherObservation.length > 0)
-        .map(record => ({
+        .filter((record) => record.WeatherObservation && record.WeatherObservation.length > 0)
+        .map((record) => ({
           ...record.WeatherObservation[0],
           stationId: record.stationId,
-          stationName: record.station?.name || '',
+          stationName: record.station?.name || "",
           utcTime: record.utcTime,
-          localTime: record.localTime
-        }));
-    }
-  }));
+          localTime: record.localTime,
+        }))
+    },
+  }))
 
   // Fetch data function
   const fetchData = async () => {
@@ -229,12 +244,29 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
   // Fetch data on component mount and when filters or refreshTrigger changes
   useEffect(() => {
     fetchData()
-  }, [selectedDate, startDate, endDate, stationFilter, refreshTrigger])
+  }, [startDate, endDate, stationFilter, refreshTrigger])
 
+  // Handle input changes in edit form - FIXED VERSION
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setEditFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
 
+  // Handle edit click - FIXED VERSION
+  const handleEditClick = (record: ObservationData) => {
+    if (user && canEditObservation(record, user)) {
+      setSelectedRecord(record)
+      setEditFormData(record.WeatherObservation[0] || {})
+      setIsEditDialogOpen(true)
+    } else {
+      setIsPermissionDeniedOpen(true)
+    }
+  }
 
-
-  // Handle saving the edited data
+  // Handle saving the edited data - FIXED VERSION
   const handleSaveEdit = async () => {
     if (!selectedRecord || !selectedRecord.WeatherObservation?.[0]) return
 
@@ -266,7 +298,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                 {
                   ...item.WeatherObservation[0],
                   ...editFormData,
-                  submittedAt: new Date().toISOString(),
+                  updatedAt: new Date().toISOString(),
                 },
               ],
             }
@@ -289,60 +321,60 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
   const filteredData = data.filter((record) => record.WeatherObservation && record.WeatherObservation.length > 0)
 
   const goToPreviousWeek = () => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const daysInRange = differenceInDays(end, start);
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const daysInRange = differenceInDays(end, start)
 
     // Calculate the new date range
-    const newStart = new Date(start);
-    newStart.setDate(start.getDate() - (daysInRange + 1));
+    const newStart = new Date(start)
+    newStart.setDate(start.getDate() - (daysInRange + 1))
 
-    const newEnd = new Date(start);
-    newEnd.setDate(start.getDate() - 1);
+    const newEnd = new Date(start)
+    newEnd.setDate(start.getDate() - 1)
 
     // Always update the dates when going back
-    setStartDate(format(newStart, "yyyy-MM-dd"));
-    setEndDate(format(newEnd, "yyyy-MM-dd"));
-    setDateError(null);
-  };
+    setStartDate(format(newStart, "yyyy-MM-dd"))
+    setEndDate(format(newEnd, "yyyy-MM-dd"))
+    setDateError(null)
+  }
 
   const goToNextWeek = () => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const daysInRange = differenceInDays(end, start);
-    
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const daysInRange = differenceInDays(end, start)
+
     // Calculate the new date range
-    const newStart = new Date(start);
-    newStart.setDate(start.getDate() + (daysInRange + 1));
-    
-    const newEnd = new Date(newStart);
-    newEnd.setDate(newStart.getDate() + daysInRange);
-    
+    const newStart = new Date(start)
+    newStart.setDate(start.getDate() + (daysInRange + 1))
+
+    const newEnd = new Date(newStart)
+    newEnd.setDate(newStart.getDate() + daysInRange)
+
     // Get today's date at midnight for comparison
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
     // If the new range would go beyond today, adjust it
     if (newEnd > today) {
       // If we're already at or beyond today, don't go further
       if (end >= today) {
-        return;
+        return
       }
       // Otherwise, set the end to today and adjust the start accordingly
-      const adjustedEnd = new Date(today);
-      const adjustedStart = new Date(adjustedEnd);
-      adjustedStart.setDate(adjustedEnd.getDate() - daysInRange);
-      
-      setStartDate(format(adjustedStart, "yyyy-MM-dd"));
-      setEndDate(format(adjustedEnd, "yyyy-MM-dd"));
+      const adjustedEnd = new Date(today)
+      const adjustedStart = new Date(adjustedEnd)
+      adjustedStart.setDate(adjustedEnd.getDate() - daysInRange)
+
+      setStartDate(format(adjustedStart, "yyyy-MM-dd"))
+      setEndDate(format(adjustedEnd, "yyyy-MM-dd"))
     } else {
       // Update to the new range if it's valid
-      setStartDate(format(newStart, "yyyy-MM-dd"));
-      setEndDate(format(newEnd, "yyyy-MM-dd"));
+      setStartDate(format(newStart, "yyyy-MM-dd"))
+      setEndDate(format(newEnd, "yyyy-MM-dd"))
     }
-    
-    setDateError(null);
-  };
+
+    setDateError(null)
+  }
 
   const handleDateChange = (type: "start" | "end", newDate: string) => {
     const date = new Date(newDate)
@@ -372,11 +404,11 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
   }
 
   const exportToCSV = () => {
-    const filteredData = data.filter(record => record.WeatherObservation && record.WeatherObservation.length > 0);
+    const filteredData = data.filter((record) => record.WeatherObservation && record.WeatherObservation.length > 0)
 
     if (filteredData.length === 0) {
-      toast.error("No weather observation data available to export");
-      return;
+      toast.error("No weather observation data available to export")
+      return
     }
 
     // Define headers
@@ -384,67 +416,112 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
       "Time (GMT)",
       "Station Name & ID ",
       "Total Cloud Amount",
-      "Low Cloud Direction", "Low Cloud Height", "Low Cloud Form", "Low Cloud Amount",
-      "Medium Cloud Direction", "Medium Cloud Height", "Medium Cloud Form", "Medium Cloud Amount",
-      "High Cloud Direction", "High Cloud Height", "High Cloud Form", "High Cloud Amount",
-      "Layer1 Height", "Layer1 Form", "Layer1 Amount",
-      "Layer2 Height", "Layer2 Form", "Layer2 Amount",
-      "Layer3 Height", "Layer3 Form", "Layer3 Amount",
-      "Layer4 Height", "Layer4 Form", "Layer4 Amount",
-      "Rainfall Start Time", "Rainfall End Time", "Since Previous", "During Previous", "Last 24 Hours",
-      "Wind First Anemometer", "Wind Second Anemometer", "Wind Speed", "Wind Direction",
-      "Observer Initial"
-    ];
+      "Low Cloud Direction",
+      "Low Cloud Height",
+      "Low Cloud Form",
+      "Low Cloud Amount",
+      "Medium Cloud Direction",
+      "Medium Cloud Height",
+      "Medium Cloud Form",
+      "Medium Cloud Amount",
+      "High Cloud Direction",
+      "High Cloud Height",
+      "High Cloud Form",
+      "High Cloud Amount",
+      "Layer1 Height",
+      "Layer1 Form",
+      "Layer1 Amount",
+      "Layer2 Height",
+      "Layer2 Form",
+      "Layer2 Amount",
+      "Layer3 Height",
+      "Layer3 Form",
+      "Layer3 Amount",
+      "Layer4 Height",
+      "Layer4 Form",
+      "Layer4 Amount",
+      "Rainfall Start Time",
+      "Rainfall End Time",
+      "Since Previous",
+      "During Previous",
+      "Last 24 Hours",
+      "Wind First Anemometer",
+      "Wind Second Anemometer",
+      "Wind Speed",
+      "Wind Direction",
+      "Observer Initial",
+    ]
 
     // Convert filteredData to CSV rows
     const rows = filteredData.map((record) => {
-      const obs = record.WeatherObservation?.[0] || {};
+      const obs = record.WeatherObservation?.[0] || {}
       return [
         utcToHour(record.utcTime),
         record.station?.name + " " + record.station?.stationId || "--",
         obs.totalCloudAmount || "--",
-        obs.lowCloudDirection || "--", obs.lowCloudHeight || "--", obs.lowCloudForm || "--", obs.lowCloudAmount || "--",
-        obs.mediumCloudDirection || "--", obs.mediumCloudHeight || "--", obs.mediumCloudForm || "--", obs.mediumCloudAmount || "--",
-        obs.highCloudDirection || "--", obs.highCloudHeight || "--", obs.highCloudForm || "--", obs.highCloudAmount || "--",
-        obs.layer1Height || "--", obs.layer1Form || "--", obs.layer1Amount || "--",
-        obs.layer2Height || "--", obs.layer2Form || "--", obs.layer2Amount || "--",
-        obs.layer3Height || "--", obs.layer3Form || "--", obs.layer3Amount || "--",
-        obs.layer4Height || "--", obs.layer4Form || "--", obs.layer4Amount || "--",
-        obs.rainfallTimeStart || "--", obs.rainfallTimeEnd || "--", obs.rainfallSincePrevious || "--",
-        obs.rainfallDuringPrevious || "--", obs.rainfallLast24Hours || "--",
-        obs.windFirstAnemometer || "--", obs.windSecondAnemometer || "--",
-        obs.windSpeed || "--", obs.windDirection || "--",
-        obs.observerInitial || "--"
-      ];
-    });
+        obs.lowCloudDirection || "--",
+        obs.lowCloudHeight || "--",
+        obs.lowCloudForm || "--",
+        obs.lowCloudAmount || "--",
+        obs.mediumCloudDirection || "--",
+        obs.mediumCloudHeight || "--",
+        obs.mediumCloudForm || "--",
+        obs.mediumCloudAmount || "--",
+        obs.highCloudDirection || "--",
+        obs.highCloudHeight || "--",
+        obs.highCloudForm || "--",
+        obs.highCloudAmount || "--",
+        obs.layer1Height || "--",
+        obs.layer1Form || "--",
+        obs.layer1Amount || "--",
+        obs.layer2Height || "--",
+        obs.layer2Form || "--",
+        obs.layer2Amount || "--",
+        obs.layer3Height || "--",
+        obs.layer3Form || "--",
+        obs.layer3Amount || "--",
+        obs.layer4Height || "--",
+        obs.layer4Form || "--",
+        obs.layer4Amount || "--",
+        obs.rainfallTimeStart || "--",
+        obs.rainfallTimeEnd || "--",
+        obs.rainfallSincePrevious || "--",
+        obs.rainfallDuringPrevious || "--",
+        obs.rainfallLast24Hours || "--",
+        obs.windFirstAnemometer || "--",
+        obs.windSecondAnemometer || "--",
+        obs.windSpeed || "--",
+        obs.windDirection || "--",
+        obs.observerInitial || "--",
+      ]
+    })
 
     // Generate CSV string
-    const csvContent = [headers, ...rows]
-      .map(row => row.map(field => `"${field}"`).join(","))
-      .join("\n");
+    const csvContent = [headers, ...rows].map((row) => row.map((field) => `"${field}"`).join(",")).join("\n")
 
     // Create blob & download
-    const blob = new Blob([csvContent], { type: "text/plain;charset=utf-8;" });
+    const blob = new Blob([csvContent], { type: "text/plain;charset=utf-8;" })
 
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `weather_observation_${startDate}_to_${endDate}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.setAttribute("download", `weather_observation_${startDate}_to_${endDate}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
 
-    toast.success("CSV export started");
-  };
-
+    toast.success("CSV export started")
+  }
 
   return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
+      <div className="text-center font-bold text-xl border-b-2 border-indigo-600 pb-2 text-indigo-800">
+        Second Card Data Table
+      </div>
       <CardContent className="p-6">
         {/* Date and Station Filters */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 bg-slate-100 p-4 rounded-lg">
-
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" onClick={goToPreviousWeek} className="hover:bg-slate-200">
@@ -484,9 +561,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                 className="flex items-center gap-1 hover:bg-green-50 border-green-200 text-green-700"
                 disabled={filteredData.length === 0}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
+                <Download className="h-4 w-4" />
                 Export CSV
               </Button>
             )}
@@ -552,7 +627,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
               <div>
                 <div className="font-bold uppercase text-slate-600">DATE</div>
                 <div className="h-10 border border-slate-400 p-2 mx-auto flex items-center justify-center font-mono rounded-md">
-                  {format(new Date(selectedDate), "dd/MM/yyyy")}
+                  {format(new Date(startDate), "dd/MM/yyyy")}
                 </div>
               </div>
             </div>
@@ -560,16 +635,15 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
 
           {/* Main Table Section */}
           <div className="p-4">
-            <div className="text-center font-bold text-xl border-b-2 border-sky-600 pb-2 mb-4 text-sky-800">
-              WEATHER OBSERVATION DATA
-            </div>
-
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 {/* Table Header */}
                 <thead>
                   <tr>
-                    <th colSpan={2} className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800">
+                    <th
+                      colSpan={2}
+                      className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800"
+                    >
                       TIME & DATE
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800">
@@ -773,6 +847,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                       const totalCloudAmount = weatherObs?.totalCloudAmount || "--"
                       const cloudClass = getCloudStatusColor(totalCloudAmount)
                       const rowClass = index % 2 === 0 ? "bg-white" : "bg-slate-50"
+                      const canEdit = user && canEditObservation(record, user)
 
                       return (
                         <tr
@@ -780,14 +855,10 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                           className={`text-center font-mono hover:bg-blue-50 transition-colors ${rowClass}`}
                         >
                           <td className="border border-slate-300 p-1 font-medium text-sky-700">
-                            <div className="flex flex-col">
-                              {utcToHour(record.utcTime.toString())}
-                            </div>
+                            <div className="flex flex-col">{utcToHour(record.utcTime.toString())}</div>
                           </td>
                           <td className="border border-slate-300 p-1 font-medium text-sky-700">
-
                             {new Date(record.utcTime).toLocaleDateString()}
-
                           </td>
                           <td className="border border-slate-300 p-1">
                             <Badge variant="outline" className="font-mono">
@@ -986,31 +1057,36 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
 
                           {/* Edit Button */}
                           <td className="border border-slate-300 p-1">
-                            {canEditObservation(record, session?.user) ? (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 w-8 p-0"
-                                onClick={() => handleEditClick(record)}
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="16"
-                                  height="16"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                                </svg>
-                              </Button>
-                            ) : (
-                              <span className="text-gray-400">--</span>
-                            )}
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className={`h-8 w-8 p-0 ${!canEdit ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    onClick={() => handleEditClick(record)}
+                                  >
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      width="16"
+                                      height="16"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                    </svg>
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  {canEdit ? "Edit this record" : "You don't have permission to edit this record"}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </td>
                         </tr>
                       )
@@ -1024,8 +1100,10 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-sky-500" />
                 <span className="text-sm text-slate-600">
-                  Date:{" "}
-                  <span className="font-medium text-slate-800">{format(new Date(selectedDate), "MMMM d, yyyy")}</span>
+                  Date Range:{" "}
+                  <span className="font-medium text-slate-800">
+                    {`${format(new Date(startDate), "MMM d")} - ${format(new Date(endDate), "MMM d, yyyy")}`}
+                  </span>
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -1042,7 +1120,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
           </div>
         </div>
 
-        {/* Edit Dialog */}
+        {/* Edit Dialog - FIXED VERSION */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="w-[50vw] !max-w-[90vw] rounded-xl border-0 bg-gradient-to-br from-sky-50 to-blue-50 p-6 shadow-xl">
             <DialogHeader>
@@ -1065,6 +1143,10 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                   Edit Weather Observation
                 </div>
               </DialogTitle>
+              <DialogDescription className="text-slate-600">
+                Editing record from {selectedRecord?.station?.name || "Unknown Station"} on{" "}
+                {selectedRecord?.utcTime ? format(new Date(selectedRecord.utcTime), "MMMM d, yyyy") : "Unknown Date"}
+              </DialogDescription>
               <div className="h-1 w-20 rounded-full bg-gradient-to-r from-sky-400 to-blue-400 mt-2"></div>
             </DialogHeader>
 
@@ -1076,9 +1158,9 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     Total Cloud Amount
                   </Label>
                   <Input
-                    id="totalCloudAmount"
+                    name="totalCloudAmount"
                     value={editFormData.totalCloudAmount || ""}
-                    onChange={(e) => handleEditInputChange("totalCloudAmount", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
                   />
                 </div>
@@ -1087,32 +1169,36 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                 <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Low Cloud Direction</Label>
                   <Input
+                    name="lowCloudDirection"
                     value={editFormData.lowCloudDirection || ""}
-                    onChange={(e) => handleEditInputChange("lowCloudDirection", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Low Cloud Height</Label>
                   <Input
+                    name="lowCloudHeight"
                     value={editFormData.lowCloudHeight || ""}
-                    onChange={(e) => handleEditInputChange("lowCloudHeight", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Low Cloud Form</Label>
                   <Input
+                    name="lowCloudForm"
                     value={editFormData.lowCloudForm || ""}
-                    onChange={(e) => handleEditInputChange("lowCloudForm", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Low Cloud Amount</Label>
                   <Input
+                    name="lowCloudAmount"
                     value={editFormData.lowCloudAmount || ""}
-                    onChange={(e) => handleEditInputChange("lowCloudAmount", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
@@ -1121,32 +1207,36 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                 <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Medium Cloud Direction</Label>
                   <Input
+                    name="mediumCloudDirection"
                     value={editFormData.mediumCloudDirection || ""}
-                    onChange={(e) => handleEditInputChange("mediumCloudDirection", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Medium Cloud Height</Label>
                   <Input
+                    name="mediumCloudHeight"
                     value={editFormData.mediumCloudHeight || ""}
-                    onChange={(e) => handleEditInputChange("mediumCloudHeight", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Medium Cloud Form</Label>
                   <Input
+                    name="mediumCloudForm"
                     value={editFormData.mediumCloudForm || ""}
-                    onChange={(e) => handleEditInputChange("mediumCloudForm", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Medium Cloud Amount</Label>
                   <Input
+                    name="mediumCloudAmount"
                     value={editFormData.mediumCloudAmount || ""}
-                    onChange={(e) => handleEditInputChange("mediumCloudAmount", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
@@ -1155,32 +1245,36 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                 <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">High Cloud Direction</Label>
                   <Input
+                    name="highCloudDirection"
                     value={editFormData.highCloudDirection || ""}
-                    onChange={(e) => handleEditInputChange("highCloudDirection", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">High Cloud Height</Label>
                   <Input
+                    name="highCloudHeight"
                     value={editFormData.highCloudHeight || ""}
-                    onChange={(e) => handleEditInputChange("highCloudHeight", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">High Cloud Form</Label>
                   <Input
+                    name="highCloudForm"
                     value={editFormData.highCloudForm || ""}
-                    onChange={(e) => handleEditInputChange("highCloudForm", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">High Cloud Amount</Label>
                   <Input
+                    name="highCloudAmount"
                     value={editFormData.highCloudAmount || ""}
-                    onChange={(e) => handleEditInputChange("highCloudAmount", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
@@ -1189,40 +1283,45 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                 <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Rainfall Start Time</Label>
                   <Input
+                    name="rainfallTimeStart"
                     value={editFormData.rainfallTimeStart || ""}
-                    onChange={(e) => handleEditInputChange("rainfallTimeStart", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Rainfall End Time</Label>
                   <Input
+                    name="rainfallTimeEnd"
                     value={editFormData.rainfallTimeEnd || ""}
-                    onChange={(e) => handleEditInputChange("rainfallTimeEnd", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Rainfall Since Previous</Label>
                   <Input
+                    name="rainfallSincePrevious"
                     value={editFormData.rainfallSincePrevious || ""}
-                    onChange={(e) => handleEditInputChange("rainfallSincePrevious", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Rainfall During Previous</Label>
                   <Input
+                    name="rainfallDuringPrevious"
                     value={editFormData.rainfallDuringPrevious || ""}
-                    onChange={(e) => handleEditInputChange("rainfallDuringPrevious", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Rainfall Last 24 Hours</Label>
                   <Input
+                    name="rainfallLast24Hours"
                     value={editFormData.rainfallLast24Hours || ""}
-                    onChange={(e) => handleEditInputChange("rainfallLast24Hours", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
                   />
                 </div>
@@ -1231,32 +1330,36 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                 <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">First Anemometer</Label>
                   <Input
+                    name="windFirstAnemometer"
                     value={editFormData.windFirstAnemometer || ""}
-                    onChange={(e) => handleEditInputChange("windFirstAnemometer", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Second Anemometer</Label>
                   <Input
+                    name="windSecondAnemometer"
                     value={editFormData.windSecondAnemometer || ""}
-                    onChange={(e) => handleEditInputChange("windSecondAnemometer", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Wind Speed</Label>
                   <Input
+                    name="windSpeed"
                     value={editFormData.windSpeed || ""}
-                    onChange={(e) => handleEditInputChange("windSpeed", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Wind Direction</Label>
                   <Input
+                    name="windDirection"
                     value={editFormData.windDirection || ""}
-                    onChange={(e) => handleEditInputChange("windDirection", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
                   />
                 </div>
@@ -1265,8 +1368,9 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                 <div className="space-y-1 p-3 rounded-lg bg-gray-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Observer Initial</Label>
                   <Input
+                    name="observerInitial"
                     value={editFormData.observerInitial || ""}
-                    onChange={(e) => handleEditInputChange("observerInitial", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-gray-400 focus:ring-2 focus:ring-gray-200"
                   />
                 </div>
@@ -1275,24 +1379,108 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                 <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Layer 1 Height</Label>
                   <Input
+                    name="layer1Height"
                     value={editFormData.layer1Height || ""}
-                    onChange={(e) => handleEditInputChange("layer1Height", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Layer 1 Form</Label>
                   <Input
+                    name="layer1Form"
                     value={editFormData.layer1Form || ""}
-                    onChange={(e) => handleEditInputChange("layer1Form", e.target.value)}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
                   />
                 </div>
                 <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
                   <Label className="text-sm font-medium text-gray-700">Layer 1 Amount</Label>
                   <Input
+                    name="layer1Amount"
                     value={editFormData.layer1Amount || ""}
-                    onChange={(e) => handleEditInputChange("layer1Amount", e.target.value)}
+                    onChange={handleEditInputChange}
+                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
+                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                  <Label className="text-sm font-medium text-gray-700">Layer 2 Height</Label>
+                  <Input
+                    name="layer2Height"
+                    value={editFormData.layer2Height || ""}
+                    onChange={handleEditInputChange}
+                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
+                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                  <Label className="text-sm font-medium text-gray-700">Layer 2 Form</Label>
+                  <Input
+                    name="layer2Form"
+                    value={editFormData.layer2Form || ""}
+                    onChange={handleEditInputChange}
+                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
+                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                  <Label className="text-sm font-medium text-gray-700">Layer 2 Amount</Label>
+                  <Input
+                    name="layer2Amount"
+                    value={editFormData.layer2Amount || ""}
+                    onChange={handleEditInputChange}
+                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
+                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                  <Label className="text-sm font-medium text-gray-700">Layer 3 Height</Label>
+                  <Input
+                    name="layer3Height"
+                    value={editFormData.layer3Height || ""}
+                    onChange={handleEditInputChange}
+                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
+                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                  <Label className="text-sm font-medium text-gray-700">Layer 3 Form</Label>
+                  <Input
+                    name="layer3Form"
+                    value={editFormData.layer3Form || ""}
+                    onChange={handleEditInputChange}
+                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
+                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                  <Label className="text-sm font-medium text-gray-700">Layer 3 Amount</Label>
+                  <Input
+                    name="layer3Amount"
+                    value={editFormData.layer3Amount || ""}
+                    onChange={handleEditInputChange}
+                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
+                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                  <Label className="text-sm font-medium text-gray-700">Layer 4 Height</Label>
+                  <Input
+                    name="layer4Height"
+                    value={editFormData.layer4Height || ""}
+                    onChange={handleEditInputChange}
+                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
+                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                  <Label className="text-sm font-medium text-gray-700">Layer 4 Form</Label>
+                  <Input
+                    name="layer4Form"
+                    value={editFormData.layer4Form || ""}
+                    onChange={handleEditInputChange}
+                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
+                  />
+                </div>
+                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                  <Label className="text-sm font-medium text-gray-700">Layer 4 Amount</Label>
+                  <Input
+                    name="layer4Amount"
+                    value={editFormData.layer4Amount || ""}
+                    onChange={handleEditInputChange}
                     className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
                   />
                 </div>
@@ -1335,11 +1523,39 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Permission Denied Dialog */}
+        <Dialog open={isPermissionDeniedOpen} onOpenChange={setIsPermissionDeniedOpen}>
+          <DialogContent className="max-w-md rounded-xl border-0 bg-white p-6 shadow-xl">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-bold text-red-600 flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5" />
+                Permission Denied
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-slate-700">You don't have permission to edit this record. This could be because:</p>
+              <ul className="mt-2 list-disc pl-5 text-sm text-slate-600 space-y-1">
+                <li>The record is too old to edit</li>
+                <li>The record belongs to a different station</li>
+                <li>You don't have the required role permissions</li>
+              </ul>
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={() => setIsPermissionDeniedOpen(false)}
+                className="bg-slate-200 text-slate-800 hover:bg-slate-300"
+              >
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   )
-});
+})
 
-SecondCardTable.displayName = "SecondCardTable";
+SecondCardTable.displayName = "SecondCardTable"
 
-export default SecondCardTable;
+export default SecondCardTable

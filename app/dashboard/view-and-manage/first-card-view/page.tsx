@@ -267,7 +267,7 @@ const FirstCardTable = forwardRef(({ refreshTrigger = 0 }: FirstCardTableProps, 
 
     toast.success("CSV export started");
   };
-const fetchData = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true)
 
@@ -341,18 +341,18 @@ const fetchData = async () => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const daysInRange = differenceInDays(end, start);
-    
+
     // Calculate the new date range
     const newStart = new Date(start);
     newStart.setDate(start.getDate() + (daysInRange + 1));
-    
+
     const newEnd = new Date(newStart);
     newEnd.setDate(newStart.getDate() + daysInRange);
-    
+
     // Get today's date at midnight for comparison
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     // If the new range would go beyond today, adjust it
     if (newEnd > today) {
       // If we're already at or beyond today, don't go further
@@ -363,7 +363,7 @@ const fetchData = async () => {
       const adjustedEnd = new Date(today);
       const adjustedStart = new Date(adjustedEnd);
       adjustedStart.setDate(adjustedEnd.getDate() - daysInRange);
-      
+
       setStartDate(format(adjustedStart, "yyyy-MM-dd"));
       setEndDate(format(adjustedEnd, "yyyy-MM-dd"));
     } else {
@@ -371,7 +371,7 @@ const fetchData = async () => {
       setStartDate(format(newStart, "yyyy-MM-dd"));
       setEndDate(format(newEnd, "yyyy-MM-dd"));
     }
-    
+
     setDateError(null);
   };
 
@@ -483,6 +483,10 @@ const fetchData = async () => {
   }
   return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
+
+      <div className="text-center font-bold text-xl border-b-2 border-indigo-600 pb-2 text-indigo-800">
+        First Card Data Table
+      </div>
       <CardContent className="p-6">
 
         <div className="mb-6">
@@ -604,10 +608,6 @@ const fetchData = async () => {
           </div>
 
           <div className="p-4">
-            <div className="text-center font-bold text-xl border-b-2 border-indigo-600 pb-2 mb-4 text-indigo-800">
-              METEOROLOGICAL DATA
-            </div>
-
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
