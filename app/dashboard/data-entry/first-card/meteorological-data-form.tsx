@@ -100,12 +100,12 @@ const pressureSchema = Yup.object({
     .test("is-numeric", "Only numeric values allowed", (value) =>
       /^\d+$/.test(value || "")
     ),
-  correctedForIndex: Yup.string()
-    .required("Corrected for Index অবশ্যই পূরণ করতে হবে")
-    .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10142 for 1014.2 hPa)")
-    .test("is-numeric", "Only numeric values allowed", (value) =>
-      /^\d+$/.test(value || "")
-    ),
+  // correctedForIndex: Yup.string()
+  //   .required("Corrected for Index অবশ্যই পূরণ করতে হবে")
+  //   .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10142 for 1014.2 hPa)")
+  //   .test("is-numeric", "Only numeric values allowed", (value) =>
+  //     /^\d+$/.test(value || "")
+  //   ),
 });
 
 const squallSchema = Yup.object({
@@ -1179,17 +1179,10 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
                       id="correctedForIndex"
                       name="correctedForIndex"
                       value={formik.values.correctedForIndex || ""}
-                      onChange={handleNumericInput}
-                      className={cn(
-                        "border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30",
-                        {
-                          "border-red-500":
-                            formik.touched.correctedForIndex &&
-                            formik.errors.correctedForIndex,
-                        }
-                      )}
+                      onChange={handleChange}
+                      className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
                     />
-                    {renderErrorMessage("correctedForIndex")}
+                  
                   </div>
 
                   <div className="space-y-2">
