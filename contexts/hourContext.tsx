@@ -7,7 +7,7 @@ type TimeData = {
   time: string;
   yesterday: {
     utcTime: string;
-    meteorologicalEntry: MeteorologicalEntry;
+    meteorologicalEntry: MeteorologicalEntry[];
   };
   hasMeteorologicalData: boolean;
   hasWeatherObservation: boolean;

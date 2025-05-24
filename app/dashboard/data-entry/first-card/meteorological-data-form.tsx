@@ -828,16 +828,35 @@ export function MeteorologicalDataForm({ onDataSubmitted }) {
           );
 
           // Get yesterday's and current station level pressure
-          const prevStationLevelPressure = timeData?.yesterday?.meteorologicalEntry?.stationLevelPressure || "0";
-          const currentStationLevelPressure = formik.values.stationLevelPressure || "0";
+          const prevStationLevelPressure = timeData?.yesterday?.meteorologicalEntry?.[0]?.stationLevelPressure || "0";
           
-          // Convert to numbers for calculation
+          // Use the pressureData directly since we just set it
+          const currentPressureStr = pressureData.stationLevelPressure;
+          
+          console.log("prevStationLevelPressure", prevStationLevelPressure);
+          console.log("currentPressureStr", currentPressureStr);
+          
+          // Convert to numbers
           const prevPressure = Number(prevStationLevelPressure) || 0;
-          const currentPressure = Number(currentStationLevelPressure) || 0;
+          const currentPressure = Number(currentPressureStr) || 0;
           
-          // Calculate the difference and convert to string
+          // Calculate the difference
           const pressureChange = prevPressure - currentPressure;
-          formik.setFieldValue("pressureChange24h", String(pressureChange));
+          
+          // Format with sign and leading zeros (always 4 chars total: sign + 3 digits)
+          const sign = pressureChange > 0 ? '+' : '-';
+          const absValue = Math.abs(pressureChange);
+          const paddedNumber = String(absValue).padStart(3, '0');
+          const formattedValue = `${sign}${paddedNumber}`;
+          
+          formik.setFieldValue("pressureChange24h", formattedValue);
+          
+          console.log({
+            prevPressure,
+            currentPressure,
+            pressureChange,
+            formattedValue
+          });
 
           const seaData = calculateSeaLevelPressure(
             dryBulb,
