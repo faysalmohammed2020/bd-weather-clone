@@ -54,7 +54,7 @@ const categoryColors = {
   },
 };
 
-export default function MeasurementsTab() {
+export default function DailySummery() {
   const { values, setFieldValue } = useFormikContext<{
     measurements: string[];
   }>();

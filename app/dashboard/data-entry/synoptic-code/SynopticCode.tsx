@@ -178,7 +178,7 @@ const measurements = [
   },
 ];
 
-export default function SynopticMeasurementsTab() {
+export function SynopticCode() {
   const { values, setFieldValue } = useFormikContext<SynopticFormValues>();
   const [dataStatus, setDataStatus] = useState<{
     hasToday: boolean;
