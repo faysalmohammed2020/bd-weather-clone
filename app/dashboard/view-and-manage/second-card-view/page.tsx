@@ -234,7 +234,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
 
 
 
-// Handle saving the edited data
+  // Handle saving the edited data
   const handleSaveEdit = async () => {
     if (!selectedRecord || !selectedRecord.WeatherObservation?.[0]) return
 
@@ -364,7 +364,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
 
   const exportToCSV = () => {
     const filteredData = data.filter(record => record.WeatherObservation && record.WeatherObservation.length > 0);
-    
+
     if (filteredData.length === 0) {
       toast.error("No weather observation data available to export");
       return;
@@ -430,7 +430,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
   };
 
 
-return (
+  return (
     <Card className="shadow-xl border-none overflow-hidden bg-gradient-to-br from-white to-slate-50">
       <CardContent className="p-6">
         {/* Date and Station Filters */}
@@ -560,8 +560,8 @@ return (
                 {/* Table Header */}
                 <thead>
                   <tr>
-                    <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800">
-                      TIME
+                    <th colSpan={2} className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800">
+                      TIME & DATE
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800">
                       STATION
@@ -621,6 +621,9 @@ return (
                   <tr>
                     <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 text-xs p-1">
                       <div className="h-16 text-sky-800">Time of Observation (UTC)</div>
+                    </th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 text-xs p-1">
+                      <div className="h-16 text-sky-800">Date of Observation</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 text-xs p-1">
                       <div className="h-16 text-sky-800">Station ID</div>
@@ -771,6 +774,11 @@ return (
                             <div className="flex flex-col">
                               {utcToHour(record.utcTime.toString())}
                             </div>
+                          </td>
+                          <td className="border border-slate-300 p-1 font-medium text-sky-700">
+
+                            {new Date(record.utcTime).toLocaleDateString()}
+
                           </td>
                           <td className="border border-slate-300 p-1">
                             <Badge variant="outline" className="font-mono">
