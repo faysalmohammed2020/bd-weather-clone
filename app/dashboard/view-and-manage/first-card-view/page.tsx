@@ -181,7 +181,7 @@ const FirstCardTable = forwardRef(({ refreshTrigger = 0 }: FirstCardTableProps, 
       "Time (GMT)",
       "Indicator",
       "Date",
-      "Station ID",
+      "Station Name & ID",
       "Station Name",
       "Attached Thermometer (°C)",
       "Bar As Read (hPa)",
@@ -218,7 +218,7 @@ const FirstCardTable = forwardRef(({ refreshTrigger = 0 }: FirstCardTableProps, 
         utcToHour(observingTime?.utcTime || ""),
         record.subIndicator || "--",
         observingTime?.utcTime ? format(new Date(observingTime.utcTime), "yyyy-MM-dd") : "--",
-        observingTime?.station?.stationId || "--",
+        observingTime?.station?.name + " " + observingTime?.station?.stationId || "--",
         observingTime?.station?.name || "--",
         record.alteredThermometer || "--",
         record.barAsRead || "--",
@@ -583,7 +583,7 @@ const fetchData = async () => {
                 </div>
               </div>
               <div>
-                <div className="font-bold uppercase text-slate-600">STATION NAME</div>
+                <div className="font-bold uppercase text-slate-600">STATION</div>
                 <div className="h-10 border border-slate-400 p-2 mx-auto flex items-cente font-mono rounded-md">
                   {user?.station?.name || "N/A"}
                 </div>
@@ -688,7 +688,7 @@ const fetchData = async () => {
                       <div className="h-16 text-indigo-800">Date</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1">
-                      <div className="h-16 text-indigo-800">Station ID</div>
+                      <div className="h-16 text-indigo-800">Station Name & ID</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
                       <div className="h-16 text-purple-800">Attached Thermometer (°C)</div>
@@ -814,7 +814,7 @@ const fetchData = async () => {
                             <td className="border border-slate-300 p-1 font-medium text-indigo-700 whitespace-nowrap">   {new Date(observingTime.utcTime).toLocaleDateString()}</td>
                             <td className="border border-slate-300 p-1">
                               <Badge variant="outline" className="font-mono">
-                                {observingTime.station.stationId || "--"}
+                                {observingTime.station?.name + " " + observingTime.station?.stationId || "--"}
                               </Badge>
                             </td>
                             <td className="border border-slate-300 p-1">{record.alteredThermometer || "--"}</td>

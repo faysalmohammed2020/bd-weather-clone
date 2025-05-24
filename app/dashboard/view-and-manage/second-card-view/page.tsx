@@ -382,7 +382,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
     // Define headers
     const headers = [
       "Time (GMT)",
-      "Station ID",
+      "Station Name & ID ",
       "Total Cloud Amount",
       "Low Cloud Direction", "Low Cloud Height", "Low Cloud Form", "Low Cloud Amount",
       "Medium Cloud Direction", "Medium Cloud Height", "Medium Cloud Form", "Medium Cloud Amount",
@@ -401,7 +401,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
       const obs = record.WeatherObservation?.[0] || {};
       return [
         utcToHour(record.utcTime),
-        record.station?.stationId || "--",
+        record.station?.name + " " + record.station?.stationId || "--",
         obs.totalCloudAmount || "--",
         obs.lowCloudDirection || "--", obs.lowCloudHeight || "--", obs.lowCloudForm || "--", obs.lowCloudAmount || "--",
         obs.mediumCloudDirection || "--", obs.mediumCloudHeight || "--", obs.mediumCloudForm || "--", obs.mediumCloudAmount || "--",
@@ -635,7 +635,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                       <div className="h-16 text-sky-800">Date of Observation</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 text-xs p-1">
-                      <div className="h-16 text-sky-800">Station ID</div>
+                      <div className="h-16 text-sky-800">Station Name & ID</div>
                     </th>
                     <th className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 text-xs p-1">
                       <div className="h-16 text-sky-800">Amount (N)</div>
@@ -791,7 +791,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                           </td>
                           <td className="border border-slate-300 p-1">
                             <Badge variant="outline" className="font-mono">
-                              {record.station?.stationId || "--"}
+                              {record.station?.name + " " + record.station?.stationId || "--"}
                             </Badge>
                           </td>
                           <td className="border border-slate-300 p-1">
