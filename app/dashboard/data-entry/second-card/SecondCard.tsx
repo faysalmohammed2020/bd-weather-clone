@@ -259,7 +259,7 @@ const validationSchema = Yup.object({
   ...observerSchema.fields,
 });
 
-export default function WeatherObservationForm() {
+export default function SecondCardForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("cloud");
   const [currentStep, setCurrentStep] = useState(1);
@@ -829,11 +829,8 @@ export default function WeatherObservationForm() {
     <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
       <div className="max-w-7xl mx-auto">
         <header className="text-center py-6">
-          <h1 className="text-3xl font-bold text-gray-800">
-            Weather Observation System
-          </h1>
-          <p className="text-lg text-gray-600">
-            Record meteorological data with precision
+          <p className="text-3xl font-bold text-gray-800">
+            Second Card Data Entry
           </p>
         </header>
 
@@ -844,22 +841,6 @@ export default function WeatherObservationForm() {
             onKeyDown={handleKeyDown}
           >
             <div className="relative rounded-xl">
-              {/* Overlay that blocks interaction when no hour is selected */}
-              {/* {(!time?.isPassed || !time?.hasMeteorologicalData) && (
-                <div className="absolute inset-0 bg-amber-50/50 backdrop-blur-[2px] z-50 flex items-center justify-center rounded-xl ring-2 ring-amber-200 ring-offset-4">
-                  <div className="bg-white py-4 px-6 rounded-lg shadow-lg text-center border-2 border-amber-300">
-                    <Clock className="mx-auto h-12 w-12 text-amber-500 mb-2" />
-                    <h3 className="text-lg font-medium text-amber-800">
-                      {time?.isPassed
-                        ? "3 Hours has not passed yet"
-                        : "Check first card"}
-                    </h3>
-                    <p className="text-sm text-amber-600 mt-1">
-                      Last update hour:
-                    </p>
-                  </div>
-                </div>
-              )} */}
 
               <Tabs
                 value={activeTab}

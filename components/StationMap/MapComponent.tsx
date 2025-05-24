@@ -220,11 +220,11 @@ function StationMarkers({
               {hasWeatherRemark && (
                 <div className="border-t pt-2 mt-2 mb-2">
                   <div className="text-sm font-medium mb-1">Current Weather:</div>
-                  <div className="flex items-center gap-2 bg-blue-50 p-2 rounded">
+                  <div className="flex items-center gap-2">
                     <img
                       src={
                         weatherRemarks.find((r) => r.stationId === station.stationId)?.weatherRemark?.split(" - ")[0] ||
-                        "/placeholder.svg"
+                        "/broadcasting.png"
                       }
                       alt="Weather Symbol"
                       className="h-8 w-8 object-contain"
@@ -369,21 +369,21 @@ export default function MapComponent({
         const today = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
         const response = await fetch(`/api/synoptic-code?date=${today}`)
         if (!response.ok) throw new Error(`Error: ${response.status}`)
-  
+
         const synopticData = await response.json()
-  
+
         const remarks: WeatherRemark[] = synopticData.map((entry: any) => ({
           stationId: entry.ObservingTime?.station?.stationId || "",
           weatherRemark: entry.weatherRemark || null,
         }))
-  
+
         setWeatherRemarks(remarks)
       } catch (error) {
         console.error("Error fetching weather remarks:", error)
         setWeatherRemarks([])
       }
     }
-  
+
     fetchWeatherRemarks()
   }, [])
 
@@ -561,18 +561,18 @@ export default function MapComponent({
 
       {/* Custom CSS for weather icons */}
       <style jsx global>{`
-        .weather-remark-icon {
-          border-radius: 50%;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-          border: 2px solid #3b82f6;
-        }
-        
-        .default-station-icon {
-          border-radius: 50%;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-          border: 2px solid #6b7280;
-        }
-      `}</style>
+  .weather-remark-icon {
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+  }
+
+  .default-station-icon {
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+  }
+`}</style>
     </div>
   )
 }

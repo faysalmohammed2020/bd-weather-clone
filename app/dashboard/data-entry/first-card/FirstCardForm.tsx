@@ -171,7 +171,7 @@ const validationSchema = Yup.object({
   ...weatherSchema.fields,
 });
 
-export function MeteorologicalDataForm({ onDataSubmitted }) {
+export function FirstCardForm({ onDataSubmitted }) {
   const [activeTab, setActiveTab] = useState("Observing Time");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { time, error: timeError } = useTimeCheck();
