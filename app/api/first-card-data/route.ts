@@ -102,7 +102,7 @@ export async function POST(req: Request) {
 
       squallConfirmed: String(data.squallConfirmed ?? ""),
       squallForce: data.squallForce || "",
-      squallDirection: data.squallDirection || "",
+      squallDirection: String(data.squallDirection) || "",
       squallTime: data.squallTime || "",
 
       horizontalVisibility: data.horizontalVisibility || "",
