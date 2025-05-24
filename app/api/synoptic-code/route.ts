@@ -168,12 +168,19 @@ export async function GET(req: Request) {
   const userStationId = session.user.station?.id;
   const isSuperAdmin = session.user.role === "super_admin";
 
-  const startTime = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 7));
-  startTime.setHours(0, 0, 0, 0);
-  const endTime = endDate ? new Date(endDate) : new Date();
-  endTime.setHours(23, 59, 59, 999);
+  // Calculate start and end date
+  const today = new Date();
+  const startTime = startDate
+    ? new Date(startDate)
+    : new Date(today.setHours(0, 0, 0, 0));
+  const endTime = endDate
+    ? new Date(endDate)
+    : new Date(new Date().setHours(23, 59, 59, 999));
 
-  const stationId = stationIdParam || userStationId;
+  // Determine which station ID to use
+  const stationId = stationIdParam || (!isSuperAdmin ? userStationId : undefined);
+
+  // For non-super admins, station ID is mandatory
   if (!stationId && !isSuperAdmin) {
     return NextResponse.json(
       { message: "Station ID is required" },
@@ -185,7 +192,7 @@ export async function GET(req: Request) {
     const entries = await prisma.synopticCode.findMany({
       where: {
         ObservingTime: {
-          stationId: stationId,
+          ...(stationId ? { stationId } : {}), // Optional station filter
           utcTime: {
             gte: startTime,
             lte: endTime,
@@ -218,6 +225,7 @@ export async function GET(req: Request) {
     );
   }
 }
+
 
 export async function PUT(req: Request) {
   try {
