@@ -30,6 +30,11 @@ interface DailySummary {
   avTotalCloud: string | null
 }
 
+interface WeatherRemark {
+  stationId: string
+  weatherRemark: string | null
+}
+
 interface MapComponentProps {
   currentDate: string
   setCurrentDate: (date: string) => void
@@ -114,6 +119,7 @@ function StationMarkers({
   selectedStation,
   onStationSelect,
   weatherData,
+  weatherRemarks,
   currentDate,
   loading,
 }: {
@@ -121,16 +127,45 @@ function StationMarkers({
   selectedStation: Station | null
   onStationSelect: (station: Station | null) => void
   weatherData: DailySummary | null
+  weatherRemarks: WeatherRemark[]
   currentDate: string
   loading: boolean
 }) {
   const map = useMap()
 
-  const stationIcon = L.icon({
-    iconUrl: "/broadcasting.png",
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-  })
+  // Function to get the appropriate icon for each station
+  const getStationIcon = (station: Station) => {
+    const stationRemark = weatherRemarks.find((remark) => remark.stationId === station.stationId)
+
+    let iconUrl = "/broadcasting.png" // Default icon
+
+    // If weather remark exists and has an image URL, use it
+    if (stationRemark?.weatherRemark) {
+      const remarkParts = stationRemark.weatherRemark.split(" - ")
+      if (remarkParts.length > 0 && remarkParts[0].trim()) {
+        iconUrl = remarkParts[0].trim()
+      }
+    }
+
+    return L.icon({
+      iconUrl: iconUrl,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+      className: stationRemark?.weatherRemark ? "weather-remark-icon" : "default-station-icon",
+    })
+  }
+
+  // Function to get weather remark description
+  const getWeatherDescription = (station: Station) => {
+    const stationRemark = weatherRemarks.find((remark) => remark.stationId === station.stationId)
+    if (stationRemark?.weatherRemark) {
+      const remarkParts = stationRemark.weatherRemark.split(" - ")
+      if (remarkParts.length > 1) {
+        return remarkParts[1].trim()
+      }
+    }
+    return "No weather remarks"
+  }
 
   // Zoom to selected station
   useEffect(() => {
@@ -150,28 +185,58 @@ function StationMarkers({
   return (
     <>
       {/* Station markers */}
-      {stations.map((station) => (
-        <Marker
-          key={station.id}
-          position={[station.latitude, station.longitude]}
-          icon={stationIcon}
-          eventHandlers={{
-            click: () => onStationSelect(station),
-            mouseover: (e) => {
-              const marker = e.target
-              marker.openPopup()
-            },
-            mouseout: (e) => {
-              const marker = e.target
-              marker.closePopup()
-            },
-          }}
-        >
-          <Popup className="min-w-[250px]" autoClose={false} closeOnClick={false}>
-            <div className="font-bold text-lg">{station.name} </div>
-            <div className="text-sm">Station ID: {station.stationId}</div>
-            <div className="text-sm mb-2">
-              Coordinates: {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}
+      {stations.map((station) => {
+        const stationIcon = getStationIcon(station)
+        const weatherDescription = getWeatherDescription(station)
+        const hasWeatherRemark = weatherRemarks.some(
+          (remark) => remark.stationId === station.stationId && remark.weatherRemark,
+        )
+
+        return (
+          <Marker
+            key={station.id}
+            position={[station.latitude, station.longitude]}
+            icon={stationIcon}
+            eventHandlers={{
+              click: () => onStationSelect(station),
+              mouseover: (e) => {
+                const marker = e.target
+                marker.openPopup()
+              },
+              mouseout: (e) => {
+                const marker = e.target
+                marker.closePopup()
+              },
+            }}
+          >
+            <Popup className="min-w-[280px]" autoClose={false} closeOnClick={false}>
+              <div className="font-bold text-lg">{station.name}</div>
+              <div className="text-sm">Station ID: {station.stationId}</div>
+              <div className="text-sm mb-2">
+                Coordinates: {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}
+              </div>
+
+              {/* Weather Remark Section */}
+              {hasWeatherRemark && (
+                <div className="border-t pt-2 mt-2 mb-2">
+                  <div className="text-sm font-medium mb-1">Current Weather:</div>
+                  <div className="flex items-center gap-2 bg-blue-50 p-2 rounded">
+                    <img
+                      src={
+                        weatherRemarks.find((r) => r.stationId === station.stationId)?.weatherRemark?.split(" - ")[0] ||
+                        "/placeholder.svg"
+                      }
+                      alt="Weather Symbol"
+                      className="h-8 w-8 object-contain"
+                      onError={(e) => {
+                        e.currentTarget.src = "/broadcasting.png"
+                      }}
+                    />
+                    <span className="text-sm text-gray-700">{weatherDescription}</span>
+                  </div>
+                </div>
+              )}
+
               {/* Weather Summary in Popup */}
               {selectedStation?.id === station.id && (
                 <div className="border-t pt-2 mt-2">
@@ -223,10 +288,10 @@ function StationMarkers({
                   )}
                 </div>
               )}
-            </div>
-          </Popup>
-        </Marker>
-      ))}
+            </Popup>
+          </Marker>
+        )
+      })}
 
       {/* Live location animation */}
       {selectedStation && (
@@ -248,11 +313,25 @@ export default function MapComponent({
   selectedStation,
   onStationSelect,
 }: MapComponentProps) {
-  const dates = ["18-Oct", "19-Nov", "19-Dec", "19-Jan", "19-Feb", "19-Mar", "19-Apr", "19-May", "19-Jun"]
+  // Generate dates for the last 7 days including today
+  const generateDates = () => {
+    const dates = [];
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      dates.push(date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }));
+    }
+    return dates;
+  };
+
+  const dates = generateDates();
   const { data: session } = useSession()
   const [stations, setStations] = useState<Station[]>([])
   const [loading, setLoading] = useState(false)
   const [weatherData, setWeatherData] = useState<DailySummary | null>(null)
+  const [weatherRemarks, setWeatherRemarks] = useState<WeatherRemark[]>([])
+  const [lastUpdated, setLastUpdated] = useState<string>('');
 
   // Fetch stations from API based on user role
   useEffect(() => {
@@ -283,7 +362,32 @@ export default function MapComponent({
     fetchStations()
   }, [session, selectedStation, onStationSelect])
 
-  // Fetch weather data when station is selected
+  // Fetch weather remarks for all stations
+  useEffect(() => {
+    const fetchWeatherRemarks = async () => {
+      try {
+        const today = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
+        const response = await fetch(`/api/synoptic-code?date=${today}`)
+        if (!response.ok) throw new Error(`Error: ${response.status}`)
+  
+        const synopticData = await response.json()
+  
+        const remarks: WeatherRemark[] = synopticData.map((entry: any) => ({
+          stationId: entry.ObservingTime?.station?.stationId || "",
+          weatherRemark: entry.weatherRemark || null,
+        }))
+  
+        setWeatherRemarks(remarks)
+      } catch (error) {
+        console.error("Error fetching weather remarks:", error)
+        setWeatherRemarks([])
+      }
+    }
+  
+    fetchWeatherRemarks()
+  }, [])
+
+  // Fetch weather data when station is selected or date changes
   useEffect(() => {
     const fetchWeatherData = async () => {
       if (!selectedStation) {
@@ -291,21 +395,25 @@ export default function MapComponent({
         return
       }
 
+      setLoading(true);
       try {
-        const response = await fetch(`/api/daily-summary?stationNo=${selectedStation.stationId}`)
+        const response = await fetch(`/api/daily-summary?stationNo=${selectedStation.stationId}&date=${currentDate}`)
         if (!response.ok) {
           throw new Error(`Error: ${response.status}`)
         }
         const data = await response.json()
         setWeatherData(data)
+        setLastUpdated(new Date().toLocaleTimeString());
       } catch (error) {
         console.error("Error fetching weather data:", error)
         setWeatherData(null)
+      } finally {
+        setLoading(false);
       }
     }
 
     fetchWeatherData()
-  }, [selectedStation])
+  }, [selectedStation, currentDate])
 
   return (
     <div className="relative h-full w-full">
@@ -332,6 +440,7 @@ export default function MapComponent({
             selectedStation={selectedStation}
             onStationSelect={onStationSelect}
             weatherData={weatherData}
+            weatherRemarks={weatherRemarks}
             currentDate={currentDate}
             loading={loading}
           />
@@ -390,61 +499,80 @@ export default function MapComponent({
 
       {/* Selected station info */}
       {selectedStation && (
-          <div className="absolute top-4 left-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
-            <div className="text-sm font-medium">{selectedStation.name}</div>
-            <div className="text-xs text-gray-500">
-              Lat: {selectedStation.latitude.toFixed(4)}, Long: {selectedStation.longitude.toFixed(4)}
-            </div>
+        <div className="absolute top-4 left-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
+          <div className="text-sm font-medium">{selectedStation.name}</div>
+          <div className="text-xs text-gray-600">
+            Lat: {selectedStation.latitude.toFixed(4)}, Long: {selectedStation.longitude.toFixed(4)}
           </div>
-        ) && (
-          <div className="absolute bottom-20 right-4 bg-white p-3 rounded-lg shadow-lg z-[1000] w-64">
-            <div className="text-sm font-medium mb-2">Weather Summary</div>
-            {weatherData ? (
-              <div className="grid grid-cols-1 gap-2">
-                <div className="flex items-center">
-                  <Thermometer className="h-4 w-4 mr-2 text-orange-500" />
-                  <div className="text-xs">
-                    <span className="font-medium">Temperature: </span>
-                    {weatherData.maxTemperature ? `${weatherData.maxTemperature}°C (max)` : "N/A"} /
-                    {weatherData.minTemperature ? `${weatherData.minTemperature}°C (min)` : "N/A"}
-                  </div>
-                </div>
+          {lastUpdated && (
+            <div className="text-xs text-gray-500 mt-1">
+              Updated: {lastUpdated}
+            </div>
+          )}
+        </div>
+      )}
 
-                <div className="flex items-center">
-                  <Droplets className="h-4 w-4 mr-2 text-blue-500" />
-                  <div className="text-xs">
-                    <span className="font-medium">Precipitation: </span>
-                    {weatherData.totalPrecipitation ? `${weatherData.totalPrecipitation} mm` : "No data"}
-                  </div>
-                </div>
-
-                <div className="flex items-center">
-                  <Wind className="h-4 w-4 mr-2 text-gray-500" />
-                  <div className="text-xs">
-                    <span className="font-medium">Wind Speed: </span>
-                    {weatherData.windSpeed ? `${weatherData.windSpeed} NM` : "No data"}
-                  </div>
-                </div>
-
-                <div className="flex items-center">
-                  <Cloud className="h-4 w-4 mr-2 text-gray-400" />
-                  <div className="text-xs">
-                    <span className="font-medium">Cloud Cover: </span>
-                    {weatherData.avTotalCloud ? `${weatherData.avTotalCloud}%` : "No data"}
-                  </div>
-                </div>
-
-                {weatherData.totalPrecipitation && Number.parseFloat(weatherData.totalPrecipitation) > 0 && (
-                  <div className="text-xs text-blue-600 font-medium mt-1">
-                    Rain detected: {weatherData.totalPrecipitation} mm
-                  </div>
-                )}
+      {/* Weather summary panel */}
+      {selectedStation && weatherData && (
+        <div className="absolute bottom-20 right-4 bg-white p-3 rounded-lg shadow-lg z-[1000] w-64">
+          <div className="text-sm font-medium mb-2">Weather Summary</div>
+          <div className="grid grid-cols-1 gap-2">
+            <div className="flex items-center">
+              <Thermometer className="h-4 w-4 mr-2 text-orange-500" />
+              <div className="text-xs">
+                <span className="font-medium">Temperature: </span>
+                {weatherData.maxTemperature ? `${weatherData.maxTemperature}°C (max)` : "N/A"} /
+                {weatherData.minTemperature ? `${weatherData.minTemperature}°C (min)` : "N/A"}
               </div>
-            ) : (
-              <div className="text-xs text-gray-500">No weather data available for {currentDate}</div>
+            </div>
+
+            <div className="flex items-center">
+              <Droplets className="h-4 w-4 mr-2 text-blue-500" />
+              <div className="text-xs">
+                <span className="font-medium">Precipitation: </span>
+                {weatherData.totalPrecipitation ? `${weatherData.totalPrecipitation} mm` : "No data"}
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <Wind className="h-4 w-4 mr-2 text-gray-500" />
+              <div className="text-xs">
+                <span className="font-medium">Wind Speed: </span>
+                {weatherData.windSpeed ? `${weatherData.windSpeed} NM` : "No data"}
+              </div>
+            </div>
+
+            <div className="flex items-center">
+              <Cloud className="h-4 w-4 mr-2 text-gray-400" />
+              <div className="text-xs">
+                <span className="font-medium">Cloud Cover: </span>
+                {weatherData.avTotalCloud ? `${weatherData.avTotalCloud}%` : "No data"}
+              </div>
+            </div>
+
+            {weatherData.totalPrecipitation && Number.parseFloat(weatherData.totalPrecipitation) > 0 && (
+              <div className="text-xs text-blue-600 font-medium mt-1">
+                Rain detected: {weatherData.totalPrecipitation} mm
+              </div>
             )}
           </div>
-        )}
+        </div>
+      )}
+
+      {/* Custom CSS for weather icons */}
+      <style jsx global>{`
+        .weather-remark-icon {
+          border-radius: 50%;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+          border: 2px solid #3b82f6;
+        }
+        
+        .default-station-icon {
+          border-radius: 50%;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          border: 2px solid #6b7280;
+        }
+      `}</style>
     </div>
   )
 }
