@@ -160,7 +160,6 @@ const rainfallSchema = Yup.object({
   }),
 });
 
-
 // Update the windSchema to enforce the specific validation requirements
 const windSchema = Yup.object({
   wind: Yup.object({
@@ -178,7 +177,16 @@ const windSchema = Yup.object({
 
     "wind-direction": Yup.string()
       .required("Wind direction is required")
-      .matches(/^[0-9]{2}$/, "Must be a 2-digit integer between 00 and 99"),
+      .test(
+        "is-valid-direction",
+        "Must be wind direction between 5 to 360 degrees",
+        (value) => {
+          if (!value) return false;
+          if (value === "00") return true;
+          const num = Number(value);
+          return Number.isInteger(num) && num >= 5 && num <= 360;
+        }
+      ),
   }),
 });
 
@@ -1234,13 +1242,15 @@ export default function WeatherObservationForm() {
                               className={cn(
                                 "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
                                 {
-                                  "border-red-500": formik.errors.rainfall?.["during-previous"],
+                                  "border-red-500":
+                                    formik.errors.rainfall?.["during-previous"],
                                 }
                               )}
                               required
                             />
-                            <p className="text-red-500 text-sm mt-1 flex items-start">{formik.errors.rainfall?.["during-previous"]}</p>
-                            
+                            <p className="text-red-500 text-sm mt-1 flex items-start">
+                              {formik.errors.rainfall?.["during-previous"]}
+                            </p>
                           </div>
                           <div className="md:col-span-2">
                             <InputField
@@ -1316,15 +1326,17 @@ export default function WeatherObservationForm() {
                               className={cn(
                                 "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
                                 {
-                                  "border-red-500": formik.errors.wind?.["first-anemometer"],
+                                  "border-red-500":
+                                    formik.errors.wind?.["first-anemometer"],
                                 }
                               )}
                               required
                             />
-                            <p className="text-red-500 text-sm mt-1 flex items-start">{formik.errors.wind?.["first-anemometer"]}</p>
-                            
+                            <p className="text-red-500 text-sm mt-1 flex items-start">
+                              {formik.errors.wind?.["first-anemometer"]}
+                            </p>
                           </div>
-                          
+
                           <div className="grid gap-2">
                             <Label
                               htmlFor="second-anemometer"
@@ -1344,13 +1356,15 @@ export default function WeatherObservationForm() {
                               className={cn(
                                 "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
                                 {
-                                  "border-red-500": formik.errors.wind?.["second-anemometer"],
+                                  "border-red-500":
+                                    formik.errors.wind?.["second-anemometer"],
                                 }
                               )}
                               required
                             />
-                            <p className="text-red-500 text-sm mt-1 flex items-start">{formik.errors.wind?.["second-anemometer"]}</p>
-                            
+                            <p className="text-red-500 text-sm mt-1 flex items-start">
+                              {formik.errors.wind?.["second-anemometer"]}
+                            </p>
                           </div>
 
                           {/* <InputField
@@ -1377,20 +1391,20 @@ export default function WeatherObservationForm() {
                               id="speed"
                               name="speed"
                               placeholder="Enter 3 Digit"
-                              value={
-                                formik.values.wind?.["speed"] || ""
-                              }
+                              value={formik.values.wind?.["speed"] || ""}
                               onChange={handleInputChange}
                               className={cn(
                                 "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
                                 {
-                                  "border-red-500": formik.errors.wind?.["speed"],
+                                  "border-red-500":
+                                    formik.errors.wind?.["speed"],
                                 }
                               )}
                               required
                             />
-                            <p className="text-red-500 text-sm mt-1 flex items-start">{formik.errors.wind?.["speed"]}</p>
-                            
+                            <p className="text-red-500 text-sm mt-1 flex items-start">
+                              {formik.errors.wind?.["speed"]}
+                            </p>
                           </div>
                           {/* Wind Direction - Fixed */}
                           <div className="grid gap-2">
@@ -1417,7 +1431,7 @@ export default function WeatherObservationForm() {
                                   ),
                                 }
                               )}
-                              placeholder="0-99 code"
+                              placeholder="wind direction 5 degree to 364 degree from code book"
                               required
                               inputMode="numeric"
                             />
