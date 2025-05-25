@@ -4,12 +4,19 @@ import { useFormikContext } from "formik";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { type SynopticFormValues } from "@/lib/generateSynopticCode";
+import type { SynopticFormValues } from "@/lib/generateSynopticCode";
 import { getRemarksFromPresentWeather } from "@/lib/generateSynopticCode";
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { AlertTriangle } from "lucide-react";
 
 // ... (keep your existing measurements array exactly as is) ...
 
@@ -61,7 +68,7 @@ const measurements = [
     label: (
       <span style={{ display: "inline-block", textAlign: "center" }}>
         <span>
-           6RRRt<sub>R</sub>
+          6RRRt<sub>R</sub>
         </span>
       </span>
     ),
@@ -141,7 +148,7 @@ const measurements = [
     label: (
       <span style={{ display: "inline-block", textAlign: "center" }}>
         <span>
-           6RRRt<sub>R</sub>
+          6RRRt<sub>R</sub>
         </span>
       </span>
     ),
@@ -189,6 +196,12 @@ export function SynopticCode() {
     isLoading: true,
   });
 
+  const [manuallyChangedFields, setManuallyChangedFields] = useState<
+    Set<number>
+  >(new Set());
+
+  const specialFields = [2, 7, 12, 19, 20]; // iRiXhvv, 6RRRtr, 57CDaEc, 90dqqqt, 91fqfqfq
+  const isSpecialField = (index: number) => specialFields.includes(index);
 
   useEffect(() => {
     const fetchSynopticData = async () => {
@@ -307,7 +320,7 @@ export function SynopticCode() {
 
       const result = await response.json();
 
-      if(!result.success){
+      if (!result.success) {
         return toast.error(result.error);
       }
 
@@ -328,6 +341,11 @@ export function SynopticCode() {
     const newMeasurements = [...values.measurements];
     newMeasurements[index] = value;
     setFieldValue("measurements", newMeasurements);
+
+    // Track manually changed special fields
+    if (isSpecialField(index)) {
+      setManuallyChangedFields((prev) => new Set([...prev, index]));
+    }
   };
 
   return (
@@ -434,7 +452,7 @@ export function SynopticCode() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="space-y-3">
+            <div className="space-y-6">
               {measurements.slice(0, 11).map((item) => (
                 <div
                   key={item.id}
@@ -454,15 +472,47 @@ export function SynopticCode() {
                   <div className="col-span-2 text-xs text-green-600 font-mono bg-green-50 px-1 py-0.5">
                     {item.range}
                   </div>
-                  <div className="col-span-3">
-                    <Input
-                      id={`measurement-${item.id}`}
-                      value={values.measurements[item.id] || ""}
-                      onChange={(e) => 
-                        handleMeasurementChange(item.id, e.target.value)
-                      }
-                      className={`border-green-200 bg-white cursor-text`}
-                    />
+                  <div className="col-span-3 relative">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="relative">
+                            <Input
+                              id={`measurement-${item.id}`}
+                              value={values.measurements[item.id] || ""}
+                              onChange={(e) =>
+                                handleMeasurementChange(item.id, e.target.value)
+                              }
+                              className={`border-green-200 bg-white cursor-text ${
+                                isSpecialField(item.id)
+                                  ? "bg-yellow-100 border-yellow-300 focus:border-yellow-500"
+                                  : ""
+                              }`}
+                            />
+                            {isSpecialField(item.id) &&
+                              manuallyChangedFields.has(item.id) && (
+                                <div className="absolute -bottom-6 left-0 right-0">
+                                  <div className="flex items-center text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                                    <AlertTriangle className="w-3 h-3 mr-1" />
+                                    <span>Analyze with card data</span>
+                                  </div>
+                                </div>
+                              )}
+                          </div>
+                        </TooltipTrigger>
+                        {isSpecialField(item.id) && (
+                          <TooltipContent
+                            side="top"
+                            className="bg-amber-100 border-amber-300"
+                          >
+                            <p className="text-sm text-amber-800">
+                              This field requires analysis with corresponding
+                              first and second card data
+                            </p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </div>
               ))}
@@ -477,7 +527,7 @@ export function SynopticCode() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
-            <div className="space-y-3">
+            <div className="space-y-6">
               {measurements.slice(11).map((item) => (
                 <div
                   key={item.id}
@@ -497,15 +547,47 @@ export function SynopticCode() {
                   <div className="col-span-2 text-xs text-green-600 font-mono bg-green-50 px-1 py-0.5 rounded">
                     {item.range}
                   </div>
-                  <div className="col-span-3">
-                    <Input
-                      id={`measurement-${item.id}`}
-                      value={values.measurements[item.id] || ""}
-                      onChange={(e) => 
-                        handleMeasurementChange(item.id, e.target.value)
-                      }
-                      className={`border-green-200 bg-white cursor-text`}
-                    />
+                  <div className="col-span-3 relative">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="relative">
+                            <Input
+                              id={`measurement-${item.id}`}
+                              value={values.measurements[item.id] || ""}
+                              onChange={(e) =>
+                                handleMeasurementChange(item.id, e.target.value)
+                              }
+                              className={`border-green-200 bg-white cursor-text ${
+                                isSpecialField(item.id)
+                                  ? "bg-yellow-100 border-yellow-300 focus:border-yellow-500"
+                                  : ""
+                              }`}
+                            />
+                            {isSpecialField(item.id) &&
+                              manuallyChangedFields.has(item.id) && (
+                                <div className="absolute -bottom-6 left-0 right-0">
+                                  <div className="flex items-center text-xs text-amber-600 bg-amber-50 px-2 py-1 rounded border border-amber-200">
+                                    <AlertTriangle className="w-3 h-3 mr-1" />
+                                    <span>Analyze with card data</span>
+                                  </div>
+                                </div>
+                              )}
+                          </div>
+                        </TooltipTrigger>
+                        {isSpecialField(item.id) && (
+                          <TooltipContent
+                            side="top"
+                            className="bg-amber-100 border-amber-300"
+                          >
+                            <p className="text-sm text-amber-800">
+                              This field requires analysis with corresponding
+                              first and second card data
+                            </p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </div>
               ))}
@@ -552,4 +634,3 @@ export function SynopticCode() {
     </div>
   );
 }
-
