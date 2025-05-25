@@ -81,12 +81,29 @@ export async function GET() {
     measurements[1] = stationNo;
 
     // 3. iRiXhvv (22-26) - 32 + low cloud height + visibility
+    const iRdata = weatherObs.rainfallTimeStart; // This should be a Date object or string representing time
+
+    let iRvalue = "3"; // Default value if no rainfallTimeStart
+
+    if (iRdata) {
+      const hours = parseInt(utcToHour(observingTime.utcTime.toString()), 10);
+
+      if (hours % 6 === 0) { // 00, 06, 12, 18 UTC (even 6-hour intervals)
+        iRvalue = "1";
+      } else if (hours % 3 === 0) { // 03, 09, 15, 21 UTC (odd 3-hour intervals)
+        iRvalue = "2";
+      }
+    }
+
     const lowCloudHeight = weatherObs.lowCloudHeight || "0";
     const visibility = pad(
       (Number(firstCard.horizontalVisibility?.toString()?.[0]) || 0) * 10,
       2
     );
-    measurements[2] = `32${lowCloudHeight}${visibility}`;
+    measurements[2] = `${iRvalue}2${lowCloudHeight}${visibility}`;
+
+
+    
 
     // 4. Nddff (27-31) - Total cloud + wind direction + speed
     const totalCloud = weatherObs.totalCloudAmount || "0";
@@ -137,7 +154,7 @@ export async function GET() {
 
     measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
 
-    // 8. 6RRRtR (47-51) - Precipitation
+    // 8. 6RRRtR (47-51) - RainfallDuringPrevious
     const rainFall = weatherObs.rainfallDuringPrevious || "0";
     measurements[7] = `6${pad(rainFall, 4)}`;
 

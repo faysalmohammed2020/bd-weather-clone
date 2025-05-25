@@ -344,7 +344,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
 
     // Create headers
     let csvContent =
-      "Time,C1,Iliii,iRiXhvv,Nddff,1SnTTT,2SnTdTdTd,3PPP/4PPP,6RRRtR,7wwW1W2,8NhClCmCh,2SnTnTnTn/InInInIn,56DlDmDh,57CDaEc,Avg Total Cloud,C2,GG,58P24P24P24/59P24P24P24,(6RRRtR)/7R24R24R24,8N5Ch5h5,90dqqqt,91fqfqfq,Weather Remarks\n";
+      "Time,C1,Iliii,iRiXhvv,Nddff,1SnTTT,2SnTdTdTd,3PPP/4PPP,6RRRtR,7wwW1W2,8NhClCmCh,2SnTnTnTn/InInInIn,56DlDmDh,57CDaEc,C2,GG,58P24P24P24/59P24P24P24,(6RRRtR)/7R24R24R24,8N5Ch5h5,90dqqqt,91fqfqfq,Weather Remarks\n";
 
     // Add data rows
     currentData.forEach((entry) => {
@@ -693,16 +693,13 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                     8NhClCmCh
                   </th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
-                    2SnTnTnTn/InInInIn
+                    2SnTnTnTn/1SnTxTxTx
                   </th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
                     56DlDmDh
                   </th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
                     57CDaEc
-                  </th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
-                    Av. Total Clouds
                   </th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
                     C2
@@ -798,9 +795,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
                           {entry.CD57DaEc || ""}
                         </td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.avgTotalCloud || ""}
-                        </td>
+                       
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
                           {entry.C2 || ""}
                         </td>
@@ -941,7 +936,6 @@ const SynopticCodeTable = forwardRef((props, ref) => {
               { id: "S2nTnTnTnInInInIn", label: "2SnTnTnTn/InInInIn", bg: "bg-blue-50" },
               { id: "D56DLDMDH", label: "56DlDmDh", bg: "bg-indigo-50" },
               { id: "CD57DaEc", label: "57CDaEc", bg: "bg-blue-50" },
-              { id: "avgTotalCloud", label: "Avg Total Cloud", bg: "bg-indigo-50" },
               { id: "C2", label: "C2 Indicator", bg: "bg-blue-50" },
               { id: "GG", label: "GG", bg: "bg-indigo-50" },
               { id: "P24Group58_59", label: "58/59P24", bg: "bg-blue-50" },

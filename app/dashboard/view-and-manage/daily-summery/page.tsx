@@ -137,9 +137,8 @@ const DailySummaryTable = forwardRef((props, ref) => {
   const fetchLatestData = async () => {
     setRefreshing(true)
     try {
-      const url = `/api/daily-summary?startDate=${startDate}&endDate=${endDate}${
-        stationFilter !== "all" ? `&stationId=${stationFilter}` : ""
-      }`
+      const url = `/api/daily-summary?startDate=${startDate}&endDate=${endDate}${stationFilter !== "all" ? `&stationId=${stationFilter}` : ""
+        }`
       const res = await fetch(url)
       if (!res.ok) {
         throw new Error("Failed to fetch daily summary data")
@@ -417,6 +416,22 @@ const DailySummaryTable = forwardRef((props, ref) => {
     }
   }
 
+  const formatValue = (value: any): string => {
+    // If value is null/undefined/empty, return dash
+    if (value === null || value === undefined || value === "") return "-";
+
+    // Convert to number if it's a string
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+
+    // If it's a valid number, return it as integer (no decimals)
+    if (!isNaN(numValue)) {
+      return Math.round(numValue).toString();
+    }
+
+    // Otherwise return the original value (or dash if empty)
+    return value || "-";
+  };
+
   // Function to export data as CSV
   const exportToCSV = () => {
     if (!currentData || currentData.length === 0) return
@@ -690,50 +705,52 @@ const DailySummaryTable = forwardRef((props, ref) => {
                           {getStationNameById(entry.ObservingTime?.stationId)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.avStationPressure || "-"}
+                          {formatValue(entry.avStationPressure)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.avSeaLevelPressure || "-"}
+                          {formatValue(entry.avSeaLevelPressure)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.avDryBulbTemperature || "-"}
+                          {formatValue(entry.avDryBulbTemperature)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.avWetBulbTemperature || "-"}
+                          {formatValue(entry.avWetBulbTemperature)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.maxTemperature || "-"}
+                          {formatValue(entry.maxTemperature)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.minTemperature || "-"}
+                          {formatValue(entry.minTemperature)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.totalPrecipitation || "-"}
+                          {formatValue(entry.totalPrecipitation)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.avDewPointTemperature || "-"}
+                          {formatValue(entry.avDewPointTemperature)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.avRelativeHumidity || "-"}
-                        </td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{entry.windSpeed || "-"}</td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.windDirectionCode || "-"}
+                          {formatValue(entry.avRelativeHumidity)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.maxWindSpeed || "-"}
+                          {formatValue(entry.windSpeed)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.maxWindDirection || "-"}
+                          {formatValue(entry.windDirectionCode)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.avTotalCloud || "-"}
+                          {formatValue(entry.maxWindSpeed)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.lowestVisibility || "-"}
+                          {formatValue(entry.maxWindDirection)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {entry.totalRainDuration || "-"}
+                          {formatValue(entry.avTotalCloud)}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {formatValue(entry.lowestVisibility)}
+                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
+                          {formatValue(entry.totalRainDuration)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
                           <TooltipProvider>
@@ -814,6 +831,10 @@ const DailySummaryTable = forwardRef((props, ref) => {
               const validation = fieldValidations[field.id as keyof typeof fieldValidations]
               const error = fieldErrors[field.id]
               const hasError = !!error
+              const value = editFormData[field.id] || ""
+
+              // Ensure the value is always an integer (remove any decimal points)
+              const displayValue = typeof value === 'number' ? Math.floor(value).toString() : value.replace(/\./g, '')
 
               return (
                 <div
@@ -825,8 +846,33 @@ const DailySummaryTable = forwardRef((props, ref) => {
                   </Label>
                   <Input
                     id={field.id}
-                    value={editFormData[field.id] || ""}
-                    onChange={handleEditInputChange}
+                    value={displayValue}
+                    onChange={(e) => {
+                      // Remove any non-digit characters and decimal points
+                      const numericValue = e.target.value.replace(/[^0-9]/g, "")
+                      // Enforce maximum length
+                      const truncatedValue = numericValue.slice(0, validation.length)
+
+                      setEditFormData((prev: any) => ({
+                        ...prev,
+                        [field.id]: truncatedValue,
+                      }))
+
+                      // Validate the input
+                      let error = ""
+                      if (truncatedValue.length === 0) {
+                        error = `This field is required`
+                      } else if (truncatedValue.length < validation.length) {
+                        error = `Must be exactly ${validation.length} digits (currently ${truncatedValue.length})`
+                      } else if (truncatedValue.length > validation.length) {
+                        error = `Cannot exceed ${validation.length} digits`
+                      }
+
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        [field.id]: error,
+                      }))
+                    }}
                     className={`w-full bg-white ${hasError ? "border-red-400 focus:border-red-500 focus:ring-red-200" : "border-gray-300 focus:border-indigo-400 focus:ring-indigo-200"} focus:ring-2`}
                     maxLength={validation.length}
                     pattern="[0-9]*"
