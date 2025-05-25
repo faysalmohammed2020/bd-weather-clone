@@ -752,7 +752,7 @@ export function FirstCardForm() {
 
           // If there's no previous pressure data, set to '000' and return
           if (!prevStationLevelPressure) {
-            formik.setFieldValue("pressureChange24h", "000");
+            formik.setFieldValue("pressureChange24h", "0000");
           } else {
             // Use the pressureData directly since we just set it
             const currentPressureStr = pressureData.stationLevelPressure;
