@@ -138,8 +138,8 @@ export async function GET() {
     measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
 
     // 8. 6RRRtR (47-51) - Precipitation
-    const precipitation = weatherObs.rainfallLast24Hours || "0";
-    measurements[7] = `6${pad(precipitation, 4)}`;
+    const rainFall = weatherObs.rainfallDuringPrevious || "0";
+    measurements[7] = `6${pad(rainFall, 4)}`;
 
     // 9. 7wwW1W2 (52-56) - Weather codes
     const presentWeather = firstCard.presentWeatherWW || "00";
