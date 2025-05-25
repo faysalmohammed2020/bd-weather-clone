@@ -71,32 +71,40 @@ export async function POST(request: NextRequest) {
     if (!observingTime) {
       return NextResponse.json(
         {
-          found: false,
+          allowFirstCard: true,
+          allowSecondCard: false,
           message: "First card data not found!",
           yesterday: {
             meteorologicalEntry: yesterdayObservingTime ? yesterdayObservingTime.MeteorologicalEntry : null,
           },
         },
-        { status: 404 }
+        { status: 400 }
+      );
+    }
+    
+
+    if(observingTime && observingTime._count.WeatherObservation > 0) {
+      return NextResponse.json(
+        {
+          allowFirstCard: false,
+          allowSecondCard: false,
+          message: "Observing time already exists!",
+          yesterday: {
+            meteorologicalEntry: yesterdayObservingTime ? yesterdayObservingTime.MeteorologicalEntry : null,
+          },
+        },
+        { status: 400 }
       );
     }
 
-    // Format Data
-    const formattedData = {
+    return NextResponse.json({
+      allowFirstCard: false,
+      allowSecondCard: true,
+      message: "Observing time already exists!",
       time: observingTime.utcTime,
       yesterday: {
         meteorologicalEntry: yesterdayObservingTime ? yesterdayObservingTime.MeteorologicalEntry : null,
       },
-      hasMeteorologicalData: observingTime._count.MeteorologicalEntry > 0,
-      hasWeatherObservation: observingTime._count.WeatherObservation > 0,
-      hasSynopticCode: observingTime._count.SynopticCode > 0,
-      hasDailySummary: observingTime._count.DailySummary > 0,
-    };
-
-    return NextResponse.json({
-      found: true,
-      message: "Observing time already exists",
-      data: formattedData,
     });
   } catch {
     return NextResponse.json(

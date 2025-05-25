@@ -163,7 +163,8 @@ const validationSchema = Yup.object({
 export function FirstCardForm() {
   const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isHourSelected, timeData, selectedHour, firstCardError, isLoading } = useHour();
+  const { isHourSelected, selectedHour, firstCardError, isLoading, timeData, resetStates } = useHour();
+
   const [hygrometricData, setHygrometricData] = useState({
     dryBulb: "",
     wetBulb: "",
@@ -578,6 +579,8 @@ export function FirstCardForm() {
         dewPoint: "",
         relativeHumidity: "",
       });
+
+      resetStates();
 
       // Reset to first tab after submission
       setActiveTab("temperature");

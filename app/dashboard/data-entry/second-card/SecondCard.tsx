@@ -40,7 +40,6 @@ import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useHour } from "@/contexts/hourContext";
 import HourSelector from "@/components/hour-selector";
-import { time } from "console";
 
 // Define the form data type
 type WeatherObservationFormData = {
@@ -274,7 +273,7 @@ export default function SecondCardForm() {
   const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
   const { data: session } = useSession();
 
-  const { isHourSelected, secondCardError, selectedHour, timeData, isLoading } = useHour();
+  const { isHourSelected, secondCardError, selectedHour, isLoading, resetStates } = useHour();
 
   // Get the persistent form store
   const { formData, updateFields, resetForm } = useWeatherObservationForm();
@@ -768,6 +767,7 @@ export default function SecondCardForm() {
 
       resetForm();
       formik.resetForm();
+      resetStates();
       setCurrentStep(1);
       setActiveTab("cloud");
       updateFields({});
@@ -837,7 +837,7 @@ export default function SecondCardForm() {
   return (
     <>
       <AnimatePresence mode="wait">
-        {isLoading || secondCardError || timeData?.hasWeatherObservation || !isHourSelected ? (
+        {isLoading || secondCardError || !isHourSelected ? (
           <motion.div
             key="hour-selector"
             initial={{ opacity: 0 }}

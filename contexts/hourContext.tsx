@@ -1,19 +1,24 @@
 "use client";
 
 import { MeteorologicalEntry } from "@prisma/client";
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { toast } from "sonner";
 import { usePathname } from "next/navigation";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { toast } from "sonner";
 
 type TimeData = {
-  time: string;
+  allowFirstCard?: boolean;
+  allowSecondCard?: boolean;
+  message?: string;
+  time?: string;
   yesterday: {
     meteorologicalEntry: MeteorologicalEntry | null;
   };
-  hasMeteorologicalData: boolean;
-  hasWeatherObservation: boolean;
-  hasSynopticCode: boolean;
-  hasDailySummary: boolean;
 };
 
 type HourContextType = {
@@ -24,6 +29,7 @@ type HourContextType = {
   secondCardError: string;
   isLoading: boolean;
   clearError: () => void;
+  resetStates: () => void;
   isHourSelected: boolean;
 };
 
@@ -35,91 +41,91 @@ export function HourProvider({ children }: { children: ReactNode }) {
   const [firstCardError, setFirstCardError] = useState<string>("");
   const [secondCardError, setSecondCardError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const pathname = usePathname();
-  
-  // Fetching time data
-  const fetchTime = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(`/api/time-check`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ hour: selectedHour }),
-      });
-      
-      const data = await response.json();
+  const path = usePathname();
 
-      if(data.error) {
-        toast.error(data.message)
-        setTimeData(null);
-        return;
-      }
-
-      if(data.found) {
-        setFirstCardError(data.message);
-        setTimeData(null);
-        return;
-      }
-
-      if(!data.found) {
-        setSecondCardError(data.message);
-        setTimeData(null);
-        return;
-      }
-
-      if(data.hasWeatherObservation) {
-        setSecondCardError("Weather observation already exists for this hour");
-        setTimeData(null);
-        return;
-      }
-
-      setTimeData(data);
-    } catch (err) {
-      setFirstCardError(err instanceof Error ? err.message : String(err));
-      setSecondCardError(err instanceof Error ? err.message : String(err));
-      setTimeData(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [selectedHour]);
-
+  // Reset states on pathchange
+  useEffect(() => {
+    setSelectedHour("");
+    setTimeData(null);
+    setFirstCardError("");
+    setSecondCardError("");
+    setIsLoading(false);
+  }, [path]);
 
   // Call the fetch
   useEffect(() => {
     if (!selectedHour) {
-      setTimeData(null);
       return;
     }
 
-    fetchTime();
-  }, [selectedHour, fetchTime]);
+    // Fetching time data
+    const fetchTime = async () => {
+      try {
+        setIsLoading(true);
+        setFirstCardError("");
+        setSecondCardError("");
+        const response = await fetch(`/api/time-check`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ hour: selectedHour }),
+        });
 
-  // Reset stats 
-  useEffect(() => {
-    return () => {
-      setSelectedHour("");
-      setTimeData(null);
-      setFirstCardError("");
-      setSecondCardError("");
-      setIsLoading(false);
+        const data = await response.json();
+
+        if (data.error) {
+          toast.error(data.message);
+          return
+        }
+
+        // Check if first card is allowed
+        if (!data.allowFirstCard) {
+          setFirstCardError(data.message);
+          return
+        }
+
+        // Check if second card is allowed
+        if (!data.allowSecondCard) {
+          setSecondCardError(data.message);
+          return
+        }
+
+        setTimeData(data);
+      } catch (err) {
+        setFirstCardError(err instanceof Error ? err.message : String(err));
+        setSecondCardError(err instanceof Error ? err.message : String(err));
+        setTimeData(null);
+      } finally {
+        setIsLoading(false);
+      }
     };
-  }, [pathname]);
+
+    fetchTime();
+  }, [selectedHour]);
 
   const clearError = () => {
     setFirstCardError("");
     setSecondCardError("");
   };
-  
+
+  const resetStates = () => {
+    setSelectedHour("");
+    setTimeData(null);
+    setFirstCardError("");
+    setSecondCardError("");
+    setIsLoading(false);
+  };
+
   const value = {
     selectedHour,
     setSelectedHour,
     timeData,
-    firstCardError,   
+    firstCardError,
     secondCardError,
     isLoading,
     clearError,
+    resetStates,
     isHourSelected: selectedHour !== "",
   };
 
