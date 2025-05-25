@@ -28,6 +28,7 @@ import { useFormik } from "formik";
 import BasicInfoTab from "@/components/basic-info-tab";
 import HourSelector from "@/components/hour-selector";
 import { AnimatePresence, motion } from "framer-motion";
+import { MeteorologicalEntry } from "@prisma/client";
 
 // type MeteorologicalFormData = {
 //   presentWeatherWW?: string;
@@ -67,10 +68,6 @@ import { AnimatePresence, motion } from "framer-motion";
 // };
 
 // Validation schemas for each tab
-const observingTimeSchema = Yup.object({
-  observationTime: Yup.string().required("সময় অবশ্যই নির্বাচন করতে হবে"),
-});
-
 const temperatureSchema = Yup.object({
   dryBulbAsRead: Yup.string()
     .required("Dry-bulb অবশ্যই পূরণ করতে হবে")
@@ -156,7 +153,6 @@ const weatherSchema = Yup.object({
 
 // Combined schema for the entire form
 const validationSchema = Yup.object({
-  ...observingTimeSchema.fields,
   ...temperatureSchema.fields,
   ...pressureSchema.fields,
   ...squallSchema.fields,
@@ -167,7 +163,7 @@ const validationSchema = Yup.object({
 export function FirstCardForm() {
   const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isHourSelected, timeData } = useHour();
+  const { isHourSelected, timeData, selectedHour } = useHour();
   const [hygrometricData, setHygrometricData] = useState({
     dryBulb: "",
     wetBulb: "",
@@ -179,13 +175,7 @@ export function FirstCardForm() {
   const { data: session } = useSession();
 
   // Tab order for navigation
-  const tabOrder = [
-    "temperature",
-    "pressure",
-    "squall",
-    "V.V",
-    "weather",
-  ];
+  const tabOrder = ["temperature", "pressure", "squall", "V.V", "weather"];
 
   // Tab styles with gradients and more vibrant colors
   const tabStyles = {
@@ -363,7 +353,9 @@ export function FirstCardForm() {
   // Debug logging for formData changes
   useEffect(() => {
     console.log("Form data updated:", formik.values);
-  }, [formik.values]);
+    console.log("Form errors updated:", formik.errors);
+    console.log("selectedHour:", selectedHour);
+  }, [formik.values, formik.errors, selectedHour]);
 
   useEffect(() => {
     const year = new Date().getFullYear().toString(); // e.g., "2025"
@@ -546,7 +538,7 @@ export function FirstCardForm() {
     };
   };
 
-  async function handleSubmit(values) {
+  async function handleSubmit(values: MeteorologicalEntry) {
     // Prevent duplicate submissions
     if (isSubmitting) return;
 
@@ -566,15 +558,15 @@ export function FirstCardForm() {
         body: JSON.stringify(submissionData),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to save data");
+      const data = await response.json();
+
+      if(data.error) {
+        toast.error(data.message)
+        return;
       }
 
-      const result = await response.json();
-
       toast.success("Data saved successfully!", {
-        description: `Entry #${result.dataCount} saved`,
+        description: `Entry #${data.dataCount} saved`,
       });
 
       formik.resetForm();

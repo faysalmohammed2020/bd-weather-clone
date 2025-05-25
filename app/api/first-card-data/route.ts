@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/getSession";
-import { convertUTCToBDTime, getTodayBDRange, getTodayUtcRange, hourToUtc } from "@/lib/utils";
+import { convertUTCToBDTime, getTodayBDRange, hourToUtc } from "@/lib/utils";
 
 const prisma = new PrismaClient();
 
@@ -14,17 +14,18 @@ export async function POST(req: Request) {
 
     const data = await req.json();
 
-    const formattedObservingTime = hourToUtc(data.observingTimeId);
-    const localTime = convertUTCToBDTime(formattedObservingTime);
-
-    if (!formattedObservingTime) {
+    if (!data.observingTimeId) {
       return NextResponse.json(
         {
-          message: "Observation time id not provided",
+          error: true,
+          message: "Must provide observation time",
         },
         { status: 404 }
       );
     }
+
+    const formattedObservingTime = hourToUtc(data.observingTimeId);
+    const localTime = convertUTCToBDTime(formattedObservingTime);
 
     const dataType =
       typeof data.dataType === "string"
@@ -35,10 +36,13 @@ export async function POST(req: Request) {
     const stationId = session.user.station?.id;
 
     if (!stationId) {
-      return NextResponse.json({
-        message: "Station ID is required",
-        status: 400,
-      });
+      return NextResponse.json(
+        {
+          error: true,
+          message: "Station ID is required",
+        },
+        { status: 400 }
+      );
     }
 
     // Find the station by stationId to get its primary key (id)
@@ -47,10 +51,13 @@ export async function POST(req: Request) {
     });
 
     if (!stationRecord) {
-      return NextResponse.json({
-        message: `No station found with ID: ${stationId}`,
-        status: 404,
-      });
+      return NextResponse.json(
+        {
+          error: true,
+          message: `No station found with ID: ${stationId}`,
+        },
+        { status: 404 }
+      );
     }
 
     // Check if the observation time already exists
@@ -68,10 +75,13 @@ export async function POST(req: Request) {
     });
 
     if (existingObservingTime) {
-      return NextResponse.json({
-        message: "Observing time already exists",
-        status: 400,
-      });
+      return NextResponse.json(
+        {
+          error: true,
+          message: "Observing time already exists",
+        },
+        { status: 400 }
+      );
     }
 
     // All Data
@@ -152,8 +162,8 @@ export async function POST(req: Request) {
     console.error("Error saving meteorological entry:", error);
     return NextResponse.json(
       {
+        error: true,
         message: "Failed to save data",
-        error: error instanceof Error ? error.message : "Unexpected Error",
       },
       { status: 500 }
     );
