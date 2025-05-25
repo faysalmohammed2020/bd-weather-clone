@@ -199,7 +199,7 @@ export async function GET() {
     measurements[16] = `${pressureChangeIndicator}${absPressureChange}`;
 
     // 18. (6RRRtR)/7R24R24R24 (24-28) - Precipitation
-    measurements[17] = `(${measurements[7]})/7${pad(precipitation, 3)}`;
+    measurements[17] = `${measurements[7]}`;
 
     // 19. 8N5Ch5h5 (29-33) - Cloud information
     let lowFormSig = weatherObs.layer1Form || "0";
@@ -212,10 +212,10 @@ export async function GET() {
     let highAmountSig = weatherObs.layer3Amount || "0";
     let fourthAmountSig = weatherObs.layer4Amount || "0";
 
-    let lowHeightSig = pad((Number(weatherObs.layer1Height) || 0) , 2);
-    let mediumHeightSig = pad((Number(weatherObs.layer2Height) || 0) , 2);
-    let highHeightSig = pad((Number(weatherObs.layer3Height) || 0) , 2);
-    let fourthHeightSig = pad((Number(weatherObs.layer3Height) || 0) , 2);
+    let lowHeightSig = pad(Number(weatherObs.layer1Height) || 0, 2);
+    let mediumHeightSig = pad(Number(weatherObs.layer2Height) || 0, 2);
+    let highHeightSig = pad(Number(weatherObs.layer3Height) || 0, 2);
+    let fourthHeightSig = pad(Number(weatherObs.layer3Height) || 0, 2);
     measurements[18] = `8${lowAmountSig}${lowFormSig}${lowHeightSig} / 8${mediumAmountSig}${mediumFormSig}${mediumHeightSig} / 8${highAmountSig}${highFormSig}${highHeightSig} /8${fourthAmountSig}${fourthFormSig}${fourthHeightSig}`;
 
     // 20. 90dqqqt (34-38) - Dew point depression
