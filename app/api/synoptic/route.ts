@@ -153,7 +153,7 @@ export async function GET() {
 
     // 8. 6RRRtR (47-51) - Precipitation
     let rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
-    rainFall = Number(rainFall.toString().slice(-3).padStart(3, "0"));
+    rainFall = Number(rainFall.toString().slice(-3).padStart(3, "000"));
     let durationCode = "/";
     if (weatherObs.rainfallTimeStart && weatherObs.rainfallTimeEnd) {
       const startTime = Number(weatherObs.rainfallTimeStart);
@@ -176,7 +176,6 @@ export async function GET() {
       }
     }
     measurements[7] = `6${rainFall}${durationCode}`;
-
     
     // 9. 7wwW1W2 (52-56) - Weather codes
     const presentWeather = firstCard.presentWeatherWW || "00";
