@@ -137,7 +137,7 @@ export async function GET() {
 
     measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
 
-    // 8. 6RRRtR (47-51) - Precipitation
+    // 8. 6RRRtR (47-51) - RainfallDuringPrevious
     const rainFall = weatherObs.rainfallDuringPrevious || "0";
     measurements[7] = `6${pad(rainFall, 4)}`;
 
