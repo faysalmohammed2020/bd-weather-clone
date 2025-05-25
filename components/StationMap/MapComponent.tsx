@@ -6,9 +6,9 @@ import "leaflet/dist/leaflet.css"
 import L from "leaflet"
 import { Slider } from "@/components/ui/slider"
 import { Button } from "@/components/ui/button"
-import { Play, Pause, Plus, Minus } from "lucide-react"
+import { Play, Pause, Plus, Minus } from 'lucide-react'
 import { useSession } from "@/lib/auth-client"
-import { Cloud, Droplets, Thermometer, Wind } from "lucide-react"
+import { Cloud, Droplets, Thermometer, Wind } from 'lucide-react'
 
 // Station interface matching Prisma model
 interface Station {
@@ -131,6 +131,7 @@ function StationMarkers({
   currentDate: string
   loading: boolean
 }) {
+  const [error, setError] = useState<string | null>(null);
   const map = useMap()
 
   // Function to get the appropriate icon for each station
@@ -225,7 +226,7 @@ function StationMarkers({
                       src={
                         weatherRemarks.find((r) => r.stationId === station.stationId)?.weatherRemark?.split(" - ")[0] ||
                         "/broadcasting.png"
-                      }
+                       || "/placeholder.svg"}
                       alt="Weather Symbol"
                       className="h-8 w-8 object-contain"
                       onError={(e) => {
@@ -242,6 +243,8 @@ function StationMarkers({
                 <div className="border-t pt-2 mt-2">
                   {loading ? (
                     <div className="text-xs">Loading weather data...</div>
+                  ) : error ? (
+                    <div className="text-xs text-red-500">{error}</div>
                   ) : weatherData ? (
                     <div className="grid grid-cols-1 gap-2">
                       <div className="flex items-center">
@@ -332,6 +335,7 @@ export default function MapComponent({
   const [weatherData, setWeatherData] = useState<DailySummary | null>(null)
   const [weatherRemarks, setWeatherRemarks] = useState<WeatherRemark[]>([])
   const [lastUpdated, setLastUpdated] = useState<string>('');
+  const [error, setError] = useState<string | null>(null)
 
   // Fetch stations from API based on user role
   useEffect(() => {
@@ -390,11 +394,12 @@ export default function MapComponent({
     useEffect(() => {
       const fetchWeatherData = async () => {
         setLoading(true);
-  
+        setError(null); // Clear previous errors
+    
         try {
           let stationToQuery: string | null = null;
           let nameToDisplay = "Your Station";
-  
+    
           if (session?.user?.role === "super_admin") {
             stationToQuery = selectedStation?.id || session?.user?.station?.id || "";
             nameToDisplay = selectedStation?.name || "No Station";
@@ -402,12 +407,14 @@ export default function MapComponent({
             stationToQuery = session?.user?.station?.id || "";
             nameToDisplay = session?.user?.station?.name || "Your Station";
           }
-  
+    
           if (!stationToQuery) {
+            setWeatherData(null);
+            setError("No station selected");
             setLoading(false);
             return;
           }
-  
+    
           // Get today's date range in UTC
           const today = new Date();
           const startToday = new Date(today);
@@ -415,15 +422,15 @@ export default function MapComponent({
           
           const endToday = new Date(today);
           endToday.setUTCHours(23, 59, 59, 999);
-  
+    
           const response = await fetch(
             `/api/daily-summary?startDate=${startToday.toISOString()}&endDate=${endToday.toISOString()}&stationId=${stationToQuery}`
           );
-  
+    
           if (!response.ok) {
             throw new Error("Failed to fetch data");
           }
-  
+    
           const data = await response.json();
           
           if (data.length === 0) {
@@ -431,12 +438,14 @@ export default function MapComponent({
             setWeatherData(null);
             return;
           }
-  
+    
           // Take the first entry (most recent)
           const latestEntry = data[0];
           setWeatherData(latestEntry);
+          setError(null); // Clear error on successful data fetch
         } catch (err) {
           setError("Failed to fetch weather data");
+          setWeatherData(null);
           console.error("Weather fetch error:", err);
         } finally {
           setLoading(false);
@@ -544,49 +553,57 @@ export default function MapComponent({
       )}
 
       {/* Weather summary panel */}
-      {selectedStation && weatherData && (
+      {selectedStation && (
         <div className="absolute bottom-20 right-4 bg-white p-3 rounded-lg shadow-lg z-[1000] w-64">
           <div className="text-sm font-medium mb-2">Weather Summary</div>
-          <div className="grid grid-cols-1 gap-2">
-            <div className="flex items-center">
-              <Thermometer className="h-4 w-4 mr-2 text-orange-500" />
-              <div className="text-xs">
-                <span className="font-medium">Temperature: </span>
-                {weatherData.maxTemperature ? `${weatherData.maxTemperature}°C (max)` : "N/A"} /
-                {weatherData.minTemperature ? `${weatherData.minTemperature}°C (min)` : "N/A"}
+          {loading ? (
+            <div className="text-xs">Loading weather data...</div>
+          ) : error ? (
+            <div className="text-xs text-red-500">{error}</div>
+          ) : weatherData ? (
+            <div className="grid grid-cols-1 gap-2">
+              <div className="flex items-center">
+                <Thermometer className="h-4 w-4 mr-2 text-orange-500" />
+                <div className="text-xs">
+                  <span className="font-medium">Temperature: </span>
+                  {weatherData.maxTemperature ? `${weatherData.maxTemperature}°C (max)` : "N/A"} /
+                  {weatherData.minTemperature ? `${weatherData.minTemperature}°C (min)` : "N/A"}
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center">
-              <Droplets className="h-4 w-4 mr-2 text-blue-500" />
-              <div className="text-xs">
-                <span className="font-medium">Precipitation: </span>
-                {weatherData.totalPrecipitation ? `${weatherData.totalPrecipitation} mm` : "No data"}
+              <div className="flex items-center">
+                <Droplets className="h-4 w-4 mr-2 text-blue-500" />
+                <div className="text-xs">
+                  <span className="font-medium">Precipitation: </span>
+                  {weatherData.totalPrecipitation ? `${weatherData.totalPrecipitation} mm` : "No data"}
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center">
-              <Wind className="h-4 w-4 mr-2 text-gray-500" />
-              <div className="text-xs">
-                <span className="font-medium">Wind Speed: </span>
-                {weatherData.windSpeed ? `${weatherData.windSpeed} NM` : "No data"}
+              <div className="flex items-center">
+                <Wind className="h-4 w-4 mr-2 text-gray-500" />
+                <div className="text-xs">
+                  <span className="font-medium">Wind Speed: </span>
+                  {weatherData.windSpeed ? `${weatherData.windSpeed} NM` : "No data"}
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center">
-              <Cloud className="h-4 w-4 mr-2 text-gray-400" />
-              <div className="text-xs">
-                <span className="font-medium">Cloud Cover: </span>
-                {weatherData.avTotalCloud ? `${weatherData.avTotalCloud}%` : "No data"}
+              <div className="flex items-center">
+                <Cloud className="h-4 w-4 mr-2 text-gray-400" />
+                <div className="text-xs">
+                  <span className="font-medium">Cloud Cover: </span>
+                  {weatherData.avTotalCloud ? `${weatherData.avTotalCloud}%` : "No data"}
+                </div>
               </div>
-            </div>
 
-            {weatherData.totalPrecipitation && Number.parseFloat(weatherData.totalPrecipitation) > 0 && (
-              <div className="text-xs text-blue-600 font-medium mt-1">
-                Rain detected: {weatherData.totalPrecipitation} mm
-              </div>
-            )}
-          </div>
+              {weatherData.totalPrecipitation && Number.parseFloat(weatherData.totalPrecipitation) > 0 && (
+                <div className="text-xs text-blue-600 font-medium mt-1">
+                  Rain detected: {weatherData.totalPrecipitation} mm
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-xs text-gray-500">No weather data available</div>
+          )}
         </div>
       )}
 
