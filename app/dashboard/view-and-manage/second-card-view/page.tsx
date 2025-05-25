@@ -1,6 +1,8 @@
 "use client"
 import { useState, useEffect, useImperativeHandle, forwardRef } from "react"
-import type React from "react"
+import { useForm } from "react-hook-form"
+import { yupResolver } from "@hookform/resolvers/yup"
+import * as yup from "yup"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -23,6 +25,160 @@ import { toast } from "sonner"
 import { utcToHour } from "@/lib/utils"
 import { Download } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+
+// Validation schema with specific digit requirements
+const validationSchema = yup.object({
+  // 1 digit fields (most cloud-related fields)
+  totalCloudAmount: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  lowCloudDirection: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  lowCloudHeight: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  lowCloudForm: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  lowCloudAmount: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  mediumCloudDirection: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  mediumCloudHeight: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  mediumCloudForm: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  mediumCloudAmount: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  highCloudDirection: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  highCloudHeight: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  highCloudForm: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  highCloudAmount: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  windDirection: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  layer1Form: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  layer1Amount: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  layer2Form: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  layer2Amount: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  layer3Form: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  layer3Amount: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  layer4Form: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+  layer4Amount: yup
+    .string()
+    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .required("Required"),
+
+  // 2 digit fields
+  layer1Height: yup
+    .string()
+    .matches(/^\d{2}$/, "Must be exactly 2 digits")
+    .required("Required"),
+  layer2Height: yup
+    .string()
+    .matches(/^\d{2}$/, "Must be exactly 2 digits")
+    .required("Required"),
+  layer3Height: yup
+    .string()
+    .matches(/^\d{2}$/, "Must be exactly 2 digits")
+    .required("Required"),
+  layer4Height: yup
+    .string()
+    .matches(/^\d{2}$/, "Must be exactly 2 digits")
+    .required("Required"),
+  rainfallTimeStart: yup
+    .string()
+    .matches(/^\d{2}$/, "Must be exactly 2 digits")
+    .required("Required"),
+  rainfallTimeEnd: yup
+    .string()
+    .matches(/^\d{2}$/, "Must be exactly 2 digits")
+    .required("Required"),
+  rainfallSincePrevious: yup
+    .string()
+    .matches(/^\d{2}$/, "Must be exactly 2 digits")
+    .required("Required"),
+  rainfallLast24Hours: yup
+    .string()
+    .matches(/^\d{2}$/, "Must be exactly 2 digits")
+    .required("Required"),
+
+  // 3 digit field
+  windSpeed: yup
+    .string()
+    .matches(/^\d{3}$/, "Must be exactly 3 digits")
+    .required("Required"),
+
+  // 4 digit field
+  rainfallDuringPrevious: yup
+    .string()
+    .matches(/^\d{4}$/, "Must be exactly 4 digits")
+    .required("Required"),
+
+  // 5 digit fields
+  windFirstAnemometer: yup
+    .string()
+    .matches(/^\d{5}$/, "Must be exactly 5 digits")
+    .required("Required"),
+  windSecondAnemometer: yup
+    .string()
+    .matches(/^\d{5}$/, "Must be exactly 5 digits")
+    .required("Required"),
+
+  // Readonly field (no validation needed as it's readonly)
+  observerInitial: yup.string(),
+})
+
+type FormData = yup.InferType<typeof validationSchema>
 
 // Define the structure of weather observation data
 interface WeatherObservation {
@@ -178,7 +334,6 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
   // Edit dialog state
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [selectedRecord, setSelectedRecord] = useState<ObservationData | null>(null)
-  const [editFormData, setEditFormData] = useState<Partial<WeatherObservation>>({})
   const [isSaving, setIsSaving] = useState(false)
   const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false)
 
@@ -186,6 +341,17 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
   const [startDate, setStartDate] = useState(today)
   const [endDate, setEndDate] = useState(today)
   const [dateError, setDateError] = useState<string | null>(null)
+
+  // React Hook Form setup
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setValue,
+  } = useForm<FormData>({
+    resolver: yupResolver(validationSchema),
+  })
 
   // Expose getData method via ref
   useImperativeHandle(ref, () => ({
@@ -246,28 +412,28 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
     fetchData()
   }, [startDate, endDate, stationFilter, refreshTrigger])
 
-  // Handle input changes in edit form - FIXED VERSION
-  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setEditFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
-
-  // Handle edit click - FIXED VERSION
+  // Handle edit click
   const handleEditClick = (record: ObservationData) => {
     if (user && canEditObservation(record, user)) {
       setSelectedRecord(record)
-      setEditFormData(record.WeatherObservation[0] || {})
+      const weatherObs = record.WeatherObservation[0] || {}
+
+      // Reset form and set values
+      reset()
+      Object.keys(weatherObs).forEach((key) => {
+        if (weatherObs[key] !== null && weatherObs[key] !== undefined) {
+          setValue(key as keyof FormData, weatherObs[key])
+        }
+      })
+
       setIsEditDialogOpen(true)
     } else {
       setIsPermissionDeniedOpen(true)
     }
   }
 
-  // Handle saving the edited data - FIXED VERSION
-  const handleSaveEdit = async () => {
+  // Handle form submission
+  const onSubmit = async (formData: FormData) => {
     if (!selectedRecord || !selectedRecord.WeatherObservation?.[0]) return
 
     setIsSaving(true)
@@ -279,8 +445,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
         },
         body: JSON.stringify({
           id: selectedRecord.WeatherObservation[0].id,
-          type: "weather", // Specify that we're updating a weather observation
-          ...editFormData,
+          type: "weather",
+          ...formData,
         }),
       })
 
@@ -297,7 +463,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
               WeatherObservation: [
                 {
                   ...item.WeatherObservation[0],
-                  ...editFormData,
+                  ...formData,
                   updatedAt: new Date().toISOString(),
                 },
               ],
@@ -315,6 +481,12 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
     } finally {
       setIsSaving(false)
     }
+  }
+
+  // Handle form cancel
+  const handleCancel = () => {
+    reset()
+    setIsEditDialogOpen(false)
   }
 
   // Filter data to only show records with WeatherObservation entries
@@ -1120,7 +1292,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
           </div>
         </div>
 
-        {/* Edit Dialog - FIXED VERSION */}
+        {/* Edit Dialog with Validation */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <DialogContent className="w-[50vw] !max-w-[90vw] rounded-xl border-0 bg-gradient-to-br from-sky-50 to-blue-50 p-6 shadow-xl">
             <DialogHeader>
@@ -1150,377 +1322,514 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
               <div className="h-1 w-20 rounded-full bg-gradient-to-r from-sky-400 to-blue-400 mt-2"></div>
             </DialogHeader>
 
-            {selectedRecord && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 max-h-[65vh] overflow-y-auto pr-2">
-                {/* Total Cloud */}
-                <div className="space-y-1 p-3 rounded-lg bg-sky-50 border border-white shadow-sm">
-                  <Label htmlFor="totalCloudAmount" className="text-sm font-medium text-gray-700">
-                    Total Cloud Amount
-                  </Label>
-                  <Input
-                    name="totalCloudAmount"
-                    value={editFormData.totalCloudAmount || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
-                  />
-                </div>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              {selectedRecord && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4 max-h-[65vh] overflow-y-auto pr-2">
+                  {/* Total Cloud */}
+                  <div className="space-y-1 p-3 rounded-lg bg-sky-50 border border-white shadow-sm">
+                    <Label htmlFor="totalCloudAmount" className="text-sm font-medium text-gray-700">
+                      Total Cloud Amount (1 digit)
+                    </Label>
+                    <Input
+                      {...register("totalCloudAmount")}
+                      className={`w-full bg-white border-gray-300 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 ${
+                        errors.totalCloudAmount ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.totalCloudAmount && (
+                      <p className="text-red-500 text-xs mt-1">{errors.totalCloudAmount.message}</p>
+                    )}
+                  </div>
 
-                {/* Low Cloud */}
-                <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Low Cloud Direction</Label>
-                  <Input
-                    name="lowCloudDirection"
-                    value={editFormData.lowCloudDirection || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Low Cloud Height</Label>
-                  <Input
-                    name="lowCloudHeight"
-                    value={editFormData.lowCloudHeight || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Low Cloud Form</Label>
-                  <Input
-                    name="lowCloudForm"
-                    value={editFormData.lowCloudForm || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Low Cloud Amount</Label>
-                  <Input
-                    name="lowCloudAmount"
-                    value={editFormData.lowCloudAmount || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
+                  {/* Low Cloud */}
+                  <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Low Cloud Direction (1 digit)</Label>
+                    <Input
+                      {...register("lowCloudDirection")}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
+                        errors.lowCloudDirection ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.lowCloudDirection && (
+                      <p className="text-red-500 text-xs mt-1">{errors.lowCloudDirection.message}</p>
+                    )}
+                  </div>
 
-                {/* Medium Cloud */}
-                <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Medium Cloud Direction</Label>
-                  <Input
-                    name="mediumCloudDirection"
-                    value={editFormData.mediumCloudDirection || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Medium Cloud Height</Label>
-                  <Input
-                    name="mediumCloudHeight"
-                    value={editFormData.mediumCloudHeight || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Medium Cloud Form</Label>
-                  <Input
-                    name="mediumCloudForm"
-                    value={editFormData.mediumCloudForm || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Medium Cloud Amount</Label>
-                  <Input
-                    name="mediumCloudAmount"
-                    value={editFormData.mediumCloudAmount || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
+                  <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Low Cloud Height (1 digit)</Label>
+                    <Input
+                      {...register("lowCloudHeight")}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
+                        errors.lowCloudHeight ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.lowCloudHeight && (
+                      <p className="text-red-500 text-xs mt-1">{errors.lowCloudHeight.message}</p>
+                    )}
+                  </div>
 
-                {/* High Cloud */}
-                <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">High Cloud Direction</Label>
-                  <Input
-                    name="highCloudDirection"
-                    value={editFormData.highCloudDirection || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">High Cloud Height</Label>
-                  <Input
-                    name="highCloudHeight"
-                    value={editFormData.highCloudHeight || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">High Cloud Form</Label>
-                  <Input
-                    name="highCloudForm"
-                    value={editFormData.highCloudForm || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">High Cloud Amount</Label>
-                  <Input
-                    name="highCloudAmount"
-                    value={editFormData.highCloudAmount || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
+                  <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Low Cloud Form (1 digit)</Label>
+                    <Input
+                      {...register("lowCloudForm")}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
+                        errors.lowCloudForm ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.lowCloudForm && <p className="text-red-500 text-xs mt-1">{errors.lowCloudForm.message}</p>}
+                  </div>
 
-                {/* Rainfall */}
-                <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Rainfall Start Time</Label>
-                  <Input
-                    name="rainfallTimeStart"
-                    value={editFormData.rainfallTimeStart || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Rainfall End Time</Label>
-                  <Input
-                    name="rainfallTimeEnd"
-                    value={editFormData.rainfallTimeEnd || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Rainfall Since Previous</Label>
-                  <Input
-                    name="rainfallSincePrevious"
-                    value={editFormData.rainfallSincePrevious || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Rainfall During Previous</Label>
-                  <Input
-                    name="rainfallDuringPrevious"
-                    value={editFormData.rainfallDuringPrevious || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Rainfall Last 24 Hours</Label>
-                  <Input
-                    name="rainfallLast24Hours"
-                    value={editFormData.rainfallLast24Hours || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
-                  />
-                </div>
+                  <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Low Cloud Amount (1 digit)</Label>
+                    <Input
+                      {...register("lowCloudAmount")}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
+                        errors.lowCloudAmount ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.lowCloudAmount && (
+                      <p className="text-red-500 text-xs mt-1">{errors.lowCloudAmount.message}</p>
+                    )}
+                  </div>
 
-                {/* Wind */}
-                <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">First Anemometer</Label>
-                  <Input
-                    name="windFirstAnemometer"
-                    value={editFormData.windFirstAnemometer || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Second Anemometer</Label>
-                  <Input
-                    name="windSecondAnemometer"
-                    value={editFormData.windSecondAnemometer || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Wind Speed</Label>
-                  <Input
-                    name="windSpeed"
-                    value={editFormData.windSpeed || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Wind Direction</Label>
-                  <Input
-                    name="windDirection"
-                    value={editFormData.windDirection || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200"
-                  />
-                </div>
+                  {/* Medium Cloud */}
+                  <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Medium Cloud Direction (1 digit)</Label>
+                    <Input
+                      {...register("mediumCloudDirection")}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
+                        errors.mediumCloudDirection ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.mediumCloudDirection && (
+                      <p className="text-red-500 text-xs mt-1">{errors.mediumCloudDirection.message}</p>
+                    )}
+                  </div>
 
-                {/* Observer */}
-                <div className="space-y-1 p-3 rounded-lg bg-gray-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Observer Initial</Label>
-                  <Input
-                    name="observerInitial"
-                    value={editFormData.observerInitial || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-gray-400 focus:ring-2 focus:ring-gray-200"
-                  />
-                </div>
+                  <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Medium Cloud Height (1 digit)</Label>
+                    <Input
+                      {...register("mediumCloudHeight")}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
+                        errors.mediumCloudHeight ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.mediumCloudHeight && (
+                      <p className="text-red-500 text-xs mt-1">{errors.mediumCloudHeight.message}</p>
+                    )}
+                  </div>
 
-                {/* Significant Clouds */}
-                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Layer 1 Height</Label>
-                  <Input
-                    name="layer1Height"
-                    value={editFormData.layer1Height || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Layer 1 Form</Label>
-                  <Input
-                    name="layer1Form"
-                    value={editFormData.layer1Form || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Layer 1 Amount</Label>
-                  <Input
-                    name="layer1Amount"
-                    value={editFormData.layer1Amount || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Layer 2 Height</Label>
-                  <Input
-                    name="layer2Height"
-                    value={editFormData.layer2Height || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Layer 2 Form</Label>
-                  <Input
-                    name="layer2Form"
-                    value={editFormData.layer2Form || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Layer 2 Amount</Label>
-                  <Input
-                    name="layer2Amount"
-                    value={editFormData.layer2Amount || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Layer 3 Height</Label>
-                  <Input
-                    name="layer3Height"
-                    value={editFormData.layer3Height || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Layer 3 Form</Label>
-                  <Input
-                    name="layer3Form"
-                    value={editFormData.layer3Form || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Layer 3 Amount</Label>
-                  <Input
-                    name="layer3Amount"
-                    value={editFormData.layer3Amount || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Layer 4 Height</Label>
-                  <Input
-                    name="layer4Height"
-                    value={editFormData.layer4Height || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Layer 4 Form</Label>
-                  <Input
-                    name="layer4Form"
-                    value={editFormData.layer4Form || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
-                <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
-                  <Label className="text-sm font-medium text-gray-700">Layer 4 Amount</Label>
-                  <Input
-                    name="layer4Amount"
-                    value={editFormData.layer4Amount || ""}
-                    onChange={handleEditInputChange}
-                    className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
-                  />
-                </div>
-              </div>
-            )}
+                  <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Medium Cloud Form (1 digit)</Label>
+                    <Input
+                      {...register("mediumCloudForm")}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
+                        errors.mediumCloudForm ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.mediumCloudForm && (
+                      <p className="text-red-500 text-xs mt-1">{errors.mediumCloudForm.message}</p>
+                    )}
+                  </div>
 
-            <DialogFooter className="mt-4">
-              <Button
-                variant="outline"
-                onClick={() => setIsEditDialogOpen(false)}
-                className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSaveEdit}
-                disabled={isSaving}
-                className="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white shadow-md transition-all"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="mr-2 h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    Save Changes
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
+                  <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Medium Cloud Amount (1 digit)</Label>
+                    <Input
+                      {...register("mediumCloudAmount")}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
+                        errors.mediumCloudAmount ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.mediumCloudAmount && (
+                      <p className="text-red-500 text-xs mt-1">{errors.mediumCloudAmount.message}</p>
+                    )}
+                  </div>
+
+                  {/* High Cloud */}
+                  <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">High Cloud Direction (1 digit)</Label>
+                    <Input
+                      {...register("highCloudDirection")}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
+                        errors.highCloudDirection ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.highCloudDirection && (
+                      <p className="text-red-500 text-xs mt-1">{errors.highCloudDirection.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">High Cloud Height (1 digit)</Label>
+                    <Input
+                      {...register("highCloudHeight")}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
+                        errors.highCloudHeight ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.highCloudHeight && (
+                      <p className="text-red-500 text-xs mt-1">{errors.highCloudHeight.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">High Cloud Form (1 digit)</Label>
+                    <Input
+                      {...register("highCloudForm")}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
+                        errors.highCloudForm ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.highCloudForm && (
+                      <p className="text-red-500 text-xs mt-1">{errors.highCloudForm.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-blue-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">High Cloud Amount (1 digit)</Label>
+                    <Input
+                      {...register("highCloudAmount")}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
+                        errors.highCloudAmount ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.highCloudAmount && (
+                      <p className="text-red-500 text-xs mt-1">{errors.highCloudAmount.message}</p>
+                    )}
+                  </div>
+
+                  {/* Rainfall */}
+                  <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Rainfall Start Time (2 digits)</Label>
+                    <Input
+                      {...register("rainfallTimeStart")}
+                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${
+                        errors.rainfallTimeStart ? "border-red-500" : ""
+                      }`}
+                      maxLength={2}
+                    />
+                    {errors.rainfallTimeStart && (
+                      <p className="text-red-500 text-xs mt-1">{errors.rainfallTimeStart.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Rainfall End Time (2 digits)</Label>
+                    <Input
+                      {...register("rainfallTimeEnd")}
+                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${
+                        errors.rainfallTimeEnd ? "border-red-500" : ""
+                      }`}
+                      maxLength={2}
+                    />
+                    {errors.rainfallTimeEnd && (
+                      <p className="text-red-500 text-xs mt-1">{errors.rainfallTimeEnd.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Rainfall Since Previous (2 digits)</Label>
+                    <Input
+                      {...register("rainfallSincePrevious")}
+                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${
+                        errors.rainfallSincePrevious ? "border-red-500" : ""
+                      }`}
+                      maxLength={2}
+                    />
+                    {errors.rainfallSincePrevious && (
+                      <p className="text-red-500 text-xs mt-1">{errors.rainfallSincePrevious.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Rainfall During Previous (4 digits)</Label>
+                    <Input
+                      {...register("rainfallDuringPrevious")}
+                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${
+                        errors.rainfallDuringPrevious ? "border-red-500" : ""
+                      }`}
+                      maxLength={4}
+                    />
+                    {errors.rainfallDuringPrevious && (
+                      <p className="text-red-500 text-xs mt-1">{errors.rainfallDuringPrevious.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Rainfall Last 24 Hours (2 digits)</Label>
+                    <Input
+                      {...register("rainfallLast24Hours")}
+                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${
+                        errors.rainfallLast24Hours ? "border-red-500" : ""
+                      }`}
+                      maxLength={2}
+                    />
+                    {errors.rainfallLast24Hours && (
+                      <p className="text-red-500 text-xs mt-1">{errors.rainfallLast24Hours.message}</p>
+                    )}
+                  </div>
+
+                  {/* Wind */}
+                  <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">First Anemometer (5 digits)</Label>
+                    <Input
+                      {...register("windFirstAnemometer")}
+                      className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${
+                        errors.windFirstAnemometer ? "border-red-500" : ""
+                      }`}
+                      maxLength={5}
+                    />
+                    {errors.windFirstAnemometer && (
+                      <p className="text-red-500 text-xs mt-1">{errors.windFirstAnemometer.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Second Anemometer (5 digits)</Label>
+                    <Input
+                      {...register("windSecondAnemometer")}
+                      className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${
+                        errors.windSecondAnemometer ? "border-red-500" : ""
+                      }`}
+                      maxLength={5}
+                    />
+                    {errors.windSecondAnemometer && (
+                      <p className="text-red-500 text-xs mt-1">{errors.windSecondAnemometer.message}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Wind Speed (3 digits)</Label>
+                    <Input
+                      {...register("windSpeed")}
+                      className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${
+                        errors.windSpeed ? "border-red-500" : ""
+                      }`}
+                      maxLength={3}
+                    />
+                    {errors.windSpeed && <p className="text-red-500 text-xs mt-1">{errors.windSpeed.message}</p>}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Wind Direction (1 digit)</Label>
+                    <Input
+                      {...register("windDirection")}
+                      className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${
+                        errors.windDirection ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.windDirection && (
+                      <p className="text-red-500 text-xs mt-1">{errors.windDirection.message}</p>
+                    )}
+                  </div>
+
+                  {/* Observer */}
+                  <div className="space-y-1 p-3 rounded-lg bg-gray-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Observer Initial (Readonly)</Label>
+                    <Input
+                      {...register("observerInitial")}
+                      readOnly
+                      className="w-full bg-gray-100 border-gray-300 focus:border-gray-400 focus:ring-2 focus:ring-gray-200 cursor-not-allowed"
+                    />
+                  </div>
+
+                  {/* Significant Clouds */}
+                  <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Layer 1 Height (2 digits)</Label>
+                    <Input
+                      {...register("layer1Height")}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
+                        errors.layer1Height ? "border-red-500" : ""
+                      }`}
+                      maxLength={2}
+                    />
+                    {errors.layer1Height && <p className="text-red-500 text-xs mt-1">{errors.layer1Height.message}</p>}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Layer 1 Form (1 digit)</Label>
+                    <Input
+                      {...register("layer1Form")}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
+                        errors.layer1Form ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.layer1Form && <p className="text-red-500 text-xs mt-1">{errors.layer1Form.message}</p>}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Layer 1 Amount (1 digit)</Label>
+                    <Input
+                      {...register("layer1Amount")}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
+                        errors.layer1Amount ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.layer1Amount && <p className="text-red-500 text-xs mt-1">{errors.layer1Amount.message}</p>}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Layer 2 Height (2 digits)</Label>
+                    <Input
+                      {...register("layer2Height")}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
+                        errors.layer2Height ? "border-red-500" : ""
+                      }`}
+                      maxLength={2}
+                    />
+                    {errors.layer2Height && <p className="text-red-500 text-xs mt-1">{errors.layer2Height.message}</p>}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Layer 2 Form (1 digit)</Label>
+                    <Input
+                      {...register("layer2Form")}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
+                        errors.layer2Form ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.layer2Form && <p className="text-red-500 text-xs mt-1">{errors.layer2Form.message}</p>}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Layer 2 Amount (1 digit)</Label>
+                    <Input
+                      {...register("layer2Amount")}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
+                        errors.layer2Amount ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.layer2Amount && <p className="text-red-500 text-xs mt-1">{errors.layer2Amount.message}</p>}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Layer 3 Height (2 digits)</Label>
+                    <Input
+                      {...register("layer3Height")}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
+                        errors.layer3Height ? "border-red-500" : ""
+                      }`}
+                      maxLength={2}
+                    />
+                    {errors.layer3Height && <p className="text-red-500 text-xs mt-1">{errors.layer3Height.message}</p>}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Layer 3 Form (1 digit)</Label>
+                    <Input
+                      {...register("layer3Form")}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
+                        errors.layer3Form ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.layer3Form && <p className="text-red-500 text-xs mt-1">{errors.layer3Form.message}</p>}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Layer 3 Amount (1 digit)</Label>
+                    <Input
+                      {...register("layer3Amount")}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
+                        errors.layer3Amount ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.layer3Amount && <p className="text-red-500 text-xs mt-1">{errors.layer3Amount.message}</p>}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Layer 4 Height (2 digits)</Label>
+                    <Input
+                      {...register("layer4Height")}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
+                        errors.layer4Height ? "border-red-500" : ""
+                      }`}
+                      maxLength={2}
+                    />
+                    {errors.layer4Height && <p className="text-red-500 text-xs mt-1">{errors.layer4Height.message}</p>}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Layer 4 Form (1 digit)</Label>
+                    <Input
+                      {...register("layer4Form")}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
+                        errors.layer4Form ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.layer4Form && <p className="text-red-500 text-xs mt-1">{errors.layer4Form.message}</p>}
+                  </div>
+
+                  <div className="space-y-1 p-3 rounded-lg bg-indigo-50 border border-white shadow-sm">
+                    <Label className="text-sm font-medium text-gray-700">Layer 4 Amount (1 digit)</Label>
+                    <Input
+                      {...register("layer4Amount")}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
+                        errors.layer4Amount ? "border-red-500" : ""
+                      }`}
+                      maxLength={1}
+                    />
+                    {errors.layer4Amount && <p className="text-red-500 text-xs mt-1">{errors.layer4Amount.message}</p>}
+                  </div>
+                </div>
+              )}
+
+              <DialogFooter className="mt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCancel}
+                  className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSaving}
+                  className="bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white shadow-md transition-all"
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="mr-2 h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
 
