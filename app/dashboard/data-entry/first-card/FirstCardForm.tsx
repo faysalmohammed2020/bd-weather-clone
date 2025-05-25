@@ -887,7 +887,7 @@ export function FirstCardForm() {
   return (
     <>
       <AnimatePresence mode="wait">
-        {!isHourSelected || firstCardError ? (
+        {firstCardError || !isHourSelected ? (
           <motion.div
             key="hour-selector"
             initial={{ opacity: 0 }}

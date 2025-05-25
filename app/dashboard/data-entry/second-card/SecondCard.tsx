@@ -273,7 +273,7 @@ export default function SecondCardForm() {
   const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
   const { data: session } = useSession();
 
-  const { isHourSelected, timeData, secondCardError } = useHour();
+  const { isHourSelected, secondCardError, selectedHour } = useHour();
 
   // Get the persistent form store
   const { formData, updateFields, resetForm } = useWeatherObservationForm();
@@ -737,6 +737,7 @@ export default function SecondCardForm() {
     try {
       const submissionData = {
         ...values,
+        observingTimeId: selectedHour || "",
         metadata: {
           ...values.metadata,
           submittedAt: new Date().toISOString(),
@@ -835,7 +836,7 @@ export default function SecondCardForm() {
   return (
     <>
       <AnimatePresence mode="wait">
-        {!isHourSelected || secondCardError ? (
+        {secondCardError || !isHourSelected ? (
           <motion.div
             key="hour-selector"
             initial={{ opacity: 0 }}

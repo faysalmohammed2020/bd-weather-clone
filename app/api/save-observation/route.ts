@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
-import { getTodayUtcRange, hourToUtc } from "@/lib/utils";
+import { hourToUtc } from "@/lib/utils";
 
 export async function POST(request: Request) {
   try {
