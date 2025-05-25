@@ -36,7 +36,6 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { useTimeCheck } from "@/hooks/useTimeCheck";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { cn } from "@/lib/utils";
@@ -272,8 +271,6 @@ export default function SecondCardForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
   const { data: session } = useSession();
-
-  const { time } = useTimeCheck();
 
   // Get the persistent form store
   const { formData, updateFields, resetForm } = useWeatherObservationForm();
@@ -847,18 +844,6 @@ export default function SecondCardForm() {
             onKeyDown={handleKeyDown}
           >
             <div className="relative rounded-xl">
-              {(!time?.isPassed ||
-                !time?.hasMeteorologicalData ||
-                time?.hasWeatherObservation) && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-red-50/30 z-10">
-                    <div className="border shadow shadow-red-500 bg-white p-4 rounded-xl aspect-square size-64 flex items-center justify-center flex-col text-center gap-2">
-                      <LockIcon className="size-16 stroke-1 text-red-500" />
-                      <p className="text-gray-600 text-xl font-medium">
-                        3 hours have not passed since the last observation
-                      </p>
-                    </div>
-                  </div>
-                )}
               <Tabs
                 value={activeTab}
                 onValueChange={(value) => {
@@ -1482,13 +1467,12 @@ export default function SecondCardForm() {
                               "observer.observer-initial"
                             )}
                           />
-
                           <InputField
                             id="station-id"
                             name="station-id"
                             label="Station ID"
                             accent="orange"
-                            value={session?.user?.station.stationId || ""}
+                            value={session?.user?.station?.stationId || ""}
                             onChange={handleInputChange}
                             disabled
                           />
