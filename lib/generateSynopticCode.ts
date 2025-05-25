@@ -172,8 +172,8 @@ export function generateSynopticCode(): SynopticFormValues {
   measurements[11] = `56${lowDir}${mediumDir}${highDir}`;
 
   // 13. 57CDaEc (72-76) - Characteristic of pressure + pressure tendency
-  const pressureTendency = firstCard.pressureChange24h?.toString()[0] || "0";
-  measurements[12] = `57${pressureTendency}00`;
+  // const pressureTendency = firstCard.pressureChange24h?.toString()[0] || "0";
+  // measurements[12] = `57${pressureTendency}00`;
 
   // 14. Av. Total Cloud (56) - Total cloud amount
   measurements[13] = totalCloud;
