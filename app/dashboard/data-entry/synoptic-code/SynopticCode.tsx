@@ -135,21 +135,6 @@ const measurements = [
     range: "19-23",
   },
   {
-    id: 17,
-    label: (
-      <span style={{ display: "inline-block", textAlign: "center" }}>
-        <span>
-          ( 6 R R R t<sub>R</sub> )
-        </span>
-        <br />
-        <span style={{ borderTop: "1px solid black" }}>
-          7 R<sub>24</sub>R<sub>24</sub>R<sub>24</sub>
-        </span>
-      </span>
-    ),
-    range: "24-28",
-  },
-  {
     id: 18,
     label: (
       <>
