@@ -65,11 +65,6 @@ export function HourProvider({ children }: { children: ReactNode }) {
           return;
         }
 
-        if(!data.found) {
-          setError(data.message);
-          return;
-        }
-
         setTimeData(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));

@@ -163,7 +163,7 @@ const validationSchema = Yup.object({
 export function FirstCardForm() {
   const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isHourSelected, timeData, selectedHour } = useHour();
+  const { isHourSelected, timeData, selectedHour, error: timeError } = useHour();
   const [hygrometricData, setHygrometricData] = useState({
     dryBulb: "",
     wetBulb: "",
@@ -797,8 +797,6 @@ export function FirstCardForm() {
   const handleReset = () => {
     // Clear all form data except station info
     const resetValues = {
-      stationNo: formik.values.stationNo,
-      year: formik.values.year,
       subIndicator: formik.values.subIndicator,
       // Clear other fields
       presentWeatherWW: "",
@@ -889,7 +887,7 @@ export function FirstCardForm() {
   return (
     <>
       <AnimatePresence mode="wait">
-        {!isHourSelected || timeData?.hasMeteorologicalData ? (
+        {!isHourSelected || timeError ? (
           <motion.div
             key="hour-selector"
             initial={{ opacity: 0 }}
