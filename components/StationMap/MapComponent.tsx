@@ -387,33 +387,64 @@ export default function MapComponent({
     fetchWeatherRemarks()
   }, [])
 
-  // Fetch weather data when station is selected or date changes
-  useEffect(() => {
-    const fetchWeatherData = async () => {
-      if (!selectedStation) {
-        setWeatherData(null)
-        return
-      }
-
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/daily-summary?stationNo=${selectedStation.stationId}&date=${currentDate}`)
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`)
+    useEffect(() => {
+      const fetchWeatherData = async () => {
+        setLoading(true);
+  
+        try {
+          let stationToQuery: string | null = null;
+          let nameToDisplay = "Your Station";
+  
+          if (session?.user?.role === "super_admin") {
+            stationToQuery = selectedStation?.id || session?.user?.station?.id || "";
+            nameToDisplay = selectedStation?.name || "No Station";
+          } else {
+            stationToQuery = session?.user?.station?.id || "";
+            nameToDisplay = session?.user?.station?.name || "Your Station";
+          }
+  
+          if (!stationToQuery) {
+            setLoading(false);
+            return;
+          }
+  
+          // Get today's date range in UTC
+          const today = new Date();
+          const startToday = new Date(today);
+          startToday.setUTCHours(0, 0, 0, 0);
+          
+          const endToday = new Date(today);
+          endToday.setUTCHours(23, 59, 59, 999);
+  
+          const response = await fetch(
+            `/api/daily-summary?startDate=${startToday.toISOString()}&endDate=${endToday.toISOString()}&stationId=${stationToQuery}`
+          );
+  
+          if (!response.ok) {
+            throw new Error("Failed to fetch data");
+          }
+  
+          const data = await response.json();
+          
+          if (data.length === 0) {
+            setError("No data available for selected station");
+            setWeatherData(null);
+            return;
+          }
+  
+          // Take the first entry (most recent)
+          const latestEntry = data[0];
+          setWeatherData(latestEntry);
+        } catch (err) {
+          setError("Failed to fetch weather data");
+          console.error("Weather fetch error:", err);
+        } finally {
+          setLoading(false);
         }
-        const data = await response.json()
-        setWeatherData(data)
-        setLastUpdated(new Date().toLocaleTimeString());
-      } catch (error) {
-        console.error("Error fetching weather data:", error)
-        setWeatherData(null)
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchWeatherData()
-  }, [selectedStation, currentDate])
+      };
+  
+      fetchWeatherData();
+    }, [selectedStation, session]);
 
   return (
     <div className="relative h-full w-full">
