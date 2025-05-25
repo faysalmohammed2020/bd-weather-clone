@@ -99,6 +99,27 @@ const DailySummaryTable = forwardRef((props, ref) => {
   const [editFormData, setEditFormData] = useState<any>({})
   const [isSaving, setIsSaving] = useState(false)
   const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+
+  // First, create a validation map based on your measurements configuration
+  const fieldValidations = {
+    avStationPressure: { length: 5 }, // hPa - must be exactly 5 digits
+    avSeaLevelPressure: { length: 5 }, // hPa - must be exactly 5 digits
+    avDryBulbTemperature: { length: 3 }, // °C - must be exactly 3 digits
+    avWetBulbTemperature: { length: 3 }, // °C - must be exactly 3 digits
+    maxTemperature: { length: 3 }, // °C - must be exactly 3 digits
+    minTemperature: { length: 3 }, // °C - must be exactly 3 digits
+    totalPrecipitation: { length: 3 }, // mm - must be exactly 3 digits
+    avDewPointTemperature: { length: 3 }, // °C - must be exactly 3 digits
+    avRelativeHumidity: { length: 3 }, // % - must be exactly 3 digits
+    windSpeed: { length: 3 }, // m/s - must be exactly 3 digits
+    windDirectionCode: { length: 2 }, // 16Pts - must be exactly 2 digits
+    maxWindSpeed: { length: 3 }, // m/s - must be exactly 3 digits
+    maxWindDirection: { length: 2 }, // 16Pts - must be exactly 2 digits
+    avTotalCloud: { length: 1 }, // octas - must be exactly 1 digit
+    lowestVisibility: { length: 3 }, // km - must be exactly 3 digits
+    totalRainDuration: { length: 4 }, // H-M (format HHMM) - must be exactly 4 digits
+  }
 
   // Expose the getData method via ref
   useImperativeHandle(ref, () => ({
@@ -116,8 +137,9 @@ const DailySummaryTable = forwardRef((props, ref) => {
   const fetchLatestData = async () => {
     setRefreshing(true)
     try {
-      const url = `/api/daily-summary?startDate=${startDate}&endDate=${endDate}${stationFilter !== "all" ? `&stationId=${stationFilter}` : ""
-        }`
+      const url = `/api/daily-summary?startDate=${startDate}&endDate=${endDate}${
+        stationFilter !== "all" ? `&stationId=${stationFilter}` : ""
+      }`
       const res = await fetch(url)
       if (!res.ok) {
         throw new Error("Failed to fetch daily summary data")
@@ -177,60 +199,60 @@ const DailySummaryTable = forwardRef((props, ref) => {
 
   // Date navigation functions
   const goToPreviousWeek = () => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const daysInRange = differenceInDays(end, start);
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const daysInRange = differenceInDays(end, start)
 
     // Calculate the new date range
-    const newStart = new Date(start);
-    newStart.setDate(start.getDate() - (daysInRange + 1));
+    const newStart = new Date(start)
+    newStart.setDate(start.getDate() - (daysInRange + 1))
 
-    const newEnd = new Date(start);
-    newEnd.setDate(start.getDate() - 1);
+    const newEnd = new Date(start)
+    newEnd.setDate(start.getDate() - 1)
 
     // Always update the dates when going back
-    setStartDate(format(newStart, "yyyy-MM-dd"));
-    setEndDate(format(newEnd, "yyyy-MM-dd"));
-    setDateError(null);
-  };
+    setStartDate(format(newStart, "yyyy-MM-dd"))
+    setEndDate(format(newEnd, "yyyy-MM-dd"))
+    setDateError(null)
+  }
 
   const goToNextWeek = () => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const daysInRange = differenceInDays(end, start);
-    
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const daysInRange = differenceInDays(end, start)
+
     // Calculate the new date range
-    const newStart = new Date(start);
-    newStart.setDate(start.getDate() + (daysInRange + 1));
-    
-    const newEnd = new Date(newStart);
-    newEnd.setDate(newStart.getDate() + daysInRange);
-    
+    const newStart = new Date(start)
+    newStart.setDate(start.getDate() + (daysInRange + 1))
+
+    const newEnd = new Date(newStart)
+    newEnd.setDate(newStart.getDate() + daysInRange)
+
     // Get today's date at midnight for comparison
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
     // If the new range would go beyond today, adjust it
     if (newEnd > today) {
       // If we're already at or beyond today, don't go further
       if (end >= today) {
-        return;
+        return
       }
       // Otherwise, set the end to today and adjust the start accordingly
-      const adjustedEnd = new Date(today);
-      const adjustedStart = new Date(adjustedEnd);
-      adjustedStart.setDate(adjustedEnd.getDate() - daysInRange);
-      
-      setStartDate(format(adjustedStart, "yyyy-MM-dd"));
-      setEndDate(format(adjustedEnd, "yyyy-MM-dd"));
+      const adjustedEnd = new Date(today)
+      const adjustedStart = new Date(adjustedEnd)
+      adjustedStart.setDate(adjustedEnd.getDate() - daysInRange)
+
+      setStartDate(format(adjustedStart, "yyyy-MM-dd"))
+      setEndDate(format(adjustedEnd, "yyyy-MM-dd"))
     } else {
       // Update to the new range if it's valid
-      setStartDate(format(newStart, "yyyy-MM-dd"));
-      setEndDate(format(newEnd, "yyyy-MM-dd"));
+      setStartDate(format(newStart, "yyyy-MM-dd"))
+      setEndDate(format(newEnd, "yyyy-MM-dd"))
     }
-    
-    setDateError(null);
-  };
+
+    setDateError(null)
+  }
 
   // Handle date changes with validation
   const handleDateChange = (type: "start" | "end", newDate: string) => {
@@ -271,24 +293,94 @@ const DailySummaryTable = forwardRef((props, ref) => {
     if (user && canEditRecord(record, user)) {
       setSelectedRecord(record)
       setEditFormData(record)
+      setFieldErrors({}) // Clear any previous errors
       setIsEditDialogOpen(true)
     } else {
       setIsPermissionDeniedOpen(true)
     }
   }
 
-  // Handle input changes in edit form
+  // In your component, add this handler for input validation
   const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target
+    const validation = fieldValidations[id as keyof typeof fieldValidations]
+
+    // Only allow numbers (no decimals, letters, or special characters)
+    const numericValue = value.replace(/[^0-9]/g, "")
+
+    // Enforce maximum length
+    const truncatedValue = numericValue.slice(0, validation.length)
+
+    // Validate the input and set appropriate error messages
+    let error = ""
+    if (truncatedValue.length === 0) {
+      error = `This field is required`
+    } else if (truncatedValue.length < validation.length) {
+      error = `Must be exactly ${validation.length} digits (currently ${truncatedValue.length})`
+    } else if (truncatedValue.length > validation.length) {
+      error = `Cannot exceed ${validation.length} digits`
+    }
+
     setEditFormData((prev: any) => ({
       ...prev,
-      [id]: value,
+      [id]: truncatedValue,
+    }))
+
+    setFieldErrors((prev) => ({
+      ...prev,
+      [id]: error,
     }))
   }
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {}
+    let isValid = true
+
+    formFields.forEach((field) => {
+      const value = editFormData[field.id] || ""
+      const validation = fieldValidations[field.id as keyof typeof fieldValidations]
+
+      if (value.length === 0) {
+        errors[field.id] = `This field is required`
+        isValid = false
+      } else if (value.length !== validation.length) {
+        errors[field.id] = `Must be exactly ${validation.length} digits (currently ${value.length})`
+        isValid = false
+      }
+    })
+
+    setFieldErrors(errors)
+    return isValid
+  }
+
+  const formFields = [
+    { id: "avStationPressure", label: "Av. Station Pressure (hPa)", bg: "bg-blue-50", requiredLength: 5 },
+    { id: "avSeaLevelPressure", label: "Av. Sea-Level Pressure (hPa)", bg: "bg-indigo-50", requiredLength: 5 },
+    { id: "avDryBulbTemperature", label: "Av. Dry-Bulb Temperature (°C)", bg: "bg-blue-50", requiredLength: 3 },
+    { id: "avWetBulbTemperature", label: "Av. Wet Bulb Temperature (°C)", bg: "bg-indigo-50", requiredLength: 3 },
+    { id: "maxTemperature", label: "Max Temperature (°C)", bg: "bg-blue-50", requiredLength: 3 },
+    { id: "minTemperature", label: "Min Temperature (°C)", bg: "bg-indigo-50", requiredLength: 3 },
+    { id: "totalPrecipitation", label: "Total Precipitation (mm)", bg: "bg-blue-50", requiredLength: 3 },
+    { id: "avDewPointTemperature", label: "Av. Dew Point Temperature (°C)", bg: "bg-indigo-50", requiredLength: 3 },
+    { id: "avRelativeHumidity", label: "Av. Relative Humidity (%)", bg: "bg-blue-50", requiredLength: 3 },
+    { id: "windSpeed", label: "Wind Speed (m/s)", bg: "bg-indigo-50", requiredLength: 3 },
+    { id: "windDirectionCode", label: "Wind Direction (16Pts)", bg: "bg-blue-50", requiredLength: 2 },
+    { id: "maxWindSpeed", label: "Max Wind Speed (m/s)", bg: "bg-indigo-50", requiredLength: 3 },
+    { id: "maxWindDirection", label: "Max Wind Direction (16Pts)", bg: "bg-blue-50", requiredLength: 2 },
+    { id: "avTotalCloud", label: "Av. Total Cloud (oktas)", bg: "bg-indigo-50", requiredLength: 1 },
+    { id: "lowestVisibility", label: "Lowest Visibility (km)", bg: "bg-blue-50", requiredLength: 3 },
+    { id: "totalRainDuration", label: "Total Rain Duration (H-M)", bg: "bg-indigo-50", requiredLength: 4 },
+  ]
 
   // Save edited data
   const handleSaveEdit = async () => {
     if (!selectedRecord) return
+
+    // Validate form before saving
+    if (!validateForm()) {
+      toast.error("Please fix all validation errors before saving")
+      return
+    }
 
     setIsSaving(true)
     try {
@@ -316,6 +408,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
 
       toast.success("Record updated successfully")
       setIsEditDialogOpen(false)
+      setFieldErrors({}) // Clear errors on successful save
     } catch (error) {
       console.error("Error updating record:", error)
       toast.error(`Failed to update record: ${error.message}`)
@@ -585,15 +678,11 @@ const DailySummaryTable = forwardRef((props, ref) => {
                   currentData.map((entry, index) => {
                     const observingTime = entry.ObservingTime?.utcTime ? new Date(entry.ObservingTime.utcTime) : null
                     const canEdit = user && canEditRecord(entry, user)
-                    const timeSlot = observingTime
-                      ? observingTime.getUTCHours().toString().padStart(2, "0")
-                      : "--";
+                    const timeSlot = observingTime ? observingTime.getUTCHours().toString().padStart(2, "0") : "--"
 
                     return (
                       <tr key={index} className="bg-white hover:bg-blue-50 print:hover:bg-white">
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {timeSlot}
-                        </td>
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{timeSlot}</td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap font-semibold text-blue-700">
                           {observingTime ? observingTime.toLocaleDateString() : "--"}
                         </td>
@@ -715,43 +804,45 @@ const DailySummaryTable = forwardRef((props, ref) => {
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-indigo-800">Edit Daily Summary Data</DialogTitle>
             <DialogDescription className="text-slate-600">
-              Editing record from {selectedRecord?.ObservingTime?.station?.name || "Unknown Station"}
-              on{" "}
+              Editing record from {selectedRecord?.ObservingTime?.station?.name || "Unknown Station"}{" "}
               {selectedRecord?.createdAt ? format(new Date(selectedRecord.createdAt), "MMMM d, yyyy") : "Unknown Date"}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4 max-h-[65vh] overflow-y-auto pr-2">
-            {[
-              { id: "avStationPressure", label: "Av. Station Pressure (hPa)", bg: "bg-blue-50" },
-              { id: "avSeaLevelPressure", label: "Av. Sea-Level Pressure (hPa)", bg: "bg-indigo-50" },
-              { id: "avDryBulbTemperature", label: "Av. Dry-Bulb Temperature (°C)", bg: "bg-blue-50" },
-              { id: "avWetBulbTemperature", label: "Av. Wet Bulb Temperature (°C)", bg: "bg-indigo-50" },
-              { id: "maxTemperature", label: "Max Temperature (°C)", bg: "bg-blue-50" },
-              { id: "minTemperature", label: "Min Temperature (°C)", bg: "bg-indigo-50" },
-              { id: "totalPrecipitation", label: "Total Precipitation (mm)", bg: "bg-blue-50" },
-              { id: "avDewPointTemperature", label: "Av. Dew Point Temperature (°C)", bg: "bg-indigo-50" },
-              { id: "avRelativeHumidity", label: "Av. Relative Humidity (%)", bg: "bg-blue-50" },
-              { id: "windSpeed", label: "Wind Speed (m/s)", bg: "bg-indigo-50" },
-              { id: "windDirectionCode", label: "Wind Direction", bg: "bg-blue-50" },
-              { id: "maxWindSpeed", label: "Max Wind Speed (m/s)", bg: "bg-indigo-50" },
-              { id: "maxWindDirection", label: "Max Wind Direction", bg: "bg-blue-50" },
-              { id: "avTotalCloud", label: "Av. Total Cloud (oktas)", bg: "bg-indigo-50" },
-              { id: "lowestVisibility", label: "Lowest Visibility (km)", bg: "bg-blue-50" },
-              { id: "totalRainDuration", label: "Total Rain Duration (H-M)", bg: "bg-indigo-50" },
-            ].map((field) => (
-              <div key={field.id} className={`space-y-1 p-3 rounded-lg ${field.bg} border border-white shadow-sm`}>
-                <Label htmlFor={field.id} className="text-sm font-medium text-gray-700">
-                  {field.label}
-                </Label>
-                <Input
-                  id={field.id}
-                  value={editFormData[field.id] || ""}
-                  onChange={handleEditInputChange}
-                  className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
-                />
-              </div>
-            ))}
+            {formFields.map((field) => {
+              const validation = fieldValidations[field.id as keyof typeof fieldValidations]
+              const error = fieldErrors[field.id]
+              const hasError = !!error
+
+              return (
+                <div
+                  key={field.id}
+                  className={`space-y-1 p-3 rounded-lg ${field.bg} border ${hasError ? "border-red-300" : "border-white"} shadow-sm`}
+                >
+                  <Label htmlFor={field.id} className="text-sm font-medium text-gray-700">
+                    {field.label}
+                  </Label>
+                  <Input
+                    id={field.id}
+                    value={editFormData[field.id] || ""}
+                    onChange={handleEditInputChange}
+                    className={`w-full bg-white ${hasError ? "border-red-400 focus:border-red-500 focus:ring-red-200" : "border-gray-300 focus:border-indigo-400 focus:ring-indigo-200"} focus:ring-2`}
+                    maxLength={validation.length}
+                    pattern="[0-9]*"
+                    inputMode="numeric"
+                    placeholder={`${"0".repeat(validation.length)}`}
+                  />
+                  {hasError ? (
+                    <div className="text-xs text-red-600 mt-1 font-medium">{error}</div>
+                  ) : (
+                    <div className="text-xs text-gray-500 mt-1">
+                      Required length: exactly {validation.length} digit{validation.length > 1 ? "s" : ""}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
 
           <DialogFooter className="mt-4">
@@ -764,8 +855,8 @@ const DailySummaryTable = forwardRef((props, ref) => {
             </Button>
             <Button
               onClick={handleSaveEdit}
-              disabled={isSaving}
-              className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-md transition-all"
+              disabled={isSaving || Object.keys(fieldErrors).some((key) => fieldErrors[key])}
+              className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? (
                 <>
