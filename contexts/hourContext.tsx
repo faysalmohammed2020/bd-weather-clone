@@ -2,6 +2,7 @@
 
 import { MeteorologicalEntry } from "@prisma/client";
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { toast } from "sonner";
 
 type TimeData = {
   time: string;
@@ -51,8 +52,25 @@ export function HourProvider({ children }: { children: ReactNode }) {
         });
         
         const data = await response.json();
+
+        if(data.error) {
+          toast.error(data.message)
+          setTimeData(null);
+          return;
+        }
+
+        if(data.found) {
+          setError(data.message);
+          setTimeData(null);
+          return;
+        }
+
+        if(!data.found) {
+          setError(data.message);
+          return;
+        }
+
         setTimeData(data);
-        setError("");
       } catch (err) {
         setError(err instanceof Error ? err.message : String(err));
         setTimeData(null);

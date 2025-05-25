@@ -71,8 +71,8 @@ export async function POST(request: NextRequest) {
     if (!observingTime) {
       return NextResponse.json(
         {
-          success: false,
-          message: "Observing time not found",
+          found: false,
+          message: "First card data not found!",
           yesterday: {
             meteorologicalEntry: yesterdayObservingTime ? yesterdayObservingTime.MeteorologicalEntry : null,
           },
@@ -94,16 +94,15 @@ export async function POST(request: NextRequest) {
     };
 
     return NextResponse.json({
-      success: true,
+      found: true,
       message: "Observing time already exists",
       data: formattedData,
     });
   } catch {
     return NextResponse.json(
       {
-        success: false,
+        error: true,
         message: "Failed to check time",
-        error: "Failed to check time",
       },
       { status: 500 }
     );

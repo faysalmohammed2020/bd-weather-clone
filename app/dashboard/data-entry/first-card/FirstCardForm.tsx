@@ -17,7 +17,6 @@ import {
   BarChart3,
   ChevronRight,
   ChevronLeft,
-  Clock,
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -166,15 +165,9 @@ const validationSchema = Yup.object({
 });
 
 export function FirstCardForm() {
-  const [activeTab, setActiveTab] = useState("Observing Time");
+  const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const {
-    selectedHour,
-    setSelectedHour,
-    isHourSelected,
-    clearError,
-    timeData,
-  } = useHour();
+  const { isHourSelected, timeData } = useHour();
   const [hygrometricData, setHygrometricData] = useState({
     dryBulb: "",
     wetBulb: "",
@@ -187,7 +180,6 @@ export function FirstCardForm() {
 
   // Tab order for navigation
   const tabOrder = [
-    "Observing Time",
     "temperature",
     "pressure",
     "squall",
@@ -197,11 +189,6 @@ export function FirstCardForm() {
 
   // Tab styles with gradients and more vibrant colors
   const tabStyles = {
-    "Observing Time": {
-      tab: "border border-fuchsia-500 px-4 py-3 !bg-fuchsia-50 text-fuchsia-800 hover:opacity-90 shadow-sm shadow-fuchsia-500/50",
-      card: "bg-gradient-to-br from-fuchsia-50 to-white border-l-4 border-fuchsia-200 shadow-sm",
-      icon: <Clock className="size-5 mr-2" />,
-    },
     temperature: {
       tab: "border border-blue-500 px-4 py-3 !bg-blue-50 text-blue-800 hover:opacity-90 shadow-sm shadow-blue-500/50",
       card: "bg-gradient-to-br from-blue-50 to-white border-l-4 border-blue-200 shadow-sm",
@@ -814,16 +801,6 @@ export function FirstCardForm() {
     }
   };
 
-  // Observing Time
-  const handleHourChange = (value: string) => {
-    if (!value) {
-      return;
-    }
-    clearError();
-    setSelectedHour(value);
-    formik.setFieldValue("observationTime", value);
-  };
-
   // Reset form function
   const handleReset = () => {
     // Clear all form data except station info
@@ -920,7 +897,7 @@ export function FirstCardForm() {
   return (
     <>
       <AnimatePresence mode="wait">
-        {!isHourSelected && !timeData?.hasMeteorologicalData ? (
+        {!isHourSelected || timeData?.hasMeteorologicalData ? (
           <motion.div
             key="hour-selector"
             initial={{ opacity: 0 }}
@@ -989,84 +966,6 @@ export function FirstCardForm() {
                     </TabsTrigger>
                   ))}
                 </TabsList>
-
-                {/* Indicators Tab */}
-                <TabsContent
-                  value="Observing Time"
-                  className="mt-6 transition-all duration-500"
-                >
-                  <Card
-                    className={cn(
-                      "overflow-hidden",
-                      tabStyles["Observing Time"].card
-                    )}
-                  >
-                    <div className="p-4 bg-gradient-to-r from-fuchsia-200 to-fuchsia-300 text-fuchsia-800">
-                      <h3 className="text-lg font-semibold flex items-center">
-                        <Clock className="mr-2" /> Time Indicators
-                      </h3>
-                    </div>
-                    <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="observationTime">
-                          GG: Time of Observation (UTC)
-                        </Label>
-                        <select
-                          id="observationTime"
-                          name="observationTime"
-                          value={selectedHour}
-                          onChange={(e) => handleHourChange(e.target.value)}
-                          required
-                          className={cn(
-                            "w-full border rounded-md px-3 py-2 focus:outline-none",
-                            {
-                              "border-red-500":
-                                (formik.touched.observationTime &&
-                                  formik.errors.observationTime) ||
-                                timeData?.time,
-                              "border-emerald-500":
-                                !timeData?.time &&
-                                formik.values.observationTime &&
-                                !formik.errors.observationTime,
-                            }
-                          )}
-                        >
-                          <option value="">-- Select GG Time --</option>
-                          <option value="00">00 UTC</option>
-                          <option value="03">03 UTC</option>
-                          <option value="06">06 UTC</option>
-                          <option value="09">09 UTC</option>
-                          <option value="12">12 UTC</option>
-                          <option value="15">15 UTC</option>
-                          <option value="18">18 UTC</option>
-                          <option value="21">21 UTC</option>
-                        </select>
-                        {timeData?.time && (
-                          <p className="text-red-500">Time Already Exist</p>
-                        )}
-                        {renderErrorMessage("observationTime")}
-                      </div>
-                    </CardContent>
-                    <CardFooter className="flex justify-between p-6">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={prevTab}
-                        disabled={isFirstTab}
-                      >
-                        <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-                      </Button>
-                      <Button
-                        type="button"
-                        onClick={nextTab}
-                        className="bg-blue-600 hover:bg-blue-700"
-                        disabled={Boolean(timeData?.time)}
-                      >
-                        Next <ChevronRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </TabsContent>
 
                 {/* Bar Pressure Tab */}
                 <TabsContent
@@ -1221,7 +1120,7 @@ export function FirstCardForm() {
                         />
                       </div>
                     </CardContent>
-                    <CardFooter className="flex justify-between p-6">
+                    <CardFooter className="flex justify-between">
                       <Button
                         type="button"
                         variant="outline"
