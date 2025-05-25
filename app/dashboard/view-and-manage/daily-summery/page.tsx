@@ -573,7 +573,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Wind Direction</th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Max Wind Speed (m/s)</th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Max Wind Direction</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Av. Total Cloud (oktas)</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Av. Total Cloud (octas)</th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Lowest Visibility (km)</th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Total Rain Duration (H-M)</th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Action</th>

@@ -8,7 +8,7 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useSession } from "@/lib/auth-client"
-import { CalendarIcon, LineChart, AlertCircle, Loader2 } from "lucide-react"
+import { LineChart, AlertCircle, Loader2 } from "lucide-react"
 
 // Daily Summary Form Values Interface
 interface DailySummaryFormValues {
@@ -25,7 +25,7 @@ const measurements = [
   { id: 0, label: "Av. Station Pressure", range: "14-18", unit: "hPa", category: "pressure" },
   { id: 1, label: "Av. Sea-Level Pressure", range: "19-23", unit: "hPa", category: "pressure" },
   { id: 2, label: "Av. Dry-Bulb Temperature", range: "24-26", unit: "°C", category: "temperature" },
-  { id: 3, label: "Av. Wet Bulb Temperature", range: "27-28", unit: "°C", category: "temperature" },
+  { id: 3, label: "Av. Wet Bulb Temperature", range: "27-29", unit: "°C", category: "temperature" },
   { id: 4, label: "Max. Temperature", range: "30-32", unit: "°C", category: "temperature" },
   { id: 5, label: "Min Temperature", range: "33-35", unit: "°C", category: "temperature" },
   { id: 6, label: "Total Precipitation", range: "36-39", unit: "mm", category: "precipitation" },
@@ -35,7 +35,7 @@ const measurements = [
   { id: 10, label: "Prevailing Wind Direction", range: "49-50", unit: "16Pts", category: "wind" },
   { id: 11, label: "Max Wind Speed", range: "51-53", unit: "m/s", category: "wind" },
   { id: 12, label: "Direction of Max Wind", range: "54-55", unit: "16Pts", category: "wind" },
-  { id: 13, label: "Av. Total Cloud", range: "56", unit: "oktas", category: "cloud" },
+  { id: 13, label: "Av. Total Cloud", range: "56", unit: "octas", category: "cloud" },
   { id: 14, label: "Lowest visibility", range: "57-59", unit: "km", category: "visibility" },
   { id: 15, label: "Total Duration of Rain", range: "60-63", unit: "H-M", category: "precipitation" },
 ]
@@ -161,17 +161,29 @@ export function DailySummaryForm() {
 
         // Calculate rain duration
         const totalRainDuration = todayWeatherObservations.reduce((total: number, item: any) => {
-          if (item.rainfallLast24Hours) {
-            const [sh, sm] = item.rainfallLast24Hours.split(".").map(Number)
-            const [eh, em] = item.rainfallLast24Hours.split(".").map(Number)
-            return total + (eh * 60 + em - (sh * 60 + sm))
+          if (item.rainfallTimeStart && item.rainfallTimeEnd) {
+            const startTime = parseInt(item.rainfallTimeStart);
+            const endTime = parseInt(item.rainfallTimeEnd);
+            
+            const startMinutes = Math.floor(startTime / 100) * 60 + (startTime % 100);
+            const endMinutes = Math.floor(endTime / 100) * 60 + (endTime % 100);
+            
+            let duration = endMinutes - startMinutes;
+            
+          
+            if (duration < 0) {
+              duration += 24 * 60;
+            }
+            
+            return total + duration;
           }
-          return total
-        }, 0)
+          return total;
+        }, 0);
+        
         if (totalRainDuration > 0) {
-          const hours = Math.floor(totalRainDuration / 60)
-          const minutes = totalRainDuration % 60
-          calculatedMeasurements[15] = `${hours}-${minutes.toString().padStart(2, "0")}`
+          const hours = Math.floor(totalRainDuration / 60);
+          const minutes = totalRainDuration % 60;
+          calculatedMeasurements[15] = `${hours.toString().padStart(2, "0")}${minutes.toString().padStart(2, "0")}`;
         }
 
         // Check if today's date matches the selected date
@@ -360,8 +372,9 @@ export function DailySummaryForm() {
                       id={`measurement-${item.id}`}
                       value={values.measurements[item.id] || ""}
                       onChange={(e) => handleMeasurementChange(item.id, e.target.value)}
-                      className="border-blue-200 bg-white cursor-text"
+                      className="border-blue-200 bg-white cursor-text disabled:opacity-80 disabled:font-semibold"
                       placeholder="--"
+                      disabled
                     />
                   </div>
                 </div>
@@ -400,8 +413,9 @@ export function DailySummaryForm() {
                       id={`measurement-${item.id}`}
                       value={values.measurements[item.id] || ""}
                       onChange={(e) => handleMeasurementChange(item.id, e.target.value)}
-                      className="border-blue-200 bg-white cursor-text"
+                      className="border-blue-200 bg-white cursor-text disabled:opacity-80 disabled:font-semibold"
                       placeholder="--"
+                      disabled
                     />
                   </div>
                 </div>
