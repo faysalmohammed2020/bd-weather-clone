@@ -87,13 +87,10 @@ export default function WeatherDashboard({
         let nameToDisplay = "Your Station";
 
         if (session?.user?.role === "super_admin") {
-          stationToQuery =
-            selectedStation?.stationId ||
-            session?.user?.station?.stationId ||
-            "";
+          stationToQuery = selectedStation?.id || session?.user?.station?.id || "";
           nameToDisplay = selectedStation?.name || "No Station";
         } else {
-          stationToQuery = session?.user?.station?.stationId || "";
+          stationToQuery = session?.user?.station?.id || "";
           nameToDisplay = session?.user?.station?.name || "Your Station";
         }
 
@@ -105,45 +102,33 @@ export default function WeatherDashboard({
 
         setStationName(nameToDisplay);
 
+        // Get today's date range in UTC
         const today = new Date();
-        const day = today.getDate();
-        const monthNames = [
-          "Jan",
-          "Feb",
-          "Mar",
-          "Apr",
-          "May",
-          "Jun",
-          "Jul",
-          "Aug",
-          "Sep",
-          "Oct",
-          "Nov",
-          "Dec",
-        ];
-        const month = monthNames[today.getMonth()];
-        const dateString = `${day}-${month}`;
+        const startToday = new Date(today);
+        startToday.setUTCHours(0, 0, 0, 0);
+        
+        const endToday = new Date(today);
+        endToday.setUTCHours(23, 59, 59, 999);
 
         const response = await fetch(
-          `/api/daily-summary?stationNo=${stationToQuery}&date=${dateString}`
+          `/api/daily-summary?startDate=${startToday.toISOString()}&endDate=${endToday.toISOString()}&stationId=${stationToQuery}`
         );
 
         if (!response.ok) {
-          setWeatherData(null);
-          toast.error("No weather data found.");
-          return;
+          throw new Error("Failed to fetch data");
         }
 
         const data = await response.json();
-        const hasValidData = Object.values(data).some(
-          (val) => val !== null && val !== undefined
-        );
-
-        if (!hasValidData) {
+        
+        if (data.length === 0) {
           setError("No data available for selected station");
+          setWeatherData(null);
+          return;
         }
 
-        setWeatherData(data);
+        // Take the first entry (most recent)
+        const latestEntry = data[0];
+        setWeatherData(latestEntry);
       } catch (err) {
         setError("Failed to fetch weather data");
         console.error("Weather fetch error:", err);
@@ -154,6 +139,8 @@ export default function WeatherDashboard({
 
     fetchWeatherData();
   }, [selectedStation, session]);
+
+
 
   if (loading) {
     return (
