@@ -201,7 +201,7 @@ export function generateSynopticCode(): SynopticFormValues {
   measurements[16] = `${pressureChangeIndicator}${absPressureChange}`;
 
   // 18. (6RRRtR)/7R24R24R24 (24-28) - Precipitation
-  measurements[17] = `(${measurements[7]})/7${pad(precipitation, 3)}`;
+  measurements[17] = `(${measurements[7]})`;
 
   // 19. 8N5Ch5h5 (29-33) - Cloud information
   let lowFormSig = weatherObs.significantClouds?.layer1?.form || "0";

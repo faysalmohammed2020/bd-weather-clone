@@ -177,8 +177,8 @@ export async function GET() {
     measurements[11] = `56${lowDir}${mediumDir}${highDir}`;
 
     // 13. 57CDaEc (72-76) - Characteristic of pressure + pressure tendency
-    const pressureTendency = firstCard.pressureChange24h?.toString()[0] || "0";
-    measurements[12] = `57${pressureTendency}00`;
+    // const pressureTendency = firstCard.pressureChange24h?.toString()[0] || "0";
+    measurements[12] = "57000";
 
     // 14. Av. Total Cloud (56) - Total cloud amount
     measurements[13] = totalCloud;
@@ -205,16 +205,18 @@ export async function GET() {
     let lowFormSig = weatherObs.layer1Form || "0";
     let mediumFormSig = weatherObs.layer2Form || "0";
     let highFormSig = weatherObs.layer3Form || "0";
+    let fourthFormSig = weatherObs.layer4Form || "0";
 
     let lowAmountSig = weatherObs.layer1Amount || "0";
     let mediumAmountSig = weatherObs.layer2Amount || "0";
     let highAmountSig = weatherObs.layer3Amount || "0";
+    let fourthAmountSig = weatherObs.layer4Amount || "0";
 
-    let lowHeightSig = pad((Number(weatherObs.layer1Height) || 0) * 10, 2);
-    let mediumHeightSig = pad((Number(weatherObs.layer2Height) || 0) * 10, 2);
-    let highHeightSig = pad((Number(weatherObs.layer3Height) || 0) * 10, 2);
-
-    measurements[18] = `8${lowAmountSig}${lowFormSig}${lowHeightSig} / 8${mediumAmountSig}${mediumFormSig}${mediumHeightSig} / 8${highAmountSig}${highFormSig}${highHeightSig}`;
+    let lowHeightSig = pad((Number(weatherObs.layer1Height) || 0) , 2);
+    let mediumHeightSig = pad((Number(weatherObs.layer2Height) || 0) , 2);
+    let highHeightSig = pad((Number(weatherObs.layer3Height) || 0) , 2);
+    let fourthHeightSig = pad((Number(weatherObs.layer3Height) || 0) , 2);
+    measurements[18] = `8${lowAmountSig}${lowFormSig}${lowHeightSig} / 8${mediumAmountSig}${mediumFormSig}${mediumHeightSig} / 8${highAmountSig}${highFormSig}${highHeightSig} /8${fourthAmountSig}${fourthFormSig}${fourthHeightSig}`;
 
     // 20. 90dqqqt (34-38) - Dew point depression
     const dewDepression = dryBulb - dewPoint;
