@@ -273,7 +273,7 @@ export default function SecondCardForm() {
   const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
   const { data: session } = useSession();
 
-  const { isHourSelected, timeData } = useHour();
+  const { isHourSelected, timeData, secondCardError } = useHour();
 
   // Get the persistent form store
   const { formData, updateFields, resetForm } = useWeatherObservationForm();
@@ -755,19 +755,20 @@ export default function SecondCardForm() {
 
       const data = await response.json();
 
-      if (!data.success) {
-        toast.error(data.error);
+      if (data.error) {
+        toast.error(data.message);
         return;
       }
 
-      if (data.success) {
-        toast.success("Observation submitted successfully!");
-        resetForm();
-        formik.resetForm();
-        setCurrentStep(1);
-        setActiveTab("cloud");
-        updateFields({});
-      }
+      toast.success(data.message, {
+        description: `Entry #${data.dataCount} saved`,
+      });
+
+      resetForm();
+      formik.resetForm();
+      setCurrentStep(1);
+      setActiveTab("cloud");
+      updateFields({});
     } catch (error) {
       console.error("Submission error:", error);
       toast.error("Failed to submit. Please try again.");
@@ -834,7 +835,7 @@ export default function SecondCardForm() {
   return (
     <>
       <AnimatePresence mode="wait">
-        {!isHourSelected || !timeData?.hasMeteorologicalData ? (
+        {!isHourSelected || secondCardError ? (
           <motion.div
             key="hour-selector"
             initial={{ opacity: 0 }}
@@ -843,7 +844,7 @@ export default function SecondCardForm() {
             transition={{ duration: 0.3 }}
             className="absolute inset-0 flex items-center justify-center bg-white backdrop-blur-sm z-50 px-6"
           >
-            <HourSelector />
+            <HourSelector type="second" />
           </motion.div>
         ) : (
           <motion.form

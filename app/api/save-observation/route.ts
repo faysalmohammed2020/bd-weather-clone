@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
-import { getTodayUtcRange } from "@/lib/utils";
+import { getTodayUtcRange, hourToUtc } from "@/lib/utils";
 
 export async function POST(request: Request) {
   try {
@@ -16,17 +16,24 @@ export async function POST(request: Request) {
 
     const data = await request.json();
 
-    const { startToday, endToday } = getTodayUtcRange();
+    if (!data.observingTimeId) {
+      return NextResponse.json(
+        {
+          error: true,
+          message: "Must provide observation time",
+        },
+        { status: 404 }
+      );
+    }
+
+    const formattedObservingTime = hourToUtc(data.observingTimeId);
 
     // First, find the ObservingTime record by its UTC time
     const observingTime = await prisma.observingTime.findFirst({
       where: {
         AND: [
           {
-            utcTime: {
-              gte: startToday,
-              lte: endToday,
-            },
+            utcTime: formattedObservingTime,
           },
           {
             stationId: session.user.station?.id,
@@ -48,21 +55,21 @@ export async function POST(request: Request) {
       }
     });
 
-    if (!observingTime || !observingTime._count.MeteorologicalEntry) {
+    if (!observingTime?._count.MeteorologicalEntry) {
       return NextResponse.json(
         {
-          success: false,
-          error: "First card entry not found",
+          error: true,
+          message: "First card entry not found",
         },
         { status: 400 }
       );
     }
 
-    if (observingTime._count.WeatherObservation) {
+    if (observingTime?._count.WeatherObservation) {
       return NextResponse.json(
         {
-          success: false,
-          error: "Second card entry already exists",
+          error: true,
+          message: "Second card entry already exists",
         },
         { status: 400 }
       );
@@ -72,8 +79,8 @@ export async function POST(request: Request) {
     const stationId = session.user.station?.id;
     if (!stationId) {
       return NextResponse.json({
-        success: false,
-        error: "Station ID is required",
+        error: true,
+        message: "Station ID is required",
       }, { status: 400 });
     }
 
@@ -84,8 +91,8 @@ export async function POST(request: Request) {
 
     if (!stationRecord) {
       return NextResponse.json({
-        success: false,
-        error: `No station found with ID: ${stationId}`,
+        error: true,
+        message: `No station found with ID: ${stationId}`,
       }, { status: 404 });
     }
 
@@ -153,15 +160,15 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json({
-      success: true,
-      error: "Observation saved successfully",
+      error: false,
+      message: "Observation saved successfully",
       data: { id: saved.id, stationId: stationRecord.id },
     });
   } catch (error) {
     return NextResponse.json(
       {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
+        error: true,
+        message: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
     );
