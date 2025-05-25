@@ -4,6 +4,10 @@ import { betterFetch } from '@better-fetch/fetch';
 type TimeData = {
   time: string;
   isPassed: boolean;
+  hasMeteorologicalData: boolean;
+  hasWeatherObservation: boolean;
+  hasSynopticCode: boolean;
+  hasDailySummary: boolean;
 } | null;
 
 export function useTimeCheck() {

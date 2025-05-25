@@ -14,6 +14,7 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
+  LockIcon,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -846,6 +847,18 @@ export default function SecondCardForm() {
             onKeyDown={handleKeyDown}
           >
             <div className="relative rounded-xl">
+              {(!time?.isPassed ||
+                !time?.hasMeteorologicalData ||
+                time?.hasWeatherObservation) && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-red-50/30 z-10">
+                    <div className="border shadow shadow-red-500 bg-white p-4 rounded-xl aspect-square size-64 flex items-center justify-center flex-col text-center gap-2">
+                      <LockIcon className="size-16 stroke-1 text-red-500" />
+                      <p className="text-gray-600 text-xl font-medium">
+                        3 hours have not passed since the last observation
+                      </p>
+                    </div>
+                  </div>
+                )}
               <Tabs
                 value={activeTab}
                 onValueChange={(value) => {
