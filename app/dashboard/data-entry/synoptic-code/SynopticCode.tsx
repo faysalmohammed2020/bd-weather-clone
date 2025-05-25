@@ -99,7 +99,7 @@ const measurements = [
         </span>
         <br />
         <span style={{ borderTop: "1px solid black" }}>
-          I<sub>n</sub>I<sub>n</sub>I<sub>n</sub>I<sub>n</sub>
+          1S<sub>n</sub>T<sub>x</sub>T<sub>x</sub>T<sub>x</sub>
         </span>
       </span>
     ),

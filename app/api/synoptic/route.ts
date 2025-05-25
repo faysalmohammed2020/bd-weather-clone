@@ -100,10 +100,7 @@ export async function GET() {
       (Number(firstCard.horizontalVisibility?.toString()?.[0]) || 0) * 10,
       2
     );
-    measurements[2] = `${iRvalue}2${lowCloudHeight}${visibility}`;
-
-
-    
+    measurements[2] = `${iRvalue}4${lowCloudHeight}${visibility}`;
 
     // 4. Nddff (27-31) - Total cloud + wind direction + speed
     const totalCloud = weatherObs.totalCloudAmount || "0";
@@ -154,10 +151,33 @@ export async function GET() {
 
     measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
 
-    // 8. 6RRRtR (47-51) - RainfallDuringPrevious
-    const rainFall = weatherObs.rainfallDuringPrevious || "0";
-    measurements[7] = `6${pad(rainFall, 4)}`;
+    // 8. 6RRRtR (47-51) - Precipitation
+    let rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
+    rainFall = Number(rainFall.toString().slice(-3).padStart(3, "0"));
+    let durationCode = "/";
+    if (weatherObs.rainfallTimeStart && weatherObs.rainfallTimeEnd) {
+      const startTime = Number(weatherObs.rainfallTimeStart);
+      const endTime = Number(weatherObs.rainfallTimeEnd);
 
+      if (endTime - startTime <= 2) {
+        durationCode = "4";
+      } else if (endTime - startTime <= 4) {
+        durationCode = "5";
+      } else if (endTime - startTime <= 6) {
+        durationCode = "6";
+      } else if (startTime > endTime) {
+        if (startTime - endTime >= 0 && startTime - endTime < 2) {
+          durationCode = "7";
+        } else if (startTime - endTime >= 2 && startTime - endTime < 4) {
+          durationCode = "8";
+        }
+      } else if (startTime - endTime > 4 && startTime - endTime <= 6) {
+        durationCode = "9";
+      }
+    }
+    measurements[7] = `6${rainFall}${durationCode}`;
+
+    
     // 9. 7wwW1W2 (52-56) - Weather codes
     const presentWeather = firstCard.presentWeatherWW || "00";
     const pastWeather1 = firstCard.pastWeatherW1 || "0";
@@ -171,17 +191,28 @@ export async function GET() {
     const highForm = weatherObs.highCloudForm || "0";
     measurements[9] = `8${lowAmount}${lowForm}${mediumForm}${highForm}`;
 
+
     // 11. 2SnTnTnTn/InInInIn (62-66) - Min temperature / ground state
     const minTemp = Number.parseFloat(firstCard.maxMinTempAsRead || "0") / 10;
-
+    // Get UTC hour from observing time
+    const utcHour = parseInt(utcToHour(observingTime.utcTime.toString()), 10);
     let sN, x;
-    if (minTemp >= 0) {
-      sN = 0;
-      x = 1;
-    } else {
-      sN = 1;
-      x = 2;
+    // For hours 00,03,06,09 - we use minTemp with indicator "20"
+    if ([0, 3, 6, 9].includes(utcHour)) {
+      x = "2";  // Indicator for min temperature
+      sN = minTemp >= 0 ? "0" : "1";  // Sign (0 for positive, 1 for negative)
     }
+    // For hours 12,15,18,21 - we use maxTemp with indicator "10"
+    else if ([12, 15, 18, 21].includes(utcHour)) {
+      x = "1";  // Indicator for max temperature
+      sN = minTemp >= 0 ? "0" : "1";  // Sign (0 for positive, 1 for negative)
+    }
+    // Default case (shouldn't happen if we have valid UTC hours)
+    else {
+      x = "0";  // Default indicator
+      sN = "0";  // Default sign
+    }
+
     const conVertMinTemp = pad(Math.abs(Math.round(minTemp * 10)), 3);
     measurements[10] = `${x}${sN}${conVertMinTemp}`;
 
@@ -215,6 +246,7 @@ export async function GET() {
 
     // 18. (6RRRtR)/7R24R24R24 (24-28) - Precipitation
     measurements[17] = `${measurements[7]}`;
+
 
     // 19. 8N5Ch5h5 (29-33) - Cloud information
     let lowFormSig = weatherObs.layer1Form || "0";
