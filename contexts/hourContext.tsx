@@ -6,8 +6,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 type TimeData = {
   time: string;
   yesterday: {
-    utcTime: string;
-    meteorologicalEntry: MeteorologicalEntry[];
+    meteorologicalEntry: MeteorologicalEntry | null;
   };
   hasMeteorologicalData: boolean;
   hasWeatherObservation: boolean;
@@ -22,9 +21,7 @@ type HourContextType = {
   error: string;
   isLoading: boolean;
   clearError: () => void;
-  hasDataForHour: (dataType: 'meteorological' | 'weather' | 'synoptic' | 'summary') => boolean;
   isHourSelected: boolean;
-  getFormattedTime: () => string | null;
 };
 
 const HourContext = createContext<HourContextType | undefined>(undefined);
@@ -54,7 +51,6 @@ export function HourProvider({ children }: { children: ReactNode }) {
         });
         
         const data = await response.json();
-        console.log("data", data)
         setTimeData(data);
         setError("");
       } catch (err) {
@@ -70,30 +66,6 @@ export function HourProvider({ children }: { children: ReactNode }) {
 
   const clearError = () => setError("");
   
-  const hasDataForHour = (dataType: 'meteorological' | 'weather' | 'synoptic' | 'summary'): boolean => {
-    if (!timeData) return false;
-    
-    switch (dataType) {
-      case 'meteorological':
-        return timeData.hasMeteorologicalData;
-      case 'weather':
-        return timeData.hasWeatherObservation;
-      case 'synoptic':
-        return timeData.hasSynopticCode;
-      case 'summary':
-        return timeData.hasDailySummary;
-      default:
-        return false;
-    }
-  };
-  
-  const isHourSelected = selectedHour !== "";
-  
-  const getFormattedTime = (): string | null => {
-    if (!timeData?.time) return null;
-    return timeData.time;
-  };
-
   const value = {
     selectedHour,
     setSelectedHour,
@@ -101,9 +73,7 @@ export function HourProvider({ children }: { children: ReactNode }) {
     error,
     isLoading,
     clearError,
-    hasDataForHour,
-    isHourSelected,
-    getFormattedTime,
+    isHourSelected: selectedHour !== "",
   };
 
   return <HourContext.Provider value={value}>{children}</HourContext.Provider>;

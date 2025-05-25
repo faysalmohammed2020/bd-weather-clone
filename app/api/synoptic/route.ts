@@ -127,9 +127,7 @@ export async function GET() {
     // 7. 3PPP/4PPP (42-46) - Station/sea level pressure
     const formatPressure = (pressure: number | undefined): string => {
       const str = pressure?.toString().replace(".", "") || "0000";
-      return str.startsWith("1") && str.length === 5
-        ? str.slice(1, 5)
-        : str.slice(0, 4);
+      return str.slice(-4).padStart(4, "0");
     };
 
     const stationPressure = formatPressure(firstCard.stationLevelPressure);
@@ -139,9 +137,9 @@ export async function GET() {
 
     measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
 
-    // 8. 6RRRtR (47-51) - Precipitation
-    const precipitation = weatherObs.rainfallLast24Hours || "0";
-    measurements[7] = `6${pad(precipitation, 4)}`;
+    // 8. 6RRRtR (47-51) - RainfallDuringPrevious
+    const rainFall = weatherObs.rainfallDuringPrevious || "0";
+    measurements[7] = `6${pad(rainFall, 4)}`;
 
     // 9. 7wwW1W2 (52-56) - Weather codes
     const presentWeather = firstCard.presentWeatherWW || "00";
@@ -212,10 +210,10 @@ export async function GET() {
     let highAmountSig = weatherObs.layer3Amount || "0";
     let fourthAmountSig = weatherObs.layer4Amount || "0";
 
-    let lowHeightSig = pad((Number(weatherObs.layer1Height) || 0) , 2);
-    let mediumHeightSig = pad((Number(weatherObs.layer2Height) || 0) , 2);
-    let highHeightSig = pad((Number(weatherObs.layer3Height) || 0) , 2);
-    let fourthHeightSig = pad((Number(weatherObs.layer4Height) || 0) , 2);
+    let lowHeightSig = pad(Number(weatherObs.layer1Height) || 0, 2);
+    let mediumHeightSig = pad(Number(weatherObs.layer2Height) || 0, 2);
+    let highHeightSig = pad(Number(weatherObs.layer3Height) || 0, 2);
+    let fourthHeightSig = pad(Number(weatherObs.layer4Height) || 0, 2);
     measurements[18] = `8${lowAmountSig}${lowFormSig}${lowHeightSig} / 8${mediumAmountSig}${mediumFormSig}${mediumHeightSig} / 8${highAmountSig}${highFormSig}${highHeightSig} /8${fourthAmountSig}${fourthFormSig}${fourthHeightSig}`;
 
     // 20. 90dqqqt (34-38) - Dew point depression
