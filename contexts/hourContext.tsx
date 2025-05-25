@@ -69,6 +69,12 @@ export function HourProvider({ children }: { children: ReactNode }) {
         return;
       }
 
+      if(data.hasWeatherObservation) {
+        setSecondCardError("Weather observation already exists for this hour");
+        setTimeData(null);
+        return;
+      }
+
       setTimeData(data);
     } catch (err) {
       setFirstCardError(err instanceof Error ? err.message : String(err));
