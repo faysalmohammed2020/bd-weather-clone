@@ -66,12 +66,18 @@ export function generateSynopticCode(): SynopticFormValues {
 
   // 3. iRiXhvv (22-26) - 32 + low cloud height (2 digits) + visibility (1 digit)
   // "iRiXhW 22-26" field data will come from : 32 is constant + "clouds>low>height" fields+ "horizontalVisibility" of "first-card-data.json"
+  const precipitation = weatherObs.rainfall?.["last-24-hours"] || "0";
   const lowCloudHeight = weatherObs.clouds?.low?.height || 0;
   const visibility = pad(
     (Number(firstCard.horizontalVisibility?.toString()?.[0]) || 0) * 10,
     2
   );
+
+
   measurements[2] = `32${lowCloudHeight}${visibility}`;
+
+
+
   // 4. Nddff (27-31) - Total cloud (1 digit) + wind direction (2 digits) + wind speed (2 digits)
   const totalCloud = weatherObs.totalCloud?.["total-cloud-amount"] || "0";
   const windDirectionDeg = Number(weatherObs.wind?.direction) || 0; // in degrees (0-359)
@@ -133,7 +139,6 @@ export function generateSynopticCode(): SynopticFormValues {
   measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
 
   // 8. 6RRRtR (47-51) - Precipitation (4 digits) + duration (1 digit)
-  const precipitation = weatherObs.rainfall?.["last-24-hours"] || "0";
   measurements[7] = `6${pad(precipitation, 4)}0`;
 
   // 9. 7wwW1W2 (52-56) - Weather codes
