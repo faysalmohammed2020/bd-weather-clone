@@ -212,10 +212,10 @@ export async function GET() {
     let highAmountSig = weatherObs.layer3Amount || "0";
     let fourthAmountSig = weatherObs.layer4Amount || "0";
 
-    let lowHeightSig = pad(Number(weatherObs.layer1Height) || 0, 2);
-    let mediumHeightSig = pad(Number(weatherObs.layer2Height) || 0, 2);
-    let highHeightSig = pad(Number(weatherObs.layer3Height) || 0, 2);
-    let fourthHeightSig = pad(Number(weatherObs.layer3Height) || 0, 2);
+    let lowHeightSig = pad((Number(weatherObs.layer1Height) || 0) , 2);
+    let mediumHeightSig = pad((Number(weatherObs.layer2Height) || 0) , 2);
+    let highHeightSig = pad((Number(weatherObs.layer3Height) || 0) , 2);
+    let fourthHeightSig = pad((Number(weatherObs.layer4Height) || 0) , 2);
     measurements[18] = `8${lowAmountSig}${lowFormSig}${lowHeightSig} / 8${mediumAmountSig}${mediumFormSig}${mediumHeightSig} / 8${highAmountSig}${highFormSig}${highHeightSig} /8${fourthAmountSig}${fourthFormSig}${fourthHeightSig}`;
 
     // 20. 90dqqqt (34-38) - Dew point depression
