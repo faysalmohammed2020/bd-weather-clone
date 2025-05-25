@@ -59,9 +59,11 @@ const measurements = [
   {
     id: 7,
     label: (
-      <>
-        6RRRt<sub>R</sub>
-      </>
+      <span style={{ display: "inline-block", textAlign: "center" }}>
+        <span>
+           6RRRt<sub>R</sub>
+        </span>
+      </span>
     ),
     range: "47-51",
   },
@@ -133,6 +135,17 @@ const measurements = [
       </span>
     ),
     range: "19-23",
+  },
+  {
+    id: 17,
+    label: (
+      <span style={{ display: "inline-block", textAlign: "center" }}>
+        <span>
+           6RRRt<sub>R</sub>
+        </span>
+      </span>
+    ),
+    range: "24-28",
   },
   {
     id: 18,
