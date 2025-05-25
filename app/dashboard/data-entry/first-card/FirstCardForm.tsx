@@ -748,7 +748,10 @@ export function FirstCardForm() {
 
           // Get yesterday's station level pressure
           const prevStationLevelPressure =
-            timeData?.yesterday?.meteorologicalEntry?.stationLevelPressure;
+            timeData?.yesterday?.meteorologicalEntry?.stationLevelPressure ?? "10007";
+
+
+            console.log("prevStationLevelPressure", prevStationLevelPressure)
 
           // If there's no previous pressure data, set to '000' and return
           if (!prevStationLevelPressure) {
@@ -1052,6 +1055,7 @@ export function FirstCardForm() {
                           value={formik.values.stationLevelPressure || ""}
                           onChange={handleChange}
                           className="border-slate-600 transition-all focus:border-rose-400 focus:ring-rose-500/30"
+                          readOnly
                         />
                       </div>
 

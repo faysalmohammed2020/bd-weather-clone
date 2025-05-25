@@ -241,16 +241,13 @@ export async function GET() {
     measurements[15] = utcToHour(observingTime.utcTime.toString());
 
     // 17. 58P24P24P24/59P24P24P24 (19-23) - Pressure change
-    const pressureChange = Number.parseFloat(
-      firstCard.pressureChange24h || "0"
-    );
-    const pressureChangeIndicator = pressureChange >= 0 ? "58" : "59";
-    const absPressureChange = pad(Math.abs(Math.round(pressureChange * 10)), 3);
-    measurements[16] = `${pressureChangeIndicator}${absPressureChange}`;
+    const pressureChange = firstCard.pressureChange24h || "0000"
+    const pressureChangeIndicator = Number.parseFloat(pressureChange) >= 0 ? "58" : "59";
+    const slicedPressure = pressureChange.slice(-3);
+    measurements[16] = `${pressureChangeIndicator}${slicedPressure}`;
 
     // 18. (6RRRtR)/7R24R24R24 (24-28) - Precipitation
     measurements[17] = `${measurements[7]}`;
-
 
     // 19. 8N5Ch5h5 (29-33) - Cloud information
     let lowFormSig = weatherObs.layer1Form || "0";
