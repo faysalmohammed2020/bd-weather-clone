@@ -10,11 +10,9 @@ import {
   User,
   Sun,
   Loader2,
-  Clock,
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-  LockIcon,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -39,6 +37,9 @@ import { Input } from "@/components/ui/input";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "framer-motion";
+import { useHour } from "@/contexts/hourContext";
+import HourSelector from "@/components/hour-selector";
 
 // Define the form data type
 type WeatherObservationFormData = {
@@ -271,6 +272,8 @@ export default function SecondCardForm() {
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
   const { data: session } = useSession();
+
+  const { isHourSelected, timeData } = useHour();
 
   // Get the persistent form store
   const { formData, updateFields, resetForm } = useWeatherObservationForm();
@@ -824,21 +827,31 @@ export default function SecondCardForm() {
   };
 
   // Check if current tab is the last one
-  const isLastTab = currentStep === totalSteps;
+  // const isLastTab = currentStep === totalSteps;
   const isFirstTab = currentStep === 1;
 
   // Update the Tabs component to prevent direct tab navigation when current tab is invalid
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-blue-50 to-cyan-50 p-4">
-      <div className="max-w-7xl mx-auto">
-        <header className="text-center py-6">
-          <p className="text-3xl font-bold text-gray-800">
-            Second Card Data Entry
-          </p>
-        </header>
-
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-          <form
+    <>
+      <AnimatePresence mode="wait">
+        {!isHourSelected || !timeData?.hasMeteorologicalData ? (
+          <motion.div
+            key="hour-selector"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="absolute inset-0 flex items-center justify-center bg-white backdrop-blur-sm z-50 px-6"
+          >
+            <HourSelector />
+          </motion.div>
+        ) : (
+          <motion.form
+            key="form"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
             onSubmit={formik.handleSubmit}
             className="w-full"
             onKeyDown={handleKeyDown}
@@ -1520,10 +1533,10 @@ export default function SecondCardForm() {
                 </div>
               </Tabs>
             </div>
-          </form>
-        </div>
-      </div>
-    </div>
+          </motion.form>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
