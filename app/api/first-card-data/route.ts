@@ -152,6 +152,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       {
+        error: false,
         message: "Data saved successfully",
         dataCount: totalCount,
         entry: savedEntry,

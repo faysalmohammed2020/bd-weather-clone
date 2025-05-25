@@ -19,7 +19,8 @@ type HourContextType = {
   selectedHour: string;
   setSelectedHour: (hour: string) => void;
   timeData: TimeData | null;
-  error: string;
+  firstCardError: string;
+  secondCardError: string;
   isLoading: boolean;
   clearError: () => void;
   isHourSelected: boolean;
@@ -30,7 +31,8 @@ const HourContext = createContext<HourContextType | undefined>(undefined);
 export function HourProvider({ children }: { children: ReactNode }) {
   const [selectedHour, setSelectedHour] = useState<string>("");
   const [timeData, setTimeData] = useState<TimeData | null>(null);
-  const [error, setError] = useState<string>("");
+  const [firstCardError, setFirstCardError] = useState<string>("");
+  const [secondCardError, setSecondCardError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -60,14 +62,21 @@ export function HourProvider({ children }: { children: ReactNode }) {
         }
 
         if(data.found) {
-          setError(data.message);
+          setFirstCardError(data.message);
+          setTimeData(null);
+          return;
+        }
+
+        if(!data.found) {
+          setSecondCardError(data.message);
           setTimeData(null);
           return;
         }
 
         setTimeData(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
+        setFirstCardError(err instanceof Error ? err.message : String(err));
+        setSecondCardError(err instanceof Error ? err.message : String(err));
         setTimeData(null);
       } finally {
         setIsLoading(false);
@@ -77,13 +86,17 @@ export function HourProvider({ children }: { children: ReactNode }) {
     fetchTime();
   }, [selectedHour]);
 
-  const clearError = () => setError("");
+  const clearError = () => {
+    setFirstCardError("");
+    setSecondCardError("");
+  };
   
   const value = {
     selectedHour,
     setSelectedHour,
     timeData,
-    error,
+    firstCardError,   
+    secondCardError,
     isLoading,
     clearError,
     isHourSelected: selectedHour !== "",

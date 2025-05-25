@@ -163,7 +163,7 @@ const validationSchema = Yup.object({
 export function FirstCardForm() {
   const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isHourSelected, timeData, selectedHour, error: timeError } = useHour();
+  const { isHourSelected, timeData, selectedHour, firstCardError } = useHour();
   const [hygrometricData, setHygrometricData] = useState({
     dryBulb: "",
     wetBulb: "",
@@ -565,7 +565,7 @@ export function FirstCardForm() {
         return;
       }
 
-      toast.success("Data saved successfully!", {
+      toast.success(data.message, {
         description: `Entry #${data.dataCount} saved`,
       });
 
@@ -887,7 +887,7 @@ export function FirstCardForm() {
   return (
     <>
       <AnimatePresence mode="wait">
-        {!isHourSelected || timeError ? (
+        {!isHourSelected || firstCardError ? (
           <motion.div
             key="hour-selector"
             initial={{ opacity: 0 }}
@@ -896,7 +896,7 @@ export function FirstCardForm() {
             transition={{ duration: 0.3 }}
             className="absolute inset-0 flex items-center justify-center bg-white backdrop-blur-sm z-50 px-6"
           >
-            <HourSelector />
+            <HourSelector type="first" />
           </motion.div>
         ) : (
           <motion.form

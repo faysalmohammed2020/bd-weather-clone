@@ -11,8 +11,8 @@ import {
 import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const HourSelector = () => {
-  const { selectedHour, setSelectedHour, error, isLoading, clearError } =
+const HourSelector = ({ type }: { type: "first" | "second" }) => {
+  const { selectedHour, setSelectedHour, firstCardError, secondCardError, isLoading, clearError } =
     useHour();
 
   const handleHourChange = (value: string) => {
@@ -39,7 +39,7 @@ const HourSelector = () => {
             className={cn(
               "text-lg font-medium py-6 px-8 shadow-xs shadow-blue-500 border border-blue-500",
               {
-                "border-red-500": error,
+                "border-red-500": firstCardError || secondCardError,
               }
             )}
           >
@@ -84,7 +84,8 @@ const HourSelector = () => {
         </Select>
       </div>
 
-      {error && <p className="text-red-500 font-medium text-lg">{error}</p>}
+      {type === "first" && firstCardError && <p className="text-red-500 font-medium text-lg">{firstCardError}</p>}
+      {type === "second" && secondCardError && <p className="text-red-500 font-medium text-lg">{secondCardError}</p>}
     </div>
   );
 };
