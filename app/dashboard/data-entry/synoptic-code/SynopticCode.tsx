@@ -18,8 +18,6 @@ import {
 } from "@/components/ui/tooltip";
 import { AlertTriangle } from "lucide-react";
 
-// ... (keep your existing measurements array exactly as is) ...
-
 const measurements = [
   { id: 0, label: "C1", range: "16" },
   { id: 1, label: "Iliii", range: "17-21" },
@@ -488,6 +486,7 @@ export function SynopticCode() {
                                   ? "bg-yellow-100 border-yellow-300 focus:border-yellow-500"
                                   : ""
                               }`}
+                              readOnly={![2, 7, 12, 19, 20].includes(item.id)}
                             />
                             {isSpecialField(item.id) &&
                               manuallyChangedFields.has(item.id) && (
@@ -506,8 +505,10 @@ export function SynopticCode() {
                             className="bg-amber-100 border-amber-300"
                           >
                             <p className="text-sm text-amber-800">
-                              This field requires analysis with corresponding
-                              first and second card data
+                              Please Double Check The Corresponding<br/> Data In First 
+                              & Second Card!.There is no logic!
+                              
+
                             </p>
                           </TooltipContent>
                         )}
@@ -563,6 +564,7 @@ export function SynopticCode() {
                                   ? "bg-yellow-100 border-yellow-300 focus:border-yellow-500"
                                   : ""
                               }`}
+                              readOnly={![2, 7, 12, 19, 20].includes(item.id)}
                             />
                             {isSpecialField(item.id) &&
                               manuallyChangedFields.has(item.id) && (
@@ -581,8 +583,8 @@ export function SynopticCode() {
                             className="bg-amber-100 border-amber-300"
                           >
                             <p className="text-sm text-amber-800">
-                              This field requires analysis with corresponding
-                              first and second card data
+                             Please Double Check The Corresponding<br/> Data In First 
+                              & Second Card!.There is no logic!
                             </p>
                           </TooltipContent>
                         )}
