@@ -216,8 +216,8 @@ model WeatherObservation {
   layer4Amount String?
 
   // RAINFALL
-  rainfallTimeStart      String?
-  rainfallTimeEnd        String?
+   rainfallTimeStart      DateTime?  // এখন UTC টাইমস্ট্যাম্প স্টোর করবে
+  rainfallTimeEnd        DateTime?
   rainfallSincePrevious  String?
   rainfallDuringPrevious String?
   rainfallLast24Hours    String?

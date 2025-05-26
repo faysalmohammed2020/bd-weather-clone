@@ -81,26 +81,12 @@ export async function GET() {
     measurements[1] = stationNo;
 
     // 3. iRiXhvv (22-26) - 32 + low cloud height + visibility
-    const iRdata = weatherObs.rainfallTimeStart; // This should be a Date object or string representing time
-
-    let iRvalue = "3"; // Default value if no rainfallTimeStart
-
-    if (iRdata) {
-      const hours = parseInt(utcToHour(observingTime.utcTime.toString()), 10);
-
-      if (hours % 6 === 0) { // 00, 06, 12, 18 UTC (even 6-hour intervals)
-        iRvalue = "1";
-      } else if (hours % 3 === 0) { // 03, 09, 15, 21 UTC (odd 3-hour intervals)
-        iRvalue = "2";
-      }
-    }
-
     const lowCloudHeight = weatherObs.lowCloudHeight || "0";
     const visibility = pad(
       (Number(firstCard.horizontalVisibility?.toString()?.[0]) || 0) * 10,
       2
     );
-    measurements[2] = `${iRvalue}4${lowCloudHeight}${visibility}`;
+    measurements[2] = `32${lowCloudHeight}${visibility}`;
 
     // 4. Nddff (27-31) - Total cloud + wind direction + speed
     const totalCloud = weatherObs.totalCloudAmount || "0";
@@ -141,7 +127,9 @@ export async function GET() {
     // 7. 3PPP/4PPP (42-46) - Station/sea level pressure
     const formatPressure = (pressure: number | undefined): string => {
       const str = pressure?.toString().replace(".", "") || "0000";
-      return str.slice(-4).padStart(4, "0");
+      return str.startsWith("1") && str.length === 5
+        ? str.slice(1, 5)
+        : str.slice(0, 4);
     };
 
     const stationPressure = formatPressure(firstCard.stationLevelPressure);
@@ -152,35 +140,47 @@ export async function GET() {
     measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
 
     // 8. 6RRRtR (47-51) - Precipitation
-    let rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
-    rainFall = Number(rainFall.toString().slice(-3).padStart(3, "000"));
+    // 8. 6RRRtR (47-51) - Precipitation
+    const rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
+    const rainFallPadded = pad(rainFall.toString().slice(-3), 3); // Last 3 digits
 
+    // Get times from database (all in UTC)
+    const observationTime = new Date(observingTime.utcTime); // H (reporting time)
+    const rainStart = weatherObs.rainfallTimeStart
+      ? new Date(weatherObs.rainfallTimeStart)
+      : null;
+    const rainEnd = weatherObs.rainfallTimeEnd
+      ? new Date(weatherObs.rainfallTimeEnd)
+      : null;
 
-    const startTime = Number(weatherObs.rainfallTimeStart);
-    const endTime = Number(weatherObs.rainfallTimeEnd);
-    let durationCode = "/";
+    let tr = "/";
 
-    if (startTime && endTime) {
-      if (endTime - startTime <= 2) {
-        durationCode = "4";
-      } else if (endTime - startTime <= 4) {
-        durationCode = "5";
-      } else if (endTime - startTime <= 6) {
-        durationCode = "6";
-      } else if (startTime > endTime) {
-        if (startTime - endTime >= 0 && startTime - endTime < 2) {
-          durationCode = "7";
-        } else if (startTime - endTime >= 2 && startTime - endTime < 4) {
-          durationCode = "8";
-        }
-      } else if (startTime - endTime > 4 && startTime - endTime <= 6) {
-        durationCode = "9";
+    if (rainStart && rainEnd) {
+      // 1. বৃষ্টির সময়কাল (ঘণ্টায়)
+      const durationHours =
+        (rainEnd.getTime() - rainStart.getTime()) / (1000 * 60 * 60);
+
+      // 2. বৃষ্টি শেষ হওয়ার পর থেকে রিপোর্ট সময়ের পার্থক্য (ঘণ্টায়)
+      let hoursSinceEnd =
+        (observationTime.getTime() - rainEnd.getTime()) / (1000 * 60 * 60);
+
+      // রাত ১২টা পার হলে সংশোধন
+      if (hoursSinceEnd < 0) {
+        hoursSinceEnd += 24; // যেমন: 00:00 - 22:00 = -2 → 22 ঘণ্টা (সঠিক মান 2 ঘণ্টা)
       }
+
+      // 3. tr মান নির্ধারণ
+      if (durationHours <= 2) {
+        if (hoursSinceEnd <= 2) tr = "4";
+        else if (hoursSinceEnd <= 4) tr = "5";
+        else if (hoursSinceEnd <= 6) tr = "6";
+      } else if (durationHours <= 4) {
+        if (hoursSinceEnd <= 2) tr = "7";
+        else if (hoursSinceEnd <= 4) tr = "8";
+      } else if (durationHours <= 6 && hoursSinceEnd <= 4) tr = "9";
     }
 
-
-    measurements[7] = `6${pad(rainFall, 3)}${durationCode}`;
-
+    measurements[7] = `6${rainFallPadded}${tr}`;
 
     // 9. 7wwW1W2 (52-56) - Weather codes
     const presentWeather = firstCard.presentWeatherWW || "00";
@@ -195,28 +195,17 @@ export async function GET() {
     const highForm = weatherObs.highCloudForm || "0";
     measurements[9] = `8${lowAmount}${lowForm}${mediumForm}${highForm}`;
 
-
     // 11. 2SnTnTnTn/InInInIn (62-66) - Min temperature / ground state
     const minTemp = Number.parseFloat(firstCard.maxMinTempAsRead || "0") / 10;
-    // Get UTC hour from observing time
-    const utcHour = parseInt(utcToHour(observingTime.utcTime.toString()), 10);
-    let sN, x;
-    // For hours 00,03,06,09 - we use minTemp with indicator "20"
-    if ([0, 3, 6, 9].includes(utcHour)) {
-      x = "2";  // Indicator for min temperature
-      sN = minTemp >= 0 ? "0" : "1";  // Sign (0 for positive, 1 for negative)
-    }
-    // For hours 12,15,18,21 - we use maxTemp with indicator "10"
-    else if ([12, 15, 18, 21].includes(utcHour)) {
-      x = "1";  // Indicator for max temperature
-      sN = minTemp >= 0 ? "0" : "1";  // Sign (0 for positive, 1 for negative)
-    }
-    // Default case (shouldn't happen if we have valid UTC hours)
-    else {
-      x = "0";  // Default indicator
-      sN = "0";  // Default sign
-    }
 
+    let sN, x;
+    if (minTemp >= 0) {
+      sN = 0;
+      x = 1;
+    } else {
+      sN = 1;
+      x = 2;
+    }
     const conVertMinTemp = pad(Math.abs(Math.round(minTemp * 10)), 3);
     measurements[10] = `${x}${sN}${conVertMinTemp}`;
 
@@ -242,10 +231,12 @@ export async function GET() {
     measurements[15] = utcToHour(observingTime.utcTime.toString());
 
     // 17. 58P24P24P24/59P24P24P24 (19-23) - Pressure change
-    const pressureChange = firstCard.pressureChange24h || "0000"
-    const pressureChangeIndicator = Number.parseFloat(pressureChange) >= 0 ? "58" : "59";
-    const slicedPressure = pressureChange.slice(-3);
-    measurements[16] = `${pressureChangeIndicator}${slicedPressure}`;
+    const pressureChange = Number.parseFloat(
+      firstCard.pressureChange24h || "0"
+    );
+    const pressureChangeIndicator = pressureChange >= 0 ? "58" : "59";
+    const absPressureChange = pad(Math.abs(Math.round(pressureChange * 10)), 3);
+    measurements[16] = `${pressureChangeIndicator}${absPressureChange}`;
 
     // 18. (6RRRtR)/7R24R24R24 (24-28) - Precipitation
     measurements[17] = `${measurements[7]}`;

@@ -47,12 +47,12 @@ export async function POST(request: Request) {
           select: {
             MeteorologicalEntry: true,
             WeatherObservation: true,
-          }
-        }
+          },
+        },
       },
       orderBy: {
         utcTime: "desc",
-      }
+      },
     });
 
     if (!observingTime?._count.MeteorologicalEntry) {
@@ -78,10 +78,13 @@ export async function POST(request: Request) {
     // Get station ID from session
     const stationId = session.user.station?.id;
     if (!stationId) {
-      return NextResponse.json({
-        error: true,
-        message: "Station ID is required",
-      }, { status: 400 });
+      return NextResponse.json(
+        {
+          error: true,
+          message: "Station ID is required",
+        },
+        { status: 400 }
+      );
     }
 
     // Find the station by stationId to get its primary key (id)
@@ -90,11 +93,40 @@ export async function POST(request: Request) {
     });
 
     if (!stationRecord) {
-      return NextResponse.json({
-        error: true,
-        message: `No station found with ID: ${stationId}`,
-      }, { status: 404 });
+      return NextResponse.json(
+        {
+          error: true,
+          message: `No station found with ID: ${stationId}`,
+        },
+        { status: 404 }
+      );
     }
+
+    // Helper function to convert hour string to DateTime
+    const convertHourToDateTime = (hourString: string | null) => {
+      if (!hourString) return null;
+
+      const hour = parseInt(hourString);
+      if (isNaN(hour) || hour < 0 || hour > 23) return null;
+
+      // Use current date for the base
+      const now = new Date();
+
+      // Create new date with the specified hour in UTC
+      const dateTime = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate(),
+          hour,
+          0, // minutes
+          0, // seconds
+          0 // milliseconds
+        )
+      );
+
+      return dateTime;
+    };
 
     const observationData = {
       tabActive: data.metadata?.tabActiveAtSubmission || "unknown",
@@ -133,9 +165,9 @@ export async function POST(request: Request) {
       layer4Height: data.significantClouds?.layer4?.height || null,
       layer4Amount: data.significantClouds?.layer4?.amount || null,
 
-      // Rainfall
-      rainfallTimeStart: data.rainfall?.["time-start"] || null,
-      rainfallTimeEnd: data.rainfall?.["time-end"] || null,
+      // Rainfall - Convert hour strings to DateTime objects
+      rainfallTimeStart: convertHourToDateTime(data.rainfall?.["time-start"]),
+      rainfallTimeEnd: convertHourToDateTime(data.rainfall?.["time-end"]),
       rainfallSincePrevious: data.rainfall?.["since-previous"] || null,
       rainfallDuringPrevious: data.rainfall?.["during-previous"] || null,
       rainfallLast24Hours: data.rainfall?.["last-24-hours"] || null,
@@ -175,13 +207,15 @@ export async function POST(request: Request) {
   }
 }
 
-
 export async function GET(request: Request) {
   try {
     const session = await getSession();
 
     if (!session || !session.user?.id) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     const { searchParams } = new URL(request.url);
@@ -192,10 +226,15 @@ export async function GET(request: Request) {
     const stationId = stationIdParam || session.user.station?.id;
 
     if (!stationId && session.user.role !== "super_admin") {
-      return NextResponse.json({ success: false, error: "Station ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Station ID is required" },
+        { status: 400 }
+      );
     }
 
-    const startTime = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 7));
+    const startTime = startDate
+      ? new Date(startDate)
+      : new Date(new Date().setDate(new Date().getDate() - 7));
     startTime.setHours(0, 0, 0, 0);
     const endTime = endDate ? new Date(endDate) : new Date();
     endTime.setHours(23, 59, 59, 999);
@@ -211,10 +250,11 @@ export async function GET(request: Request) {
               lte: endTime,
             },
           },
-          ...(superFilter 
-            ? (stationIdParam ? [{ stationId: stationIdParam }] : []) 
-            : [{ stationId: session.user.station?.id }]
-          ),
+          ...(superFilter
+            ? stationIdParam
+              ? [{ stationId: stationIdParam }]
+              : []
+            : [{ stationId: session.user.station?.id }]),
         ],
       },
       include: {
@@ -230,7 +270,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: true, data: entries });
   } catch (error) {
     console.error("Error fetching entries:", error);
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -238,13 +284,19 @@ export async function PUT(request: Request) {
   try {
     const session = await getSession();
     if (!session || !session.user?.id) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     const { id, type, ...updateData } = await request.json();
 
     if (!id) {
-      return NextResponse.json({ success: false, error: "Entry ID is required" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Entry ID is required" },
+        { status: 400 }
+      );
     }
 
     const canEditRecord = (record: any, user: any): boolean => {
@@ -290,13 +342,16 @@ export async function PUT(request: Request) {
             include: {
               user: true,
               station: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       if (!existing) {
-        return NextResponse.json({ success: false, error: "Weather observation not found" }, { status: 404 });
+        return NextResponse.json(
+          { success: false, error: "Weather observation not found" },
+          { status: 404 }
+        );
       }
 
       const userRole = session.user.role;
@@ -305,19 +360,29 @@ export async function PUT(request: Request) {
 
       let canEdit = false;
       if (userRole === "super_admin") canEdit = true;
-      else if (userRole === "station_admin" && userStationId === existing.ObservingTime?.station?.id) canEdit = true;
+      else if (
+        userRole === "station_admin" &&
+        userStationId === existing.ObservingTime?.station?.id
+      )
+        canEdit = true;
       else if (userRole === "observer" && isOwner) canEdit = true;
 
       // Add the time-based permission check
       if (canEdit && !canEditRecord(existing, session.user)) {
-        return NextResponse.json({
-          success: false,
-          error: "Editing period has expired for this record"
-        }, { status: 403 });
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Editing period has expired for this record",
+          },
+          { status: 403 }
+        );
       }
 
       if (!canEdit) {
-        return NextResponse.json({ success: false, error: "Permission denied" }, { status: 403 });
+        return NextResponse.json(
+          { success: false, error: "Permission denied" },
+          { status: 403 }
+        );
       }
 
       const updated = await prisma.weatherObservation.update({
@@ -328,20 +393,25 @@ export async function PUT(request: Request) {
             include: {
               user: true,
               station: true,
-            }
-          }
-        }
+            },
+          },
+        },
       });
 
       return NextResponse.json({
         success: true,
         message: "Weather observation updated",
-        data: updated
+        data: updated,
       });
     }
   } catch (error) {
     console.error("Error updating entry:", error);
-    return NextResponse.json({ success: false, error: error instanceof Error ? error.message : "Unknown error" }, { status: 500 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }
-
