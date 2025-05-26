@@ -123,11 +123,11 @@ const measurements = [
     ),
     range: "72-76",
   },
-  { id: 13, label: "Av. Total Cloud", range: "56" },
-  { id: 14, label: "C2", range: "16" },
-  { id: 15, label: "GG", range: "17-18" },
+  
+  { id: 13, label: "C2", range: "16" },
+  { id: 14, label: "GG", range: "17-18" },
   {
-    id: 16,
+    id: 15,
     label: (
       <span style={{ display: "inline-block", textAlign: "center" }}>
         <span>
@@ -142,7 +142,7 @@ const measurements = [
     range: "19-23",
   },
   {
-    id: 17,
+    id: 16,
     label: (
       <span style={{ display: "inline-block", textAlign: "center" }}>
         <span>
@@ -153,7 +153,7 @@ const measurements = [
     range: "24-28",
   },
   {
-    id: 18,
+    id: 17,
     label: (
       <>
         8 N<sub>s</sub>C h<sub>s</sub>h<sub>s</sub>
@@ -162,7 +162,7 @@ const measurements = [
     range: "29-33",
   },
   {
-    id: 19,
+    id: 18,
     label: (
       <>
         90dqqq<sub>t</sub>
@@ -171,7 +171,7 @@ const measurements = [
     range: "34-38",
   },
   {
-    id: 20,
+    id: 19,
     label: (
       <>
         91 f<sub>q</sub>f<sub>q</sub>f<sub>q</sub>
@@ -300,7 +300,6 @@ export function SynopticCode() {
         S2nTnTnTnInInInIn: values.measurements[10] || null,
         D56DLDMDH: values.measurements[11] || null,
         CD57DaEc: values.measurements[12] || null,
-        avgTotalCloud: values.measurements[13] || null,
         C2: values.measurements[14] || null,
         GG: values.measurements[15] || null,
         P24Group58_59: values.measurements[16] || null,
