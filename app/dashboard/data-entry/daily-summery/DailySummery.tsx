@@ -103,6 +103,7 @@ export function DailySummaryForm() {
         processFirstCard("wetBulbAsRead", 3, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
         processFirstCard("maxMinTempAsRead", 4, (arr) => Math.max(...arr))
         processFirstCard("maxMinTempAsRead", 5, (arr) => Math.min(...arr))
+        const rainfallLast24Hours = todayWeatherObservations.map((item: any) => Number.parseFloat(item.rainfallLast24Hours))
         processFirstCard("Td", 7, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
 
         // Calculate humidity
@@ -112,11 +113,8 @@ export function DailySummaryForm() {
         processFirstCard("horizontalVisibility", 14, (arr) => Math.min(...arr))
 
         // Calculate precipitation
-        const totalPrecip = todayWeatherObservations.reduce((sum: number, item: any) => {
-          const val = Number.parseFloat(item.rainfallLast24Hours)
-          return isNaN(val) ? sum : sum + val
-        }, 0)
-        if (totalPrecip > 0) calculatedMeasurements[6] = Math.round(totalPrecip).toString()
+        const totalPrecip = rainfallLast24Hours.reduce((sum: number, item: number) => isNaN(item) ? sum : sum + item, 0)
+        if (totalPrecip > 0) calculatedMeasurements[6] = totalPrecip.toString()
 
         // Calculate wind measurements
         const windSpeeds = todayWeatherObservations
