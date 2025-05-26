@@ -15,7 +15,7 @@ export default function DailySummaryWrapper() {
       
         <div className="mb-4 font-semibold text-gray-900 text-lg"> Weather Observations & Daily Summary</div>    
                
-        <div className="mb-4 h-[60vh] overflow-y-auto border border-gray-200 p-3 rounded-lg">
+        <div className="mb-4 h-[30vh] overflow-y-auto border border-gray-200 p-3 rounded-lg">
         <WeatherDataTable />
         </div>
         <div className="mb-4 h-[60vh] overflow-y-auto border border-gray-200 p-3 rounded-lg">
