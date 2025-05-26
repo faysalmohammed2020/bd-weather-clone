@@ -163,7 +163,14 @@ const validationSchema = Yup.object({
 export function FirstCardForm() {
   const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isHourSelected, selectedHour, firstCardError, isLoading, timeData, resetStates } = useHour();
+  const {
+    isHourSelected,
+    selectedHour,
+    firstCardError,
+    isLoading,
+    timeData,
+    resetStates,
+  } = useHour();
 
   const [hygrometricData, setHygrometricData] = useState({
     dryBulb: "",
@@ -561,8 +568,8 @@ export function FirstCardForm() {
 
       const data = await response.json();
 
-      if(data.error) {
-        toast.error(data.message)
+      if (data.error) {
+        toast.error(data.message);
         return;
       }
 
@@ -749,12 +756,11 @@ export function FirstCardForm() {
             pressureData.heightDifference
           );
 
+          console.log(timeData);
+
           // Get yesterday's station level pressure
           const prevStationLevelPressure =
-            timeData?.yesterday?.meteorologicalEntry?.stationLevelPressure ?? "10007";
-
-
-            console.log("prevStationLevelPressure", prevStationLevelPressure)
+            timeData?.yesterday?.meteorologicalEntry?.stationLevelPressure;
 
           // If there's no previous pressure data, set to '000' and return
           if (!prevStationLevelPressure) {

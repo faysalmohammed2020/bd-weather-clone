@@ -76,19 +76,16 @@ export function HourProvider({ children }: { children: ReactNode }) {
 
         if (data.error) {
           toast.error(data.message);
-          return
         }
 
         // Check if first card is allowed
         if (!data.allowFirstCard) {
           setFirstCardError(data.message);
-          return
         }
 
         // Check if second card is allowed
         if (!data.allowSecondCard) {
           setSecondCardError(data.message);
-          return
         }
 
         setTimeData(data);
