@@ -760,8 +760,8 @@ export function FirstCardForm() {
 
           // Get yesterday's station level pressure
           const prevStationLevelPressure =
-            timeData?.yesterday?.meteorologicalEntry?.stationLevelPressure;
-
+            timeData?.yesterday?.meteorologicalEntry[0]?.stationLevelPressure;
+            console.log("Time Data: ", timeData?.yesterday);
           // If there's no previous pressure data, set to '000' and return
           if (!prevStationLevelPressure) {
             formik.setFieldValue("pressureChange24h", "0000");
