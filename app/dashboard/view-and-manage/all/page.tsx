@@ -9,7 +9,7 @@ import * as XLSX from "xlsx"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useSession } from "@/lib/auth-client"
-import CompactPDFExportButton from "../PdfExportComponent"
+// import CompactPDFExportButton from "../PdfExportComponent"
 
 export default function AllViewAndManagePage() {
   const [activeTab, setActiveTab] = useState("first-card")
@@ -62,12 +62,12 @@ export default function AllViewAndManagePage() {
           </Button>
 
           {/* Compact PDF Export Button */}
-          <CompactPDFExportButton
+          {/* <CompactPDFExportButton
             firstCardRef={firstCardRef}
             secondCardRef={secondCardRef}
             synopticRef={synopticRef}
             stationInfo={stationInfo}
-          />
+          /> */}
         </div>
       </div>
 
