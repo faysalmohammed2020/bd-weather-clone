@@ -151,36 +151,35 @@ export async function GET() {
 
     measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
 
-    // // // 8. 6RRRtR (47-51) - Precipitation
+    // 8. 6RRRtR (47-51) - Precipitation
     let rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
     rainFall = Number(rainFall.toString().slice(-3).padStart(3, "000"));
-    let durationCode = "0";
-    if (weatherObs.rainfallTimeStart && weatherObs.rainfallTimeEnd) {
-      const startTime = Number(weatherObs.rainfallTimeStart);
-      const endTime = Number(weatherObs.rainfallTimeEnd);
-      const duration = endTime - startTime;
-      const negativeDuration = 24 - (startTime - endTime);
 
-      console.log("startTime", startTime, "endTime", endTime);
-      console.log("duration", duration, "negativeDuration", negativeDuration);
 
-      if (duration <= 2) {
+    const startTime = Number(weatherObs.rainfallTimeStart);
+    const endTime = Number(weatherObs.rainfallTimeEnd);
+    let durationCode = "/";
+
+    if (startTime && endTime) {
+      if (endTime - startTime <= 2) {
         durationCode = "4";
-      } else if (duration <= 4) {
+      } else if (endTime - startTime <= 4) {
         durationCode = "5";
-      } else if (duration <= 6) {
+      } else if (endTime - startTime <= 6) {
         durationCode = "6";
       } else if (startTime > endTime) {
-        if (negativeDuration >= 0 && negativeDuration < 2) {
+        if (startTime - endTime >= 0 && startTime - endTime < 2) {
           durationCode = "7";
-        } else if (negativeDuration >= 2 && negativeDuration < 4) {
+        } else if (startTime - endTime >= 2 && startTime - endTime < 4) {
           durationCode = "8";
         }
-      } else if (negativeDuration > 4 && negativeDuration <= 6) {
+      } else if (startTime - endTime > 4 && startTime - endTime <= 6) {
         durationCode = "9";
       }
     }
-    measurements[7] = `6${rainFall}${durationCode}`;
+
+
+    measurements[7] = `6${pad(rainFall, 3)}${durationCode}`;
 
 
     // 9. 7wwW1W2 (52-56) - Weather codes
