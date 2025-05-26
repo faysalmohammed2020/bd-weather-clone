@@ -288,15 +288,6 @@ export function DailySummaryForm() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-gray-100">
-        <h2 className="text-lg font-semibold text-blue-700 flex items-center">
-          <span className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mr-2">
-            <LineChart size={18} />
-          </span>
-          Daily Summary Measurements
-        </h2>
-      </div>
 
       {/* Status Messages */}
       {dataStatus.error ? (
@@ -436,3 +427,5 @@ export function DailySummaryForm() {
     </div>
   )
 }
+
+
