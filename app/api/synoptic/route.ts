@@ -151,32 +151,38 @@ export async function GET() {
 
     measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
 
-    // 8. 6RRRtR (47-51) - Precipitation
+    // // // 8. 6RRRtR (47-51) - Precipitation
     let rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
     rainFall = Number(rainFall.toString().slice(-3).padStart(3, "000"));
-    let durationCode = "/";
+    let durationCode = "0";
     if (weatherObs.rainfallTimeStart && weatherObs.rainfallTimeEnd) {
       const startTime = Number(weatherObs.rainfallTimeStart);
       const endTime = Number(weatherObs.rainfallTimeEnd);
+      const duration = endTime - startTime;
+      const negativeDuration = 24 - (startTime - endTime);
 
-      if (endTime - startTime <= 2) {
+      console.log("startTime", startTime, "endTime", endTime);
+      console.log("duration", duration, "negativeDuration", negativeDuration);
+
+      if (duration <= 2) {
         durationCode = "4";
-      } else if (endTime - startTime <= 4) {
+      } else if (duration <= 4) {
         durationCode = "5";
-      } else if (endTime - startTime <= 6) {
+      } else if (duration <= 6) {
         durationCode = "6";
       } else if (startTime > endTime) {
-        if (startTime - endTime >= 0 && startTime - endTime < 2) {
+        if (negativeDuration >= 0 && negativeDuration < 2) {
           durationCode = "7";
-        } else if (startTime - endTime >= 2 && startTime - endTime < 4) {
+        } else if (negativeDuration >= 2 && negativeDuration < 4) {
           durationCode = "8";
         }
-      } else if (startTime - endTime > 4 && startTime - endTime <= 6) {
+      } else if (negativeDuration > 4 && negativeDuration <= 6) {
         durationCode = "9";
       }
     }
     measurements[7] = `6${rainFall}${durationCode}`;
-    
+
+
     // 9. 7wwW1W2 (52-56) - Weather codes
     const presentWeather = firstCard.presentWeatherWW || "00";
     const pastWeather1 = firstCard.pastWeatherW1 || "0";
@@ -222,8 +228,9 @@ export async function GET() {
     measurements[11] = `56${lowDir}${mediumDir}${highDir}`;
 
     // 13. 57CDaEc (72-76) - Characteristic of pressure + pressure tendency
-    // const pressureTendency = firstCard.pressureChange24h?.toString()[0] || "0";
-    measurements[12] = "57000";
+    const specialCloudForm = weatherObs.layer1Form || "0";
+    const specialCloudDirection = weatherObs.lowCloudDirection || "0";
+    measurements[12] = `57${specialCloudForm}${specialCloudDirection}${specialCloudForm}`;
 
     // 14. Av. Total Cloud (56) - Total cloud amount
     measurements[13] = totalCloud;
