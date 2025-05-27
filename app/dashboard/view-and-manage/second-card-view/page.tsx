@@ -83,7 +83,7 @@ const validationSchema = yup.object({
     .required("Required"),
   windDirection: yup
     .string()
-    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .matches(/^\d{3}$/, "Must be exactly 3 digit")
     .required("Required"),
   layer1Form: yup
     .string()
@@ -135,14 +135,14 @@ const validationSchema = yup.object({
     .string()
     .matches(/^\d{2}$/, "Must be exactly 2 digits")
     .required("Required"),
-  rainfallTimeStart: yup
-    .string()
-    .matches(/^\d{2}$/, "Must be exactly 2 digits")
-    .required("Required"),
-  rainfallTimeEnd: yup
-    .string()
-    .matches(/^\d{2}$/, "Must be exactly 2 digits")
-    .required("Required"),
+  // rainfallTimeStart: yup
+  //   .string()
+  //   .matches(/^\d{2}$/, "Must be exactly 2 digits")
+  //   .required("Required"),
+  // rainfallTimeEnd: yup
+  //   .string()
+  //   .matches(/^\d{2}$/, "Must be exactly 2 digits")
+  //   .required("Required"),
   rainfallSincePrevious: yup
     .string()
     .matches(/^\d{2}$/, "Must be exactly 2 digits")
@@ -1513,31 +1513,22 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
 
                   {/* Rainfall */}
                   <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
-                    <Label className="text-sm font-medium text-gray-700">Rainfall Start Time (2 digits)</Label>
+                    <Label className="text-sm font-medium text-gray-700">Rainfall Start Time</Label>
                     <Input
                       {...register("rainfallTimeStart")}
-                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${
-                        errors.rainfallTimeStart ? "border-red-500" : ""
-                      }`}
-                      maxLength={2}
+                       className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200" 
+                      
                     />
-                    {errors.rainfallTimeStart && (
-                      <p className="text-red-500 text-xs mt-1">{errors.rainfallTimeStart.message}</p>
-                    )}
                   </div>
 
                   <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
-                    <Label className="text-sm font-medium text-gray-700">Rainfall End Time (2 digits)</Label>
+                    <Label className="text-sm font-medium text-gray-700">Rainfall End Time</Label>
                     <Input
                       {...register("rainfallTimeEnd")}
-                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${
-                        errors.rainfallTimeEnd ? "border-red-500" : ""
-                      }`}
-                      maxLength={2}
+                       className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"  
+                        
                     />
-                    {errors.rainfallTimeEnd && (
-                      <p className="text-red-500 text-xs mt-1">{errors.rainfallTimeEnd.message}</p>
-                    )}
+                    
                   </div>
 
                   <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
@@ -1624,13 +1615,13 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                   </div>
 
                   <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
-                    <Label className="text-sm font-medium text-gray-700">Wind Direction (1 digit)</Label>
+                    <Label className="text-sm font-medium text-gray-700">Wind Direction (3 digit)</Label>
                     <Input
                       {...register("windDirection")}
                       className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${
                         errors.windDirection ? "border-red-500" : ""
                       }`}
-                      maxLength={1}
+                      maxLength={3}
                     />
                     {errors.windDirection && (
                       <p className="text-red-500 text-xs mt-1">{errors.windDirection.message}</p>
