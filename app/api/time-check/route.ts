@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import { getYesterdayRange, hourToUtc } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/getSession";
+import moment from "moment";
 
 // Check if observing time exist or not and return each data count
 export async function POST(request: NextRequest) {
@@ -16,7 +17,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const formattedUtcTime = hourToUtc(hour);
-    const { startYesterday, endYesterday } = getYesterdayRange();
+    const yesterDayUtcTime = moment(formattedUtcTime)
+      .subtract(1, "day")
+      .toDate();
 
     // Get today's and yesterday's observing time
     const [observingTime, yesterdayObservingTime] = await prisma.$transaction([
@@ -49,10 +52,7 @@ export async function POST(request: NextRequest) {
         where: {
           AND: [
             {
-              utcTime: {
-                gte: startYesterday,
-                lte: endYesterday,
-              },
+              utcTime: yesterDayUtcTime,
             },
             {
               stationId: session.user.station?.id,
