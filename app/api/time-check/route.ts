@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { getYesterdayRange, hourToUtc } from "@/lib/utils";
+import { hourToUtc } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/getSession";
 import moment from "moment";
