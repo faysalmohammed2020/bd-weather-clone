@@ -127,9 +127,7 @@ export async function GET() {
     // 7. 3PPP/4PPP (42-46) - Station/sea level pressure
     const formatPressure = (pressure: number | undefined): string => {
       const str = pressure?.toString().replace(".", "") || "0000";
-      return str.startsWith("1") && str.length === 5
-        ? str.slice(1, 5)
-        : str.slice(0, 4);
+      return str.slice(-4).padStart(4, "0");
     };
 
     const stationPressure = formatPressure(firstCard.stationLevelPressure);
