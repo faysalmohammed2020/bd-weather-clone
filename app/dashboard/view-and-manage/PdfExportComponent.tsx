@@ -152,7 +152,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
 }) => {
   const formatValue = (value: any) => {
     if (value === null || value === undefined || value === "") return "--"
-    return String(value).substring(0, 8) // Limit length for compact display
+    return String(value).substring(0, 10)
   }
 
   const formatTime = (utcTime: string) => {
@@ -172,7 +172,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
           <View>
             <Text style={styles.title}>Weather Station Data Report</Text>
             <Text style={styles.subtitle}>
-              {stationInfo.stationName} ({stationInfo.stationId})
+            {firstCardData[0].stationName} ({firstCardData[0].stationId})
             </Text>
           </View>
           <Text style={{ fontSize: 7, color: "#64748b" }}>Generated: {new Date().toLocaleDateString()}</Text>
@@ -186,15 +186,15 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
           </View>
           <View style={styles.stationItem}>
             <Text style={styles.stationLabel}>STATION NO</Text>
-            <Text style={styles.stationValue}>{stationInfo.stationId}</Text>
+            <Text style={styles.stationValue}>{formatValue(firstCardData[0].stationId)}</Text>
           </View>
           <View style={styles.stationItem}>
             <Text style={styles.stationLabel}>STATION NAME</Text>
-            <Text style={styles.stationValue}>{stationInfo.stationName}</Text>
+            <Text style={styles.stationValue}>{formatValue(firstCardData[0].stationName)}</Text>
           </View>
           <View style={styles.stationItem}>
             <Text style={styles.stationLabel}>DATE</Text>
-            <Text style={styles.stationValue}>{stationInfo.date}</Text>
+            <Text style={styles.stationValue}>{moment(firstCardData[0].utcTime).format("ll")}</Text>
           </View>
         </View>
 
@@ -236,7 +236,6 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Present Weather (ww)</Text>
             </View>
 
-            {/* First Card Data Rows - Limited to 6 rows for space */}
             {firstCardData.slice(0, 8).map((record, index) => (
               <View key={index} style={styles.tableRow}>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{formatTime(record.utcTime)}</Text>
@@ -429,7 +428,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
         {/* Footer */}
         <View style={styles.footer}>
           <Text>
-            Weather Station Data Report - {stationInfo.stationName} ({stationInfo.stationId}) - {stationInfo.date}
+            Weather Station Data Report - {firstCardData[0].stationName} ({firstCardData[0].stationId}) - {stationInfo.date}
           </Text>
         </View>
       </Page>
