@@ -140,18 +140,33 @@ export async function GET() {
     measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
 
     // 8. 6RRRtR (47-51) - Precipitation
+<<<<<<< HEAD
     // 8. 6RRRtR (47-51) - Precipitation
     const rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
     const rainFallPadded = pad(rainFall.toString().slice(-3), 3); // Last 3 digits
 
     // Get times from database (all in UTC)
     const observationTime = new Date(observingTime.utcTime); // H (reporting time)
+=======
+<<<<<<< Updated upstream
+    const precipitation = weatherObs.rainfallLast24Hours || '0';
+    measurements[7] = `6${pad(precipitation, 4)}`;
+=======
+    // 8. 6RRRtR (47-51) - Precipitation
+    // ... পূর্বের কোড (prisma, session, etc.) এখানে ধরেই নিচ্ছি
+
+    const rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
+    const rainFallPadded = pad(rainFall.toString().slice(-3), 3); // শেষ ৩ সংখ্যা
+
+    const observationTime = new Date(observingTime.utcTime); // H (রিপোর্ট টাইম)
+>>>>>>> zisan
     const rainStart = weatherObs.rainfallTimeStart
       ? new Date(weatherObs.rainfallTimeStart)
       : null;
     const rainEnd = weatherObs.rainfallTimeEnd
       ? new Date(weatherObs.rainfallTimeEnd)
       : null;
+<<<<<<< HEAD
 
     let tr = "/";
 
@@ -181,6 +196,63 @@ export async function GET() {
     }
 
     measurements[7] = `6${rainFallPadded}${tr}`;
+=======
+    const isIntermittentRain = weatherObs.isIntermittentRain; // true/false; ফর্ম/ডিবিতে যোগ করুন
+
+    let tr = "/";
+
+    // ৬ ঘণ্টার window নির্ধারণ
+    const H = observationTime;
+    const H_3 = new Date(H.getTime() - 3 * 60 * 60 * 1000);
+    const H_6 = new Date(H.getTime() - 6 * 60 * 60 * 1000);
+
+    if (rainStart && rainEnd) {
+      if (isIntermittentRain) {
+        // Intermittent rain (বিরতিযুক্ত বৃষ্টি) — WMO tr = 1, 2, 3
+        if (rainStart >= H_6 && rainEnd <= H_3) {
+          tr = "1"; // H-6 to H-3
+        } else if (rainStart >= H_3 && rainEnd <= H) {
+          tr = "2"; // H-3 to H
+        } else if (
+          (rainStart <= H_6 && rainEnd >= H) || // পুরো ৬ ঘণ্টা জুড়ে
+          (rainStart <= H_6 && rainEnd >= H_3 && rainEnd <= H) || // overlap case
+          (rainStart >= H_6 && rainStart <= H_3 && rainEnd >= H)
+        ) {
+          tr = "3"; // Full 6-hour intermittent
+        }
+        // না মিললে tr = "/"
+      } else {
+        // Continuous rain — WMO tr = 4-9
+        // Window check: বৃষ্টি অবশ্যই H-6 থেকে H এর মধ্যে
+        if (rainStart < H_6 || rainEnd > H) {
+          tr = "/";
+        } else {
+          const durationHours =
+            (rainEnd.getTime() - rainStart.getTime()) / (1000 * 60 * 60);
+          let hoursSinceEnd =
+            (H.getTime() - rainEnd.getTime()) / (1000 * 60 * 60);
+
+          // রাত পার হলে
+          if (hoursSinceEnd < 0) hoursSinceEnd += 24;
+
+          if (durationHours <= 2) {
+            if (hoursSinceEnd <= 2) tr = "4";
+            else if (hoursSinceEnd <= 4) tr = "5";
+            else if (hoursSinceEnd <= 6) tr = "6";
+          } else if (durationHours <= 4) {
+            if (hoursSinceEnd <= 2) tr = "7";
+            else if (hoursSinceEnd <= 4) tr = "8";
+          } else if (durationHours <= 6 && hoursSinceEnd <= 2) {
+            tr = "9";
+          }
+          // না মিললে tr = "/"
+        }
+      }
+    }
+
+    measurements[7] = `6${rainFallPadded}${tr}`;
+>>>>>>> Stashed changes
+>>>>>>> zisan
 
     // 9. 7wwW1W2 (52-56) - Weather codes
     const presentWeather = firstCard.presentWeatherWW || "00";

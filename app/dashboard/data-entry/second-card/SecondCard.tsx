@@ -41,6 +41,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useHour } from "@/contexts/hourContext";
 import HourSelector from "@/components/hour-selector";
 
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+export default function WeatherObservationForm() {
+=======
+>>>>>>> zisan
 // Define the form data type
 type WeatherObservationFormData = {
   clouds: {
@@ -111,24 +117,38 @@ type WeatherObservationFormData = {
   };
 };
 
+<<<<<<< HEAD
 // Update the validation schemas to enforce numeric validation for all numeric fields
 
 // Update the validation schemas to use English error messages and add time format validation
 // Update the rainfallSchema to enforce the specific validation requirements
+=======
+// Updated validation schema with HH:MM format for rainfall times
+>>>>>>> zisan
 const rainfallSchema = Yup.object({
   rainfall: Yup.object({
     "time-start": Yup.string()
       .required("Time of start is required")
       .matches(
+<<<<<<< HEAD
         /^(0[0-9]|1[0-9]|2[0-3])$/,
         "Please enter a valid hour (00 to 23)"
+=======
+        /^([01]\d|2[0-3]):([0-5]\d)$/,
+        "Please enter a valid time in HH:MM format (00:00 to 23:59)"
+>>>>>>> zisan
       ),
 
     "time-end": Yup.string()
       .required("Time of ending is required")
       .matches(
+<<<<<<< HEAD
         /^(0[0-9]|1[0-9]|2[0-3])$/,
         "Please enter a valid hour (00 to 23)"
+=======
+        /^([01]\d|2[0-3]):([0-5]\d)$/,
+        "Please enter a valid time in HH:MM format (00:00 to 23:59)"
+>>>>>>> zisan
       ),
 
     "since-previous": Yup.string()
@@ -267,13 +287,31 @@ const validationSchema = Yup.object({
 });
 
 export default function SecondCardForm() {
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
+>>>>>>> zisan
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("cloud");
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
   const { data: session } = useSession();
 
+<<<<<<< HEAD
   const { isHourSelected, secondCardError, selectedHour, isLoading, resetStates } = useHour();
+=======
+<<<<<<< Updated upstream
+  const { time, error: timeError } = useTimeCheck();
+=======
+  const {
+    isHourSelected,
+    secondCardError,
+    selectedHour,
+    isLoading,
+    resetStates,
+  } = useHour();
+>>>>>>> Stashed changes
+>>>>>>> zisan
 
   // Get the persistent form store
   const { formData, updateFields, resetForm } = useWeatherObservationForm();
@@ -556,6 +594,106 @@ export default function SecondCardForm() {
     return steps[step - 1] || "cloud";
   };
 
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+  // This section was removed to avoid duplicate declarations
+=======
+  // Handle input changes and update the form data state
+  // Update the handleInputChange function to validate time fields immediately
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    formik.setFieldTouched(name, true, true);
+>>>>>>> Stashed changes
+
+  const validateStep = (step: number) => {
+    switch (step) {
+      case 1: // Cloud
+        return (
+          !!safeFormData.clouds.low.form ||
+          !!safeFormData.clouds.medium.form ||
+          !!safeFormData.clouds.high.form
+        );
+      case 2: // Total Cloud
+        return !!safeFormData.totalCloud["total-cloud-amount"];
+      // Add validation for other steps as needed
+      default:
+        return true;
+    }
+  };
+
+  // Get the persistent form store
+  const { formData, updateFields, resetForm, checkAndResetIfExpired } =
+    useWeatherObservationForm();
+
+  // Create a safe default value for form data to prevent TypeScript errors
+  const safeFormData = {
+    clouds: {
+      low: formData?.clouds?.low || {},
+      medium: formData?.clouds?.medium || {},
+      high: formData?.clouds?.high || {},
+    },
+    significantClouds: {
+      layer1: formData?.significantClouds?.layer1 || {},
+      layer2: formData?.significantClouds?.layer2 || {},
+      layer3: formData?.significantClouds?.layer3 || {},
+      layer4: formData?.significantClouds?.layer4 || {},
+    },
+    rainfall: formData?.rainfall || {},
+    wind: formData?.wind || {},
+    observer: formData?.observer || {},
+    totalCloud: formData?.totalCloud || {},
+    metadata: formData?.metadata || {},
+  };
+
+  // Initialize session-specific values when session is available
+  useEffect(() => {
+    if (session?.user) {
+      // Set the observer name from session if available
+      updateFields({
+        observer: {
+          ...(formData?.observer || {}),
+          "observer-initial": session.user.name || "",
+        },
+        metadata: {
+          ...(formData?.metadata || {}),
+          stationId: session.user.stationId || "",
+        },
+      });
+    }
+    // We intentionally omit formData from dependencies to prevent infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session, updateFields]);
+
+<<<<<<< Updated upstream
+  // Set observation time on initial load (only runs once)
+  // Set observation time on initial load (only runs once)
+  // Set observation time on initial load (only runs once)
+  useEffect(() => {
+    if (!formData?.observer || !formData?.observer["observation-time"]) {
+      const utcHour = new Date().getUTCHours().toString().padStart(2, "0"); // "03", "15", etc.
+      updateFields({
+        observer: {
+          ...(formData?.observer || {}),
+          "observation-time": utcHour,
+        },
+      });
+=======
+    // Validate time fields for HH:MM format
+    if (name === "time-start" || name === "time-end") {
+      if (value !== "" && !/^([01]\d|2[0-3]):([0-5]\d)$/.test(value)) {
+        formik.setFieldTouched(`rainfall.${name}`, true, false);
+        toast.error("Invalid time format", {
+          description: "Please enter time in HH:MM format (00:00 to 23:59)",
+          duration: 3000,
+        });
+      }
+>>>>>>> Stashed changes
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+>>>>>>> zisan
   // Handle input changes and update the form data state
   // Update the handleInputChange function to validate numeric fields immediately
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1131,11 +1269,129 @@ export default function SecondCardForm() {
                     <Card
                       className={cn("overflow-hidden", tabStyles.rainfall.card)}
                     >
+<<<<<<< HEAD
+=======
+<<<<<<< Updated upstream
+                      <div className="grid gap-6 md:grid-cols-2">
+                        <InputField
+                          id="time-start"
+                          name="time-start"
+                          label="Time of Start (HH:MM UTC)"
+                          accent="cyan"
+                          value={formData.rainfall["time-start"] || ""}
+                          onChange={handleInputChange}
+                        />
+                        <InputField
+                          id="time-end"
+                          name="time-end"
+                          label="Time of Ending (HH:MM UTC)"
+                          accent="cyan"
+                          value={formData.rainfall["time-end"] || ""}
+                          onChange={handleInputChange}
+                        />
+                        <InputField
+                          id="since-previous"
+                          name="since-previous"
+                          label="Since Previous Observation"
+                          accent="cyan"
+                          value={formData.rainfall["since-previous"] || ""}
+                          onChange={handleInputChange}
+                        />
+                        <InputField
+                          id="during-previous"
+                          name="during-previous"
+                          label="During Previous 6 Hours (At 00, 06, 12, 18 UTC)"
+                          accent="cyan"
+                          value={formData.rainfall["during-previous"] || ""}
+                          onChange={handleInputChange}
+                        />
+                        <div className="md:col-span-2">
+=======
+>>>>>>> zisan
                       <div className="p-4 bg-gradient-to-r from-cyan-200 to-cyan-300 text-cyan-800">
                         <h3 className="text-lg font-semibold flex items-center">
                           <CloudRainIcon className="mr-2" /> Rainfall
                           Measurement (mm)
                         </h3>
+<<<<<<< HEAD
+=======
+                      </div>
+                      <CardContent className="pt-6">
+                        <div className="grid gap-6 md:grid-cols-2">
+                          <div className="grid gap-2">
+                            <Label
+                              htmlFor="time-start"
+                              className="font-medium text-gray-700"
+                            >
+                              Time of Start (HH:MM UTC){" "}
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="time-start"
+                              name="time-start"
+                              type="text"
+                              placeholder="00:00"
+                              pattern="^([01]\d|2[0-3]):([0-5]\d)$"
+                              value={formik.values.rainfall["time-start"] || ""}
+                              onChange={handleInputChange}
+                              className={cn(
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                {
+                                  "border-red-500": renderErrorMessage(
+                                    "rainfall.time-start"
+                                  ),
+                                }
+                              )}
+                              required
+                            />
+                            {renderErrorMessage("rainfall.time-start")}
+                            <p className="text-xs text-gray-500 mt-1">
+                              Format: HH:MM (e.g., 03:30, 06:15, 23:45)
+                            </p>
+                          </div>
+
+                          <div className="grid gap-2">
+                            <Label
+                              htmlFor="time-end"
+                              className="font-medium text-gray-700"
+                            >
+                              Time of Ending (HH:MM UTC){" "}
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="time-end"
+                              name="time-end"
+                              type="text"
+                              placeholder="00:00"
+                              pattern="^([01]\d|2[0-3]):([0-5]\d)$"
+                              value={formik.values.rainfall["time-end"] || ""}
+                              onChange={handleInputChange}
+                              className={cn(
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                {
+                                  "border-red-500":
+                                    renderErrorMessage("rainfall.time-end"),
+                                }
+                              )}
+                              required
+                            />
+                            {renderErrorMessage("rainfall.time-end")}
+                            <p className="text-xs text-gray-500 mt-1">
+                              Format: HH:MM (e.g., 03:30, 06:15, 23:45)
+                            </p>
+                          </div>
+
+>>>>>>> Stashed changes
+                          <InputField
+                            id="last-24-hours"
+                            name="last-24-hours"
+                            label="Last 24 Hours Precipitation"
+                            accent="cyan"
+                            value={formData.rainfall["last-24-hours"] || ""}
+                            onChange={handleInputChange}
+                          />
+                        </div>
+>>>>>>> zisan
                       </div>
                       <CardContent className="pt-6">
                         <div className="grid gap-6 md:grid-cols-2">
