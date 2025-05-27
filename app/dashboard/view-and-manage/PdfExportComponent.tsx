@@ -63,8 +63,8 @@ const styles = StyleSheet.create({
     borderWidth: 0.3,
     borderColor: "#e2e8f0",
     textAlign: "center",
-    minHeight: 30,
-    maxHeight: 50,
+    minHeight: 10,
+    maxHeight: 12,
   },
   tableCellHeader: {
     margin: "auto",
@@ -222,11 +222,10 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Past Weather (W₁)</Text>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Past Weather (W₂)</Text>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Present Weather (ww)</Text>
-              <Text style={[styles.tableCellHeader, { width: "3%" }]}>C2 Indicator</Text>
             </View>
 
             {/* First Card Data Rows - Limited to 6 rows for space */}
-            {firstCardData.slice(0, 6).map((record, index) => (
+            {firstCardData.slice(0, 8).map((record, index) => (
               <View key={index} style={styles.tableRow}>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatTime(record.utcTime)}</Text>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{moment(record.utcTime).format("ll")}</Text>
@@ -258,7 +257,6 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.pastWeatherW1)}</Text>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.pastWeatherW2)}</Text>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.presentWeatherWW)}</Text>
-                <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.c2Indicator)}</Text>
               </View>
             ))}
           </View>
@@ -310,7 +308,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
             </View>
 
             {/* Second Card Data Rows - Limited to 6 rows */}
-            {secondCardData.slice(0, 6).map((record, index) => (
+            {secondCardData.slice(0, 8).map((record, index) => (
               <View key={index} style={styles.tableRow}>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatTime(record.utcTime)}</Text>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{moment(record.utcTime).format("ll")}</Text>
@@ -386,10 +384,10 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
             </View>
 
             {/* Synoptic Data Rows - Limited to 6 rows */}
-            {synopticData.slice(0, 6).map((record, index) => (
+            {synopticData.slice(0, 8).map((record, index) => (
               <View key={index} style={styles.tableRow}>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{formatTime(record.date)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{moment(record.utcTime).format("ll")}</Text>
+                <Text style={[styles.tableCell, { width: "4%" }]}>{moment(record.date).format("ll")}</Text>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.C1)}</Text>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.Iliii)}</Text>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.iRiXhvv)}</Text>
@@ -419,9 +417,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
         {/* Footer */}
         <View style={styles.footer}>
           <Text>
-            Weather Station Data Report - {stationInfo.stationName} ({stationInfo.stationId}) - {stationInfo.date} -
-            Records: First Card ({firstCardData.length}), Second Card ({secondCardData.length}), Synoptic (
-            {synopticData.length})
+            Weather Station Data Report - {stationInfo.stationName} ({stationInfo.stationId}) - {stationInfo.date}
           </Text>
         </View>
       </Page>
