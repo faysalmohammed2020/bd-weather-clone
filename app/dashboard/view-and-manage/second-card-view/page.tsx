@@ -751,7 +751,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                   <SelectContent>
                     <SelectItem value="all">All Stations</SelectItem>
                     {stations.map((station) => (
-                      <SelectItem key={station.id} value={station.stationId}>
+                      <SelectItem key={station.id} value={station.id}>
                         {station.name} ({station.stationId})
                       </SelectItem>
                     ))}
@@ -1268,7 +1268,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
               </table>
             </div>
 
-            <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+            {/* <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-sky-500" />
                 <span className="text-sm text-slate-600">
@@ -1288,7 +1288,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                   </Badge>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 
