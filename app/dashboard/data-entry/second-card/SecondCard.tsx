@@ -31,14 +31,250 @@ import { useHour } from "@/contexts/hourContext";
 import { useTimeCheck } from "@/hooks/useTimeCheck";
 import { utcToHour } from "@/lib/utils";
 
+<<<<<<< Updated upstream
 export default function WeatherObservationForm() {
+=======
+// Define the form data type
+type WeatherObservationFormData = {
+  clouds: {
+    low: {
+      form?: string;
+      amount?: string;
+      height?: string;
+      direction?: string;
+    };
+    medium: {
+      form?: string;
+      amount?: string;
+      height?: string;
+      direction?: string;
+    };
+    high: {
+      form?: string;
+      amount?: string;
+      height?: string;
+      direction?: string;
+    };
+  };
+  totalCloud: {
+    "total-cloud-amount"?: string;
+  };
+  significantClouds: {
+    layer1: {
+      form?: string;
+      amount?: string;
+      height?: string;
+    };
+    layer2: {
+      form?: string;
+      amount?: string;
+      height?: string;
+    };
+    layer3: {
+      form?: string;
+      amount?: string;
+      height?: string;
+    };
+    layer4: {
+      form?: string;
+      amount?: string;
+      height?: string;
+    };
+  };
+  rainfall: {
+    "time-start"?: string;
+    "time-end"?: string;
+    "since-previous"?: string;
+    "during-previous"?: string;
+    "last-24-hours"?: string;
+  };
+  wind: {
+    "first-anemometer"?: string;
+    "second-anemometer"?: string;
+    speed?: string;
+    "wind-direction"?: string;
+  };
+  observer: {
+    "observer-initial"?: string;
+    "observation-time"?: string;
+  };
+  metadata: {
+    stationId?: string;
+    submittedAt?: string;
+  };
+};
+
+// Updated validation schema with HH:MM format for rainfall times
+const rainfallSchema = Yup.object({
+  rainfall: Yup.object({
+    "time-start": Yup.string()
+      .required("Time of start is required")
+      .matches(
+        /^([01]\d|2[0-3]):([0-5]\d)$/,
+        "Please enter a valid time in HH:MM format (00:00 to 23:59)"
+      ),
+
+    "time-end": Yup.string()
+      .required("Time of ending is required")
+      .matches(
+        /^([01]\d|2[0-3]):([0-5]\d)$/,
+        "Please enter a valid time in HH:MM format (00:00 to 23:59)"
+      ),
+
+    "since-previous": Yup.string()
+      .required("Since previous observation is required")
+      .test(
+        "is-non-negative-number",
+        "Please enter a non-negative number",
+        (value) =>
+          !value ||
+          (Number.parseFloat(value) >= 0 && !isNaN(Number.parseFloat(value)))
+      ),
+
+    "during-previous": Yup.string()
+      .required("During previous 6 hours is required")
+      .matches(/^\d{4}$/, "Must be a 4-digit integer between 0000 and 9999"),
+
+    "last-24-hours": Yup.string()
+      .required("Last 24 hours precipitation is required")
+      .test(
+        "is-non-negative-number",
+        "Please enter a non-negative number",
+        (value) =>
+          !value ||
+          (Number.parseFloat(value) >= 0 && !isNaN(Number.parseFloat(value)))
+      ),
+  }),
+});
+
+// Update the windSchema to enforce the specific validation requirements
+const windSchema = Yup.object({
+  wind: Yup.object({
+    "first-anemometer": Yup.string()
+      .required("1st Anemometer reading is required")
+      .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10123)"),
+
+    "second-anemometer": Yup.string()
+      .required("2nd Anemometer reading is required")
+      .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10123)"),
+
+    speed: Yup.string()
+      .required("Wind speed is required")
+      .matches(/^\d{3}$/, "Must be exactly 3 digits (e.g., 025, 100)"),
+
+    "wind-direction": Yup.string()
+      .required("Wind direction is required")
+      .test(
+        "is-valid-direction",
+        "Must be wind direction between 5 to 360 degrees",
+        (value) => {
+          if (!value) return false;
+          if (value === "00") return true;
+          const num = Number(value);
+          return Number.isInteger(num) && num >= 5 && num <= 360;
+        }
+      ),
+  }),
+});
+
+// Update the cloudSchema to use English error messages
+const cloudSchema = Yup.object({
+  clouds: Yup.object({
+    low: Yup.object({
+      form: Yup.string().required("Low cloud form is required"),
+      amount: Yup.string().required("Low cloud amount is required"),
+      height: Yup.string().required("Low cloud height is required"),
+      direction: Yup.string().required("Low cloud direction is required"),
+    }),
+    medium: Yup.object({
+      form: Yup.string().required("Medium cloud form is required"),
+      amount: Yup.string().required("Medium cloud amount is required"),
+      height: Yup.string().required("Medium cloud height is required"),
+      direction: Yup.string().required("Medium cloud direction is required"),
+    }),
+    high: Yup.object({
+      form: Yup.string().required("High cloud form is required"),
+      amount: Yup.string().required("High cloud amount is required"),
+      height: Yup.string().required("High cloud height is required"),
+      direction: Yup.string().required("High cloud direction is required"),
+    }),
+  }),
+});
+
+// Update the totalCloudSchema to use English error messages
+const totalCloudSchema = Yup.object({
+  totalCloud: Yup.object({
+    "total-cloud-amount": Yup.string().required(
+      "Total cloud amount is required"
+    ),
+  }),
+});
+
+// Update the significantCloudSchema to use English error messages
+const significantCloudSchema = Yup.object({
+  significantClouds: Yup.object({
+    layer1: Yup.object({
+      form: Yup.string().required("Layer 1 form is required"),
+      amount: Yup.string().required("Layer 1 amount is required"),
+      height: Yup.string()
+        .required("Layer 1 height is required")
+        .matches(/^[0-9]+$/, "Please enter numbers only"),
+    }),
+    layer2: Yup.object({
+      form: Yup.string(),
+      amount: Yup.string(),
+      height: Yup.string().matches(/^[0-9]*$/, "Please enter numbers only"),
+    }),
+    layer3: Yup.object({
+      form: Yup.string(),
+      amount: Yup.string(),
+      height: Yup.string().matches(/^[0-9]*$/, "Please enter numbers only"),
+    }),
+    layer4: Yup.object({
+      form: Yup.string(),
+      amount: Yup.string(),
+      height: Yup.string().matches(/^[0-9]*$/, "Please enter numbers only"),
+    }),
+  }),
+});
+
+// Update the observerSchema to use English error messages
+const observerSchema = Yup.object({
+  observer: Yup.object({
+    "observer-initial": Yup.string().required("Observer initials are required"),
+    "observation-time": Yup.string().required("Observation time is required"),
+  }),
+});
+
+// Combined schema for the entire form
+const validationSchema = Yup.object({
+  ...cloudSchema.fields,
+  ...totalCloudSchema.fields,
+  ...significantCloudSchema.fields,
+  ...rainfallSchema.fields,
+  ...windSchema.fields,
+  ...observerSchema.fields,
+});
+
+export default function SecondCardForm() {
+>>>>>>> Stashed changes
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("cloud");
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
   const { data: session } = useSession();
 
+<<<<<<< Updated upstream
   const { time, error: timeError } = useTimeCheck();
+=======
+  const {
+    isHourSelected,
+    secondCardError,
+    selectedHour,
+    isLoading,
+    resetStates,
+  } = useHour();
+>>>>>>> Stashed changes
 
   const handleNext = () => {
     // Add validation for current step before proceeding
@@ -67,7 +303,15 @@ export default function WeatherObservationForm() {
     return steps[step - 1] || "cloud";
   };
 
+<<<<<<< Updated upstream
   // This section was removed to avoid duplicate declarations
+=======
+  // Handle input changes and update the form data state
+  // Update the handleInputChange function to validate time fields immediately
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    formik.setFieldTouched(name, true, true);
+>>>>>>> Stashed changes
 
   const validateStep = (step: number) => {
     switch (step) {
@@ -128,6 +372,7 @@ export default function WeatherObservationForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, updateFields]);
 
+<<<<<<< Updated upstream
   // Set observation time on initial load (only runs once)
   // Set observation time on initial load (only runs once)
   // Set observation time on initial load (only runs once)
@@ -140,6 +385,17 @@ export default function WeatherObservationForm() {
           "observation-time": utcHour,
         },
       });
+=======
+    // Validate time fields for HH:MM format
+    if (name === "time-start" || name === "time-end") {
+      if (value !== "" && !/^([01]\d|2[0-3]):([0-5]\d)$/.test(value)) {
+        formik.setFieldTouched(`rainfall.${name}`, true, false);
+        toast.error("Invalid time format", {
+          description: "Please enter time in HH:MM format (00:00 to 23:59)",
+          duration: 3000,
+        });
+      }
+>>>>>>> Stashed changes
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -652,6 +908,7 @@ export default function WeatherObservationForm() {
                       icon={<CloudRainIcon className="h-6 w-6 text-cyan-500" />}
                       className="border-cyan-200"
                     >
+<<<<<<< Updated upstream
                       <div className="grid gap-6 md:grid-cols-2">
                         <InputField
                           id="time-start"
@@ -686,6 +943,79 @@ export default function WeatherObservationForm() {
                           onChange={handleInputChange}
                         />
                         <div className="md:col-span-2">
+=======
+                      <div className="p-4 bg-gradient-to-r from-cyan-200 to-cyan-300 text-cyan-800">
+                        <h3 className="text-lg font-semibold flex items-center">
+                          <CloudRainIcon className="mr-2" /> Rainfall
+                          Measurement (mm)
+                        </h3>
+                      </div>
+                      <CardContent className="pt-6">
+                        <div className="grid gap-6 md:grid-cols-2">
+                          <div className="grid gap-2">
+                            <Label
+                              htmlFor="time-start"
+                              className="font-medium text-gray-700"
+                            >
+                              Time of Start (HH:MM UTC){" "}
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="time-start"
+                              name="time-start"
+                              type="text"
+                              placeholder="00:00"
+                              pattern="^([01]\d|2[0-3]):([0-5]\d)$"
+                              value={formik.values.rainfall["time-start"] || ""}
+                              onChange={handleInputChange}
+                              className={cn(
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                {
+                                  "border-red-500": renderErrorMessage(
+                                    "rainfall.time-start"
+                                  ),
+                                }
+                              )}
+                              required
+                            />
+                            {renderErrorMessage("rainfall.time-start")}
+                            <p className="text-xs text-gray-500 mt-1">
+                              Format: HH:MM (e.g., 03:30, 06:15, 23:45)
+                            </p>
+                          </div>
+
+                          <div className="grid gap-2">
+                            <Label
+                              htmlFor="time-end"
+                              className="font-medium text-gray-700"
+                            >
+                              Time of Ending (HH:MM UTC){" "}
+                              <span className="text-red-500">*</span>
+                            </Label>
+                            <Input
+                              id="time-end"
+                              name="time-end"
+                              type="text"
+                              placeholder="00:00"
+                              pattern="^([01]\d|2[0-3]):([0-5]\d)$"
+                              value={formik.values.rainfall["time-end"] || ""}
+                              onChange={handleInputChange}
+                              className={cn(
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                {
+                                  "border-red-500":
+                                    renderErrorMessage("rainfall.time-end"),
+                                }
+                              )}
+                              required
+                            />
+                            {renderErrorMessage("rainfall.time-end")}
+                            <p className="text-xs text-gray-500 mt-1">
+                              Format: HH:MM (e.g., 03:30, 06:15, 23:45)
+                            </p>
+                          </div>
+
+>>>>>>> Stashed changes
                           <InputField
                             id="last-24-hours"
                             name="last-24-hours"

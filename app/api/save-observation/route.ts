@@ -43,6 +43,7 @@ export async function POST(request: Request) {
       );
     }
 
+<<<<<<< Updated upstream
     if(observingTime._count.WeatherObservation){
       return NextResponse.json(
         {
@@ -50,6 +51,39 @@ export async function POST(request: Request) {
           error: "The selected hour already has a second card entry",
         },
         { status: 404 }
+=======
+    // Helper function to convert hour string to DateTime
+    const convertHourToDateTime = (hourString: string | null) => {
+      if (!hourString) return null;
+
+      // hourString ধরে নিচ্ছে "18:45" বা "04:05" ফরম্যাটে আসবে
+      const [hourPart, minutePart] = hourString.split(":");
+      const hour = parseInt(hourPart, 10);
+      const minute = parseInt(minutePart ?? "0", 10);
+
+      if (
+        isNaN(hour) ||
+        hour < 0 ||
+        hour > 23 ||
+        isNaN(minute) ||
+        minute < 0 ||
+        minute > 59
+      )
+        return null;
+
+      const now = new Date();
+
+      const dateTime = new Date(
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth(),
+          now.getUTCDate(),
+          hour,
+          minute, // <<== এখন মিনিটও যাবে!
+          0, // seconds
+          0 // milliseconds
+        )
+>>>>>>> Stashed changes
       );
     }
 
