@@ -4,6 +4,7 @@ import React from "react"
 import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from "@react-pdf/renderer"
 import { Button } from "@/components/ui/button"
 import { FileText } from "lucide-react"
+import moment from 'moment';
 
 // Compact PDF Styles for single A3 page
 const styles = StyleSheet.create({
@@ -44,7 +45,6 @@ const styles = StyleSheet.create({
     borderLeftColor: "#3b82f6",
   },
   table: {
-    display: "table",
     width: "100%",
     borderStyle: "solid",
     borderWidth: 0.5,
@@ -63,8 +63,8 @@ const styles = StyleSheet.create({
     borderWidth: 0.3,
     borderColor: "#e2e8f0",
     textAlign: "center",
-    minHeight: 10,
-    maxHeight: 12,
+    minHeight: 30,
+    maxHeight: 50,
   },
   tableCellHeader: {
     margin: "auto",
@@ -74,11 +74,12 @@ const styles = StyleSheet.create({
     borderWidth: 0.3,
     borderColor: "#e2e8f0",
     textAlign: "center",
+    maxLines: 3,
     backgroundColor: "#3b82f6",
     color: "#ffffff",
     fontWeight: "bold",
-    minHeight: 10,
-    maxHeight: 12,
+    minHeight: 30,
+    maxHeight: 50,
   },
   stationInfo: {
     flexDirection: "row",
@@ -157,7 +158,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.title}>Weather Station Data Report - {stationInfo.date}</Text>
+            <Text style={styles.title}>Weather Station Data Report</Text>
             <Text style={styles.subtitle}>
               {stationInfo.stationName} ({stationInfo.stationId})
             </Text>
@@ -192,6 +193,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
             {/* First Card Headers - Compact */}
             <View style={styles.tableRow}>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Time</Text>
+              <Text style={[styles.tableCellHeader, { width: "4%" }]}>Date</Text>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Indicator</Text>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Attached Thermometer (°C)</Text>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Bar As Read (hPa)</Text>
@@ -227,6 +229,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
             {firstCardData.slice(0, 6).map((record, index) => (
               <View key={index} style={styles.tableRow}>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatTime(record.utcTime)}</Text>
+                <Text style={[styles.tableCell, { width: "4%" }]}>{moment(record.utcTime).format("ll")}</Text>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.subIndicator)}</Text>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.alteredThermometer)}</Text>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.barAsRead)}</Text>
@@ -268,6 +271,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
             {/* Second Card Headers - Compact */}
             <View style={styles.tableRow}>
               <Text style={[styles.tableCellHeader, { width: "2.5%" }]}>Time</Text>
+              <Text style={[styles.tableCellHeader, { width: "4%" }]}>Date</Text>
               <Text style={[styles.tableCellHeader, { width: "2.5%" }]}>Low Cloud Form</Text>
               <Text style={[styles.tableCellHeader, { width: "2.5%" }]}>Low Cloud Height</Text>
               <Text style={[styles.tableCellHeader, { width: "2.5%" }]}>Low Cloud Amount</Text>
@@ -309,6 +313,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
             {secondCardData.slice(0, 6).map((record, index) => (
               <View key={index} style={styles.tableRow}>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatTime(record.utcTime)}</Text>
+                <Text style={[styles.tableCell, { width: "4%" }]}>{moment(record.utcTime).format("ll")}</Text>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.lowCloudForm)}</Text>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.lowCloudHeight)}</Text>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.lowCloudAmount)}</Text>
@@ -356,6 +361,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
             {/* Synoptic Headers - Compact */}
             <View style={styles.tableRow}>
               <Text style={[styles.tableCellHeader, { width: "4%" }]}>Time</Text>
+              <Text style={[styles.tableCellHeader, { width: "4%" }]}>Date</Text>
               <Text style={[styles.tableCellHeader, { width: "4%" }]}>C1</Text>
               <Text style={[styles.tableCellHeader, { width: "4%" }]}>Iliii</Text>
               <Text style={[styles.tableCellHeader, { width: "4%" }]}>iRiXhvv</Text>
@@ -383,6 +389,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
             {synopticData.slice(0, 6).map((record, index) => (
               <View key={index} style={styles.tableRow}>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{formatTime(record.date)}</Text>
+                <Text style={[styles.tableCell, { width: "4%" }]}>{moment(record.utcTime).format("ll")}</Text>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.C1)}</Text>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.Iliii)}</Text>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.iRiXhvv)}</Text>
@@ -481,7 +488,7 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
           ) : (
             <>
               <FileText className="h-4 w-4" />
-              Export All to PDF (A3)
+              Export All to PDF
             </>
           )}
         </Button>
