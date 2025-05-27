@@ -6,7 +6,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["relationJoins"]
+  previewFeatures = ["relationJoins", "driverAdapters"]
 }
 
 datasource db {
@@ -37,6 +37,7 @@ model users {
 
   Station       Station         @relation(fields: [stationId], references: [id], onDelete: Restrict)
   ObservingTime ObservingTime[]
+  log           logs[]
 }
 
 model sessions {
@@ -92,6 +93,20 @@ model twoFactor {
 
   user users @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+}
+
+model logs {
+  id        String   @id @default(cuid())
+  userId    String
+  role      String
+  action    String
+  details   String?
+  createdAt DateTime @default(now())
+
+  user users @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([role])
   @@index([userId])
 }
 
@@ -171,7 +186,6 @@ model MeteorologicalEntry {
   @@index([observingTimeId])
 }
 
-
 model WeatherObservation {
   id              String @id @default(cuid())
   tabActive       String
@@ -216,7 +230,7 @@ model WeatherObservation {
   layer4Amount String?
 
   // RAINFALL
-   rainfallTimeStart      DateTime?  // এখন UTC টাইমস্ট্যাম্প স্টোর করবে
+  rainfallTimeStart      DateTime? // এখন UTC টাইমস্ট্যাম্প স্টোর করবে
   rainfallTimeEnd        DateTime?
   rainfallSincePrevious  String?
   rainfallDuringPrevious String?
