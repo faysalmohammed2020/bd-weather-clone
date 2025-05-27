@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     width: "100%",
     borderStyle: "solid",
     borderWidth: 0.5,
-    borderColor: "#e2e8f0",
+    borderColor: "#74777B",
     marginBottom: 8,
   },
   tableRow: {
@@ -61,10 +61,22 @@ const styles = StyleSheet.create({
     padding: 1.5,
     borderStyle: "solid",
     borderWidth: 0.3,
-    borderColor: "#e2e8f0",
+    borderColor: "#74777B",
     textAlign: "center",
     minHeight: 10,
     maxHeight: 12,
+  },
+  tableCellSynoptic: {
+    margin: "auto",
+    fontSize: 6,
+    padding: 1.5,
+    borderStyle: "solid",
+    maxLines: 4,
+    borderWidth: 0.3,
+    borderColor: "#74777B",
+    textAlign: "center",
+    minHeight: 30,
+    maxHeight: 32,
   },
   tableCellHeader: {
     margin: "auto",
@@ -72,7 +84,7 @@ const styles = StyleSheet.create({
     padding: 1.5,
     borderStyle: "solid",
     borderWidth: 0.3,
-    borderColor: "#e2e8f0",
+    borderColor: "#74777B",
     textAlign: "center",
     maxLines: 3,
     backgroundColor: "#3b82f6",
@@ -112,7 +124,7 @@ const styles = StyleSheet.create({
     fontSize: 6,
     color: "#64748b",
     borderTopWidth: 0.5,
-    borderTopColor: "#e2e8f0",
+    borderTopColor: "#74777B",
     paddingTop: 3,
   },
   compactSection: {
@@ -192,17 +204,17 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
           <View style={styles.table}>
             {/* First Card Headers - Compact */}
             <View style={styles.tableRow}>
-              <Text style={[styles.tableCellHeader, { width: "3%" }]}>Time</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>Date</Text>
+              <Text style={[styles.tableCellHeader, { width: "4%" }]}>Time</Text>
+              <Text style={[styles.tableCellHeader, { width: "5%" }]}>Date</Text>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Indicator</Text>
-              <Text style={[styles.tableCellHeader, { width: "3%" }]}>Attached Thermometer (°C)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5%" }]}>Attached Thermometer (°C)</Text>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Bar As Read (hPa)</Text>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Corrected For Index</Text>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Height Difference (hPa)</Text>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Correction For Temp</Text>
-              <Text style={[styles.tableCellHeader, { width: "3%" }]}>Station Level Pressure (QFE)</Text>
-              <Text style={[styles.tableCellHeader, { width: "3%" }]}>Sea Level Reduction</Text>
-              <Text style={[styles.tableCellHeader, { width: "3%" }]}>Sea Level Pressure (QNH)</Text>
+              <Text style={[styles.tableCellHeader, { width: "4.5%" }]}>Station Level Pressure (QFE)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5%" }]}>Sea Level Reduction</Text>
+              <Text style={[styles.tableCellHeader, { width: "4.5%" }]}>Sea Level Pressure (QNH)</Text>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Afternoon Reading</Text>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>24-Hour Pressure Change</Text>
               <Text style={[styles.tableCellHeader, { width: "3%" }]}>Dry Bulb As Read (°C)</Text>
@@ -227,17 +239,17 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
             {/* First Card Data Rows - Limited to 6 rows for space */}
             {firstCardData.slice(0, 8).map((record, index) => (
               <View key={index} style={styles.tableRow}>
-                <Text style={[styles.tableCell, { width: "3%" }]}>{formatTime(record.utcTime)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{moment(record.utcTime).format("ll")}</Text>
+                <Text style={[styles.tableCell, { width: "4%" }]}>{formatTime(record.utcTime)}</Text>
+                <Text style={[styles.tableCell, { width: "5%" }]}>{moment(record.utcTime).format("ll")}</Text>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.subIndicator)}</Text>
-                <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.alteredThermometer)}</Text>
+                <Text style={[styles.tableCell, { width: "5%" }]}>{formatValue(record.alteredThermometer)}</Text>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.barAsRead)}</Text>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.correctedForIndex)}</Text>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.heightDifference)}</Text>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.correctionForTemp)}</Text>
-                <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.stationLevelPressure)}</Text>
-                <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.seaLevelReduction)}</Text>
-                <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.correctedSeaLevelPressure)}</Text>
+                <Text style={[styles.tableCell, { width: "4.5%" }]}>{formatValue(record.stationLevelPressure)}</Text>
+                <Text style={[styles.tableCell, { width: "5%" }]}>{formatValue(record.seaLevelReduction)}</Text>
+                <Text style={[styles.tableCell, { width: "4.5%" }]}>{formatValue(record.correctedSeaLevelPressure)}</Text>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.afternoonReading)}</Text>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.pressureChange24h)}</Text>
                 <Text style={[styles.tableCell, { width: "3%" }]}>{formatValue(record.dryBulbAsRead)}</Text>
@@ -268,7 +280,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
           <View style={styles.table}>
             {/* Second Card Headers - Compact */}
             <View style={styles.tableRow}>
-              <Text style={[styles.tableCellHeader, { width: "2.5%" }]}>Time</Text>
+              <Text style={[styles.tableCellHeader, { width: "3%" }]}>Time</Text>
               <Text style={[styles.tableCellHeader, { width: "4%" }]}>Date</Text>
               <Text style={[styles.tableCellHeader, { width: "2.5%" }]}>Low Cloud Form</Text>
               <Text style={[styles.tableCellHeader, { width: "2.5%" }]}>Low Cloud Height</Text>
@@ -304,13 +316,13 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
               <Text style={[styles.tableCellHeader, { width: "2.5%" }]}>Wind Second Anemometer</Text>
               <Text style={[styles.tableCellHeader, { width: "2.5%" }]}>Wind Speed</Text>
               <Text style={[styles.tableCellHeader, { width: "2.5%" }]}>Wind Direction</Text>
-              <Text style={[styles.tableCellHeader, { width: "2.5%" }]}>Observer Initial</Text>
+              <Text style={[styles.tableCellHeader, { width: "8%" }]}>Observer Initial</Text>
             </View>
 
             {/* Second Card Data Rows - Limited to 6 rows */}
             {secondCardData.slice(0, 8).map((record, index) => (
               <View key={index} style={styles.tableRow}>
-                <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatTime(record.utcTime)}</Text>
+                <Text style={[styles.tableCell, { width: "3%" }]}>{formatTime(record.utcTime)}</Text>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{moment(record.utcTime).format("ll")}</Text>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.lowCloudForm)}</Text>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.lowCloudHeight)}</Text>
@@ -346,7 +358,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.windSecondAnemometer)}</Text>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.windSpeed)}</Text>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.windDirection)}</Text>
-                <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.observerInitial)}</Text>
+                <Text style={[styles.tableCell, { width: "8%" }]}>{formatValue(record.observerInitial)}</Text>
               </View>
             ))}
           </View>
@@ -380,35 +392,35 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
               <Text style={[styles.tableCellHeader, { width: "4%" }]}>8NsChshs</Text>
               <Text style={[styles.tableCellHeader, { width: "4%" }]}>90dqqqt</Text>
               <Text style={[styles.tableCellHeader, { width: "4%" }]}>91fqfqfq</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>Remark</Text>
+              <Text style={[styles.tableCellHeader, { width: "12%" }]}>Remark</Text>
             </View>
 
             {/* Synoptic Data Rows - Limited to 6 rows */}
             {synopticData.slice(0, 8).map((record, index) => (
               <View key={index} style={styles.tableRow}>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatTime(record.date)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{moment(record.date).format("ll")}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.C1)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.Iliii)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.iRiXhvv)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.Nddff)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.S1nTTT)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.S2nTddTddTdd)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.P3PPP4PPPP)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.RRRtR6)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.wwW1W2)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.NhClCmCh)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.S2nTnTnTnInInInIn)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.D56DLDMDH)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.CD57DaEc)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.C2)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.GG)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.P24Group58_59)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.R24Group6_7)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.NsChshs)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.dqqqt90)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.fqfqfq91)}</Text>
-                <Document style={[styles.tableCell, { width: "4%" }]}><Image src={record.weatherRemark.split(" - ")[0]} /></Document>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatTime(record.date)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{moment(record.date).format("ll")}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.C1)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.Iliii)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.iRiXhvv)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.Nddff)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.S1nTTT)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.S2nTddTddTdd)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.P3PPP4PPPP)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.RRRtR6)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.wwW1W2)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.NhClCmCh)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.S2nTnTnTnInInInIn)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.D56DLDMDH)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.CD57DaEc)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.C2)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.GG)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.P24Group58_59)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.R24Group6_7)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.NsChshs)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.dqqqt90)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "4%" }]}>{formatValue(record.fqfqfq91)}</Text>
+                <Document style={[styles.tableCellSynoptic, { width: "12%" }]}><Text>{record.weatherRemark.split(" - ")[1]}</Text><Image style={{width: 10, height: 10}} src={record.weatherRemark.split(" - ")[0]} /></Document>
             </View>
             ))}
           </View>
