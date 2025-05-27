@@ -65,55 +65,13 @@ export async function POST(request: Request) {
       );
     }
 
-<<<<<<< HEAD
     if (observingTime?._count.WeatherObservation) {
-=======
-<<<<<<< Updated upstream
-    if(observingTime._count.WeatherObservation){
->>>>>>> zisan
       return NextResponse.json(
         {
           error: true,
           message: "Second card entry already exists",
         },
-<<<<<<< HEAD
         { status: 400 }
-=======
-        { status: 404 }
-=======
-    // Helper function to convert hour string to DateTime
-    const convertHourToDateTime = (hourString: string | null) => {
-      if (!hourString) return null;
-
-      // hourString ধরে নিচ্ছে "18:45" বা "04:05" ফরম্যাটে আসবে
-      const [hourPart, minutePart] = hourString.split(":");
-      const hour = parseInt(hourPart, 10);
-      const minute = parseInt(minutePart ?? "0", 10);
-
-      if (
-        isNaN(hour) ||
-        hour < 0 ||
-        hour > 23 ||
-        isNaN(minute) ||
-        minute < 0 ||
-        minute > 59
-      )
-        return null;
-
-      const now = new Date();
-
-      const dateTime = new Date(
-        Date.UTC(
-          now.getUTCFullYear(),
-          now.getUTCMonth(),
-          now.getUTCDate(),
-          hour,
-          minute, // <<== এখন মিনিটও যাবে!
-          0, // seconds
-          0 // milliseconds
-        )
->>>>>>> Stashed changes
->>>>>>> zisan
       );
     }
 
@@ -148,20 +106,30 @@ export async function POST(request: Request) {
     const convertHourToDateTime = (hourString: string | null) => {
       if (!hourString) return null;
 
-      const hour = parseInt(hourString);
-      if (isNaN(hour) || hour < 0 || hour > 23) return null;
+      // hourString ধরে নিচ্ছে "18:45" বা "04:05" ফরম্যাটে আসবে
+      const [hourPart, minutePart] = hourString.split(":");
+      const hour = parseInt(hourPart, 10);
+      const minute = parseInt(minutePart ?? "0", 10);
 
-      // Use current date for the base
+      if (
+        isNaN(hour) ||
+        hour < 0 ||
+        hour > 23 ||
+        isNaN(minute) ||
+        minute < 0 ||
+        minute > 59
+      )
+        return null;
+
       const now = new Date();
 
-      // Create new date with the specified hour in UTC
       const dateTime = new Date(
         Date.UTC(
           now.getUTCFullYear(),
           now.getUTCMonth(),
           now.getUTCDate(),
           hour,
-          0, // minutes
+          minute, // <<== এখন মিনিটও যাবে!
           0, // seconds
           0 // milliseconds
         )
