@@ -37,7 +37,8 @@ model users {
 
   Station       Station         @relation(fields: [stationId], references: [id], onDelete: Restrict)
   ObservingTime ObservingTime[]
-  log           logs[]
+  actorUser     logs[]          @relation("ActorUser")
+  targetUser    logs[]          @relation("TargetUser")
 }
 
 model sessions {
@@ -97,17 +98,25 @@ model twoFactor {
 }
 
 model logs {
-  id        String   @id @default(cuid())
-  userId    String
-  role      String
-  action    String
-  details   String?
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  userId      String?
+  targetId    String?
+  actorEmail  String?
+  targetEmail String?
+  role        String
+  action      String
+  actionText  String?
+  module      String?
+  details     Json?
+  createdAt   DateTime @default(now())
 
-  user users @relation(fields: [userId], references: [id], onDelete: Cascade)
+  actor      users? @relation("ActorUser", fields: [userId], references: [id], onDelete: SetNull)
+  targetUser users? @relation("TargetUser", fields: [targetId], references: [id], onDelete: SetNull)
 
-  @@index([role])
   @@index([userId])
+  @@index([targetId])
+  @@index([role])
+  @@index([action])
 }
 
 model Station {
