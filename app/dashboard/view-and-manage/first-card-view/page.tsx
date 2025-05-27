@@ -1006,7 +1006,7 @@ const FirstCardTable = forwardRef(
                         {stations.map((station) => (
                           <SelectItem
                             key={station.id}
-                            value={station.stationId}
+                            value={station.id}
                           >
                             {station.name} ({station.stationId})
                           </SelectItem>
@@ -1493,7 +1493,7 @@ const FirstCardTable = forwardRef(
                 </table>
               </div>
 
-              <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+              {/* <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-sky-500" />
                   <span className="text-sm text-slate-600">
@@ -1519,12 +1519,11 @@ const FirstCardTable = forwardRef(
                       variant="outline"
                       className="bg-blue-100 text-blue-800 hover:bg-blue-200"
                     >
-                      Station: {getStationNameById(stationFilter)} (
-                      {stationFilter})
+                      Station: {stationFilter}
                     </Badge>
                   )}
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
 

@@ -181,6 +181,10 @@ export async function POST(request: Request) {
       rainfallSincePrevious: data.rainfall?.["since-previous"] || null,
       rainfallDuringPrevious: data.rainfall?.["during-previous"] || null,
       rainfallLast24Hours: data.rainfall?.["last-24-hours"] || null,
+      isIntermittentRain:
+        typeof data.rainfall?.isIntermittentRain === "boolean"
+          ? data.rainfall?.isIntermittentRain
+          : null, // ⭐️⭐️⭐️ নতুন লাইন
 
       // Wind
       windFirstAnemometer: data.wind?.["first-anemometer"] || null,

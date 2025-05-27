@@ -83,7 +83,7 @@ const validationSchema = yup.object({
     .required("Required"),
   windDirection: yup
     .string()
-    .matches(/^\d{1}$/, "Must be exactly 1 digit")
+    .matches(/^\d{3}$/, "Must be exactly 3 digit")
     .required("Required"),
   layer1Form: yup
     .string()
@@ -135,14 +135,14 @@ const validationSchema = yup.object({
     .string()
     .matches(/^\d{2}$/, "Must be exactly 2 digits")
     .required("Required"),
-  rainfallTimeStart: yup
-    .string()
-    .matches(/^\d{2}$/, "Must be exactly 2 digits")
-    .required("Required"),
-  rainfallTimeEnd: yup
-    .string()
-    .matches(/^\d{2}$/, "Must be exactly 2 digits")
-    .required("Required"),
+  // rainfallTimeStart: yup
+  //   .string()
+  //   .matches(/^\d{2}$/, "Must be exactly 2 digits")
+  //   .required("Required"),
+  // rainfallTimeEnd: yup
+  //   .string()
+  //   .matches(/^\d{2}$/, "Must be exactly 2 digits")
+  //   .required("Required"),
   rainfallSincePrevious: yup
     .string()
     .matches(/^\d{2}$/, "Must be exactly 2 digits")
@@ -751,7 +751,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                   <SelectContent>
                     <SelectItem value="all">All Stations</SelectItem>
                     {stations.map((station) => (
-                      <SelectItem key={station.id} value={station.stationId}>
+                      <SelectItem key={station.id} value={station.id}>
                         {station.name} ({station.stationId})
                       </SelectItem>
                     ))}
@@ -1268,7 +1268,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
               </table>
             </div>
 
-            <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+            {/* <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-sky-500" />
                 <span className="text-sm text-slate-600">
@@ -1288,7 +1288,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                   </Badge>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -1513,31 +1513,22 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
 
                   {/* Rainfall */}
                   <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
-                    <Label className="text-sm font-medium text-gray-700">Rainfall Start Time (2 digits)</Label>
+                    <Label className="text-sm font-medium text-gray-700">Rainfall Start Time</Label>
                     <Input
                       {...register("rainfallTimeStart")}
-                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${
-                        errors.rainfallTimeStart ? "border-red-500" : ""
-                      }`}
-                      maxLength={2}
+                       className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200" 
+                      
                     />
-                    {errors.rainfallTimeStart && (
-                      <p className="text-red-500 text-xs mt-1">{errors.rainfallTimeStart.message}</p>
-                    )}
                   </div>
 
                   <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
-                    <Label className="text-sm font-medium text-gray-700">Rainfall End Time (2 digits)</Label>
+                    <Label className="text-sm font-medium text-gray-700">Rainfall End Time</Label>
                     <Input
                       {...register("rainfallTimeEnd")}
-                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${
-                        errors.rainfallTimeEnd ? "border-red-500" : ""
-                      }`}
-                      maxLength={2}
+                       className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"  
+                        
                     />
-                    {errors.rainfallTimeEnd && (
-                      <p className="text-red-500 text-xs mt-1">{errors.rainfallTimeEnd.message}</p>
-                    )}
+                    
                   </div>
 
                   <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
@@ -1624,13 +1615,13 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                   </div>
 
                   <div className="space-y-1 p-3 rounded-lg bg-amber-50 border border-white shadow-sm">
-                    <Label className="text-sm font-medium text-gray-700">Wind Direction (1 digit)</Label>
+                    <Label className="text-sm font-medium text-gray-700">Wind Direction (3 digit)</Label>
                     <Input
                       {...register("windDirection")}
                       className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${
                         errors.windDirection ? "border-red-500" : ""
                       }`}
-                      maxLength={1}
+                      maxLength={3}
                     />
                     {errors.windDirection && (
                       <p className="text-red-500 text-xs mt-1">{errors.windDirection.message}</p>

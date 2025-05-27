@@ -244,6 +244,8 @@ model WeatherObservation {
   rainfallSincePrevious  String?
   rainfallDuringPrevious String?
   rainfallLast24Hours    String?
+  isIntermittentRain     Boolean? // নতুন ফিল্ড
+
 
   // WIND
   windFirstAnemometer  String?

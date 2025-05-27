@@ -94,6 +94,7 @@ type WeatherObservationFormData = {
     "since-previous"?: string;
     "during-previous"?: string;
     "last-24-hours"?: string;
+    isIntermittentRain?: boolean; // ← এখানে অবশ্যই যোগ করুন
   };
   wind: {
     "first-anemometer"?: string;
@@ -1266,6 +1267,31 @@ export default function SecondCardForm() {
                               required
                               numeric={true}
                             />
+                          </div>
+
+                          <div className="md:col-span-2 flex items-center gap-2 mt-4">
+                            <input
+                              id="is-intermittent-rain"
+                              name="isIntermittentRain"
+                              type="checkbox"
+                              checked={
+                                formik.values.rainfall?.isIntermittentRain ||
+                                false
+                              }
+                              onChange={(e) => {
+                                formik.setFieldValue(
+                                  "rainfall.isIntermittentRain",
+                                  e.target.checked
+                                );
+                              }}
+                              className="h-5 w-5 text-cyan-600 border-gray-300 rounded focus:ring-cyan-500"
+                            />
+                            <Label
+                              htmlFor="is-intermittent-rain"
+                              className="font-medium text-cyan-800"
+                            >
+                              Intermittent Rain? (বিরতিযুক্ত বৃষ্টি)
+                            </Label>
                           </div>
                         </div>
                       </CardContent>
