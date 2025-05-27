@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
           ],
         },
         include: {
-          MeteorologicalEntry: true
+          MeteorologicalEntry: true,
         },
         orderBy: {
           utcTime: "desc",
@@ -75,22 +75,25 @@ export async function POST(request: NextRequest) {
           allowSecondCard: false,
           message: "First card data not found!",
           yesterday: {
-            meteorologicalEntry: yesterdayObservingTime ? yesterdayObservingTime.MeteorologicalEntry : null,
+            meteorologicalEntry: yesterdayObservingTime
+              ? yesterdayObservingTime.MeteorologicalEntry
+              : [],
           },
         },
         { status: 400 }
       );
     }
-    
 
-    if(observingTime && observingTime._count.WeatherObservation > 0) {
+    if (observingTime && observingTime._count.WeatherObservation > 0) {
       return NextResponse.json(
         {
           allowFirstCard: false,
           allowSecondCard: false,
           message: "Observing time already exists!",
           yesterday: {
-            meteorologicalEntry: yesterdayObservingTime ? yesterdayObservingTime.MeteorologicalEntry : null,
+            meteorologicalEntry: yesterdayObservingTime
+              ? yesterdayObservingTime.MeteorologicalEntry
+              : [],
           },
         },
         { status: 400 }
@@ -103,7 +106,9 @@ export async function POST(request: NextRequest) {
       message: "Observing time already exists!",
       time: observingTime.utcTime,
       yesterday: {
-        meteorologicalEntry: yesterdayObservingTime ? yesterdayObservingTime.MeteorologicalEntry : null,
+        meteorologicalEntry: yesterdayObservingTime
+          ? yesterdayObservingTime.MeteorologicalEntry
+          : [],
       },
     });
   } catch {
