@@ -56,21 +56,23 @@ export default function AllViewAndManagePage() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-gray-800">All View & Manage</h1>
 
-        <div className="flex items-center gap-3">
-          {/* Excel Export Button */}
-          <Button onClick={exportToExcel} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
-            <Download className="h-4 w-4" />
-            Export All to Excel
-          </Button>
+        {session?.user?.role === "super_admin" || session?.user?.role === "station_admin" ? (
+          <div className="flex items-center gap-3">
+            {/* Excel Export Button */}
+            <Button onClick={exportToExcel} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
+              <Download className="h-4 w-4" />
+              Export All to Excel
+            </Button>
 
-          {/* Compact PDF Export Button */}
-          <CompactPDFExportButton
-            firstCardRef={firstCardRef}
-            secondCardRef={secondCardRef}
-            synopticRef={synopticRef}
-            stationInfo={stationInfo}
-          />
-        </div>
+            {/* Compact PDF Export Button */}
+            <CompactPDFExportButton
+              firstCardRef={firstCardRef}
+              secondCardRef={secondCardRef}
+              synopticRef={synopticRef}
+              stationInfo={stationInfo}
+            />
+          </div>
+        ) : null}
       </div>
 
       <Tabs defaultValue="first-card" onValueChange={(value) => setActiveTab(value)} className="w-full">
