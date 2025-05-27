@@ -17,7 +17,7 @@ type TimeData = {
   message?: string;
   time?: string;
   yesterday: {
-    meteorologicalEntry: MeteorologicalEntry | null;
+    meteorologicalEntry: MeteorologicalEntry[] | [];
   };
 };
 
