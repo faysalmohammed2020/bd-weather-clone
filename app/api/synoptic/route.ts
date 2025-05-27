@@ -141,43 +141,69 @@ export async function GET() {
 
     // 8. 6RRRtR (47-51) - Precipitation
     // 8. 6RRRtR (47-51) - Precipitation
-    const rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
-    const rainFallPadded = pad(rainFall.toString().slice(-3), 3); // Last 3 digits
+    // ... পূর্বের কোড (prisma, session, etc.) এখানে ধরেই নিচ্ছি
 
-    // Get times from database (all in UTC)
-    const observationTime = new Date(observingTime.utcTime); // H (reporting time)
+    const rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
+    const rainFallPadded = pad(rainFall.toString().slice(-3), 3); // শেষ ৩ সংখ্যা
+
+    const observationTime = new Date(observingTime.utcTime); // H (রিপোর্ট টাইম)
     const rainStart = weatherObs.rainfallTimeStart
       ? new Date(weatherObs.rainfallTimeStart)
       : null;
     const rainEnd = weatherObs.rainfallTimeEnd
       ? new Date(weatherObs.rainfallTimeEnd)
       : null;
+    const isIntermittentRain = weatherObs.isIntermittentRain; // true/false; ফর্ম/ডিবিতে যোগ করুন
 
     let tr = "/";
 
+    // ৬ ঘণ্টার window নির্ধারণ
+    const H = observationTime;
+    const H_3 = new Date(H.getTime() - 3 * 60 * 60 * 1000);
+    const H_6 = new Date(H.getTime() - 6 * 60 * 60 * 1000);
+
     if (rainStart && rainEnd) {
-      // 1. বৃষ্টির সময়কাল (ঘণ্টায়)
-      const durationHours =
-        (rainEnd.getTime() - rainStart.getTime()) / (1000 * 60 * 60);
+      if (isIntermittentRain) {
+        // Intermittent rain (বিরতিযুক্ত বৃষ্টি) — WMO tr = 1, 2, 3
+        if (rainStart >= H_6 && rainEnd <= H_3) {
+          tr = "1"; // H-6 to H-3
+        } else if (rainStart >= H_3 && rainEnd <= H) {
+          tr = "2"; // H-3 to H
+        } else if (
+          (rainStart <= H_6 && rainEnd >= H) || // পুরো ৬ ঘণ্টা জুড়ে
+          (rainStart <= H_6 && rainEnd >= H_3 && rainEnd <= H) || // overlap case
+          (rainStart >= H_6 && rainStart <= H_3 && rainEnd >= H)
+        ) {
+          tr = "3"; // Full 6-hour intermittent
+        }
+        // না মিললে tr = "/"
+      } else {
+        // Continuous rain — WMO tr = 4-9
+        // Window check: বৃষ্টি অবশ্যই H-6 থেকে H এর মধ্যে
+        if (rainStart < H_6 || rainEnd > H) {
+          tr = "/";
+        } else {
+          const durationHours =
+            (rainEnd.getTime() - rainStart.getTime()) / (1000 * 60 * 60);
+          let hoursSinceEnd =
+            (H.getTime() - rainEnd.getTime()) / (1000 * 60 * 60);
 
-      // 2. বৃষ্টি শেষ হওয়ার পর থেকে রিপোর্ট সময়ের পার্থক্য (ঘণ্টায়)
-      let hoursSinceEnd =
-        (observationTime.getTime() - rainEnd.getTime()) / (1000 * 60 * 60);
+          // রাত পার হলে
+          if (hoursSinceEnd < 0) hoursSinceEnd += 24;
 
-      // রাত ১২টা পার হলে সংশোধন
-      if (hoursSinceEnd < 0) {
-        hoursSinceEnd += 24; // যেমন: 00:00 - 22:00 = -2 → 22 ঘণ্টা (সঠিক মান 2 ঘণ্টা)
+          if (durationHours <= 2) {
+            if (hoursSinceEnd <= 2) tr = "4";
+            else if (hoursSinceEnd <= 4) tr = "5";
+            else if (hoursSinceEnd <= 6) tr = "6";
+          } else if (durationHours <= 4) {
+            if (hoursSinceEnd <= 2) tr = "7";
+            else if (hoursSinceEnd <= 4) tr = "8";
+          } else if (durationHours <= 6 && hoursSinceEnd <= 2) {
+            tr = "9";
+          }
+          // না মিললে tr = "/"
+        }
       }
-
-      // 3. tr মান নির্ধারণ
-      if (durationHours <= 2) {
-        if (hoursSinceEnd <= 2) tr = "4";
-        else if (hoursSinceEnd <= 4) tr = "5";
-        else if (hoursSinceEnd <= 6) tr = "6";
-      } else if (durationHours <= 4) {
-        if (hoursSinceEnd <= 2) tr = "7";
-        else if (hoursSinceEnd <= 4) tr = "8";
-      } else if (durationHours <= 6 && hoursSinceEnd <= 4) tr = "9";
     }
 
     measurements[7] = `6${rainFallPadded}${tr}`;

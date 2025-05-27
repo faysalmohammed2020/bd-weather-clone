@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Document, Page, Text, View, StyleSheet, PDFDownloadLink } from "@react-pdf/renderer"
+import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Image } from "@react-pdf/renderer"
 import { Button } from "@/components/ui/button"
 import { FileText } from "lucide-react"
 import moment from 'moment';
@@ -408,8 +408,8 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
                 <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.NsChshs)}</Text>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.dqqqt90)}</Text>
                 <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.fqfqfq91)}</Text>
-                <Text style={[styles.tableCell, { width: "4%" }]}>{formatValue(record.weatherRemark)}</Text>
-              </View>
+                <Document style={[styles.tableCell, { width: "4%" }]}><Image src={record.weatherRemark.split(" - ")[0]} /></Document>
+            </View>
             ))}
           </View>
         </View>

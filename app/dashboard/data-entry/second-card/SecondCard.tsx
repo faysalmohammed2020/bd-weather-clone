@@ -111,24 +111,21 @@ type WeatherObservationFormData = {
   };
 };
 
-// Update the validation schemas to enforce numeric validation for all numeric fields
-
-// Update the validation schemas to use English error messages and add time format validation
-// Update the rainfallSchema to enforce the specific validation requirements
+// Updated validation schema with HH:MM format for rainfall times
 const rainfallSchema = Yup.object({
   rainfall: Yup.object({
     "time-start": Yup.string()
       .required("Time of start is required")
       .matches(
-        /^(0[0-9]|1[0-9]|2[0-3])$/,
-        "Please enter a valid hour (00 to 23)"
+        /^([01]\d|2[0-3]):([0-5]\d)$/,
+        "Please enter a valid time in HH:MM format (00:00 to 23:59)"
       ),
 
     "time-end": Yup.string()
       .required("Time of ending is required")
       .matches(
-        /^(0[0-9]|1[0-9]|2[0-3])$/,
-        "Please enter a valid hour (00 to 23)"
+        /^([01]\d|2[0-3]):([0-5]\d)$/,
+        "Please enter a valid time in HH:MM format (00:00 to 23:59)"
       ),
 
     "since-previous": Yup.string()
@@ -273,7 +270,13 @@ export default function SecondCardForm() {
   const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
   const { data: session } = useSession();
 
-  const { isHourSelected, secondCardError, selectedHour, isLoading, resetStates } = useHour();
+  const {
+    isHourSelected,
+    secondCardError,
+    selectedHour,
+    isLoading,
+    resetStates,
+  } = useHour();
 
   // Get the persistent form store
   const { formData, updateFields, resetForm } = useWeatherObservationForm();
@@ -557,7 +560,7 @@ export default function SecondCardForm() {
   };
 
   // Handle input changes and update the form data state
-  // Update the handleInputChange function to validate numeric fields immediately
+  // Update the handleInputChange function to validate time fields immediately
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     formik.setFieldTouched(name, true, true);
@@ -592,7 +595,7 @@ export default function SecondCardForm() {
       });
     }
 
-    // Validate time fields
+    // Validate time fields for HH:MM format
     if (name === "time-start" || name === "time-end") {
       if (value !== "" && !/^([01]\d|2[0-3]):([0-5]\d)$/.test(value)) {
         formik.setFieldTouched(`rainfall.${name}`, true, false);
@@ -1144,14 +1147,14 @@ export default function SecondCardForm() {
                               htmlFor="time-start"
                               className="font-medium text-gray-700"
                             >
-                              Time of Start (HH UTC){" "}
+                              Time of Start (HH:MM UTC){" "}
                               <span className="text-red-500">*</span>
                             </Label>
                             <Input
                               id="time-start"
                               name="time-start"
                               type="text"
-                              placeholder="00"
+                              placeholder="00:00"
                               pattern="^([01]\d|2[0-3]):([0-5]\d)$"
                               value={formik.values.rainfall["time-start"] || ""}
                               onChange={handleInputChange}
@@ -1167,7 +1170,7 @@ export default function SecondCardForm() {
                             />
                             {renderErrorMessage("rainfall.time-start")}
                             <p className="text-xs text-gray-500 mt-1">
-                              Format: HH (e.g., 03, 06, 23)
+                              Format: HH:MM (e.g., 03:30, 06:15, 23:45)
                             </p>
                           </div>
 
@@ -1176,14 +1179,14 @@ export default function SecondCardForm() {
                               htmlFor="time-end"
                               className="font-medium text-gray-700"
                             >
-                              Time of Ending (HH UTC){" "}
+                              Time of Ending (HH:MM UTC){" "}
                               <span className="text-red-500">*</span>
                             </Label>
                             <Input
                               id="time-end"
                               name="time-end"
                               type="text"
-                              placeholder="00"
+                              placeholder="00:00"
                               pattern="^([01]\d|2[0-3]):([0-5]\d)$"
                               value={formik.values.rainfall["time-end"] || ""}
                               onChange={handleInputChange}
@@ -1198,7 +1201,7 @@ export default function SecondCardForm() {
                             />
                             {renderErrorMessage("rainfall.time-end")}
                             <p className="text-xs text-gray-500 mt-1">
-                              Format: HH (e.g., 03, 06, 23)
+                              Format: HH:MM (e.g., 03:30, 06:15, 23:45)
                             </p>
                           </div>
 
