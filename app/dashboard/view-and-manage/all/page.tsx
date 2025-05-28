@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useSession } from "@/lib/auth-client"
 import dynamic from "next/dynamic"
+import DailySummaryTable from "../daily-summery/daily-summery"
 
 const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), { ssr: false })
 
@@ -20,6 +21,7 @@ export default function AllViewAndManagePage() {
   const firstCardRef = useRef<any>(null)
   const secondCardRef = useRef<any>(null)
   const synopticRef = useRef<any>(null)
+  const dailySummeryRef = useRef<any>(null)
 
   const exportToExcel = () => {
     // Create a new workbook
@@ -29,16 +31,19 @@ export default function AllViewAndManagePage() {
     const firstCardData = firstCardRef.current?.getData?.() || []
     const secondCardData = secondCardRef.current?.getData?.() || []
     const synopticData = synopticRef.current?.getData?.() || []
+    const dailySummeryData = dailySummeryRef.current?.getData?.() || []
 
     // Create worksheets for each dataset
     const firstCardSheet = XLSX.utils.json_to_sheet(firstCardData)
     const secondCardSheet = XLSX.utils.json_to_sheet(secondCardData)
     const synopticSheet = XLSX.utils.json_to_sheet(synopticData)
+    const dailySummerySheet = XLSX.utils.json_to_sheet(dailySummeryData)
 
     // Add worksheets to the workbook with appropriate names
     XLSX.utils.book_append_sheet(wb, firstCardSheet, "First Card")
     XLSX.utils.book_append_sheet(wb, secondCardSheet, "Second Card")
     XLSX.utils.book_append_sheet(wb, synopticSheet, "Synoptic Code")
+    XLSX.utils.book_append_sheet(wb, dailySummerySheet, "Daily Summery")
 
     // Generate Excel file and trigger download
     XLSX.writeFile(wb, "Weather_Data_All_Tabs.xlsx")
@@ -69,6 +74,7 @@ export default function AllViewAndManagePage() {
               firstCardRef={firstCardRef}
               secondCardRef={secondCardRef}
               synopticRef={synopticRef}
+              dailySummeryRef={dailySummeryRef}
               stationInfo={stationInfo}
             />
           </div>
@@ -80,6 +86,7 @@ export default function AllViewAndManagePage() {
           <TabsTrigger value="first-card">First Card</TabsTrigger>
           <TabsTrigger value="second-card">Second Card</TabsTrigger>
           <TabsTrigger value="synoptic-code">Synoptic Code</TabsTrigger>
+          <TabsTrigger value="daily-summery">Daily Summery</TabsTrigger>
         </TabsList>
 
         <div className="mt-6 rounded-lg border bg-white p-4 shadow">
@@ -91,6 +98,9 @@ export default function AllViewAndManagePage() {
           </div>
           <div hidden={activeTab !== "synoptic-code"}>
             <SynopticCodeTable ref={synopticRef} />
+          </div>
+          <div hidden={activeTab !== "daily-summery"}>
+            <DailySummaryTable ref={dailySummeryRef} />
           </div>
         </div>
       </Tabs>
