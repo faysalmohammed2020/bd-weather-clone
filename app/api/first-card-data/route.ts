@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/getSession";
 import { convertUTCToBDTime, getTodayBDRange, hourToUtc } from "@/lib/utils";
+import { revalidateTag } from "next/cache";
 
 const prisma = new PrismaClient();
 
@@ -124,18 +125,19 @@ export async function POST(req: Request) {
 
       c2Indicator: data.c2Indicator || "",
       submittedAt: new Date(),
-    }
+    };
 
-    const savedEntry = await prisma.observingTime.create({
-      data: {
-        utcTime: formattedObservingTime,
-        MeteorologicalEntry: {
-          create: {
-            ...meteorologicalData,
-          }
-        },
-        station: {
-          connect: {
+    const [savedEntry, totalCount] = await prisma.$transaction([
+      prisma.observingTime.create({
+        data: {
+          utcTime: formattedObservingTime,
+          MeteorologicalEntry: {
+            create: {
+              ...meteorologicalData,
+            },
+          },
+          station: {
+            connect: {
               id: stationRecord.id,
             },
           },
@@ -146,9 +148,12 @@ export async function POST(req: Request) {
             },
           },
         },
-      });
+      }),
+      prisma.meteorologicalEntry.count(),
+    ]);
 
-    const totalCount = await prisma.meteorologicalEntry.count();
+    // Revalidate time checking
+    revalidateTag("time-check");
 
     return NextResponse.json(
       {
@@ -218,10 +223,11 @@ export async function GET(req: Request) {
               lte: end,
             },
           },
-          ...(superFilter 
-            ? (stationIdParam ? [{ stationId: stationIdParam }] : []) 
-            : [{ stationId: session.user.station?.id }]
-          ),
+          ...(superFilter
+            ? stationIdParam
+              ? [{ stationId: stationIdParam }]
+              : []
+            : [{ stationId: session.user.station?.id }]),
         ],
       },
       include: {
@@ -336,6 +342,9 @@ export async function PUT(req: Request) {
         },
       },
     });
+
+    // Revalidate time checking
+    revalidateTag("time-check");
 
     return NextResponse.json(
       {

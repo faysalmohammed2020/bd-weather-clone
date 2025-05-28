@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
 import { hourToUtc } from "@/lib/utils";
+import { revalidateTag } from "next/cache";
 
 export async function POST(request: Request) {
   try {
@@ -239,6 +240,9 @@ export async function POST(request: Request) {
       },
     });
 
+    // Revalidate time checking
+    revalidateTag("time-check");
+
     return NextResponse.json({
       error: false,
       message: "Observation saved successfully",
@@ -445,6 +449,9 @@ export async function PUT(request: Request) {
           },
         },
       });
+
+      // Revalidate time checking
+      revalidateTag("time-check");
 
       return NextResponse.json({
         success: true,
