@@ -677,6 +677,7 @@ const FirstCardTable = forwardRef(
                 ...entry,
                 observingTimeId: observingTime.id,
                 stationId: observingTime.stationId,
+                stationCode: observingTime.station?.stationId,
               });
             }
           );
