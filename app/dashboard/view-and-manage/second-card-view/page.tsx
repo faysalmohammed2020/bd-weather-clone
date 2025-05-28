@@ -13,6 +13,7 @@ import { Calendar, ChevronLeft, ChevronRight, CloudSun, Filter, Loader2, AlertTr
 import { format, parseISO, differenceInDays, isValid } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import { useSession } from "@/lib/auth-client"
+import moment from "moment"
 import {
   Dialog,
   DialogContent,
@@ -1173,17 +1174,17 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
 
                           {/* Rainfall */}
                           <td
-                            className={`border border-slate-300 p-1 ${weatherObs?.rainfallTimeStart ? "text-emerald-700 font-medium" : ""}`}
+                            className={` border border-slate-300 p-1 ${weatherObs?.rainfallTimeStart ? "text-emerald-700 font-medium" : ""}`}
                           >
-                            {weatherObs?.rainfallTimeStart || "--"}
+                            {moment(weatherObs?.rainfallTimeStart).format("MMMM Do YYYY, h:mm") || "--"}
                           </td>
                           <td
-                            className={`border border-slate-300 p-1 ${weatherObs?.rainfallTimeEnd ? "text-emerald-700 font-medium" : ""}`}
+                            className={` border border-slate-300 p-3 ${weatherObs?.rainfallTimeEnd ? "text-emerald-700 font-medium" : ""}`}
                           >
-                            {weatherObs?.rainfallTimeEnd || "--"}
+                            {moment(weatherObs?.rainfallTimeEnd).format("MMMM Do YYYY, h:mm") || "--"}
                           </td>
                           <td
-                            className={`border border-slate-300 p-1 ${weatherObs?.rainfallSincePrevious ? "text-emerald-700 font-medium" : ""}`}
+                            className={`border border-slate-300 p-3 ${weatherObs?.rainfallSincePrevious ? "text-emerald-700 font-medium" : ""}`}
                           >
                             {weatherObs?.rainfallSincePrevious || "--"}
                           </td>
