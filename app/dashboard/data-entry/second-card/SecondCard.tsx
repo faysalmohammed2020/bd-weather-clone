@@ -1175,6 +1175,7 @@ export default function SecondCardForm() {
                                 id="time-start"
                                 name="time-start"
                                 type="text"
+                                placeholder="set this ( HH:MM 00:00 )"
                                 step="60"
                                 value={
                                   formik.values.rainfall["time-start"] || ""
@@ -1211,6 +1212,7 @@ export default function SecondCardForm() {
                                 id="time-end"
                                 name="time-end"
                                 type="text"
+                                placeholder="set this ( HH:MM 00:00 )"
                                 step="60"
                                 value={formik.values.rainfall["time-end"] || ""}
                                 onChange={handleInputChange}
