@@ -108,7 +108,7 @@ const Sidebar = () => {
       href: "/dashboard/user",
       icon: <Users className="w-5 h-5" />,
       label: "User Management",
-      roles: ["super_admin"],
+      roles: ["super_admin", "station_admin"],
     },
     {
       href: "/dashboard/stations",
