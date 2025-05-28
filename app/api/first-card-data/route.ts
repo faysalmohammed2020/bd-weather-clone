@@ -3,7 +3,8 @@ import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/getSession";
 import { convertUTCToBDTime, getTodayBDRange, hourToUtc } from "@/lib/utils";
 import { revalidateTag } from "next/cache";
-import { LogModule } from "@/lib/log";
+import { LogAction, LogActionType, LogModule } from "@/lib/log";
+import { diff } from "deep-object-diff";
 
 const prisma = new PrismaClient();
 
@@ -152,6 +153,18 @@ export async function POST(req: Request) {
       }),
       prisma.meteorologicalEntry.count(),
     ]);
+
+    
+    // Log The Action
+    await LogAction({
+      init: prisma,
+      action: LogActionType.CREATE,
+      actionText: "Meteorological Data Created",
+      role: session.user.role!,
+      actorId: session.user.id,
+      actorEmail: session.user.email,
+      module: LogModule.METEOROLOGICAL_ENTRY,
+    });
 
     // Revalidate time checking
     revalidateTag("time-check");
@@ -346,6 +359,19 @@ export async function PUT(req: Request) {
 
     // Revalidate time checking
     revalidateTag("time-check");
+
+    // Log The Action
+    const diffData = diff(existingEntry, updatedEntry);
+    await LogAction({
+      init: prisma,
+      action: LogActionType.UPDATE,
+      actionText: "Meteorological Data Updated",
+      role: session.user.role!,
+      actorId: session.user.id,
+      actorEmail: session.user.email,
+      module: LogModule.METEOROLOGICAL_ENTRY,
+      details: diffData,
+    });
 
     return NextResponse.json(
       {

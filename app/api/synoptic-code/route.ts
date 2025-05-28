@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/getSession";
 import { getTodayBDRange, getTodayUtcRange } from "@/lib/utils";
+import { LogAction, LogActionType, LogModule } from "@/lib/log";
+import { diff } from "deep-object-diff";
 
 const prisma = new PrismaClient();
 
@@ -131,6 +133,17 @@ export async function POST(req: Request) {
           },
         },
       },
+    });
+
+    // Log The Action
+    await LogAction({
+      init: prisma,
+      action: LogActionType.CREATE,
+      actionText: "Synoptic Code Created",
+      role: session.user.role!,
+      actorId: session.user.id,
+      actorEmail: session.user.email,
+      module: LogModule.SYNOPTIC_CODE,
     });
 
     return NextResponse.json(
@@ -269,6 +282,19 @@ export async function PUT(req: Request) {
     const updatedRecord = await prisma.synopticCode.update({
       where: { id },
       data: updateData,
+    });
+
+    // Log The Action
+    const diffData = diff(existingRecord, updatedRecord);
+    await LogAction({
+      init: prisma,
+      action: LogActionType.UPDATE,
+      actionText: "Synoptic Code Updated",
+      role: session.user.role!,
+      actorId: session.user.id,
+      actorEmail: session.user.email,
+      module: LogModule.SYNOPTIC_CODE,
+      details: diffData,
     });
 
     return NextResponse.json(

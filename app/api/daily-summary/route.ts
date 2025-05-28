@@ -1,6 +1,8 @@
 import { getSession } from "@/lib/getSession"
+import { LogAction, LogActionType, LogModule } from "@/lib/log"
 import prisma from "@/lib/prisma"
 import { getTodayUtcRange } from "@/lib/utils"
+import { diff } from "deep-object-diff"
 import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
@@ -129,6 +131,17 @@ export async function POST(req: Request) {
         },
       },
     })
+
+    // Log The Action
+    await LogAction({
+      init: prisma,
+      action: LogActionType.CREATE,
+      actionText: "Daily Summary Created",
+      role: session.user.role!,
+      actorId: session.user.id,
+      actorEmail: session.user.email,
+      module: LogModule.DAILY_SUMMARY,
+    });
 
     return NextResponse.json({
       success: true,
@@ -265,6 +278,19 @@ export async function PUT(req: Request) {
       where: { id },
       data: updateData,
     })
+
+    // Log The Action
+    const diffData = diff(existingRecord, updatedRecord);
+    await LogAction({
+      init: prisma,
+      action: LogActionType.UPDATE,
+      actionText: "Daily Summary Updated",
+      role: session.user.role!,
+      actorId: session.user.id,
+      actorEmail: session.user.email,
+      module: LogModule.DAILY_SUMMARY,
+      details: diffData,
+    });
 
     return NextResponse.json({ success: true, data: updatedRecord }, { status: 200 })
   } catch (error) {
