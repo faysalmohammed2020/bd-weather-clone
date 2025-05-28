@@ -141,6 +141,8 @@ export async function GET() {
     // 8. 6RRRtR (47-51) - Precipitation
     // ... পূর্বের কোড (prisma, session, etc.) এখানে ধরেই নিচ্ছি
 
+    // ... পূর্বের কোড (prisma, session, etc.) এখানে ধরেই নিচ্ছি
+
     const rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
     const rainFallPadded = pad(rainFall.toString().slice(-3), 3); // শেষ ৩ সংখ্যা
 
@@ -255,8 +257,9 @@ export async function GET() {
     measurements[15] = utcToHour(observingTime.utcTime.toString());
 
     // 17. 58P24P24P24/59P24P24P24 (19-23) - Pressure change
-    const pressureChange = firstCard.pressureChange24h || "0000"
-    const pressureChangeIndicator = Number.parseFloat(pressureChange) >= 0 ? "58" : "59";
+    const pressureChange = firstCard.pressureChange24h || "0000";
+    const pressureChangeIndicator =
+      Number.parseFloat(pressureChange) >= 0 ? "58" : "59";
     const slicedPressure = pressureChange.slice(-3);
     measurements[16] = `${pressureChangeIndicator}${slicedPressure}`;
 

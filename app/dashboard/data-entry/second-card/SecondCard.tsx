@@ -116,18 +116,13 @@ type WeatherObservationFormData = {
 const rainfallSchema = Yup.object({
   rainfall: Yup.object({
     "time-start": Yup.string()
-      .required("Time of start is required")
-      .matches(
-        /^([01]\d|2[0-3]):([0-5]\d)$/,
-        "Please enter a valid time in HH:MM format (00:00 to 23:59)"
-      ),
-
+      .required("Start time is required")
+      .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Use HH:MM 24-hour format"),
+    "date-start": Yup.string().required("Start date is required"),
     "time-end": Yup.string()
-      .required("Time of ending is required")
-      .matches(
-        /^([01]\d|2[0-3]):([0-5]\d)$/,
-        "Please enter a valid time in HH:MM format (00:00 to 23:59)"
-      ),
+      .required("End time is required")
+      .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Use HH:MM 24-hour format"),
+    "date-end": Yup.string().required("End date is required"),
 
     "since-previous": Yup.string()
       .required("Since previous observation is required")
@@ -331,7 +326,17 @@ export default function SecondCardForm() {
         layer3: formData?.significantClouds?.layer3 || {},
         layer4: formData?.significantClouds?.layer4 || {},
       },
-      rainfall: formData?.rainfall || {},
+      rainfall: {
+        "date-start": formData?.rainfall?.["date-start"] || "",
+        "time-start": formData?.rainfall?.["time-start"] || "",
+        "date-end": formData?.rainfall?.["date-end"] || "",
+        "time-end": formData?.rainfall?.["time-end"] || "",
+        "since-previous": formData?.rainfall?.["since-previous"] || "",
+        "during-previous": formData?.rainfall?.["during-previous"] || "",
+        "last-24-hours": formData?.rainfall?.["last-24-hours"] || "",
+        isIntermittentRain: formData?.rainfall?.isIntermittentRain || false,
+      },
+
       wind: formData?.wind || {},
       observer: {
         "observer-initial": session?.user?.name || "",
@@ -631,15 +636,19 @@ export default function SecondCardForm() {
       formik.setFieldValue(`significantClouds.layer4.${field}`, value);
     } else if (
       name.startsWith("rainfall-") ||
-      name.startsWith("time-") ||
-      name.startsWith("since-") ||
-      name.startsWith("during-") ||
-      name.startsWith("last-")
+      name === "date-start" ||
+      name === "time-start" ||
+      name === "date-end" ||
+      name === "time-end" ||
+      name === "since-previous" ||
+      name === "during-previous" ||
+      name === "last-24-hours" ||
+      name === "isIntermittentRain"
     ) {
-      // Handle rainfall fields with or without the rainfall- prefix
       const field = name.startsWith("rainfall-")
         ? name.replace("rainfall-", "")
         : name;
+
       formik.setFieldValue(`rainfall.${field}`, value);
     } else if (
       name === "first-anemometer" ||
@@ -1151,24 +1160,30 @@ export default function SecondCardForm() {
                               Time of Start (HH:MM UTC){" "}
                               <span className="text-red-500">*</span>
                             </Label>
-                            <Input
-                              id="time-start"
-                              name="time-start"
-                              type="text"
-                              placeholder="00:00"
-                              pattern="^([01]\d|2[0-3]):([0-5]\d)$"
-                              value={formik.values.rainfall["time-start"] || ""}
-                              onChange={handleInputChange}
-                              className={cn(
-                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
-                                {
-                                  "border-red-500": renderErrorMessage(
-                                    "rainfall.time-start"
-                                  ),
+                            <div className="grid grid-cols-2 gap-2">
+                              <Input
+                                id="date-start"
+                                name="date-start"
+                                type="date"
+                                value={
+                                  formik.values.rainfall["date-start"] || ""
                                 }
-                              )}
-                              required
-                            />
+                                onChange={handleInputChange}
+                                required
+                              />
+                              <Input
+                                id="time-start"
+                                name="time-start"
+                                type="text"
+                                step="60"
+                                value={
+                                  formik.values.rainfall["time-start"] || ""
+                                }
+                                onChange={handleInputChange}
+                                required
+                              />
+                            </div>
+
                             {renderErrorMessage("rainfall.time-start")}
                             <p className="text-xs text-gray-500 mt-1">
                               Format: HH:MM (e.g., 03:30, 06:15, 23:45)
@@ -1183,23 +1198,26 @@ export default function SecondCardForm() {
                               Time of Ending (HH:MM UTC){" "}
                               <span className="text-red-500">*</span>
                             </Label>
-                            <Input
-                              id="time-end"
-                              name="time-end"
-                              type="text"
-                              placeholder="00:00"
-                              pattern="^([01]\d|2[0-3]):([0-5]\d)$"
-                              value={formik.values.rainfall["time-end"] || ""}
-                              onChange={handleInputChange}
-                              className={cn(
-                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
-                                {
-                                  "border-red-500":
-                                    renderErrorMessage("rainfall.time-end"),
-                                }
-                              )}
-                              required
-                            />
+                            <div className="grid grid-cols-2 gap-2">
+                              <Input
+                                id="date-end"
+                                name="date-end"
+                                type="date"
+                                value={formik.values.rainfall["date-end"] || ""}
+                                onChange={handleInputChange}
+                                required
+                              />
+                              <Input
+                                id="time-end"
+                                name="time-end"
+                                type="text"
+                                step="60"
+                                value={formik.values.rainfall["time-end"] || ""}
+                                onChange={handleInputChange}
+                                required
+                              />
+                            </div>
+
                             {renderErrorMessage("rainfall.time-end")}
                             <p className="text-xs text-gray-500 mt-1">
                               Format: HH:MM (e.g., 03:30, 06:15, 23:45)

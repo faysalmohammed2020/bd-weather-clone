@@ -138,6 +138,33 @@ export async function POST(request: Request) {
       return dateTime;
     };
 
+    // নতুন helper ফাংশন
+    const convertToUTCDateTime = (
+      dateString: string | null,
+      timeString: string | null
+    ): Date | null => {
+      if (!dateString || !timeString) return null;
+
+      const [year, month, day] = dateString.split("-").map(Number);
+      const [hour, minute] = timeString.split(":").map(Number);
+
+      if (
+        !year ||
+        isNaN(month) ||
+        isNaN(day) ||
+        isNaN(hour) ||
+        isNaN(minute) ||
+        hour < 0 ||
+        hour > 23 ||
+        minute < 0 ||
+        minute > 59
+      ) {
+        return null;
+      }
+
+      return new Date(Date.UTC(year, month - 1, day, hour, minute));
+    };
+
     const observationData = {
       tabActive: data.metadata?.tabActiveAtSubmission || "unknown",
 
@@ -176,8 +203,15 @@ export async function POST(request: Request) {
       layer4Amount: data.significantClouds?.layer4?.amount || null,
 
       // Rainfall - Convert hour strings to DateTime objects
-      rainfallTimeStart: convertHourToDateTime(data.rainfall?.["time-start"]),
-      rainfallTimeEnd: convertHourToDateTime(data.rainfall?.["time-end"]),
+      rainfallTimeStart: convertToUTCDateTime(
+        data.rainfall?.["date-start"] || null,
+        data.rainfall?.["time-start"] || null
+      ),
+      rainfallTimeEnd: convertToUTCDateTime(
+        data.rainfall?.["date-end"] || null,
+        data.rainfall?.["time-end"] || null
+      ),
+
       rainfallSincePrevious: data.rainfall?.["since-previous"] || null,
       rainfallDuringPrevious: data.rainfall?.["during-previous"] || null,
       rainfallLast24Hours: data.rainfall?.["last-24-hours"] || null,
