@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
 import { useSession } from "@/lib/auth-client"
 import { LineChart, AlertCircle, Loader2 } from "lucide-react"
+import moment from "moment"
 
 // Daily Summary Form Values Interface
 interface DailySummaryFormValues {
@@ -158,25 +159,26 @@ export function DailySummaryForm() {
         }
 
         // Calculate rain duration
-        const totalRainDuration = todayWeatherObservations.reduce((total: number, item: any) => {
+        const totalRainDuration = todayWeatherObservations.reduce((totalMinutes: number, item: any) => {
           if (item.rainfallTimeStart && item.rainfallTimeEnd) {
-            const startTime = parseInt(item.rainfallTimeStart);
-            const endTime = parseInt(item.rainfallTimeEnd);
+            const startTime = moment(item.rainfallTimeStart, 'YYYY-MM-DD HH:mm:ss');
+            const endTime = moment(item.rainfallTimeEnd, 'YYYY-MM-DD HH:mm:ss');
             
-            const startMinutes = Math.floor(startTime / 100) * 60 + (startTime % 100);
-            const endMinutes = Math.floor(endTime / 100) * 60 + (endTime % 100);
+            let duration = moment.duration(endTime.diff(startTime)).asMinutes();
             
-            let duration = endMinutes - startMinutes;
-            
-          
             if (duration < 0) {
-              duration += 24 * 60;
+              duration += 1440; // add 24 hours if crossed midnight
             }
             
-            return total + duration;
+            return totalMinutes + duration;
           }
-          return total;
+          return totalMinutes;
         }, 0);
+        
+        // Convert total minutes to H:MM format
+        const hours = Math.floor(totalRainDuration / 60);
+        const minutes = Math.round(totalRainDuration % 60);
+        const formattedDuration = `${hours}:${minutes.toString().padStart(2, '0')}`;
         
         if (totalRainDuration > 0) {
           const hours = Math.floor(totalRainDuration / 60);
