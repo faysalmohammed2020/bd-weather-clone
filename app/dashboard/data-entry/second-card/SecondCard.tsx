@@ -1150,7 +1150,20 @@ export default function SecondCardForm() {
                           Measurement (mm)
                         </h3>
                       </div>
+
                       <CardContent className="pt-6">
+                        <p className="mb-3 text-sm text-yellow-800">
+                          📅 Please select the{" "}
+                          <span className="font-medium underline">
+                            previous date from calender
+                          </span>{" "}
+                          for
+                          <span className="text-blue-700 font-semibold">
+                            {" "}
+                            00 UTC{" "}
+                          </span>{" "}
+                          report submission.
+                        </p>
                         <div className="grid gap-6 md:grid-cols-2">
                           <div className="grid gap-2">
                             <Label
