@@ -55,7 +55,6 @@ export const auth = betterAuth({
       adminRoles: ["super_admin"],
     }),
     twoFactor(),
-    nextCookies(),
     customSession(async ({ user, session }) => {
       const authUser = await prisma.users.findUnique({
         where: {
@@ -78,5 +77,6 @@ export const auth = betterAuth({
         },
       };
     }),
+    nextCookies(),
   ],
 });
