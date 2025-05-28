@@ -25,6 +25,7 @@ import { toast } from "sonner"
 import { utcToHour } from "@/lib/utils"
 import { Download } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import moment from "moment"
 
 // Validation schema with specific digit requirements
 const validationSchema = yup.object({
@@ -1175,12 +1176,12 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                           <td
                             className={`border border-slate-300 p-1 ${weatherObs?.rainfallTimeStart ? "text-emerald-700 font-medium" : ""}`}
                           >
-                            {weatherObs?.rainfallTimeStart || "--"}
+                            {moment(weatherObs?.rainfallTimeStart).format("MMMM Do YYYY, h:mm") || "--"}
                           </td>
                           <td
                             className={`border border-slate-300 p-1 ${weatherObs?.rainfallTimeEnd ? "text-emerald-700 font-medium" : ""}`}
                           >
-                            {weatherObs?.rainfallTimeEnd || "--"}
+                            {moment(weatherObs?.rainfallTimeEnd).format("MMMM Do YYYY, h:mm") || "--"}
                           </td>
                           <td
                             className={`border border-slate-300 p-1 ${weatherObs?.rainfallSincePrevious ? "text-emerald-700 font-medium" : ""}`}
