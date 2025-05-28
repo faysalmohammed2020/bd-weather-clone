@@ -4,6 +4,7 @@ import { hashPassword } from "better-auth/crypto";
 import { getSession } from "@/lib/getSession";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import { diff } from "deep-object-diff";
+import { revalidateTag } from "next/cache";
 
 // GET method for listing users with pagination
 export async function GET(request: NextRequest) {
@@ -163,6 +164,9 @@ export async function PUT(request: NextRequest) {
         return user;
       });
 
+      // Revalidate time checking
+      revalidateTag("logs");
+
       return NextResponse.json(
         { message: "User updated successfully", user: updatedUser },
         { status: 200 }
@@ -304,6 +308,9 @@ export async function POST(request: NextRequest) {
       return newUser;
     });
 
+    // Revalidate time checking
+    revalidateTag("logs");
+
     return NextResponse.json(
       { message: "User created successfully" },
       { status: 201 }
@@ -385,6 +392,9 @@ export async function DELETE(request: NextRequest) {
         },
       });
     });
+
+    // Revalidate time checking
+    revalidateTag("logs");
 
     return NextResponse.json(
       { message: "User deleted successfully" },

@@ -29,6 +29,7 @@ import BasicInfoTab from "@/components/basic-info-tab";
 import HourSelector from "@/components/hour-selector";
 import { AnimatePresence, motion } from "framer-motion";
 import { MeteorologicalEntry } from "@prisma/client";
+import { TimeInfo } from "@/lib/data-type";
 
 // type MeteorologicalFormData = {
 //   presentWeatherWW?: string;
@@ -160,7 +161,11 @@ const validationSchema = Yup.object({
   ...weatherSchema.fields,
 });
 
-export function FirstCardForm() {
+export function FirstCardForm({
+  timeInfo,
+}: {
+  timeInfo: TimeInfo[];
+}) {
   const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
@@ -908,7 +913,7 @@ export function FirstCardForm() {
             transition={{ duration: 0.3 }}
             className="absolute inset-0 flex items-center justify-center bg-white backdrop-blur-sm z-50 px-6"
           >
-            <HourSelector type="first" />
+            <HourSelector type="first" timeInfo={timeInfo} />
           </motion.div>
         ) : (
           <motion.form
