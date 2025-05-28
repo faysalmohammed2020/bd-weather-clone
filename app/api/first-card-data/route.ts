@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { getSession } from "@/lib/getSession";
 import { convertUTCToBDTime, getTodayBDRange, hourToUtc } from "@/lib/utils";
 import { revalidateTag } from "next/cache";
+import { LogModule } from "@/lib/log";
 
 const prisma = new PrismaClient();
 

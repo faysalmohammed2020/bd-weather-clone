@@ -1,65 +1,8 @@
 import prisma from "@/lib/prisma";
-import { getTodayUtcRange, hourToUtc } from "@/lib/utils";
+import { hourToUtc } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/getSession";
 import moment from "moment";
-
-// Get todays time data for checking
-export async function GET() {
-  try {
-    const { startToday, endToday } = getTodayUtcRange();
-
-    const data = await prisma.observingTime.findMany({
-      where: {
-        AND: [
-          {
-            utcTime: {
-              gte: startToday,
-              lte: endToday,
-            },
-          },
-        ],
-      },
-      include: {
-        _count: {
-          select: {
-            MeteorologicalEntry: true,
-            WeatherObservation: true,
-            SynopticCode: true,
-            DailySummary: true,
-          },
-        },
-      },
-      orderBy: {
-        utcTime: "desc",
-      },
-    });
-
-
-    const formattedData = data.length > 0 ? data.map((item) => {
-      return {
-        createdAt: item.createdAt,
-        id: item.id,
-        localTime: item.localTime,
-        stationId: item.stationId,
-        updatedAt: item.updatedAt,
-        userId: item.userId,
-        utcTime: item.utcTime,
-        hasMeteorologicalEntry: item._count.MeteorologicalEntry > 0,
-        hasWeatherObservation: item._count.WeatherObservation > 0,
-        hasSynopticCode: item._count.SynopticCode > 0,
-        hasDailySummary: item._count.DailySummary > 0,
-      };
-    }) : [];
-
-    return NextResponse.json(formattedData);
-  } catch (error) {
-    return NextResponse.json(
-      { error: `Error fetching time information: ${error}` },
-      { status: 500 }
-    );
-  }
-}
 
 // Check if observing time exist or not and return each data count
 export async function POST(request: NextRequest) {

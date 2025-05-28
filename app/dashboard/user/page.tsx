@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { LogsTable } from "./logs-table";
 import { UserTable } from "./user-table";
-import { getLogs } from "@/lib/api";
+import { getLogs } from "@/app/actions/logs";
 
 const UserPage = async () => {
   const logs = await getLogs();
