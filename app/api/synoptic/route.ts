@@ -138,10 +138,6 @@ export async function GET() {
     measurements[6] = `3${stationPressure}/4${seaLevelPressure}`;
 
     // 8. 6RRRtR (47-51) - Precipitation
-    // 8. 6RRRtR (47-51) - Precipitation
-    // ... পূর্বের কোড (prisma, session, etc.) এখানে ধরেই নিচ্ছি
-
-    // ... পূর্বের কোড (prisma, session, etc.) এখানে ধরেই নিচ্ছি
 
     const rainFall = Number(weatherObs.rainfallDuringPrevious) || 0;
     const rainFallPadded = pad(rainFall.toString().slice(-3), 3); // শেষ ৩ সংখ্যা
@@ -153,7 +149,7 @@ export async function GET() {
     const rainEnd = weatherObs.rainfallTimeEnd
       ? new Date(weatherObs.rainfallTimeEnd)
       : null;
-    const isIntermittentRain = weatherObs.isIntermittentRain; // true/false; ফর্ম/ডিবিতে যোগ করুন
+    const isIntermittentRain = weatherObs.isIntermittentRain;
 
     let tr = "/";
 
@@ -164,22 +160,24 @@ export async function GET() {
 
     if (rainStart && rainEnd) {
       if (isIntermittentRain) {
-        // Intermittent rain (বিরতিযুক্ত বৃষ্টি) — WMO tr = 1, 2, 3
-        if (rainStart >= H_6 && rainEnd <= H_3) {
+        // WMO Chart-Based Intermittent Logic
+        const startedInFirstHalf = rainStart >= H_6 && rainStart < H_3;
+        const endedInFirstHalf = rainEnd <= H_3;
+
+        const startedInSecondHalf = rainStart >= H_3 && rainStart < H;
+        const endedInSecondHalf = rainEnd <= H;
+
+        if (startedInFirstHalf && endedInFirstHalf) {
           tr = "1"; // H-6 to H-3
-        } else if (rainStart >= H_3 && rainEnd <= H) {
+        } else if (startedInSecondHalf && endedInSecondHalf) {
           tr = "2"; // H-3 to H
-        } else if (
-          (rainStart <= H_6 && rainEnd >= H) || // পুরো ৬ ঘণ্টা জুড়ে
-          (rainStart <= H_6 && rainEnd >= H_3 && rainEnd <= H) || // overlap case
-          (rainStart >= H_6 && rainStart <= H_3 && rainEnd >= H)
-        ) {
-          tr = "3"; // Full 6-hour intermittent
+        } else if (rainStart <= H_6 && rainEnd >= H) {
+          tr = "3"; // Full H-6 to H
+        } else {
+          tr = "/"; // Invalid range
         }
-        // না মিললে tr = "/"
       } else {
         // Continuous rain — WMO tr = 4-9
-        // Window check: বৃষ্টি অবশ্যই H-6 থেকে H এর মধ্যে
         if (rainStart < H_6 || rainEnd > H) {
           tr = "/";
         } else {
@@ -188,7 +186,6 @@ export async function GET() {
           let hoursSinceEnd =
             (H.getTime() - rainEnd.getTime()) / (1000 * 60 * 60);
 
-          // রাত পার হলে
           if (hoursSinceEnd < 0) hoursSinceEnd += 24;
 
           if (durationHours <= 2) {
@@ -200,9 +197,20 @@ export async function GET() {
             else if (hoursSinceEnd <= 4) tr = "8";
           } else if (durationHours <= 6 && hoursSinceEnd <= 2) {
             tr = "9";
+          } else {
+            tr = "/";
           }
-          // না মিললে tr = "/"
         }
+      }
+    } else {
+      if (
+        rainFall > 0 &&
+        (!rainStart ||
+          !rainEnd ||
+          isIntermittentRain === null ||
+          isIntermittentRain === undefined)
+      ) {
+        tr = "0"; // বৃষ্টি হয়েছে, কিন্তু সময় বা ধরণ অজানা
       }
     }
 
