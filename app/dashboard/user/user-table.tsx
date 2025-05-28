@@ -184,13 +184,14 @@ export const UserTable = () => {
     const selectedStation = stations.find(
       (station) => station.id === stationId
     );
+    
     if (selectedStation) {
       setFormData((prevData) => ({
         ...prevData,
-        stationId: selectedStation.id,
+        stationId: selectedStation?.id || "",
       }));
     }
-  };
+  };  
 
   // We're now handling form data updates directly in the select onValueChange handlers
   // This ensures the form data and location context stay in sync
