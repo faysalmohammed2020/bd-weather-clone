@@ -177,16 +177,26 @@ export async function GET(req: Request) {
   const endTime = endDate ? new Date(endDate) : new Date();
   endTime.setHours(23, 59, 59, 999);
 
+  const superFilter = session.user.role === "super_admin";
+
   try {
     const rawSummaries = await prisma.dailySummary.findMany({
       where: {
-        ObservingTime: {
-          utcTime: {
-            gte: startTime,
-            lte: endTime,
+        AND: [
+          {
+            ObservingTime: {
+              utcTime: {
+                gte: startTime,
+                lte: endTime,
+              },
+            },
           },
-          ...(stationIdParam ? { stationId: stationIdParam } : {}),
-        },
+          ...(superFilter
+            ? stationIdParam
+              ? [{ ObservingTime: { stationId: stationIdParam } }]
+              : []
+            : [{ ObservingTime: { stationId: session.user.station?.id } }]),
+        ],
       },
       include: {
         ObservingTime: {
