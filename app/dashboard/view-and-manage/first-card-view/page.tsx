@@ -1074,19 +1074,20 @@ const FirstCardTable = forwardRef(
                 <table className="w-full border-collapse">
                   <thead>
                     <tr>
-                      <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
+                      <th rowSpan={2} className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
                         GG
                       </th>
-                      <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
+                      <th rowSpan={2} className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
                         CI
                       </th>
-                      <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
+                      <th rowSpan={2} className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
                         Date
                       </th>
-                      <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
+                      <th rowSpan={2} className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
                         Station
                       </th>
                       <th
+                        rowSpan={2}
                         colSpan={9}
                         className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 p-1 text-purple-800"
                       >
@@ -1099,44 +1100,60 @@ const FirstCardTable = forwardRef(
                         TEMPERATURE
                       </th>
                       <th
+                        rowSpan={2}
                         colSpan={1}
                         className="border border-slate-300 bg-gradient-to-b from-teal-50 to-teal-100 p-1 text-teal-800"
                       >
                         Td
                       </th>
                       <th
+                        rowSpan={2}
                         colSpan={1}
                         className="border border-slate-300 bg-gradient-to-b from-teal-50 to-teal-100 p-1 text-teal-800"
                       >
                         R.H.
                       </th>
                       <th
+                        rowSpan={2}
                         colSpan={3}
                         className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 p-1 text-amber-800"
                       >
                         SQUALL
                       </th>
                       <th
+                        rowSpan={2}
                         colSpan={1}
                         className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 p-1 text-blue-800"
                       >
                         VV
                       </th>
                       <th
+                        rowSpan={2}
                         colSpan={1}
                         className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 p-1 text-blue-800"
                       ></th>
                       <th
+                        rowSpan={2}
                         colSpan={3}
                         className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 p-1 text-emerald-800"
                       >
                         WEATHER
                       </th>
                       <th
+                        rowSpan={2}
                         colSpan={1}
                         className="border border-slate-300 bg-gradient-to-b from-gray-50 to-gray-100 p-1 text-gray-800"
                       >
                         Actions
+                      </th>
+                    </tr>
+                    <tr>
+                      {/* Row for temperature column groups */}
+                      <th colSpan={3} className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 text-xs p-1 text-cyan-800 text-center">
+                        As Read
+                      </th>
+                      <th colSpan={3} className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 text-xs p-1 text-cyan-800 text-center">
+                        Corrected
                       </th>
                     </tr>
                     <tr>
