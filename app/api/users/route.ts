@@ -5,6 +5,7 @@ import { getSession } from "@/lib/getSession";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import { diff } from "deep-object-diff";
 import { revalidateTag } from "next/cache";
+import { admin } from "@/lib/auth-client";
 
 // GET method for listing users with pagination
 export async function GET(request: NextRequest) {
@@ -161,6 +162,11 @@ export async function PUT(request: NextRequest) {
               data: {
                 password: hashedPassword,
               },
+            });
+
+            // Revoke User Sessions
+            await admin.revokeUserSessions({
+              userId: existingUser.id,
             });
           } else {
             // Create a new account if it doesn't exist
@@ -416,6 +422,10 @@ export async function DELETE(request: NextRequest) {
     }
 
     await prisma.$transaction(async (tx) => {
+      await admin.revokeUserSessions({
+        userId: userToDelete.id,
+      });
+
       // Log The Action
       await LogAction({
         init: tx,
