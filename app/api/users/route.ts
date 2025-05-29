@@ -8,6 +8,12 @@ import { revalidateTag } from "next/cache";
 
 // GET method for listing users with pagination
 export async function GET(request: NextRequest) {
+  const session = await getSession();
+
+  if (!session) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     // Get pagination parameters from the URL
     const searchParams = request.nextUrl.searchParams;
@@ -15,16 +21,31 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get("offset") || "0");
 
     // Fetch users with pagination
-    const users = await prisma.users.findMany({
-      skip: offset,
-      take: limit,
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
-
-    // Get total count for pagination
-    const total = await prisma.users.count();
+    const [users, total] = await Promise.all([
+      prisma.users.findMany({
+        where:
+          session.user.role === "super_admin"
+            ? undefined
+            : {
+                role: "observer",
+                stationId: session.user.station?.id,
+              },
+        skip: offset,
+        take: limit,
+        orderBy: {
+          createdAt: "desc",
+        },
+      }),
+      prisma.users.count({
+        where:
+          session.user.role === "super_admin"
+            ? undefined
+            : {
+                role: "observer",
+                stationId: session.user.station?.id,
+              },
+      }),
+    ]);
 
     return NextResponse.json(
       {
@@ -65,6 +86,7 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+
     // Get the existing user to check their current role
     const existingUser = await prisma.users.findUnique({
       where: { id },
@@ -74,10 +96,19 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Prevent modifying super_admin role
-    if (existingUser.role === "super_admin" && rest.role !== "super_admin") {
+
+    // Authorization check (If other role tries to update super admin)
+    if (existingUser.role === "super_admin" && session.user.role !== "super_admin") {
       return NextResponse.json(
-        { error: "Super admin role cannot be changed" },
+        { error: "You are not authorized to do this action" },
+        { status: 403 }
+      );
+    }
+
+    // Authorization check (If station admin tries to update other station admin)
+    if (existingUser.role === "station_admin" && session.user.role === "station_admin") {
+      return NextResponse.json(
+        { error: "You are not authorized to do this action" },
         { status: 403 }
       );
     }
@@ -196,6 +227,13 @@ export async function POST(request: NextRequest) {
     const session = await getSession();
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if(session.user.role !== "super_admin") {
+      return NextResponse.json(
+        { error: "You are not authorized to do this action" },
+        { status: 403 }
+      );
     }
 
     const body = await request.json();
@@ -333,6 +371,13 @@ export async function DELETE(request: NextRequest) {
     // Check if user is authenticated
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    if(session.user.role !== "super_admin") {
+      return NextResponse.json(
+        { error: "You are not authorized to do this action" },
+        { status: 403 }
+      );
     }
 
     const searchParams = request.nextUrl.searchParams;
