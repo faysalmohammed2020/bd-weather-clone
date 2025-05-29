@@ -199,7 +199,6 @@ const cloudSchema = Yup.object({
     high: Yup.object({
       form: Yup.string().required("High cloud form is required"),
       amount: Yup.string().required("High cloud amount is required"),
-      height: Yup.string().required("High cloud height is required"),
       direction: Yup.string().required("High cloud direction is required"),
     }),
   }),
@@ -260,11 +259,7 @@ const validationSchema = Yup.object({
   ...observerSchema.fields,
 });
 
-export default function SecondCardForm({
-  timeInfo,
-}: {
-  timeInfo: TimeInfo[];
-}) {
+export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("cloud");
   const [currentStep, setCurrentStep] = useState(1);
@@ -1902,18 +1897,20 @@ function CloudLevelSection({
           required
         />
 
-        <SelectField
-          id={`${prefix}-height`}
-          name={`${prefix}-height`}
-          label="Height of Base (Code)"
-          accent={color}
-          value={data["height"] || ""}
-          onValueChange={(value) => onSelectChange(`${prefix}-height`, value)}
-          options={cloudHeightOptions.map((opt) => opt.value)}
-          optionLabels={cloudHeightOptions.map((opt) => opt.label)}
-          error={renderError("height")}
-          required
-        />
+        {prefix !== "high-cloud" && (
+          <SelectField
+            id={`${prefix}-height`}
+            name={`${prefix}-height`}
+            label="Height of Base (Code)"
+            accent={color}
+            value={data["height"] || ""}
+            onValueChange={(value) => onSelectChange(`${prefix}-height`, value)}
+            options={cloudHeightOptions.map((opt) => opt.value)}
+            optionLabels={cloudHeightOptions.map((opt) => opt.label)}
+            error={renderError("height")}
+            required
+          />
+        )}
 
         <SelectField
           id={`${prefix}-direction`}

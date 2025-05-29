@@ -1005,10 +1005,7 @@ const FirstCardTable = forwardRef(
                       <SelectContent>
                         <SelectItem value="all">All Stations</SelectItem>
                         {stations.map((station) => (
-                          <SelectItem
-                            key={station.id}
-                            value={station.id}
-                          >
+                          <SelectItem key={station.id} value={station.id}>
                             {station.name} ({station.stationId})
                           </SelectItem>
                         ))}
@@ -1074,16 +1071,28 @@ const FirstCardTable = forwardRef(
                 <table className="w-full border-collapse">
                   <thead>
                     <tr>
-                      <th rowSpan={2} className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
+                      <th
+                        rowSpan={2}
+                        className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800"
+                      >
                         GG
                       </th>
-                      <th rowSpan={2} className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
+                      <th
+                        rowSpan={2}
+                        className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800"
+                      >
                         CI
                       </th>
-                      <th rowSpan={2} className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
+                      <th
+                        rowSpan={2}
+                        className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800"
+                      >
                         Date
                       </th>
-                      <th rowSpan={2} className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
+                      <th
+                        rowSpan={2}
+                        className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800"
+                      >
                         Station
                       </th>
                       <th
@@ -1149,10 +1158,16 @@ const FirstCardTable = forwardRef(
                     </tr>
                     <tr>
                       {/* Row for temperature column groups */}
-                      <th colSpan={3} className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 text-xs p-1 text-cyan-800 text-center">
+                      <th
+                        colSpan={3}
+                        className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 text-xs p-1 text-cyan-800 text-center"
+                      >
                         As Read
                       </th>
-                      <th colSpan={3} className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 text-xs p-1 text-cyan-800 text-center">
+                      <th
+                        colSpan={3}
+                        className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 text-xs p-1 text-cyan-800 text-center"
+                      >
                         Corrected
                       </th>
                     </tr>
@@ -1210,12 +1225,12 @@ const FirstCardTable = forwardRef(
                       </th>
                       <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
                         <div className="h-16 text-purple-800">
-                          Afternoon Reading
+                          Altimeter setting (QNH)
                         </div>
                       </th>
                       <th className="border border-slate-300 bg-gradient-to-b from-purple-50 to-purple-100 text-xs p-1">
                         <div className="h-16 text-purple-800">
-                          24-Hour Change
+                          24-Hour Pressure Change
                         </div>
                       </th>
                       <th className="border border-slate-300 bg-gradient-to-b from-cyan-50 to-cyan-100 text-xs p-1">
@@ -1717,7 +1732,7 @@ const FirstCardTable = forwardRef(
                             },
                             {
                               id: "afternoonReading",
-                              label: "Afternoon Reading",
+                              label: "Altimeter setting (QNH)",
                               bg: "bg-indigo-50",
                               readOnly: false,
                             },
