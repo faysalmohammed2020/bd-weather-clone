@@ -995,19 +995,21 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                 onValueChange={handleTabChange}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-3 rounded-xl p-1 border-0 bg-transparent">
+                <TabsList className="grid w-full grid-cols-2 mb-20 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-3 rounded-xl p-1 border-0 bg-transparent">
                   {Object.entries(tabStyles).map(([key, style]) => (
                     <TabsTrigger
                       key={key}
                       value={key}
                       disabled={Boolean(timeData?.time)}
-                      className={cn("border border-gray-300", {
-                        [style.tab]: activeTab === key,
-                        "!border-red-500 !text-red-700":
-                          !isTabValid(key) && formik.submitCount > 0,
-                      })}
+                      className={cn(
+                        "flex flex-col items-center justify-center border border-gray-300 text-xs sm:text-sm px-2 py-1 md:py-2",
+                        {
+                          [style.tab]: activeTab === key,
+                          "!border-red-500 !text-red-700":
+                            !isTabValid(key) && formik.submitCount > 0,
+                        }
+                      )}
                       onClick={(e) => {
-                        // Prevent tab navigation if current tab is invalid
                         if (activeTab !== key && !validateTab(activeTab)) {
                           e.preventDefault();
                           toast.error(
@@ -1021,9 +1023,9 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         }
                       }}
                     >
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center gap-1">
                         {style.icon}
-                        <span className="hidden md:inline">
+                        <span className="hidden sm:inline">
                           {key === "V.V" ? "VV" : key}
                         </span>
                       </div>
@@ -1661,12 +1663,15 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   <Card
                     className={cn("overflow-hidden", tabStyles.weather.card)}
                   >
+                    {/* Header */}
                     <div className="p-4 bg-gradient-to-r from-cyan-200 to-cyan-300 text-cyan-800">
                       <h3 className="text-lg font-semibold flex items-center">
                         <Cloud className="mr-2" /> Weather Conditions
                       </h3>
                     </div>
-                    <CardContent className="grid grid-cols-2 gap-4 pt-6 space-y-4">
+
+                    {/* Form Fields */}
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
                       {/* Past Weather W1 */}
                       <div className="space-y-2">
                         <Label htmlFor="pastWeatherW1">Past Weather (W1)</Label>
@@ -1719,8 +1724,8 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         </p>
                       </div>
 
-                      {/* Present Weather WW */}
-                      <div className="space-y-2">
+                      {/* Present Weather WW (full width on small) */}
+                      <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="presentWeatherWW">
                           Present Weather (WW)
                         </Label>
@@ -1743,22 +1748,30 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         </p>
                       </div>
                     </CardContent>
-                    <CardFooter className="flex justify-between p-6">
-                      <Button type="button" variant="outline" onClick={prevTab}>
+
+                    {/* Footer */}
+                    <CardFooter className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-4 p-6">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={prevTab}
+                        className="w-full sm:w-auto"
+                      >
                         <ChevronLeft className="mr-2 h-4 w-4" /> Previous
                       </Button>
-                      <div className="flex gap-4">
+
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
                         <Button
                           type="button"
                           variant="outline"
-                          className="border-slate-600 hover:bg-slate-100 transition-all duration-300"
+                          className="w-full sm:w-auto border-slate-600 hover:bg-slate-100 transition-all duration-300"
                           onClick={handleReset}
                         >
                           Reset
                         </Button>
                         <Button
                           type="submit"
-                          className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
+                          className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
                           disabled={isSubmitting}
                         >
                           {isSubmitting ? "Saving..." : "Submit Data"}
