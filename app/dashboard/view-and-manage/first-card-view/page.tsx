@@ -508,7 +508,7 @@ const FirstCardTable = forwardRef(
 
         const closestPressure = availablePressures.reduce((prev, curr) =>
           Math.abs(curr - stationPressureValue) <
-          Math.abs(prev - stationPressureValue)
+            Math.abs(prev - stationPressureValue)
             ? curr
             : prev
         );
@@ -600,8 +600,8 @@ const FirstCardTable = forwardRef(
             ? format(new Date(observingTime.utcTime), "yyyy-MM-dd")
             : "--",
           observingTime?.station?.name +
-            " " +
-            observingTime?.station?.stationId || "--",
+          " " +
+          observingTime?.station?.stationId || "--",
           observingTime?.station?.name || "--",
           record.alteredThermometer || "--",
           record.barAsRead || "--",
@@ -840,10 +840,10 @@ const FirstCardTable = forwardRef(
           prevData.map((item) =>
             item.id === selectedRecord.id
               ? {
-                  ...item,
-                  ...values,
-                  squallConfirmed: values.squallConfirmed ? "true" : "false",
-                }
+                ...item,
+                ...values,
+                squallConfirmed: values.squallConfirmed ? "true" : "false",
+              }
               : item
           )
         );
@@ -856,12 +856,12 @@ const FirstCardTable = forwardRef(
               (entry) =>
                 entry.id === selectedRecord.id
                   ? {
-                      ...entry,
-                      ...values,
-                      squallConfirmed: values.squallConfirmed
-                        ? "true"
-                        : "false",
-                    }
+                    ...entry,
+                    ...values,
+                    squallConfirmed: values.squallConfirmed
+                      ? "true"
+                      : "false",
+                  }
                   : entry
             ),
           }))
@@ -928,143 +928,166 @@ const FirstCardTable = forwardRef(
           First Card Data Table
         </div>
         <CardContent className="p-6">
-          <div className="mb-6">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 p-4 rounded-lg">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                <div className="flex items-center gap-2">
+          <div className="flex flex-col md:flex-row md:justify-between mb-6 gap-4 bg-slate-100 p-3 sm:p-4 rounded-lg">
+
+            {/* Date Navigation Section */}
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4">
+
+              {/* Navigation Controls - Responsive Layout */}
+              <div className="flex flex-col xs:flex-row items-start xs:items-center gap-2 xs:gap-3 w-full sm:w-auto">
+
+                {/* Previous/Next Buttons with Date Inputs */}
+                <div className="flex items-center gap-2 w-full xs:w-auto">
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={goToPreviousWeek}
-                    className="hover:bg-slate-200"
+                    className="hover:bg-slate-200 flex-shrink-0"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
 
-                  <div className="flex items-center gap-2">
+                  {/* Date Range Inputs - Responsive */}
+
+                  <div className="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
                     <input
                       type="date"
                       value={startDate}
-                      onChange={(e) =>
-                        handleDateChange("start", e.target.value)
-                      }
+                      onChange={(e) => handleDateChange("start", e.target.value)}
                       max={endDate}
-                      className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                      className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full xs:w-auto min-w-0"
                     />
-                    <span>to</span>
+                    <span className="text-sm text-slate-600 whitespace-nowrap">to</span>
                     <input
                       type="date"
                       value={endDate}
                       onChange={(e) => handleDateChange("end", e.target.value)}
                       min={startDate}
                       max={format(new Date(), "yyyy-MM-dd")}
-                      className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                      className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full xs:w-auto min-w-0"
                     />
                   </div>
+
+
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={goToNextWeek}
-                    className="hover:bg-slate-200"
+                    className="hover:bg-slate-200 flex-shrink-0"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
+            </div>
 
-              <div className="flex items-center gap-2">
-                {(isSuperAdmin || isStationAdmin) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={exportToCSV}
-                    className="flex items-center gap-1 hover:bg-green-50 border-green-200 text-green-700"
-                    disabled={flattenedData.length === 0}
-                  >
-                    <Download className="h-4 w-4" />
-                    Export CSV
-                  </Button>
-                )}
+            {/* Actions and Filters Section */}
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4 pt-2 md:pt-0 border-t md:border-t-0 border-slate-200">
+              {/* Export Button */}
+              {(isSuperAdmin || isStationAdmin) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={exportToCSV}
+                  className="flex items-center gap-2 hover:bg-green-50 border-green-200 text-green-700 w-full sm:w-auto justify-center sm:justify-start"
+                  disabled={flattenedData.length === 0}
+                >
+                  <Download className="h-4 w-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">Export CSV</span>
+                </Button>
+              )}
 
-                {isSuperAdmin && (
-                  <>
-                    <Filter size={16} className="text-purple-500" />
+              {/* Station Filter - Super Admin Only */}
+              {isSuperAdmin && (
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-3 w-full md:w-auto">
+                  <div className="flex items-center gap-2">
+                    <Filter size={16} className="text-purple-500 flex-shrink-0" />
                     <Label
                       htmlFor="stationFilter"
-                      className="whitespace-nowrap font-medium text-slate-700"
+                      className="whitespace-nowrap font-medium text-slate-700 text-sm"
                     >
                       Station:
                     </Label>
-                    <Select
-                      value={stationFilter}
-                      onValueChange={setStationFilter}
-                    >
-                      <SelectTrigger className="w-[200px] border-slate-300 focus:ring-purple-500">
-                        <SelectValue placeholder="All Stations" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Stations</SelectItem>
-                        {stations.map((station) => (
-                          <SelectItem key={station.id} value={station.id}>
+                  </div>
+                  <Select
+                    value={stationFilter}
+                    onValueChange={setStationFilter}
+                  >
+                    <SelectTrigger className="w-full xs:w-[180px] sm:w-[200px] border-slate-300 focus:ring-purple-500 text-sm">
+                      <SelectValue placeholder="All Stations" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Stations</SelectItem>
+                      {stations.map((station) => (
+                        <SelectItem key={station.id} value={station.id}>
+                          <span className="block truncate">
                             {station.name} ({station.stationId})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </>
-                )}
-              </div>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
-            <div className="p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300">
-              <div className="flex justify-around gap-4">
-                <div className="flex flex-col">
-                  <Label className="text-sm font-medium text-slate-900 mb-2">
+
+            <div className="flex flex-col md:flex-row md:justify-between p-3 sm:p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300 gap-3 sm:gap-4">
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
+                <div className="flex flex-col items-center min-w-[100px]">
+                  <Label className="text-xs sm:text-sm font-medium text-slate-900 mb-1 sm:mb-2 text-center">
                     DATA TYPE
                   </Label>
                   <div className="flex gap-1">
                     {["S", "Y"].map((char, i) => (
                       <Input
                         key={`dataType-${i}`}
-                        className="w-12 text-center p-2 bg-slate-100 border border-slate-400 shadow-sm"
+                        className="w-8 sm:w-10 h-8 sm:h-9 text-center p-1 bg-slate-100 border border-slate-400 shadow-sm text-xs sm:text-sm"
                         defaultValue={char}
                         readOnly
                       />
                     ))}
                   </div>
                 </div>
-                <div>
-                  <div className="font-bold uppercase text-slate-600">
+
+                <div className="flex flex-col items-center min-w-[100px]">
+                  <div className="text-xs sm:text-sm font-bold uppercase text-slate-600 mb-1 sm:mb-2 text-center">
                     STATION NO
                   </div>
-                  <div className="flex h-10 border border-slate-400 rounded-lg p-2 mx-auto">
+                  <div className="flex h-8 sm:h-9 w-full min-w-[80px] sm:min-w-[100px] border border-slate-400 rounded-lg px-2 items-center justify-center bg-white text-xs sm:text-sm font-mono truncate">
                     {user?.station?.stationId || "N/A"}
                   </div>
                 </div>
-                <div>
-                  <div className="font-bold uppercase text-slate-600">
-                    STATION
-                  </div>
-                  <div className="h-10 border border-slate-400 p-2 mx-auto flex items-cente font-mono rounded-md">
-                    {user?.station?.name || "N/A"}
-                  </div>
-                </div>
+              </div>
 
-                <div>
-                  <div className="font-bold uppercase text-slate-600">YEAR</div>
-                  <div className="flex mt-1">
-                    <div className="w-12 h-10 border border-slate-400 flex items-center justify-center p-2 font-mono rounded-l-md">
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
+                <div className="flex flex-col items-center min-w-[100px]">
+                  <div className="text-xs sm:text-sm font-bold uppercase text-slate-600 mb-1 sm:mb-2 text-center">
+                    YEAR
+                  </div>
+                  <div className="flex">
+                    <div className="w-8 sm:w-10 h-8 sm:h-9 border border-slate-400 flex items-center justify-center p-1 font-mono rounded-l-md bg-white text-xs sm:text-sm">
                       {new Date().getFullYear().toString().slice(-2, -1)}
                     </div>
-                    <div className="w-12 h-10 border-t border-r border-b border-slate-400 flex items-center justify-center p-2 font-mono rounded-r-md">
+                    <div className="w-8 sm:w-10 h-8 sm:h-9 border-t border-r border-b border-slate-400 flex items-center justify-center p-1 font-mono rounded-r-md bg-white text-xs sm:text-sm">
                       {new Date().getFullYear().toString().slice(-1)}
                     </div>
                   </div>
                 </div>
+
+                <div className="flex flex-col items-center min-w-[120px] sm:min-w-[150px]">
+                  <div className="text-xs sm:text-sm font-bold uppercase text-slate-600 mb-1 sm:mb-2 text-center">
+                    STATION
+                  </div>
+                  <div className="h-8 sm:h-9 w-full border border-slate-400 px-2 flex items-center justify-center font-mono rounded-md bg-white text-xs sm:text-sm text-center truncate">
+                    {user?.station?.name || "N/A"}
+                  </div>
+                </div>
               </div>
             </div>
+
 
             <div className="p-4">
               <div className="overflow-x-auto">
@@ -1334,24 +1357,23 @@ const FirstCardTable = forwardRef(
                             );
                             const recordDate = observingTime.utcTime
                               ? format(
-                                  new Date(observingTime.utcTime),
-                                  "yyyy-MM-dd"
-                                )
+                                new Date(observingTime.utcTime),
+                                "yyyy-MM-dd"
+                              )
                               : "--";
                             const canEdit = user && canEditRecord(record, user);
                             const rowIndex =
                               obsIndex *
-                                observingTime.MeteorologicalEntry.length +
+                              observingTime.MeteorologicalEntry.length +
                               entryIndex;
 
                             return (
                               <tr
                                 key={record.id}
-                                className={`text-center font-mono hover:bg-slate-50 transition-colors ${
-                                  rowIndex % 2 === 0
-                                    ? "bg-white"
-                                    : "bg-slate-50"
-                                }`}
+                                className={`text-center font-mono hover:bg-slate-50 transition-colors ${rowIndex % 2 === 0
+                                  ? "bg-white"
+                                  : "bg-slate-50"
+                                  }`}
                               >
                                 <td className="border border-slate-300 p-1 font-medium text-indigo-700">
                                   {utcToHour(observingTime.utcTime.toString())}
@@ -1443,20 +1465,20 @@ const FirstCardTable = forwardRef(
                                 <td className="border border-slate-300 p-1 font-medium text-blue-700">
                                   {record.horizontalVisibility
                                     ? Number.parseInt(
-                                        record.horizontalVisibility
-                                      ) %
-                                        10 ===
+                                      record.horizontalVisibility
+                                    ) %
+                                      10 ===
                                       0
                                       ? Number.parseInt(
+                                        record.horizontalVisibility,
+                                        10
+                                      ) / 10
+                                      : (
+                                        Number.parseInt(
                                           record.horizontalVisibility,
                                           10
                                         ) / 10
-                                      : (
-                                          Number.parseInt(
-                                            record.horizontalVisibility,
-                                            10
-                                          ) / 10
-                                        ).toFixed(1)
+                                      ).toFixed(1)
                                     : "--"}
                                 </td>
 
@@ -1562,7 +1584,7 @@ const FirstCardTable = forwardRef(
 
           {/* Edit Dialog with Formik and Auto-calculations */}
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogContent className="w-[50vw] !max-w-[90vw] rounded-xl border-0 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 shadow-xl">
+            <DialogContent className="w-[90vw] !max-w-[95vw] rounded-xl border-0 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 shadow-xl">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-bold text-indigo-800">
                   <div className="flex items-center gap-2">
@@ -1589,9 +1611,9 @@ const FirstCardTable = forwardRef(
                   {selectedObservingTime?.station?.stationId || "Unknown"}) on{" "}
                   {selectedObservingTime?.utcTime
                     ? format(
-                        new Date(selectedObservingTime.utcTime),
-                        "MMMM d, yyyy"
-                      )
+                      new Date(selectedObservingTime.utcTime),
+                      "MMMM d, yyyy"
+                    )
                     : "Unknown Date"}
                 </DialogDescription>
                 <div className="h-1 w-20 rounded-full bg-gradient-to-r from-indigo-400 to-blue-400 mt-2"></div>
@@ -1865,16 +1887,14 @@ const FirstCardTable = forwardRef(
                                 id={field.id}
                                 name={field.id}
                                 readOnly={field.readOnly}
-                                className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
-                                  field.readOnly
-                                    ? "opacity-70 cursor-not-allowed bg-gray-50"
-                                    : ""
-                                } ${
-                                  errors[field.id as keyof typeof errors] &&
-                                  touched[field.id as keyof typeof touched]
+                                className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${field.readOnly
+                                  ? "opacity-70 cursor-not-allowed bg-gray-50"
+                                  : ""
+                                  } ${errors[field.id as keyof typeof errors] &&
+                                    touched[field.id as keyof typeof touched]
                                     ? "border-red-500 focus:border-red-500 focus:ring-red-200"
                                     : ""
-                                }`}
+                                  }`}
                               />
                               <ErrorMessage
                                 name={field.id}
