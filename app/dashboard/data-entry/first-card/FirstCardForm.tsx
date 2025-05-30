@@ -1524,9 +1524,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="squallTime">
-                              GG: Time of Observation (UTC)
-                            </Label>
+                            <Label htmlFor="squallTime">Time(qt)</Label>
                             <select
                               id="squallTime"
                               name="squallTime"
@@ -1547,15 +1545,37 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                 }
                               )}
                             >
-                              <option value="">-- Select GG Time --</option>
-                              <option value="00">00 UTC</option>
-                              <option value="03">03 UTC</option>
-                              <option value="06">06 UTC</option>
-                              <option value="09">09 UTC</option>
-                              <option value="12">12 UTC</option>
-                              <option value="15">15 UTC</option>
-                              <option value="18">18 UTC</option>
-                              <option value="21">21 UTC</option>
+                              <option value="">-- Select Time (qt) --</option>
+                              <option value="0">
+                                0 → 0 to ½ hour before observation
+                              </option>
+                              <option value="1">
+                                1 → ½ to 1 hour before observation
+                              </option>
+                              <option value="2">
+                                2 → 1 to 1¼ hour before observation
+                              </option>
+                              <option value="3">
+                                3 → 1¼ to 2 hour before observation
+                              </option>
+                              <option value="4">
+                                4 → 2 to 2½ hour before observation
+                              </option>
+                              <option value="5">
+                                5 → 2½ to 3 hour before observation
+                              </option>
+                              <option value="6">
+                                6 → 3 to 4 hour before observation
+                              </option>
+                              <option value="7">
+                                7 → 4 to 5 hour before observation
+                              </option>
+                              <option value="8">
+                                8 → 5 to 6 hour before observation
+                              </option>
+                              <option value="9">
+                                9 → More than 6 hour before observation
+                              </option>
                             </select>
                             {renderErrorMessage("squallTime")}
                           </div>
