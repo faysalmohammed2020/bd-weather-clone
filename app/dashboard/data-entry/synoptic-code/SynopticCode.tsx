@@ -123,7 +123,7 @@ const measurements = [
     ),
     range: "72-76",
   },
-  
+
   { id: 14, label: "C2", range: "16" },
   { id: 15, label: "GG", range: "17-18" },
   {
@@ -145,13 +145,16 @@ const measurements = [
     id: 17,
     label: (
       <span style={{ display: "inline-block", textAlign: "center" }}>
+        (
         <span>
           6RRRt<sub>R</sub>
         </span>
+        )
       </span>
     ),
     range: "24-28",
   },
+
   {
     id: 18,
     label: (
@@ -504,10 +507,9 @@ export function SynopticCode() {
                             className="bg-amber-100 border-amber-300"
                           >
                             <p className="text-sm text-amber-800">
-                              Please Double Check The Corresponding<br/> Data In First 
-                              & Second Card!.There is no logic!
-                              
-
+                              Please Double Check The Corresponding
+                              <br /> Data In First & Second Card!.There is no
+                              logic!
                             </p>
                           </TooltipContent>
                         )}
@@ -582,8 +584,9 @@ export function SynopticCode() {
                             className="bg-amber-100 border-amber-300"
                           >
                             <p className="text-sm text-amber-800">
-                             Please Double Check The Corresponding<br/> Data In First 
-                              & Second Card!.There is no logic!
+                              Please Double Check The Corresponding
+                              <br /> Data In First & Second Card!.There is no
+                              logic!
                             </p>
                           </TooltipContent>
                         )}
