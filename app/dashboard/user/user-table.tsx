@@ -529,326 +529,324 @@ export const UserTable = () => {
 
   return (
     <div className="mb-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">User Management</h1>
-        <div>
-          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-            <DialogTrigger asChild>
-              <Button
-                className="bg-sky-600 hover:bg-sky-400"
-                onClick={openCreateDialog}
-              >
-                + Create User
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {editUser ? "Edit User" : "Create New User"}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                {/* Name */}
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="name">Name</label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                  />
-                </div>
-
-                {/* Role - Placed first for validation purposes */}
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="role">
-                    Role <span className="text-red-500">*</span>
-                  </label>
-                  <Select
-                    value={formData.role}
-                    onValueChange={(value) => {
-                      const role = value as UserRole;
-                      setFormData({ ...formData, role });
-
-                      // Display password requirement based on selected role
-                      const passwordMinLength = {
-                        super_admin: 12,
-                        station_admin: 11,
-                        observer: 10,
-                      };
-
-                      toast.info(
-                        `Password must be at least ${passwordMinLength[role]} characters for ${role} role`
-                      );
-                    }}
-                  >
-                    <SelectTrigger id="role" className="w-full">
-                      <SelectValue placeholder="Select Role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="super_admin">Super Admin</SelectItem>
-                      <SelectItem value="station_admin">
-                        Station Admin
-                      </SelectItem>
-                      <SelectItem value="observer">Observer</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Email and Password */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="email">
-                      Email <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="password"
-                      className="flex items-center gap-1"
-                    >
-                      {editUser ? "New Password" : "Password"}
-                      {!editUser && <span className="text-red-500">*</span>}
-                      {formData.role && (
-                        <span className="text-xs text-blue-600 block">
-                          {`Min ${formData.role === "super_admin" ? 12 : formData.role === "station_admin" ? 11 : 10} characters`}
-                        </span>
-                      )}
-                    </label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder={
-                        formData.role
-                          ? `Min ${formData.role === "super_admin" ? 12 : formData.role === "station_admin" ? 11 : 10} characters`
-                          : "Select a role first"
-                      }
-                      value={formData.password}
-                      onChange={(e) =>
-                        setFormData({ ...formData, password: e.target.value })
-                      }
-                      required={!editUser}
-                      disabled={!formData.role} // Disable password field until role is selected
-                    />
-                  </div>
-                </div>
-
-                {/* Station Name */}
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="stationName">Station Name</label>
-                  <Select
-                    value={formData.stationId}
-                    onValueChange={handleStationChange}
-                  >
-                    <SelectTrigger id="stationName" className="w-full">
-                      <SelectValue
-                        placeholder={
-                          loadingStations ? "Loading..." : "Select Station"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {stations.map((station) => (
-                        <SelectItem key={station.id} value={station.id}>
-                          {station.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Station ID */}
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="stationId">Station ID</label>
-                  <Input
-                    id="stationId"
-                    value={
-                      stations.find(
-                        (station) => station.id === formData.stationId
-                      )?.stationId
-                    }
-                    className="bg-gray-100"
-                    disabled
-                    readOnly
-                  />
-                </div>
-
-                {/* Station Code (Security Code) */}
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="securityCode">
-                    Station Code (Security Code)
-                  </label>
-                  <Input
-                    id="securityCode"
-                    value={
-                      stations.find(
-                        (station) => station.id === formData.stationId
-                      )?.securityCode
-                    }
-                    className="bg-gray-100"
-                    disabled
-                    readOnly
-                  />
-                </div>
-
-                {/* Division, District, Upazila */}
-                <div className="grid grid-cols-3 gap-4 w-full">
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="division">
-                      Division <span className="text-red-500">*</span>
-                    </label>
-                    <Select
-                      value={formData.division}
-                      onValueChange={(value) => {
-                        console.log("Division selected:", value);
-                        const division = divisions.find(
-                          (d) => d.name === value
-                        );
-                        if (division) {
-                          // First update form data
-                          setFormData((prevData) => ({
-                            ...prevData,
-                            division: value,
-                            district: "",
-                            upazila: "",
-                          }));
-                          // Then update selected division which will trigger district loading
-                          setSelectedDivision(division);
-                          // Reset other selections
-                          setSelectedDistrict(null);
-                          setSelectedUpazila(null);
-                        }
-                      }}
-                      disabled={loadingDivisions}
-                    >
-                      <SelectTrigger id="division" className="w-full">
-                        <SelectValue
-                          placeholder={
-                            loadingDivisions ? "Loading..." : "Select Division"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {divisions.map((division) => (
-                          <SelectItem
-                            key={division.osmId}
-                            value={division.name}
-                          >
-                            {division.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="district">
-                      District <span className="text-red-500">*</span>
-                    </label>
-                    <Select
-                      value={formData.district}
-                      onValueChange={(value) => {
-                        console.log("District selected:", value);
-                        const district = districts.find(
-                          (d) => d.name === value
-                        );
-                        if (district) {
-                          // First update form data
-                          setFormData((prevData) => ({
-                            ...prevData,
-                            district: value,
-                            upazila: "",
-                          }));
-                          // Then update selected district which will trigger upazila loading
-                          setSelectedDistrict(district);
-                          // Reset upazila selection
-                          setSelectedUpazila(null);
-                        }
-                      }}
-                      disabled={!selectedDivision || districts.length === 0}
-                    >
-                      <SelectTrigger id="district" className="w-full">
-                        <SelectValue
-                          placeholder={
-                            loadingDistricts ? "Loading..." : "Select District"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {districts.map((district) => (
-                          <SelectItem
-                            key={district.osmId}
-                            value={district.name}
-                          >
-                            {district.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="upazila">
-                      Upazila <span className="text-red-500">*</span>
-                    </label>
-                    <Select
-                      value={formData.upazila}
-                      onValueChange={(value) => {
-                        console.log("Upazila selected:", value);
-                        const upazila = upazilas.find((u) => u.name === value);
-                        if (upazila) {
-                          // Update form data
-                          setFormData((prevData) => ({
-                            ...prevData,
-                            upazila: value,
-                          }));
-                          // Then update selected upazila
-                          setSelectedUpazila(upazila);
-                        }
-                      }}
-                      disabled={!selectedDistrict || upazilas.length === 0}
-                    >
-                      <SelectTrigger id="upazila" className="w-full">
-                        <SelectValue
-                          placeholder={
-                            loadingUpazilas ? "Loading..." : "Select Upazila"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {upazilas.map((upazila) => (
-                          <SelectItem key={upazila.osmId} value={upazila.name}>
-                            {upazila.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setOpenDialog(false)}>
-                  Cancel
-                </Button>
+      <div className="mb-8">
+        <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center mb-6">
+          <h2 className="text-xl sm:text-2xl font-bold">User Management</h2>
+          <div>
+            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+              <DialogTrigger asChild>
                 <Button
-                  onClick={editUser ? confirmRoleUpdate : handleCreateUser}
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-sky-600 hover:bg-sky-400 w-full sm:w-auto"
                 >
-                  {editUser ? "Update User" : "Create User"}
+                  + Create User
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[90vh]">
+                <DialogHeader>
+                  <DialogTitle className="text-lg sm:text-xl">
+                    {editUser ? "Edit User" : "Create New User"}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  {/* Name */}
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="name">Name</label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                    />
+                  </div>
+      
+                  {/* Role */}
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="role">
+                      Role <span className="text-red-500">*</span>
+                    </label>
+                    <Select
+                      value={formData.role}
+                      onValueChange={(value) => {
+                        const role = value as UserRole;
+                        setFormData({ ...formData, role });
+                        const passwordMinLength = {
+                          super_admin: 12,
+                          station_admin: 11,
+                          observer: 10,
+                        };
+                        toast.info(
+                          `Password must be at least ${passwordMinLength[role]} characters for ${role} role`
+                        );
+                      }}
+                    >
+                      <SelectTrigger id="role" className="w-full">
+                        <SelectValue placeholder="Select Role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="super_admin">Super Admin</SelectItem>
+                        <SelectItem value="station_admin">Station Admin</SelectItem>
+                        <SelectItem value="observer">Observer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+      
+                  {/* Email and Password - Stack on mobile, side by side on larger screens */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="email">
+                        Email <span className="text-red-500">*</span>
+                      </label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="password" className="flex flex-col gap-1">
+                        <span>
+                          {editUser ? "New Password" : "Password"}
+                          {!editUser && <span className="text-red-500">*</span>}
+                        </span>
+                        {formData.role && (
+                          <span className="text-xs text-blue-600">
+                            {`Min ${
+                              formData.role === "super_admin" 
+                                ? 12 
+                                : formData.role === "station_admin" 
+                                  ? 11 
+                                  : 10
+                            } characters`}
+                          </span>
+                        )}
+                      </label>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder={
+                          formData.role
+                            ? `Min ${
+                                formData.role === "super_admin" 
+                                  ? 12 
+                                  : formData.role === "station_admin" 
+                                    ? 11 
+                                    : 10
+                              } characters`
+                            : "Select a role first"
+                        }
+                        value={formData.password}
+                        onChange={(e) =>
+                          setFormData({ ...formData, password: e.target.value })
+                        }
+                        required={!editUser}
+                        disabled={!formData.role}
+                      />
+                    </div>
+                  </div>
+      
+                  {/* Station Name */}
+                  <div className="flex flex-col gap-2">
+                    <label htmlFor="stationName">Station Name</label>
+                    <Select
+                      value={formData.stationId}
+                      onValueChange={handleStationChange}
+                    >
+                      <SelectTrigger id="stationName" className="w-full">
+                        <SelectValue
+                          placeholder={
+                            loadingStations ? "Loading..." : "Select Station"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {stations.map((station) => (
+                          <SelectItem key={station.id} value={station.id}>
+                            {station.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+      
+                  {/* Station ID and Security Code - Stack on mobile, side by side on larger screens */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="stationId">Station ID</label>
+                      <Input
+                        id="stationId"
+                        value={
+                          stations.find(
+                            (station) => station.id === formData.stationId
+                          )?.stationId
+                        }
+                        className="bg-gray-100"
+                        disabled
+                        readOnly
+                      />
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="securityCode">Station Code (Security Code)</label>
+                      <Input
+                        id="securityCode"
+                        value={
+                          stations.find(
+                            (station) => station.id === formData.stationId
+                          )?.securityCode
+                        }
+                        className="bg-gray-100"
+                        disabled
+                        readOnly
+                      />
+                    </div>
+                  </div>
+      
+                  {/* Division, District, Upazila - Stack on mobile, 3 columns on larger screens */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="division">
+                        Division <span className="text-red-500">*</span>
+                      </label>
+                      <Select
+                        value={formData.division}
+                        onValueChange={(value) => {
+                          const division = divisions.find(
+                            (d) => d.name === value
+                          );
+                          if (division) {
+                            setFormData((prevData) => ({
+                              ...prevData,
+                              division: value,
+                              district: "",
+                              upazila: "",
+                            }));
+                            setSelectedDivision(division);
+                            setSelectedDistrict(null);
+                            setSelectedUpazila(null);
+                          }
+                        }}
+                        disabled={loadingDivisions}
+                      >
+                        <SelectTrigger id="division" className="w-full">
+                          <SelectValue
+                            placeholder={
+                              loadingDivisions ? "Loading..." : "Select Division"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {divisions.map((division) => (
+                            <SelectItem
+                              key={division.osmId}
+                              value={division.name}
+                            >
+                              {division.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+      
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="district">
+                        District <span className="text-red-500">*</span>
+                      </label>
+                      <Select
+                        value={formData.district}
+                        onValueChange={(value) => {
+                          const district = districts.find(
+                            (d) => d.name === value
+                          );
+                          if (district) {
+                            setFormData((prevData) => ({
+                              ...prevData,
+                              district: value,
+                              upazila: "",
+                            }));
+                            setSelectedDistrict(district);
+                            setSelectedUpazila(null);
+                          }
+                        }}
+                        disabled={!selectedDivision || districts.length === 0}
+                      >
+                        <SelectTrigger id="district" className="w-full">
+                          <SelectValue
+                            placeholder={
+                              loadingDistricts ? "Loading..." : "Select District"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {districts.map((district) => (
+                            <SelectItem
+                              key={district.osmId}
+                              value={district.name}
+                            >
+                              {district.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+      
+                    <div className="flex flex-col gap-2">
+                      <label htmlFor="upazila">
+                        Upazila <span className="text-red-500">*</span>
+                      </label>
+                      <Select
+                        value={formData.upazila}
+                        onValueChange={(value) => {
+                          const upazila = upazilas.find((u) => u.name === value);
+                          if (upazila) {
+                            setFormData((prevData) => ({
+                              ...prevData,
+                              upazila: value,
+                            }));
+                            setSelectedUpazila(upazila);
+                          }
+                        }}
+                        disabled={!selectedDistrict || upazilas.length === 0}
+                      >
+                        <SelectTrigger id="upazila" className="w-full">
+                          <SelectValue
+                            placeholder={
+                              loadingUpazilas ? "Loading..." : "Select Upazila"
+                            }
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {upazilas.map((upazila) => (
+                            <SelectItem key={upazila.osmId} value={upazila.name}>
+                              {upazila.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                <DialogFooter className="flex flex-col sm:flex-row gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setOpenDialog(false)}
+                    className="w-full sm:w-auto"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={editUser ? confirmRoleUpdate : handleCreateUser}
+                    className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
+                  >
+                    {editUser ? "Update User" : "Create User"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
 
