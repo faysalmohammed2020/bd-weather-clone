@@ -562,7 +562,7 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
             </>
           ) : (
             <>
-              <FileText className="h-4 w-4" />
+              <FileText className="h-4 w-full" />
               Export All to PDF
             </>
           )}

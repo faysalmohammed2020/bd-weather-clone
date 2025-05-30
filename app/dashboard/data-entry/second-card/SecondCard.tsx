@@ -116,14 +116,14 @@ type WeatherObservationFormData = {
 // Updated validation schema with HH:MM format for rainfall times
 const rainfallSchema = Yup.object({
   rainfall: Yup.object({
-    "time-start": Yup.string()
-      .required("Start time is required")
-      .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Use HH:MM 24-hour format"),
-    "date-start": Yup.string().required("Start date is required"),
-    "time-end": Yup.string()
-      .required("End time is required")
-      .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Use HH:MM 24-hour format"),
-    "date-end": Yup.string().required("End date is required"),
+    // "time-start": Yup.string()
+    //   .required("Start time is required")
+    //   .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Use HH:MM 24-hour format"),
+    // "date-start": Yup.string().required("Start date is required"),
+    // "time-end": Yup.string()
+    //   .required("End time is required")
+    //   .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Use HH:MM 24-hour format"),
+    // "date-end": Yup.string().required("End date is required"),
 
     "since-previous": Yup.string()
       .required("Since previous observation is required")
@@ -327,10 +327,10 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
         layer4: formData?.significantClouds?.layer4 || {},
       },
       rainfall: {
-        "date-start": formData?.rainfall?.["date-start"] || "",
-        "time-start": formData?.rainfall?.["time-start"] || "",
-        "date-end": formData?.rainfall?.["date-end"] || "",
-        "time-end": formData?.rainfall?.["time-end"] || "",
+        // "date-start": formData?.rainfall?.["date-start"] || "",
+        // "time-start": formData?.rainfall?.["time-start"] || "",
+        // "date-end": formData?.rainfall?.["date-end"] || "",
+        // "time-end": formData?.rainfall?.["time-end"] || "",
         "since-previous": formData?.rainfall?.["since-previous"] || "",
         "during-previous": formData?.rainfall?.["during-previous"] || "",
         "last-24-hours": formData?.rainfall?.["last-24-hours"] || "",
@@ -378,9 +378,9 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
         );
       case "rainfall":
         return !(
-          (touched.rainfall?.["time-start"] &&
-            errors.rainfall?.["time-start"]) ||
-          (touched.rainfall?.["time-end"] && errors.rainfall?.["time-end"]) ||
+          // (touched.rainfall?.["time-start"] &&
+          //   errors.rainfall?.["time-start"]) ||
+          // (touched.rainfall?.["time-end"] && errors.rainfall?.["time-end"]) ||
           (touched.rainfall?.["since-previous"] &&
             errors.rainfall?.["since-previous"]) ||
           (touched.rainfall?.["during-previous"] &&
@@ -446,8 +446,8 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
         break;
       case "rainfall":
         fieldsToValidate = [
-          "rainfall.time-start",
-          "rainfall.time-end",
+          // "rainfall.time-start",
+          // "rainfall.time-end",
           "rainfall.since-previous",
           "rainfall.during-previous",
           "rainfall.last-24-hours",
@@ -602,15 +602,15 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
     }
 
     // Validate time fields for HH:MM format
-    if (name === "time-start" || name === "time-end") {
-      if (value !== "" && !/^([01]\d|2[0-3]):([0-5]\d)$/.test(value)) {
-        formik.setFieldTouched(`rainfall.${name}`, true, false);
-        toast.error("Invalid time format", {
-          description: "Please enter time in HH:MM format (00:00 to 23:59)",
-          duration: 3000,
-        });
-      }
-    }
+    // if (name === "time-start" || name === "time-end") {
+    //   if (value !== "" && !/^([01]\d|2[0-3]):([0-5]\d)$/.test(value)) {
+    //     formik.setFieldTouched(`rainfall.${name}`, true, false);
+    //     toast.error("Invalid time format", {
+    //       description: "Please enter time in HH:MM format (00:00 to 23:59)",
+    //       duration: 3000,
+    //     });
+    //   }
+    // }
 
     // Update the appropriate section of the form data based on the input name
     if (name.startsWith("low-cloud-")) {
