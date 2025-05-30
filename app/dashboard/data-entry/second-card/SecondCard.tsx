@@ -381,12 +381,14 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
           // (touched.rainfall?.["time-start"] &&
           //   errors.rainfall?.["time-start"]) ||
           // (touched.rainfall?.["time-end"] && errors.rainfall?.["time-end"]) ||
-          (touched.rainfall?.["since-previous"] &&
-            errors.rainfall?.["since-previous"]) ||
-          (touched.rainfall?.["during-previous"] &&
-            errors.rainfall?.["during-previous"]) ||
-          (touched.rainfall?.["last-24-hours"] &&
-            errors.rainfall?.["last-24-hours"])
+          (
+            (touched.rainfall?.["since-previous"] &&
+              errors.rainfall?.["since-previous"]) ||
+            (touched.rainfall?.["during-previous"] &&
+              errors.rainfall?.["during-previous"]) ||
+            (touched.rainfall?.["last-24-hours"] &&
+              errors.rainfall?.["last-24-hours"])
+          )
         );
       case "wind":
         return !(
@@ -876,7 +878,6 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
               <Tabs
                 value={activeTab}
                 onValueChange={(value) => {
-                  // Only allow tab change if current tab is valid or going backwards
                   const currentTabIndex =
                     Object.keys(tabStyles).indexOf(activeTab);
                   const newTabIndex = Object.keys(tabStyles).indexOf(value);
@@ -899,20 +900,24 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                 }}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 gap-3 rounded-xl p-1 border-0 bg-transparent">
+                {/* Responsive tabs list */}
+                <TabsList className="grid w-full mb-10 grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-3 rounded-xl p-1 border-0 bg-transparent">
                   {Object.entries(tabStyles).map(([key, style]) => (
                     <TabsTrigger
                       key={key}
                       value={key}
-                      className={cn("border border-gray-300", {
-                        [style.tab]: activeTab === key,
-                        "!border-red-500 !text-red-700":
-                          !isTabValid(key) && formik.submitCount > 0,
-                      })}
+                      className={cn(
+                        "border border-gray-300 text-xs sm:text-sm",
+                        {
+                          [style.tab]: activeTab === key,
+                          "!border-red-500 !text-red-700":
+                            !isTabValid(key) && formik.submitCount > 0,
+                        }
+                      )}
                     >
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center gap-1">
                         {style.icon}
-                        <span className="hidden md:inline">
+                        <span className="hidden sm:inline">
                           {key === "n" ? "Total Cloud" : key}
                         </span>
                       </div>
@@ -920,22 +925,23 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   ))}
                 </TabsList>
 
-                <div className="p-6">
+                <div className="p-4 sm:p-6">
                   {/* CLOUD Tab */}
                   <TabsContent
                     value="cloud"
-                    className="mt-6 transition-all duration-500"
+                    className="mt-4 sm:mt-6 transition-all duration-500"
                   >
                     <Card
                       className={cn("overflow-hidden", tabStyles.cloud.card)}
                     >
-                      <div className="p-4 bg-gradient-to-r from-blue-200 to-blue-300 text-blue-800">
-                        <h3 className="text-lg font-semibold flex items-center">
-                          <CloudIcon className="mr-2" /> Cloud Observation
+                      <div className="p-3 sm:p-4 bg-gradient-to-r from-blue-200 to-blue-300 text-blue-800">
+                        <h3 className="text-base sm:text-lg font-semibold flex items-center">
+                          <CloudIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />{" "}
+                          Cloud Observation
                         </h3>
                       </div>
-                      <CardContent className="pt-6">
-                        <div className="space-y-8">
+                      <CardContent className="pt-4 sm:pt-6">
+                        <div className="space-y-6 sm:space-y-8">
                           <CloudLevelSection
                             title="Low Cloud"
                             prefix="low-cloud"
@@ -971,21 +977,24 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           />
                         </div>
                       </CardContent>
-                      <CardFooter className="flex justify-between p-6">
+                      <CardFooter className="flex justify-between p-4 sm:p-6">
                         <Button
                           type="button"
                           variant="outline"
                           onClick={handlePrevious}
                           disabled={isFirstTab}
+                          className="text-xs sm:text-sm"
                         >
-                          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
+                          Previous
                         </Button>
                         <Button
                           type="button"
                           onClick={handleNext}
-                          className="bg-blue-600 hover:bg-blue-700"
+                          className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
                         >
-                          Next <ChevronRight className="ml-2 h-4 w-4" />
+                          Next{" "}
+                          <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </CardFooter>
                     </Card>
@@ -994,16 +1003,17 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   {/* TOTAL CLOUD Tab */}
                   <TabsContent
                     value="n"
-                    className="mt-6 transition-all duration-500"
+                    className="mt-4 sm:mt-6 transition-all duration-500"
                   >
                     <Card className={cn("overflow-hidden", tabStyles.n.card)}>
-                      <div className="p-4 bg-gradient-to-r from-yellow-200 to-yellow-300 text-yellow-800">
-                        <h3 className="text-lg font-semibold flex items-center">
-                          <Sun className="mr-2" /> Total Cloud Amount
+                      <div className="p-3 sm:p-4 bg-gradient-to-r from-yellow-200 to-yellow-300 text-yellow-800">
+                        <h3 className="text-base sm:text-lg font-semibold flex items-center">
+                          <Sun className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Total
+                          Cloud Amount
                         </h3>
                       </div>
-                      <CardContent className="pt-6">
-                        <div className="grid gap-6">
+                      <CardContent className="pt-4 sm:pt-6">
+                        <div className="grid gap-4 sm:gap-6">
                           <SelectField
                             id="total-cloud-amount"
                             name="total-cloud-amount"
@@ -1027,21 +1037,24 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           />
                         </div>
                       </CardContent>
-                      <CardFooter className="flex justify-between p-6">
+                      <CardFooter className="flex justify-between p-4 sm:p-6">
                         <Button
                           type="button"
                           variant="outline"
                           onClick={handlePrevious}
                           disabled={isFirstTab}
+                          className="text-xs sm:text-sm"
                         >
-                          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
+                          Previous
                         </Button>
                         <Button
                           type="button"
                           onClick={handleNext}
-                          className="bg-blue-600 hover:bg-blue-700"
+                          className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
                         >
-                          Next <ChevronRight className="ml-2 h-4 w-4" />
+                          Next{" "}
+                          <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </CardFooter>
                     </Card>
@@ -1050,7 +1063,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   {/* SIGNIFICANT CLOUD Tab */}
                   <TabsContent
                     value="significant-cloud"
-                    className="mt-6 transition-all duration-500"
+                    className="mt-4 sm:mt-6 transition-all duration-500"
                   >
                     <Card
                       className={cn(
@@ -1058,13 +1071,14 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         tabStyles["significant-cloud"].card
                       )}
                     >
-                      <div className="p-4 bg-gradient-to-r from-purple-200 to-purple-300 text-purple-800">
-                        <h3 className="text-lg font-semibold flex items-center">
-                          <CloudIcon className="mr-2" /> Significant Cloud
+                      <div className="p-3 sm:p-4 bg-gradient-to-r from-purple-200 to-purple-300 text-purple-800">
+                        <h3 className="text-base sm:text-lg font-semibold flex items-center">
+                          <CloudIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />{" "}
+                          Significant Cloud
                         </h3>
                       </div>
-                      <CardContent className="pt-6">
-                        <div className="space-y-8">
+                      <CardContent className="pt-4 sm:pt-6">
+                        <div className="space-y-6 sm:space-y-8">
                           <SignificantCloudSection
                             title="1st Layer"
                             prefix="layer1"
@@ -1115,44 +1129,46 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           />
                         </div>
                       </CardContent>
-                      <CardFooter className="flex justify-between p-6">
+                      <CardFooter className="flex justify-between p-4 sm:p-6">
                         <Button
                           type="button"
                           variant="outline"
                           onClick={handlePrevious}
                           disabled={isFirstTab}
+                          className="text-xs sm:text-sm"
                         >
-                          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
+                          Previous
                         </Button>
                         <Button
                           type="button"
                           onClick={handleNext}
-                          className="bg-blue-600 hover:bg-blue-700"
+                          className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
                         >
-                          Next <ChevronRight className="ml-2 h-4 w-4" />
+                          Next{" "}
+                          <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </CardFooter>
                     </Card>
                   </TabsContent>
 
                   {/* RAINFALL Tab */}
-
                   <TabsContent
                     value="rainfall"
-                    className="mt-6 transition-all duration-500"
+                    className="mt-4 sm:mt-6 transition-all duration-500"
                   >
                     <Card
                       className={cn("overflow-hidden", tabStyles.rainfall.card)}
                     >
-                      <div className="p-4 bg-gradient-to-r from-cyan-200 to-cyan-300 text-cyan-800">
-                        <h3 className="text-lg font-semibold flex items-center">
-                          <CloudRainIcon className="mr-2" /> Rainfall
-                          Measurement (mm)
+                      <div className="p-3 sm:p-4 bg-gradient-to-r from-cyan-200 to-cyan-300 text-cyan-800">
+                        <h3 className="text-base sm:text-lg font-semibold flex items-center">
+                          <CloudRainIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />{" "}
+                          Rainfall Measurement (mm)
                         </h3>
                       </div>
 
-                      <CardContent className="pt-6">
-                        <p className="mb-3 text-sm text-yellow-800">
+                      <CardContent className="pt-4 sm:pt-6">
+                        <p className="mb-3 text-xs sm:text-sm text-yellow-800">
                           📅 Please select the{" "}
                           <span className="font-medium underline">
                             previous date from calender
@@ -1164,11 +1180,11 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           </span>{" "}
                           report submission.
                         </p>
-                        <div className="grid gap-6 md:grid-cols-2">
+                        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
                           <div className="grid gap-2">
                             <Label
                               htmlFor="time-start"
-                              className="font-medium text-gray-700"
+                              className="font-medium text-gray-700 text-xs sm:text-sm"
                             >
                               Time of Start (HH:MM UTC){" "}
                               <span className="text-red-500">*</span>
@@ -1182,6 +1198,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                   formik.values.rainfall["date-start"] || ""
                                 }
                                 onChange={handleInputChange}
+                                className="text-xs sm:text-sm"
                                 required
                               />
                               <Input
@@ -1194,6 +1211,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                   formik.values.rainfall["time-start"] || ""
                                 }
                                 onChange={handleInputChange}
+                                className="text-xs sm:text-sm"
                                 required
                               />
                             </div>
@@ -1207,7 +1225,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           <div className="grid gap-2">
                             <Label
                               htmlFor="time-end"
-                              className="font-medium text-gray-700"
+                              className="font-medium text-gray-700 text-xs sm:text-sm"
                             >
                               Time of Ending (HH:MM UTC){" "}
                               <span className="text-red-500">*</span>
@@ -1219,6 +1237,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                 type="date"
                                 value={formik.values.rainfall["date-end"] || ""}
                                 onChange={handleInputChange}
+                                className="text-xs sm:text-sm"
                                 required
                               />
                               <Input
@@ -1229,6 +1248,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                 step="60"
                                 value={formik.values.rainfall["time-end"] || ""}
                                 onChange={handleInputChange}
+                                className="text-xs sm:text-sm"
                                 required
                               />
                             </div>
@@ -1257,7 +1277,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           <div className="grid gap-2">
                             <Label
                               htmlFor="during-previous"
-                              className="font-medium text-gray-700"
+                              className="font-medium text-gray-700 text-xs sm:text-sm"
                             >
                               During Previous 6 Hours Rainfall (At 00, 06, 12,
                               18 UTC)
@@ -1272,7 +1292,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               }
                               onChange={handleInputChange}
                               className={cn(
-                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3 text-xs sm:text-sm",
                                 {
                                   "border-red-500":
                                     formik.errors.rainfall?.["during-previous"],
@@ -1280,7 +1300,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               )}
                               required
                             />
-                            <p className="text-red-500 text-sm mt-1 flex items-start">
+                            <p className="text-red-500 text-xs sm:text-sm mt-1 flex items-start">
                               {formik.errors.rainfall?.["during-previous"]}
                             </p>
                           </div>
@@ -1302,7 +1322,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             />
                           </div>
 
-                          <div className="md:col-span-2 flex items-center gap-2 mt-4">
+                          <div className="md:col-span-2 flex items-center gap-2 mt-2 sm:mt-4">
                             <input
                               id="is-intermittent-rain"
                               name="isIntermittentRain"
@@ -1317,57 +1337,60 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                   e.target.checked
                                 );
                               }}
-                              className="h-5 w-5 text-cyan-600 border-gray-300 rounded focus:ring-cyan-500"
+                              className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-600 border-gray-300 rounded focus:ring-cyan-500"
                             />
                             <Label
                               htmlFor="is-intermittent-rain"
-                              className="font-medium text-cyan-800"
+                              className="font-medium text-cyan-800 text-xs sm:text-sm"
                             >
                               Intermittent Rain? (বিরতিযুক্ত বৃষ্টি)
                             </Label>
                           </div>
                         </div>
                       </CardContent>
-                      <CardFooter className="flex justify-between p-6">
+                      <CardFooter className="flex justify-between p-4 sm:p-6">
                         <Button
                           type="button"
                           variant="outline"
                           onClick={handlePrevious}
                           disabled={isFirstTab}
+                          className="text-xs sm:text-sm"
                         >
-                          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
+                          Previous
                         </Button>
                         <Button
                           type="button"
                           onClick={handleNext}
-                          className="bg-blue-600 hover:bg-blue-700"
+                          className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
                         >
-                          Next <ChevronRight className="ml-2 h-4 w-4" />
+                          Next{" "}
+                          <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </CardFooter>
                     </Card>
                   </TabsContent>
 
                   {/* WIND Tab */}
-
                   <TabsContent
                     value="wind"
-                    className="mt-6 transition-all duration-500"
+                    className="mt-4 sm:mt-6 transition-all duration-500"
                   >
                     <Card
                       className={cn("overflow-hidden", tabStyles.wind.card)}
                     >
-                      <div className="p-4 bg-gradient-to-r from-green-200 to-green-300 text-green-800">
-                        <h3 className="text-lg font-semibold flex items-center">
-                          <Wind className="mr-2" /> Wind Measurement
+                      <div className="p-3 sm:p-4 bg-gradient-to-r from-green-200 to-green-300 text-green-800">
+                        <h3 className="text-base sm:text-lg font-semibold flex items-center">
+                          <Wind className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Wind
+                          Measurement
                         </h3>
                       </div>
-                      <CardContent className="pt-6">
-                        <div className="grid gap-6 md:grid-cols-2">
+                      <CardContent className="pt-4 sm:pt-6">
+                        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
                           <div className="grid gap-2">
                             <Label
                               htmlFor="first-anemometer"
-                              className="font-medium text-gray-700"
+                              className="font-medium text-gray-700 text-xs sm:text-sm"
                             >
                               First Anenometer
                               <span className="text-red-500">*</span>
@@ -1381,7 +1404,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               }
                               onChange={handleInputChange}
                               className={cn(
-                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3 text-xs sm:text-sm",
                                 {
                                   "border-red-500":
                                     formik.errors.wind?.["first-anemometer"],
@@ -1389,7 +1412,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               )}
                               required
                             />
-                            <p className="text-red-500 text-sm mt-1 flex items-start">
+                            <p className="text-red-500 text-xs sm:text-sm mt-1 flex items-start">
                               {formik.errors.wind?.["first-anemometer"]}
                             </p>
                           </div>
@@ -1397,7 +1420,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           <div className="grid gap-2">
                             <Label
                               htmlFor="second-anemometer"
-                              className="font-medium text-gray-700"
+                              className="font-medium text-gray-700 text-xs sm:text-sm"
                             >
                               Second Anenometer
                               <span className="text-red-500">*</span>
@@ -1411,7 +1434,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               }
                               onChange={handleInputChange}
                               className={cn(
-                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3 text-xs sm:text-sm",
                                 {
                                   "border-red-500":
                                     formik.errors.wind?.["second-anemometer"],
@@ -1419,29 +1442,17 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               )}
                               required
                             />
-                            <p className="text-red-500 text-sm mt-1 flex items-start">
+                            <p className="text-red-500 text-xs sm:text-sm mt-1 flex items-start">
                               {formik.errors.wind?.["second-anemometer"]}
                             </p>
                           </div>
 
-                          {/* <InputField
-                            id="speed"
-                            name="speed"
-                            label="Speed (KTS)"
-                            accent="green"
-                            value={formik.values.wind["speed"] || ""}
-                            onChange={handleInputChange}
-                            error={renderErrorMessage("wind.speed")}
-                            required
-                            numeric={true}
-                          /> */}
-
                           <div className="grid gap-2">
                             <Label
                               htmlFor="speed"
-                              className="font-medium text-gray-700"
+                              className="font-medium text-gray-700 text-xs sm:text-sm"
                             >
-                              speed
+                              Speed (KTS)
                               <span className="text-red-500">*</span>
                             </Label>
                             <Input
@@ -1451,7 +1462,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               value={formik.values.wind?.["speed"] || ""}
                               onChange={handleInputChange}
                               className={cn(
-                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3",
+                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3 text-xs sm:text-sm",
                                 {
                                   "border-red-500":
                                     formik.errors.wind?.["speed"],
@@ -1459,15 +1470,15 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               )}
                               required
                             />
-                            <p className="text-red-500 text-sm mt-1 flex items-start">
+                            <p className="text-red-500 text-xs sm:text-sm mt-1 flex items-start">
                               {formik.errors.wind?.["speed"]}
                             </p>
                           </div>
-                          {/* Wind Direction - Fixed */}
+
                           <div className="grid gap-2">
                             <Label
                               htmlFor="wind-direction"
-                              className="font-medium text-gray-700"
+                              className="font-medium text-gray-700 text-xs sm:text-sm"
                             >
                               Direction (Degrees){" "}
                               <span className="text-red-500">*</span>
@@ -1481,7 +1492,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               value={formik.values.wind["wind-direction"] || ""}
                               onChange={handleInputChange}
                               className={cn(
-                                "border-2 border-green-300 bg-green-50 focus:border-green-500 focus:ring-green-500/30 rounded-lg py-2 px-3",
+                                "border-2 border-green-300 bg-green-50 focus:border-green-500 focus:ring-green-500/30 rounded-lg py-2 px-3 text-xs sm:text-sm",
                                 {
                                   "border-red-500": renderErrorMessage(
                                     "wind.wind-direction"
@@ -1496,21 +1507,24 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           </div>
                         </div>
                       </CardContent>
-                      <CardFooter className="flex justify-between p-6">
+                      <CardFooter className="flex justify-between p-4 sm:p-6">
                         <Button
                           type="button"
                           variant="outline"
                           onClick={handlePrevious}
                           disabled={isFirstTab}
+                          className="text-xs sm:text-sm"
                         >
-                          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
+                          Previous
                         </Button>
                         <Button
                           type="button"
                           onClick={handleNext}
-                          className="bg-blue-600 hover:bg-blue-700"
+                          className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
                         >
-                          Next <ChevronRight className="ml-2 h-4 w-4" />
+                          Next{" "}
+                          <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </CardFooter>
                     </Card>
@@ -1519,18 +1533,19 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   {/* OBSERVER Tab */}
                   <TabsContent
                     value="observer"
-                    className="mt-6 transition-all duration-500"
+                    className="mt-4 sm:mt-6 transition-all duration-500"
                   >
                     <Card
                       className={cn("overflow-hidden", tabStyles.observer.card)}
                     >
-                      <div className="p-4 bg-gradient-to-r from-orange-200 to-orange-300 text-orange-800">
-                        <h3 className="text-lg font-semibold flex items-center">
-                          <User className="mr-2" /> Observer Information
+                      <div className="p-3 sm:p-4 bg-gradient-to-r from-orange-200 to-orange-300 text-orange-800">
+                        <h3 className="text-base sm:text-lg font-semibold flex items-center">
+                          <User className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />{" "}
+                          Observer Information
                         </h3>
                       </div>
-                      <CardContent className="pt-6">
-                        <div className="grid gap-6 md:grid-cols-2">
+                      <CardContent className="pt-4 sm:pt-6">
+                        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
                           <InputField
                             id="observer-initial"
                             name="observer-initial"
@@ -1556,37 +1571,41 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           />
                         </div>
                       </CardContent>
-                      <CardFooter className="flex justify-between p-6">
+                      <CardFooter className="flex flex-col sm:flex-row justify-between p-4 sm:p-6 gap-3 sm:gap-0">
                         <Button
                           type="button"
                           variant="outline"
                           onClick={handlePrevious}
                           disabled={isFirstTab}
+                          className="text-xs sm:text-sm w-full sm:w-auto flex justify-center items-center"
                         >
-                          <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
+                          Previous
                         </Button>
-                        <div className="flex gap-4">
+
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
                           <Button
                             type="button"
                             variant="outline"
-                            className="border-slate-600 hover:bg-slate-100 transition-all duration-300"
+                            className="border-slate-600 hover:bg-slate-100 transition-all duration-300 text-xs sm:text-sm w-full sm:w-auto"
                             onClick={handleReset}
                           >
                             Reset
                           </Button>
+
                           <Button
                             type="submit"
-                            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
+                            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm text-xs sm:text-sm w-full sm:w-auto flex justify-center items-center"
                             disabled={isSubmitting}
                           >
                             {isSubmitting ? (
                               <>
-                                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                                <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 animate-spin" />
                                 Submitting...
                               </>
                             ) : (
                               <>
-                                <CloudIcon className="h-5 w-5 mr-2" />
+                                <CloudIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
                                 Submit Observation
                               </>
                             )}
