@@ -209,18 +209,18 @@ const SynopticCodeTable = forwardRef((props, ref) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const daysInRange = differenceInDays(end, start);
-    
+
     // Calculate the new date range
     const newStart = new Date(start);
     newStart.setDate(start.getDate() + (daysInRange + 1));
-    
+
     const newEnd = new Date(newStart);
     newEnd.setDate(newStart.getDate() + daysInRange);
-    
+
     // Get today's date at midnight for comparison
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     // If the new range would go beyond today, adjust it
     if (newEnd > today) {
       // If we're already at or beyond today, don't go further
@@ -231,7 +231,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
       const adjustedEnd = new Date(today);
       const adjustedStart = new Date(adjustedEnd);
       adjustedStart.setDate(adjustedEnd.getDate() - daysInRange);
-      
+
       setStartDate(format(adjustedStart, "yyyy-MM-dd"));
       setEndDate(format(adjustedEnd, "yyyy-MM-dd"));
     } else {
@@ -239,7 +239,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
       setStartDate(format(newStart, "yyyy-MM-dd"));
       setEndDate(format(newEnd, "yyyy-MM-dd"));
     }
-    
+
     setDateError(null);
   };
 
@@ -399,100 +399,103 @@ const SynopticCodeTable = forwardRef((props, ref) => {
   };
 
   return (
-    <div className="space-y-6 print:space-y-0 p-8 m-2">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
-        <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-          <span className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mr-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M8 3v3a2 2 0 0 1-2 2H3" />
-              <path d="M21 8h-3a2 2 0 0 1-2-2V3" />
-              <path d="M3 16h3a2 2 0 0 1 2 2v3" />
-              <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
-            </svg>
-          </span>
-          Synoptic Code Data
-        </h2>
+    <div className="space-y-6 print:space-y-0 m-2">
 
+      <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+        <span className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mr-3">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M8 3v3a2 2 0 0 1-2 2H3" />
+            <path d="M21 8h-3a2 2 0 0 1-2-2V3" />
+            <path d="M3 16h3a2 2 0 0 1 2 2v3" />
+            <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
+          </svg>
+        </span>
+        Synoptic Code Data
+      </h2>
 
-      </div>
 
       {/* Date and station filter controls */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 p-4 rounded-lg print:hidden">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-          <div className="flex items-center gap-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 bg-slate-100 p-3 sm:p-4 md:p-5 rounded-lg print:hidden">
+        {/* Date Navigation Section */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <Button
               variant="outline"
               size="icon"
               onClick={goToPreviousWeek}
-              className="hover:bg-slate-200"
+              className="hover:bg-slate-200 flex-shrink-0"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => handleDateChange("start", e.target.value)}
                 max={endDate}
-                className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full sm:w-auto min-w-[120px]"
               />
-              <span>to</span>
+              <span className="text-sm text-slate-600 whitespace-nowrap">to</span>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => handleDateChange("end", e.target.value)}
                 min={startDate}
                 max={format(new Date(), "yyyy-MM-dd")}
-                className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full sm:w-auto min-w-[120px]"
               />
             </div>
             <Button
               variant="outline"
               size="icon"
               onClick={goToNextWeek}
-              className="hover:bg-slate-200"
+              className="hover:bg-slate-200 flex-shrink-0"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
-        <div className="flex gap-6"> 
+
+        {/* Actions and Filters Section */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 md:gap-6 w-full sm:w-auto">
           {(isSuperAdmin || isStationAdmin) && (
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              className="flex items-center gap-2 text-blue-700 border-blue-300 hover:bg-blue-50"
-              onClick={exportToCSV}
-              disabled={!currentData || currentData.length === 0}
-            >
-              <Download size={18} />
-              <span className="text-base">Export CSV</span>
-            </Button>
-          </div>
-        )}
+            <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
+              <Button
+                variant="outline"
+                className="flex items-center justify-center gap-2 text-blue-700 border-blue-300 hover:bg-blue-50 w-full sm:w-auto px-3 py-2"
+                onClick={exportToCSV}
+                disabled={!currentData || currentData.length === 0}
+              >
+                <Download size={18} className="flex-shrink-0" />
+                <span className="text-sm sm:text-base whitespace-nowrap">Export CSV</span>
+              </Button>
+            </div>
+          )}
 
           {isSuperAdmin && (
-            <div className="flex items-center gap-2">
-              <Filter size={16} className="text-purple-500" />
-              <Label
-                htmlFor="stationFilter"
-                className="whitespace-nowrap font-medium text-slate-700"
-              >
-                Station:
-              </Label>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+              <div className="flex items-center gap-2">
+                <Filter size={16} className="text-purple-500 flex-shrink-0" />
+                <Label
+                  htmlFor="stationFilter"
+                  className="whitespace-nowrap font-medium text-slate-700 text-sm sm:text-base"
+                >
+                  Station:
+                </Label>
+              </div>
               <Select value={stationFilter} onValueChange={setStationFilter}>
-                <SelectTrigger className="w-[200px] border-slate-300 focus:ring-purple-500">
+                <SelectTrigger className="w-full sm:w-[180px] md:w-[200px] border-slate-300 focus:ring-purple-500 text-sm sm:text-base">
                   <SelectValue placeholder="All Stations" />
                 </SelectTrigger>
                 <SelectContent>
@@ -505,9 +508,8 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                 </SelectContent>
               </Select>
             </div>
-          )}</div>
-
-
+          )}
+        </div>
       </div>
 
       {dateError && (
@@ -562,19 +564,17 @@ const SynopticCodeTable = forwardRef((props, ref) => {
         <div className="w-full overflow-auto print:overflow-visible">
           {/* Header Section */}
           <div className="mb-4 print:mb-2">
-            <div className="text-center border-b-2 border-blue-200 bg-gradient-to-b from-blue-50 to-white py-6 print:py-3 rounded-t-lg">
-
-
-              <div className="flex flex-wrap justify-center gap-10 print:gap-6 max-w-5xl mx-auto">
+            <div className="text-center border-b-2 border-blue-200 bg-gradient-to-b from-blue-50 to-white py-4 sm:py-6 print:py-3 rounded-t-lg">
+              <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-10 print:gap-6 max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-5xl mx-auto px-3 sm:px-4">
                 <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">
+                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
                     DATA TYPE
                   </div>
-                  <div className="flex">
+                  <div className="flex gap-1 sm:gap-2">
                     {headerInfo.dataType.split("").map((char, i) => (
                       <div
                         key={i}
-                        className="w-10 h-10 border-2 border-blue-300 bg-white flex items-center justify-center font-mono text-lg font-bold text-blue-700 rounded"
+                        className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 border-2 border-blue-300 bg-white flex items-center justify-center font-mono text-base sm:text-lg font-bold text-blue-700 rounded"
                       >
                         {char}
                       </div>
@@ -583,14 +583,14 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                 </div>
 
                 <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">
+                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
                     STATION NO.
                   </div>
-                  <div className="flex">
+                  <div className="flex gap-1 sm:gap-2">
                     {headerInfo.stationNo.split("").map((char, i) => (
                       <div
                         key={i}
-                        className="w-10 h-10 border-2 border-blue-300 bg-white flex items-center justify-center font-mono text-lg font-bold text-blue-700 rounded"
+                        className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 border-2 border-blue-300 bg-white flex items-center justify-center font-mono text-base sm:text-lg font-bold text-blue-700 rounded"
                       >
                         {char}
                       </div>
@@ -599,14 +599,14 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                 </div>
 
                 <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">
+                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
                     YEAR
                   </div>
-                  <div className="flex">
+                  <div className="flex gap-1 sm:gap-2">
                     {headerInfo.year.split("").map((char, i) => (
                       <div
                         key={i}
-                        className="w-10 h-10 border-2 border-blue-300 bg-white flex items-center justify-center font-mono text-lg font-bold text-blue-700 rounded"
+                        className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 border-2 border-blue-300 bg-white flex items-center justify-center font-mono text-base sm:text-lg font-bold text-blue-700 rounded"
                       >
                         {char}
                       </div>
@@ -615,14 +615,14 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                 </div>
 
                 <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">
+                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
                     MONTH
                   </div>
-                  <div className="flex">
+                  <div className="flex gap-1 sm:gap-2">
                     {headerInfo.month.split("").map((char, i) => (
                       <div
                         key={i}
-                        className="w-10 h-10 border-2 border-blue-300 bg-white flex items-center justify-center font-mono text-lg font-bold text-blue-700 rounded"
+                        className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 border-2 border-blue-300 bg-white flex items-center justify-center font-mono text-base sm:text-lg font-bold text-blue-700 rounded"
                       >
                         {char}
                       </div>
@@ -631,14 +631,14 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                 </div>
 
                 <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">
+                  <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
                     DAY
                   </div>
-                  <div className="flex">
+                  <div className="flex gap-1 sm:gap-2">
                     {headerInfo.day.split("").map((char, i) => (
                       <div
                         key={i}
-                        className="w-10 h-10 border-2 border-blue-300 bg-white flex items-center justify-center font-mono text-lg font-bold text-blue-700 rounded"
+                        className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 border-2 border-blue-300 bg-white flex items-center justify-center font-mono text-base sm:text-lg font-bold text-blue-700 rounded"
                       >
                         {char}
                       </div>
@@ -795,7 +795,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
                           {entry.CD57DaEc || ""}
                         </td>
-                       
+
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
                           {entry.C2 || ""}
                         </td>
@@ -879,38 +879,9 @@ const SynopticCodeTable = forwardRef((props, ref) => {
         </div>
       )}
 
-      {/* Summary footer */}
-      <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200 print:hidden">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-sky-500" />
-          <span className="text-sm text-slate-600">
-            Date Range:{" "}
-            <span className="font-semibold text-slate-800">
-              {`${format(new Date(startDate), "MMM d")} - ${format(new Date(endDate), "MMM d, yyyy")}`}
-            </span>
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge
-            variant="outline"
-            className="bg-sky-100 text-sky-800 hover:bg-sky-200"
-          >
-            {currentData.length} record(s)
-          </Badge>
-          {stationFilter !== "all" && (
-            <Badge
-              variant="outline"
-              className="bg-blue-100 text-blue-800 hover:bg-blue-200"
-            >
-              Station: {getStationNameById(stationFilter)}
-            </Badge>
-          )}
-        </div>
-      </div>
-
       {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="w-[50vw] !max-w-[90vw] rounded-xl border-0 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 shadow-xl">
+        <DialogContent className="w-[90vw] !max-w-[95vw] rounded-xl border-0 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 shadow-xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-indigo-800">
               Edit Synoptic Code Data

@@ -694,67 +694,87 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
         Second Card Data Table
       </div>
       <CardContent className="p-6">
-        {/* Date and Station Filters */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 bg-slate-100 p-4 rounded-lg">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={goToPreviousWeek} className="hover:bg-slate-200">
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
 
-              <div className="flex items-center gap-2">
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => handleDateChange("start", e.target.value)}
-                  max={endDate}
-                  className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
-                />
-                <span>to</span>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => handleDateChange("end", e.target.value)}
-                  min={startDate}
-                  max={format(new Date(), "yyyy-MM-dd")}
-                  className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
-                />
-              </div>
-              <Button variant="outline" size="icon" onClick={goToNextWeek} className="hover:bg-slate-200">
-                <ChevronRight className="h-4 w-4" />
-              </Button>
+        <div className="flex flex-col md:flex-row justify-between  gap-4 mb-4 md:mb-6 bg-slate-100 p-3 sm:p-4 rounded-lg">
+          {/* Date Navigation Section */}
+          <div className="flex flex-col md:flex-row items-center justify-center md:justify-start gap-3 md:gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={goToPreviousWeek}
+              className="hover:bg-slate-200 flex-shrink-0"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+
+            <div className="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto max-w-sm md:max-w-none">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => handleDateChange("start", e.target.value)}
+                max={endDate}
+                className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full xs:w-auto min-w-0"
+              />
+              <span className="text-sm text-slate-600 whitespace-nowrap px-1">to</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => handleDateChange("end", e.target.value)}
+                min={startDate}
+                max={format(new Date(), "yyyy-MM-dd")}
+                className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full xs:w-auto min-w-0"
+              />
             </div>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={goToNextWeek}
+              className="hover:bg-slate-200 flex-shrink-0"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Actions and Filters Section */}
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-4 pt-3 md:pt-0 border-t md:border-t-0 border-slate-200">
+            {/* Export Button */}
             {session?.user?.role && ["super_admin", "station_admin"].includes(session?.user?.role) && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={exportToCSV}
-                className="flex items-center gap-1 hover:bg-green-50 border-green-200 text-green-700"
+                className="flex items-center justify-center gap-2 hover:bg-green-50 border-green-200 text-green-700 w-full sm:w-auto"
                 disabled={filteredData.length === 0}
               >
-                <Download className="h-4 w-4" />
-                Export CSV
+                <Download className="h-4 w-4 flex-shrink-0" />
+                <span className="whitespace-nowrap">Export CSV</span>
               </Button>
             )}
 
+            {/* Station Filter - Super Admin Only */}
             {session?.user?.role === "super_admin" && (
-              <div className="flex items-center gap-2">
-                <Filter size={16} className="text-sky-500" />
-                <Label htmlFor="stationFilter" className="whitespace-nowrap font-medium text-slate-700">
-                  Station:
-                </Label>
+              <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-3 w-full md:w-auto">
+                <div className="flex items-center gap-2">
+                  <Filter size={16} className="text-sky-500 flex-shrink-0" />
+                  <Label
+                    htmlFor="stationFilter"
+                    className="whitespace-nowrap font-medium text-slate-700 text-sm"
+                  >
+                    Station:
+                  </Label>
+                </div>
                 <Select value={stationFilter} onValueChange={setStationFilter}>
-                  <SelectTrigger className="w-[200px] border-slate-300 focus:ring-sky-500">
+                  <SelectTrigger className="w-full xs:w-[180px] sm:w-[200px] border-slate-300 focus:ring-sky-500 text-sm">
                     <SelectValue placeholder="All Stations" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Stations</SelectItem>
                     {stations.map((station) => (
                       <SelectItem key={station.id} value={station.id}>
-                        {station.name} ({station.stationId})
+                        <span className="block truncate">
+                          {station.name} ({station.stationId})
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -766,47 +786,62 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
 
         {/* Form View */}
         <div className="bg-white rounded-lg shadow-lg border border-slate-200 overflow-hidden">
-          {/* Header Section */}
-          <div className="p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300">
-            <div className="flex justify-around gap-4">
-              <div className="flex flex-col">
-                <Label htmlFor="dataType" className="text-sm font-medium text-slate-900 mb-2">
+          {/* Header Section - Responsive */}
+          <div className="p-3 md:p-4 bg-gradient-to-r from-slate-100 to-slate-200 border-b border-slate-300">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+              {/* DATA TYPE Section */}
+              <div className="flex flex-col items-center">
+                <Label className="text-xs md:text-sm font-medium text-slate-900 mb-1 md:mb-2">
                   DATA TYPE
                 </Label>
                 <div className="flex gap-1">
-                  {["W", "O"].map((char, i) => (
+                  {["S", "Y"].map((char, i) => (
                     <Input
                       key={`dataType-${i}`}
-                      id={`dataType-${i}`}
-                      className="w-12 text-center p-2 bg-slate-100 border border-slate-400 shadow-sm"
+                      className="w-8 sm:w-10 h-8 text-center p-1 bg-slate-100 border border-slate-400 shadow-sm text-xs sm:text-sm"
                       defaultValue={char}
                       readOnly
                     />
                   ))}
                 </div>
               </div>
-              <div>
-                <div className="font-bold uppercase text-slate-600 ">STATION NO</div>
-                <div className="flex h-10 border border-slate-400 rounded-lg p-2 mx-auto">
+
+              {/* STATION NO Section */}
+              <div className="flex flex-col items-center">
+                <div className="text-xs sm:text-sm font-bold uppercase text-slate-600 mb-1 sm:mb-2">
+                  STATION NO
+                </div>
+                <div className="h-8 w-full min-w-[60px] border border-slate-400 rounded-lg p-1 flex items-center justify-center bg-white text-xs sm:text-sm font-mono truncate">
                   {user?.station?.stationId || "N/A"}
                 </div>
               </div>
-              <div>
-                <div className="font-bold uppercase text-slate-600">STATION NAME</div>
-                <div className="h-10 border border-slate-400 p-2 mx-auto flex items-cente font-mono rounded-md">
-                  {user?.station?.name || "N/A"}
+
+              {/* YEAR Section */}
+              <div className="flex flex-col items-center">
+                <div className="text-xs md:text-sm font-bold uppercase text-slate-600 mb-1 md:mb-2">
+                  YEAR
+                </div>
+                <div className="flex">
+                  <div className="w-8 md:w-10 h-8 border border-slate-400 flex items-center justify-center p-1 font-mono rounded-l-md bg-white text-xs md:text-sm">
+                    {new Date().getFullYear().toString().slice(-2, -1)}
+                  </div>
+                  <div className="w-8 sm:w-10 h-8 border-t border-r border-b border-slate-400 flex items-center justify-center p-1 font-mono rounded-r-md bg-white text-xs sm:text-sm">
+                    {new Date().getFullYear().toString().slice(-1)}
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <div className="font-bold uppercase text-slate-600">DATE</div>
-                <div className="h-10 border border-slate-400 p-2 mx-auto flex items-center justify-center font-mono rounded-md">
-                  {format(new Date(startDate), "dd/MM/yyyy")}
+              {/* STATION NAME Section */}
+              <div className="flex flex-col items-center">
+                <div className="text-xs sm:text-sm font-bold uppercase text-slate-600 mb-1 sm:mb-2">
+                  STATION
+                </div>
+                <div className="h-8 w-full border border-slate-400 p-1 flex items-center justify-center font-mono rounded-md bg-white text-xs sm:text-sm truncate">
+                  {user?.station?.name || "N/A"}
                 </div>
               </div>
             </div>
           </div>
-
           {/* Main Table Section */}
           <div className="p-4">
             <div className="overflow-x-auto">
@@ -1296,7 +1331,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
 
         {/* Edit Dialog with Validation */}
         <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-          <DialogContent className="w-[50vw] !max-w-[90vw] rounded-xl border-0 bg-gradient-to-br from-sky-50 to-blue-50 p-6 shadow-xl">
+          <DialogContent className="w-[90vw] !max-w-[95vw] rounded-xl border-0 bg-gradient-to-br from-sky-50 to-blue-50 p-6 shadow-xl">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-sky-800">
                 <div className="flex items-center gap-2">
@@ -1334,9 +1369,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     </Label>
                     <Input
                       {...register("totalCloudAmount")}
-                      className={`w-full bg-white border-gray-300 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 ${
-                        errors.totalCloudAmount ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-sky-400 focus:ring-2 focus:ring-sky-200 ${errors.totalCloudAmount ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.totalCloudAmount && (
@@ -1349,9 +1383,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Low Cloud Direction (1 digit)</Label>
                     <Input
                       {...register("lowCloudDirection")}
-                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
-                        errors.lowCloudDirection ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${errors.lowCloudDirection ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.lowCloudDirection && (
@@ -1363,9 +1396,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Low Cloud Height (1 digit)</Label>
                     <Input
                       {...register("lowCloudHeight")}
-                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
-                        errors.lowCloudHeight ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${errors.lowCloudHeight ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.lowCloudHeight && (
@@ -1377,9 +1409,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Low Cloud Form (1 digit)</Label>
                     <Input
                       {...register("lowCloudForm")}
-                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
-                        errors.lowCloudForm ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${errors.lowCloudForm ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.lowCloudForm && <p className="text-red-500 text-xs mt-1">{errors.lowCloudForm.message}</p>}
@@ -1389,9 +1420,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Low Cloud Amount (1 digit)</Label>
                     <Input
                       {...register("lowCloudAmount")}
-                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
-                        errors.lowCloudAmount ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${errors.lowCloudAmount ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.lowCloudAmount && (
@@ -1404,9 +1434,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Medium Cloud Direction (1 digit)</Label>
                     <Input
                       {...register("mediumCloudDirection")}
-                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
-                        errors.mediumCloudDirection ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${errors.mediumCloudDirection ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.mediumCloudDirection && (
@@ -1418,9 +1447,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Medium Cloud Height (1 digit)</Label>
                     <Input
                       {...register("mediumCloudHeight")}
-                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
-                        errors.mediumCloudHeight ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${errors.mediumCloudHeight ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.mediumCloudHeight && (
@@ -1432,9 +1460,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Medium Cloud Form (1 digit)</Label>
                     <Input
                       {...register("mediumCloudForm")}
-                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
-                        errors.mediumCloudForm ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${errors.mediumCloudForm ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.mediumCloudForm && (
@@ -1446,9 +1473,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Medium Cloud Amount (1 digit)</Label>
                     <Input
                       {...register("mediumCloudAmount")}
-                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
-                        errors.mediumCloudAmount ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${errors.mediumCloudAmount ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.mediumCloudAmount && (
@@ -1461,9 +1487,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">High Cloud Direction (1 digit)</Label>
                     <Input
                       {...register("highCloudDirection")}
-                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
-                        errors.highCloudDirection ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${errors.highCloudDirection ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.highCloudDirection && (
@@ -1475,9 +1500,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">High Cloud Height (1 digit)</Label>
                     <Input
                       {...register("highCloudHeight")}
-                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
-                        errors.highCloudHeight ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${errors.highCloudHeight ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.highCloudHeight && (
@@ -1489,9 +1513,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">High Cloud Form (1 digit)</Label>
                     <Input
                       {...register("highCloudForm")}
-                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
-                        errors.highCloudForm ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${errors.highCloudForm ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.highCloudForm && (
@@ -1503,9 +1526,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">High Cloud Amount (1 digit)</Label>
                     <Input
                       {...register("highCloudAmount")}
-                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${
-                        errors.highCloudAmount ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-blue-400 focus:ring-2 focus:ring-blue-200 ${errors.highCloudAmount ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.highCloudAmount && (
@@ -1518,8 +1540,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Rainfall Start Time</Label>
                     <Input
                       {...register("rainfallTimeStart")}
-                       className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200" 
-                      
+                      className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+
                     />
                   </div>
 
@@ -1527,19 +1549,18 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Rainfall End Time</Label>
                     <Input
                       {...register("rainfallTimeEnd")}
-                       className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"  
-                        
+                      className="w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200"
+
                     />
-                    
+
                   </div>
 
                   <div className="space-y-1 p-3 rounded-lg bg-emerald-50 border border-white shadow-sm">
                     <Label className="text-sm font-medium text-gray-700">Rainfall Since Previous (2 digits)</Label>
                     <Input
                       {...register("rainfallSincePrevious")}
-                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${
-                        errors.rainfallSincePrevious ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${errors.rainfallSincePrevious ? "border-red-500" : ""
+                        }`}
                       maxLength={2}
                     />
                     {errors.rainfallSincePrevious && (
@@ -1551,9 +1572,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Rainfall During Previous (4 digits)</Label>
                     <Input
                       {...register("rainfallDuringPrevious")}
-                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${
-                        errors.rainfallDuringPrevious ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${errors.rainfallDuringPrevious ? "border-red-500" : ""
+                        }`}
                       maxLength={4}
                     />
                     {errors.rainfallDuringPrevious && (
@@ -1565,9 +1585,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Rainfall Last 24 Hours (2 digits)</Label>
                     <Input
                       {...register("rainfallLast24Hours")}
-                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${
-                        errors.rainfallLast24Hours ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 ${errors.rainfallLast24Hours ? "border-red-500" : ""
+                        }`}
                       maxLength={2}
                     />
                     {errors.rainfallLast24Hours && (
@@ -1580,9 +1599,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">First Anemometer (5 digits)</Label>
                     <Input
                       {...register("windFirstAnemometer")}
-                      className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${
-                        errors.windFirstAnemometer ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${errors.windFirstAnemometer ? "border-red-500" : ""
+                        }`}
                       maxLength={5}
                     />
                     {errors.windFirstAnemometer && (
@@ -1594,9 +1612,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Second Anemometer (5 digits)</Label>
                     <Input
                       {...register("windSecondAnemometer")}
-                      className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${
-                        errors.windSecondAnemometer ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${errors.windSecondAnemometer ? "border-red-500" : ""
+                        }`}
                       maxLength={5}
                     />
                     {errors.windSecondAnemometer && (
@@ -1608,9 +1625,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Wind Speed (3 digits)</Label>
                     <Input
                       {...register("windSpeed")}
-                      className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${
-                        errors.windSpeed ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${errors.windSpeed ? "border-red-500" : ""
+                        }`}
                       maxLength={3}
                     />
                     {errors.windSpeed && <p className="text-red-500 text-xs mt-1">{errors.windSpeed.message}</p>}
@@ -1620,9 +1636,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Wind Direction (3 digit)</Label>
                     <Input
                       {...register("windDirection")}
-                      className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${
-                        errors.windDirection ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-amber-400 focus:ring-2 focus:ring-amber-200 ${errors.windDirection ? "border-red-500" : ""
+                        }`}
                       maxLength={3}
                     />
                     {errors.windDirection && (
@@ -1645,9 +1660,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Layer 1 Height (2 digits)</Label>
                     <Input
                       {...register("layer1Height")}
-                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
-                        errors.layer1Height ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${errors.layer1Height ? "border-red-500" : ""
+                        }`}
                       maxLength={2}
                     />
                     {errors.layer1Height && <p className="text-red-500 text-xs mt-1">{errors.layer1Height.message}</p>}
@@ -1657,9 +1671,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Layer 1 Form (1 digit)</Label>
                     <Input
                       {...register("layer1Form")}
-                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
-                        errors.layer1Form ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${errors.layer1Form ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.layer1Form && <p className="text-red-500 text-xs mt-1">{errors.layer1Form.message}</p>}
@@ -1669,9 +1682,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Layer 1 Amount (1 digit)</Label>
                     <Input
                       {...register("layer1Amount")}
-                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
-                        errors.layer1Amount ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${errors.layer1Amount ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.layer1Amount && <p className="text-red-500 text-xs mt-1">{errors.layer1Amount.message}</p>}
@@ -1681,9 +1693,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Layer 2 Height (2 digits)</Label>
                     <Input
                       {...register("layer2Height")}
-                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
-                        errors.layer2Height ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${errors.layer2Height ? "border-red-500" : ""
+                        }`}
                       maxLength={2}
                     />
                     {errors.layer2Height && <p className="text-red-500 text-xs mt-1">{errors.layer2Height.message}</p>}
@@ -1693,9 +1704,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Layer 2 Form (1 digit)</Label>
                     <Input
                       {...register("layer2Form")}
-                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
-                        errors.layer2Form ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${errors.layer2Form ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.layer2Form && <p className="text-red-500 text-xs mt-1">{errors.layer2Form.message}</p>}
@@ -1705,9 +1715,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Layer 2 Amount (1 digit)</Label>
                     <Input
                       {...register("layer2Amount")}
-                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
-                        errors.layer2Amount ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${errors.layer2Amount ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.layer2Amount && <p className="text-red-500 text-xs mt-1">{errors.layer2Amount.message}</p>}
@@ -1717,9 +1726,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Layer 3 Height (2 digits)</Label>
                     <Input
                       {...register("layer3Height")}
-                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
-                        errors.layer3Height ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${errors.layer3Height ? "border-red-500" : ""
+                        }`}
                       maxLength={2}
                     />
                     {errors.layer3Height && <p className="text-red-500 text-xs mt-1">{errors.layer3Height.message}</p>}
@@ -1729,9 +1737,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Layer 3 Form (1 digit)</Label>
                     <Input
                       {...register("layer3Form")}
-                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
-                        errors.layer3Form ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${errors.layer3Form ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.layer3Form && <p className="text-red-500 text-xs mt-1">{errors.layer3Form.message}</p>}
@@ -1741,9 +1748,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Layer 3 Amount (1 digit)</Label>
                     <Input
                       {...register("layer3Amount")}
-                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
-                        errors.layer3Amount ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${errors.layer3Amount ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.layer3Amount && <p className="text-red-500 text-xs mt-1">{errors.layer3Amount.message}</p>}
@@ -1753,9 +1759,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Layer 4 Height (2 digits)</Label>
                     <Input
                       {...register("layer4Height")}
-                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
-                        errors.layer4Height ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${errors.layer4Height ? "border-red-500" : ""
+                        }`}
                       maxLength={2}
                     />
                     {errors.layer4Height && <p className="text-red-500 text-xs mt-1">{errors.layer4Height.message}</p>}
@@ -1765,9 +1770,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Layer 4 Form (1 digit)</Label>
                     <Input
                       {...register("layer4Form")}
-                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
-                        errors.layer4Form ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${errors.layer4Form ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.layer4Form && <p className="text-red-500 text-xs mt-1">{errors.layer4Form.message}</p>}
@@ -1777,9 +1781,8 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <Label className="text-sm font-medium text-gray-700">Layer 4 Amount (1 digit)</Label>
                     <Input
                       {...register("layer4Amount")}
-                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${
-                        errors.layer4Amount ? "border-red-500" : ""
-                      }`}
+                      className={`w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 ${errors.layer4Amount ? "border-red-500" : ""
+                        }`}
                       maxLength={1}
                     />
                     {errors.layer4Amount && <p className="text-red-500 text-xs mt-1">{errors.layer4Amount.message}</p>}

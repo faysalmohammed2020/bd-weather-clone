@@ -479,7 +479,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
   }
 
   return (
-    <div className="space-y-6 print:space-y-0 p-8">
+    <div className="space-y-6 print:space-y-0">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center">
           <span className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-sm mr-3">
@@ -489,67 +489,89 @@ const DailySummaryTable = forwardRef((props, ref) => {
         </h2>
       </div>
 
-      {/* Date and station filter controls */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-slate-100 p-4 rounded-lg print:hidden">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={goToPreviousWeek} className="hover:bg-slate-200">
+      {/* Responsive Date and Station Filter Controls */}
+      <div className="flex flex-col md:flex-row md:justify-between gap-4 bg-slate-100 p-3 sm:p-4 rounded-lg print:hidden">
+        {/* Top Row - Date Navigation */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2 w-full">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={goToPreviousWeek}
+              className="hover:bg-slate-200 flex-shrink-0 h-9 w-9"
+            >
               <ChevronLeft className="h-4 w-4" />
             </Button>
 
-            <div className="flex items-center gap-2">
+            <div className="flex-1 flex flex-col md:flex-row items-center gap-2 min-w-0">
               <input
                 type="date"
                 value={startDate}
                 onChange={(e) => handleDateChange("start", e.target.value)}
                 max={endDate}
-                className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full"
               />
-              <span>to</span>
+              <span className="text-sm text-slate-600 whitespace-nowrap px-1">to</span>
               <input
                 type="date"
                 value={endDate}
                 onChange={(e) => handleDateChange("end", e.target.value)}
                 min={startDate}
                 max={format(new Date(), "yyyy-MM-dd")}
-                className="text-xs p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded"
+                className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full"
               />
             </div>
-            <Button variant="outline" size="icon" onClick={goToNextWeek} className="hover:bg-slate-200">
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={goToNextWeek}
+              className="hover:bg-slate-200 flex-shrink-0 h-9 w-9"
+            >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
-        <div className="flex gap-6">
+
+        {/* Bottom Row - Actions */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 pt-3 md:pt-0 border-t md:border-t-0 border-slate-200">
+          {/* Export Button - Only for admins */}
           {(isSuperAdmin || isStationAdmin) && (
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="flex items-center gap-2 text-blue-700 border-blue-300 hover:bg-blue-50"
-                onClick={exportToCSV}
-                disabled={!currentData || currentData.length === 0}
-              >
-                <Download size={18} />
-                <span className="text-base">Export CSV</span>
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={exportToCSV}
+              className="flex items-center justify-center gap-2 hover:bg-blue-50 border-blue-300 text-blue-700 w-full sm:w-auto"
+              disabled={!currentData || currentData.length === 0}
+            >
+              <Download className="h-4 w-4" />
+              <span className="whitespace-nowrap text-xs sm:text-sm">Export CSV</span>
+            </Button>
           )}
 
+          {/* Station Filter - Only for super admin */}
           {isSuperAdmin && (
-            <div className="flex items-center gap-2">
-              <Filter size={16} className="text-purple-500" />
-              <Label htmlFor="stationFilter" className="whitespace-nowrap font-medium text-slate-700">
-                Station:
-              </Label>
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 w-full md:w-auto">
+              <div className="flex items-center gap-2">
+                <Filter size={16} className="text-purple-500 flex-shrink-0" />
+                <Label
+                  htmlFor="stationFilter"
+                  className="whitespace-nowrap font-medium text-slate-700 text-xs md:text-sm"
+                >
+                  Station:
+                </Label>
+              </div>
               <Select value={stationFilter} onValueChange={setStationFilter}>
-                <SelectTrigger className="w-[200px] border-slate-300 focus:ring-purple-500">
+                <SelectTrigger className="w-full md:w-[180px] border-slate-300 focus:ring-purple-500 text-xs md:text-sm h-9">
                   <SelectValue placeholder="All Stations" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Stations</SelectItem>
                   {stations.map((station) => (
                     <SelectItem key={station.id} value={station.id}>
-                      {station.name} ({station.stationId})
+                      <span className="block truncate text-xs md:text-sm">
+                        {station.name} ({station.stationId})
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>

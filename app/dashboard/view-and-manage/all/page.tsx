@@ -93,7 +93,7 @@ export default function AllViewAndManagePage() {
       {/* Tabs Section - Responsive */}
       <Tabs defaultValue="first-card" onValueChange={(value) => setActiveTab(value)} className="w-full">
         {/* Tab Navigation - Responsive with Horizontal Scroll */}
-        <div className="w-full">
+        <div className="w-full md:w-[200px]">
           <TabsList className="bg-gradient-to-r from-blue-400 to-blue-500 shadow rounded-lg p-1 flex justify-start gap-1 sm:gap-2 min-w-max w-full h-12 sm:w-auto">
             <TabsTrigger 
               value="first-card" 
