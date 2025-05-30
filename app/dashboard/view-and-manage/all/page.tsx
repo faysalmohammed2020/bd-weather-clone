@@ -66,18 +66,18 @@ export default function AllViewAndManagePage() {
 
         {/* Export Buttons - Responsive Layout */}
         {(session?.user?.role === "super_admin" || session?.user?.role === "station_admin") && (
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <div className="flex items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
             {/* Excel Export Button */}
             <Button 
               onClick={exportToExcel} 
-              className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 w-full sm:w-auto text-sm sm:text-base px-3 py-2"
+              className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 w-1/2 sm:w-auto text-sm sm:text-base px-3 py-2"
             >
               <Download className="h-4 w-4 flex-shrink-0" />
               <span className="truncate">Export All to Excel</span>
             </Button>
 
             {/* Compact PDF Export Button */}
-            <div className="w-full sm:w-auto">
+            <div className="w-1/2 sm:w-auto">
               <CompactPDFExportButton
                 firstCardRef={firstCardRef}
                 secondCardRef={secondCardRef}
@@ -93,29 +93,29 @@ export default function AllViewAndManagePage() {
       {/* Tabs Section - Responsive */}
       <Tabs defaultValue="first-card" onValueChange={(value) => setActiveTab(value)} className="w-full">
         {/* Tab Navigation - Responsive with Horizontal Scroll */}
-        <div className="w-full overflow-x-auto">
-          <TabsList className="bg-white shadow rounded-lg p-1 flex justify-start gap-1 sm:gap-2 min-w-max w-full sm:w-auto">
+        <div className="w-full">
+          <TabsList className="bg-gradient-to-r from-blue-400 to-blue-500 shadow rounded-lg p-1 flex justify-start gap-1 sm:gap-2 min-w-max w-full h-12 sm:w-auto">
             <TabsTrigger 
               value="first-card" 
-              className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
             >
               First Card
             </TabsTrigger>
             <TabsTrigger 
               value="second-card"
-              className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
             >
               Second Card
             </TabsTrigger>
             <TabsTrigger 
               value="synoptic-code"
-              className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
             >
               Synoptic Code
             </TabsTrigger>
             <TabsTrigger 
               value="daily-summery"
-              className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+              className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
             >
               Daily Summary
             </TabsTrigger>

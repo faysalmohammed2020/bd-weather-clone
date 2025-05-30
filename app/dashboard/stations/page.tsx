@@ -3,7 +3,7 @@ import { stations as initialStations } from "@/data/stations";
 
 export default function StationsAdminPage() {
   return (
-    <div className="container mx-auto py-8">
+    <div className="md:container md:mx-auto md:py-8">
       <StationManagement initialStations={initialStations} />
     </div>
   );
