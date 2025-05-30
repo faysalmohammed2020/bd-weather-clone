@@ -24,8 +24,10 @@ export default function DroughtDashboard() {
 
   return (
     <div className="flex flex-col h-screen">
-      <div className="grid grid-cols-5 rounded-lg shadow mb-4">
-        <div className="col-span-1">
+      {/* Responsive Layout for Controls and Map */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 rounded-lg shadow mb-4">
+        {/* MapControls: Full width on mobile, 1 col on lg */}
+        <div className="order-1 lg:order-1 lg:col-span-1 p-4">
           <MapControls
             selectedRegion={selectedRegion}
             setSelectedRegion={setSelectedRegion}
@@ -38,7 +40,8 @@ export default function DroughtDashboard() {
           />
         </div>
 
-        <div className="col-span-4 p-4">
+        {/* MapComponent: Full width on mobile, 4 col on lg */}
+        <div className="order-2 lg:order-2 lg:col-span-4 p-4">
           <MapComponent
             currentDate={currentDate}
             setCurrentDate={setCurrentDate}
@@ -50,7 +53,8 @@ export default function DroughtDashboard() {
         </div>
       </div>
 
-      <div className="md:col-span-2 grid grid-cols-1 gap-4 p-4">
+      {/* Weather Dashboard always full width */}
+      <div className="grid grid-cols-1 gap-4 p-4">
         <WeatherDashboard selectedStation={selectedStation} />
       </div>
     </div>

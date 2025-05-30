@@ -197,8 +197,6 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile sidebar toggle button */}
-      {/* Mobile sidebar toggle button */}
       {!isMobileOpen && (
         <div className="md:hidden fixed top-4 left-4 z-50">
           <Button
