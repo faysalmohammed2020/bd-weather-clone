@@ -184,14 +184,14 @@ export const UserTable = () => {
     const selectedStation = stations.find(
       (station) => station.id === stationId
     );
-    
+
     if (selectedStation) {
       setFormData((prevData) => ({
         ...prevData,
         stationId: selectedStation?.id || "",
       }));
     }
-  };  
+  };
 
   // We're now handling form data updates directly in the select onValueChange handlers
   // This ensures the form data and location context stay in sync
@@ -531,8 +531,9 @@ export const UserTable = () => {
     <div className="mb-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">User Management</h1>
-        <div>
-          <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+
+        <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+          {session?.user.role === "super_admin" && (
             <DialogTrigger asChild>
               <Button
                 className="bg-sky-600 hover:bg-sky-400"
@@ -541,26 +542,28 @@ export const UserTable = () => {
                 + Create User
               </Button>
             </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {editUser ? "Edit User" : "Create New User"}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                {/* Name */}
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="name">Name</label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                  />
-                </div>
+          )}
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                {editUser ? "Edit User" : "Create New User"}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              {/* Name */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="name">Name</label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                />
+              </div>
 
-                {/* Role - Placed first for validation purposes */}
+              {/* Role - Placed first for validation purposes */}
+              {session?.user.role === "super_admin" && (
                 <div className="flex flex-col gap-2">
                   <label htmlFor="role">
                     Role <span className="text-red-500">*</span>
@@ -595,113 +598,113 @@ export const UserTable = () => {
                     </SelectContent>
                   </Select>
                 </div>
+              )}
 
-                {/* Email and Password */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="email">
-                      Email <span className="text-red-500">*</span>
-                    </label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <label
-                      htmlFor="password"
-                      className="flex items-center gap-1"
-                    >
-                      {editUser ? "New Password" : "Password"}
-                      {!editUser && <span className="text-red-500">*</span>}
-                      {formData.role && (
-                        <span className="text-xs text-blue-600 block">
-                          {`Min ${formData.role === "super_admin" ? 12 : formData.role === "station_admin" ? 11 : 10} characters`}
-                        </span>
-                      )}
-                    </label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder={
-                        formData.role
-                          ? `Min ${formData.role === "super_admin" ? 12 : formData.role === "station_admin" ? 11 : 10} characters`
-                          : "Select a role first"
-                      }
-                      value={formData.password}
-                      onChange={(e) =>
-                        setFormData({ ...formData, password: e.target.value })
-                      }
-                      required={!editUser}
-                      disabled={!formData.role} // Disable password field until role is selected
-                    />
-                  </div>
-                </div>
-
-                {/* Station Name */}
+              {/* Email and Password */}
+              <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="stationName">Station Name</label>
-                  <Select
-                    value={formData.stationId}
-                    onValueChange={handleStationChange}
-                  >
-                    <SelectTrigger id="stationName" className="w-full">
-                      <SelectValue
-                        placeholder={
-                          loadingStations ? "Loading..." : "Select Station"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {stations.map((station) => (
-                        <SelectItem key={station.id} value={station.id}>
-                          {station.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Station ID */}
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="stationId">Station ID</label>
-                  <Input
-                    id="stationId"
-                    value={
-                      stations.find(
-                        (station) => station.id === formData.stationId
-                      )?.stationId
-                    }
-                    className="bg-gray-100"
-                    disabled
-                    readOnly
-                  />
-                </div>
-
-                {/* Station Code (Security Code) */}
-                <div className="flex flex-col gap-2">
-                  <label htmlFor="securityCode">
-                    Station Code (Security Code)
+                  <label htmlFor="email">
+                    Email <span className="text-red-500">*</span>
                   </label>
                   <Input
-                    id="securityCode"
-                    value={
-                      stations.find(
-                        (station) => station.id === formData.stationId
-                      )?.securityCode
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
                     }
-                    className="bg-gray-100"
-                    disabled
-                    readOnly
+                    required
                   />
                 </div>
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="password" className="flex items-center gap-1">
+                    {editUser ? "New Password" : "Password"}
+                    {!editUser && <span className="text-red-500">*</span>}
+                    {formData.role && (
+                      <span className="text-xs text-blue-600 block">
+                        {`Min ${formData.role === "super_admin" ? 12 : formData.role === "station_admin" ? 11 : 10} characters`}
+                      </span>
+                    )}
+                  </label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder={
+                      formData.role
+                        ? `Min ${formData.role === "super_admin" ? 12 : formData.role === "station_admin" ? 11 : 10} characters`
+                        : "Select a role first"
+                    }
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    required={!editUser}
+                    disabled={!formData.role} // Disable password field until role is selected
+                  />
+                </div>
+              </div>
 
-                {/* Division, District, Upazila */}
+              {/* Station Name */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="stationName">Station Name</label>
+                <Select
+                  value={formData.stationId}
+                  onValueChange={handleStationChange}
+                  disabled={session?.user.role !== "super_admin"}
+                >
+                  <SelectTrigger id="stationName" className="w-full">
+                    <SelectValue
+                      placeholder={
+                        loadingStations ? "Loading..." : "Select Station"
+                      }
+                    />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {stations.map((station) => (
+                      <SelectItem key={station.id} value={station.id}>
+                        {station.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Station ID */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="stationId">Station ID</label>
+                <Input
+                  id="stationId"
+                  value={
+                    stations.find(
+                      (station) => station.id === formData.stationId
+                    )?.stationId
+                  }
+                  className="bg-gray-100"
+                  disabled
+                  readOnly
+                />
+              </div>
+
+              {/* Station Code (Security Code) */}
+              <div className="flex flex-col gap-2">
+                <label htmlFor="securityCode">
+                  Station Code (Security Code)
+                </label>
+                <Input
+                  id="securityCode"
+                  value={
+                    stations.find(
+                      (station) => station.id === formData.stationId
+                    )?.securityCode
+                  }
+                  className="bg-gray-100"
+                  disabled
+                  readOnly
+                />
+              </div>
+
+              {/* Division, District, Upazila */}
+              {session?.user.role === "super_admin" && (
                 <div className="grid grid-cols-3 gap-4 w-full">
                   <div className="flex flex-col gap-2">
                     <label htmlFor="division">
@@ -835,21 +838,21 @@ export const UserTable = () => {
                     </Select>
                   </div>
                 </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setOpenDialog(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={editUser ? confirmRoleUpdate : handleCreateUser}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  {editUser ? "Update User" : "Create User"}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpenDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={editUser ? confirmRoleUpdate : handleCreateUser}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                {editUser ? "Update User" : "Create User"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className=" bg-white py-6 rounded-xl border shadow">
@@ -911,15 +914,17 @@ export const UserTable = () => {
                       >
                         Edit
                       </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() =>
-                          openDeleteConfirmation(user.id, user.role)
-                        }
-                      >
-                        Delete
-                      </Button>
+                      {session?.user.role === "super_admin" && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() =>
+                            openDeleteConfirmation(user.id, user.role)
+                          }
+                        >
+                          Delete
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -966,30 +971,34 @@ export const UserTable = () => {
       </div>
 
       {/* Delete Confirmation Dialog */}
-      <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-center">Confirm Deletion</DialogTitle>
-          </DialogHeader>
-          <div className="p-4 text-center">
-            <p className="mb-4">
-              Are you sure you want to delete this user? This action cannot be
-              undone.
-            </p>
-            <div className="flex justify-center space-x-4">
-              <Button
-                variant="outline"
-                onClick={() => setOpenDeleteDialog(false)}
-              >
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={handleDeleteUser}>
-                Delete
-              </Button>
+      {session?.user?.role === "super_admin" && (
+        <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-center">
+                Confirm Deletion
+              </DialogTitle>
+            </DialogHeader>
+            <div className="p-4 text-center">
+              <p className="mb-4">
+                Are you sure you want to delete this user? This action cannot be
+                undone.
+              </p>
+              <div className="flex justify-center space-x-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setOpenDeleteDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button variant="destructive" onClick={handleDeleteUser}>
+                  Delete
+                </Button>
+              </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Role Update Confirmation Dialog */}
       <Dialog

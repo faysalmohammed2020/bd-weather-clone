@@ -203,13 +203,7 @@ export async function GET() {
         }
       }
     } else {
-      if (
-        rainFall > 0 &&
-        (!rainStart ||
-          !rainEnd ||
-          isIntermittentRain === null ||
-          isIntermittentRain === undefined)
-      ) {
+      if (rainFall > 0 && (!rainStart || !rainEnd)) {
         tr = "0"; // বৃষ্টি হয়েছে, কিন্তু সময় বা ধরণ অজানা
       }
     }

@@ -8,12 +8,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
-import { Clock } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Circle, CircleCheck, Clock } from "lucide-react";
+import { cn, utcToHour } from "@/lib/utils";
+import { TimeInfo } from "@/lib/data-type";
 
-const HourSelector = ({ type }: { type: "first" | "second" }) => {
-  const { selectedHour, setSelectedHour, firstCardError, secondCardError, isLoading, clearError } =
-    useHour();
+
+
+const HourSelector = ({
+  type,
+  timeInfo,
+}: {
+  type: "first" | "second";
+  timeInfo: TimeInfo[];
+}) => {
+  const {
+    selectedHour,
+    setSelectedHour,
+    firstCardError,
+    secondCardError,
+    isLoading,
+    clearError,
+  } = useHour();
+
+  // Function to check if a specific hour exists in timeInfo
+  const hasTimeEntry = (hour: string) => {
+    if(type == "second") {
+      return timeInfo.some((item) => {
+        const utcHour = utcToHour(item.utcTime.toString());
+        return utcHour === hour && item.hasWeatherObservation;
+      });
+    }
+
+    if(type == "first") {
+      return timeInfo.some((item) => {
+        const utcHour = utcToHour(item.utcTime.toString());
+        return utcHour === hour && item.hasMeteorologicalEntry;
+      });
+    }
+  };
 
   const handleHourChange = (value: string) => {
     if (!value) {
@@ -49,34 +81,74 @@ const HourSelector = ({ type }: { type: "first" | "second" }) => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="00" className="text-lg">
+              {hasTimeEntry("00") ? (
+                <CircleCheck className="size-5 stroke-1.5 text-blue-500" />
+              ) : (
+                <Circle className="size-5 stroke-1.5 text-slate-200" />
+              )}
               00&nbsp;
               <span className="text-muted-foreground text-sm">(12:00 AM)</span>
             </SelectItem>
             <SelectItem value="03" className="text-lg">
+              {hasTimeEntry("03") ? (
+                <CircleCheck className="size-5 stroke-1.5 text-blue-500" />
+              ) : (
+                <Circle className="size-5 stroke-1.5 text-slate-200" />
+              )}
               03&nbsp;
               <span className="text-muted-foreground text-sm">(3:00 AM)</span>
             </SelectItem>
             <SelectItem value="06" className="text-lg">
+              {hasTimeEntry("06") ? (
+                <CircleCheck className="size-5 stroke-1.5 text-blue-500" />
+              ) : (
+                <Circle className="size-5 stroke-1.5 text-slate-200" />
+              )}
               06&nbsp;
               <span className="text-muted-foreground text-sm">(6:00 AM)</span>
             </SelectItem>
             <SelectItem value="09" className="text-lg">
+              {hasTimeEntry("09") ? (
+                <CircleCheck className="size-5 stroke-1.5 text-blue-500" />
+              ) : (
+                <Circle className="size-5 stroke-1.5 text-slate-200" />
+              )}
               09&nbsp;
               <span className="text-muted-foreground text-sm">(9:00 AM)</span>
             </SelectItem>
             <SelectItem value="12" className="text-lg">
+              {hasTimeEntry("12") ? (
+                <CircleCheck className="size-5 stroke-1.5 text-blue-500" />
+              ) : (
+                <Circle className="size-5 stroke-1.5 text-slate-200" />
+              )}
               12&nbsp;
               <span className="text-muted-foreground text-sm">(12:00 PM)</span>
             </SelectItem>
             <SelectItem value="15" className="text-lg">
+              {hasTimeEntry("15") ? (
+                <CircleCheck className="size-5 stroke-1.5 text-blue-500" />
+              ) : (
+                <Circle className="size-5 stroke-1.5 text-slate-200" />
+              )}
               15&nbsp;
               <span className="text-muted-foreground text-sm">(3:00 PM)</span>
             </SelectItem>
             <SelectItem value="18" className="text-lg">
+              {hasTimeEntry("18") ? (
+                <CircleCheck className="size-5 stroke-1.5 text-blue-500" />
+              ) : (
+                <Circle className="size-5 stroke-1.5 text-slate-200" />
+              )}
               18&nbsp;
               <span className="text-muted-foreground text-sm">(6:00 PM)</span>
             </SelectItem>
             <SelectItem value="21" className="text-lg">
+              {hasTimeEntry("21") ? (
+                <CircleCheck className="size-5 stroke-1.5 text-blue-500" />
+              ) : (
+                <Circle className="size-5 stroke-1.5 text-slate-200" />
+              )}
               21&nbsp;
               <span className="text-muted-foreground text-sm">(9:00 PM)</span>
             </SelectItem>
@@ -84,8 +156,12 @@ const HourSelector = ({ type }: { type: "first" | "second" }) => {
         </Select>
       </div>
 
-      {type === "first" && firstCardError && <p className="text-red-500 font-medium text-lg">{firstCardError}</p>}
-      {type === "second" && secondCardError && <p className="text-red-500 font-medium text-lg">{secondCardError}</p>}
+      {type === "first" && firstCardError && (
+        <p className="text-red-500 font-medium text-lg">{firstCardError}</p>
+      )}
+      {type === "second" && secondCardError && (
+        <p className="text-red-500 font-medium text-lg">{secondCardError}</p>
+      )}
     </div>
   );
 };

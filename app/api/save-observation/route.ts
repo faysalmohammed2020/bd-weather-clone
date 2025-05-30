@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
 import { hourToUtc } from "@/lib/utils";
+import { revalidateTag } from "next/cache";
+import { LogAction, LogActionType, LogModule } from "@/lib/log";
+import { diff } from "deep-object-diff";
 
 export async function POST(request: Request) {
   try {
@@ -239,6 +242,20 @@ export async function POST(request: Request) {
       },
     });
 
+    // Revalidate time checking
+    revalidateTag("time-check");
+
+    // Log The Action
+    await LogAction({
+      init: prisma,
+      action: LogActionType.CREATE,
+      actionText: "Weather Observation Created",
+      role: session.user.role!,
+      actorId: session.user.id,
+      actorEmail: session.user.email,
+      module: LogModule.WEATHER_OBSERVATION,
+    });
+
     return NextResponse.json({
       error: false,
       message: "Observation saved successfully",
@@ -444,6 +461,22 @@ export async function PUT(request: Request) {
             },
           },
         },
+      });
+
+      // Revalidate time checking
+      revalidateTag("time-check");
+
+      // Log The Action
+      const diffData = diff(existing, updated);
+      await LogAction({
+        init: prisma,
+        action: LogActionType.UPDATE,
+        actionText: "Weather Observation Updated",
+        role: session.user.role!,
+        actorId: session.user.id,
+        actorEmail: session.user.email,
+        module: LogModule.WEATHER_OBSERVATION,
+        details: diffData,
       });
 
       return NextResponse.json({

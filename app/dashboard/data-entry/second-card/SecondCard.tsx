@@ -40,6 +40,7 @@ import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { useHour } from "@/contexts/hourContext";
 import HourSelector from "@/components/hour-selector";
+import { TimeInfo } from "@/lib/data-type";
 
 // Define the form data type
 type WeatherObservationFormData = {
@@ -198,7 +199,6 @@ const cloudSchema = Yup.object({
     high: Yup.object({
       form: Yup.string().required("High cloud form is required"),
       amount: Yup.string().required("High cloud amount is required"),
-      height: Yup.string().required("High cloud height is required"),
       direction: Yup.string().required("High cloud direction is required"),
     }),
   }),
@@ -259,7 +259,7 @@ const validationSchema = Yup.object({
   ...observerSchema.fields,
 });
 
-export default function SecondCardForm() {
+export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("cloud");
   const [currentStep, setCurrentStep] = useState(1);
@@ -859,7 +859,7 @@ export default function SecondCardForm() {
             transition={{ duration: 0.3 }}
             className="absolute inset-0 flex items-center justify-center bg-white backdrop-blur-sm z-50 px-6"
           >
-            <HourSelector type="second" />
+            <HourSelector type="second" timeInfo={timeInfo} />
           </motion.div>
         ) : (
           <motion.form
@@ -1897,18 +1897,20 @@ function CloudLevelSection({
           required
         />
 
-        <SelectField
-          id={`${prefix}-height`}
-          name={`${prefix}-height`}
-          label="Height of Base (Code)"
-          accent={color}
-          value={data["height"] || ""}
-          onValueChange={(value) => onSelectChange(`${prefix}-height`, value)}
-          options={cloudHeightOptions.map((opt) => opt.value)}
-          optionLabels={cloudHeightOptions.map((opt) => opt.label)}
-          error={renderError("height")}
-          required
-        />
+        {prefix !== "high-cloud" && (
+          <SelectField
+            id={`${prefix}-height`}
+            name={`${prefix}-height`}
+            label="Height of Base (Code)"
+            accent={color}
+            value={data["height"] || ""}
+            onValueChange={(value) => onSelectChange(`${prefix}-height`, value)}
+            options={cloudHeightOptions.map((opt) => opt.value)}
+            optionLabels={cloudHeightOptions.map((opt) => opt.label)}
+            error={renderError("height")}
+            required
+          />
+        )}
 
         <SelectField
           id={`${prefix}-direction`}

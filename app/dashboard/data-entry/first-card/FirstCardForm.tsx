@@ -28,7 +28,8 @@ import { useFormik } from "formik";
 import BasicInfoTab from "@/components/basic-info-tab";
 import HourSelector from "@/components/hour-selector";
 import { AnimatePresence, motion } from "framer-motion";
-import { MeteorologicalEntry } from "@prisma/client";
+import type { MeteorologicalEntry } from "@prisma/client";
+import type { TimeInfo } from "@/lib/data-type";
 
 // type MeteorologicalFormData = {
 //   presentWeatherWW?: string;
@@ -160,7 +161,7 @@ const validationSchema = Yup.object({
   ...weatherSchema.fields,
 });
 
-export function FirstCardForm() {
+export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
@@ -546,6 +547,46 @@ export function FirstCardForm() {
     };
   };
 
+  // async function calculateCorrectedTemperatures(
+  //   dryBulbAsRead: string,
+  //   wetBulbAsRead: string,
+  //   maxMinTempAsRead: string,
+  //   stationId: string,
+  // ) {
+  //   if (!dryBulbAsRead || !wetBulbAsRead || !maxMinTempAsRead || !stationId) return
+
+  //   const userStationData = stationDataMap[stationId]
+  //   if (!userStationData) {
+  //     toast.error("Station data not found for temperature correction")
+  //     return
+  //   }
+
+  //   // Convert 3-digit inputs to actual temperature values (e.g., "256" → 25.6)
+  //   const dryBulbValue = Number.parseFloat(`${dryBulbAsRead.slice(0, 2)}.${dryBulbAsRead.slice(2)}`)
+  //   const wetBulbValue = Number.parseFloat(`${wetBulbAsRead.slice(0, 2)}.${wetBulbAsRead.slice(2)}`)
+  //   const maxMinTempValue = Number.parseFloat(`${maxMinTempAsRead.slice(0, 2)}.${maxMinTempAsRead.slice(2)}`)
+
+  //   // Apply temperature corrections (you can customize these correction factors)
+  //   // For now, using standard meteorological corrections
+  //   const temperatureCorrection = userStationData.station.temperatureCorrection || 0
+
+  //   const correctedDryBulb = dryBulbValue + temperatureCorrection
+  //   const correctedWetBulb = wetBulbValue + temperatureCorrection
+  //   const correctedMaxMinTemp = maxMinTempValue + temperatureCorrection
+
+  //   // Convert back to 3-digit format
+  //   const formatTemperature = (temp: number) => {
+  //     const rounded = Math.round(temp * 10)
+  //     return rounded.toString().padStart(3, "0")
+  //   }
+
+  //   return {
+  //     dryBulbCorrected: formatTemperature(correctedDryBulb),
+  //     wetBulbCorrected: formatTemperature(correctedWetBulb),
+  //     maxMinTempCorrected: formatTemperature(correctedMaxMinTemp),
+  //   }
+  // }
+
   async function handleSubmit(values: MeteorologicalEntry) {
     // Prevent duplicate submissions
     if (isSubmitting) return;
@@ -727,6 +768,24 @@ export function FirstCardForm() {
       }
     }
 
+    // Add this after the dew point calculation section and replace the existing temperature correction code
+    if (
+      name === "dryBulbAsRead" ||
+      name === "wetBulbAsRead" ||
+      name === "maxMinTempAsRead"
+    ) {
+      // Auto-update corrected fields with the same values as as-read fields
+      if (name === "dryBulbAsRead") {
+        formik.setFieldValue("dryBulbCorrected", value);
+      }
+      if (name === "wetBulbAsRead") {
+        formik.setFieldValue("wetBulbCorrected", value);
+      }
+      if (name === "maxMinTempAsRead") {
+        formik.setFieldValue("maxMinTempCorrected", value);
+      }
+    }
+
     // Station level + Sea level pressure calculation
     if (name === "dryBulbAsRead" || name === "barAsRead") {
       const dryBulb =
@@ -761,7 +820,10 @@ export function FirstCardForm() {
           // Get yesterday's station level pressure
           const prevStationLevelPressure =
             timeData?.yesterday?.meteorologicalEntry[0]?.stationLevelPressure;
-            console.log("Time Data: ", timeData?.yesterday?.meteorologicalEntry[0]?.stationLevelPressure);
+          console.log(
+            "Time Data: ",
+            timeData?.yesterday?.meteorologicalEntry[0]?.stationLevelPressure
+          );
           // If there's no previous pressure data, set to '000' and return
           if (!prevStationLevelPressure) {
             formik.setFieldValue("pressureChange24h", "0000");
@@ -908,7 +970,7 @@ export function FirstCardForm() {
             transition={{ duration: 0.3 }}
             className="absolute inset-0 flex items-center justify-center bg-white backdrop-blur-sm z-50 px-6"
           >
-            <HourSelector type="first" />
+            <HourSelector type="first" timeInfo={timeInfo} />
           </motion.div>
         ) : (
           <motion.form
@@ -1261,7 +1323,7 @@ export function FirstCardForm() {
                                     id="dryBulbCorrected"
                                     name="dryBulbCorrected"
                                     value={formik.values.dryBulbCorrected || ""}
-                                    onChange={handleChange}
+                                    onChange={handleNumericInput}
                                     className="transition-all focus:border-blue-400 focus:ring-blue-500/30"
                                   />
                                 </div>
@@ -1274,7 +1336,7 @@ export function FirstCardForm() {
                                     id="wetBulbCorrected"
                                     name="wetBulbCorrected"
                                     value={formik.values.wetBulbCorrected || ""}
-                                    onChange={handleChange}
+                                    onChange={handleNumericInput}
                                     className="border-slate-600 transition-all focus:border-blue-400 focus:ring-blue-500/30"
                                   />
                                 </div>
@@ -1289,7 +1351,7 @@ export function FirstCardForm() {
                                     value={
                                       formik.values.maxMinTempCorrected || ""
                                     }
-                                    onChange={handleChange}
+                                    onChange={handleNumericInput}
                                     className="border-slate-600 transition-all focus:border-blue-400 focus:ring-blue-500/30"
                                   />
                                 </div>

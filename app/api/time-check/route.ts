@@ -6,14 +6,14 @@ import moment from "moment";
 
 // Check if observing time exist or not and return each data count
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const { hour } = body;
-
   const session = await getSession();
 
   if (!session) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
+
+  const body = await request.json();
+  const { hour } = body;
 
   try {
     const formattedUtcTime = hourToUtc(hour);
@@ -121,3 +121,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+

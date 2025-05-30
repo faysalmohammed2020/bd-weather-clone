@@ -1,6 +1,8 @@
 import { getSession } from "@/lib/getSession"
+import { LogAction, LogActionType, LogModule } from "@/lib/log"
 import prisma from "@/lib/prisma"
 import { getTodayUtcRange } from "@/lib/utils"
+import { diff } from "deep-object-diff"
 import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
@@ -130,6 +132,17 @@ export async function POST(req: Request) {
       },
     })
 
+    // Log The Action
+    await LogAction({
+      init: prisma,
+      action: LogActionType.CREATE,
+      actionText: "Daily Summary Created",
+      role: session.user.role!,
+      actorId: session.user.id,
+      actorEmail: session.user.email,
+      module: LogModule.DAILY_SUMMARY,
+    });
+
     return NextResponse.json({
       success: true,
       message: "Daily summary saved successfully",
@@ -164,16 +177,26 @@ export async function GET(req: Request) {
   const endTime = endDate ? new Date(endDate) : new Date();
   endTime.setHours(23, 59, 59, 999);
 
+  const superFilter = session.user.role === "super_admin";
+
   try {
     const rawSummaries = await prisma.dailySummary.findMany({
       where: {
-        ObservingTime: {
-          utcTime: {
-            gte: startTime,
-            lte: endTime,
+        AND: [
+          {
+            ObservingTime: {
+              utcTime: {
+                gte: startTime,
+                lte: endTime,
+              },
+            },
           },
-          ...(stationIdParam ? { stationId: stationIdParam } : {}),
-        },
+          ...(superFilter
+            ? stationIdParam
+              ? [{ ObservingTime: { stationId: stationIdParam } }]
+              : []
+            : [{ ObservingTime: { stationId: session.user.station?.id } }]),
+        ],
       },
       include: {
         ObservingTime: {
@@ -265,6 +288,19 @@ export async function PUT(req: Request) {
       where: { id },
       data: updateData,
     })
+
+    // Log The Action
+    const diffData = diff(existingRecord, updatedRecord);
+    await LogAction({
+      init: prisma,
+      action: LogActionType.UPDATE,
+      actionText: "Daily Summary Updated",
+      role: session.user.role!,
+      actorId: session.user.id,
+      actorEmail: session.user.email,
+      module: LogModule.DAILY_SUMMARY,
+      details: diffData,
+    });
 
     return NextResponse.json({ success: true, data: updatedRecord }, { status: 200 })
   } catch (error) {

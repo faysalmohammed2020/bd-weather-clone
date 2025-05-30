@@ -5,6 +5,7 @@ import { Document, Page, Text, View, StyleSheet, PDFDownloadLink, Image } from "
 import { Button } from "@/components/ui/button"
 import { FileText } from "lucide-react"
 import moment from 'moment';
+import { useSession } from "@/lib/auth-client"
 
 // Compact PDF Styles for single A3 page
 const styles = StyleSheet.create({
@@ -57,7 +58,8 @@ const styles = StyleSheet.create({
   },
   tableCell: {
     margin: "auto",
-    fontSize: 6,
+    fontSize: 7,
+    maxLines: 2,
     padding: 1.5,
     borderStyle: "solid",
     borderWidth: 0.3,
@@ -68,10 +70,14 @@ const styles = StyleSheet.create({
   },
   tableCellSynoptic: {
     margin: "auto",
-    fontSize: 6,
+    fontSize: 7,
     padding: 1.5,
     borderStyle: "solid",
     maxLines: 4,
+    display: "flex",
+    alignItems: "center",
+    flexGrow: 1,
+    justifyContent: "center",
     borderWidth: 0.3,
     borderColor: "#74777B",
     textAlign: "center",
@@ -80,18 +86,18 @@ const styles = StyleSheet.create({
   },
   tableCellHeader: {
     margin: "auto",
-    fontSize: 6,
+    fontSize: 8,
     padding: 1.5,
     borderStyle: "solid",
     borderWidth: 0.3,
     borderColor: "#74777B",
     textAlign: "center",
-    maxLines: 3,
+    maxLines: 4,
     backgroundColor: "#3b82f6",
     color: "#ffffff",
     fontWeight: "bold",
-    minHeight: 30,
-    maxHeight: 50,
+    minHeight: 42,
+    maxHeight: 45,
   },
   stationInfo: {
     flexDirection: "row",
@@ -136,6 +142,7 @@ interface CompactWeatherPDFProps {
   firstCardData: any[]
   secondCardData: any[]
   synopticData: any[]
+  dailySummeryData: any[]
   stationInfo: {
     stationId: string
     stationName: string
@@ -148,12 +155,15 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
   firstCardData,
   secondCardData,
   synopticData,
+  dailySummeryData,
   stationInfo,
 }) => {
   const formatValue = (value: any) => {
     if (value === null || value === undefined || value === "") return "--"
     return String(value).substring(0, 10)
   }
+  const { data: session } = useSession()
+  const superAdmin = session?.user?.role === "super_admin"
 
   const formatTime = (utcTime: string) => {
     if (!utcTime) return "--"
@@ -172,7 +182,7 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
           <View>
             <Text style={styles.title}>Weather Station Data Report</Text>
             <Text style={styles.subtitle}>
-            {firstCardData[0].stationName} ({firstCardData[0].stationId})
+            {superAdmin ? formatValue(firstCardData[0].stationName) : formatValue(stationInfo.stationName)} ({superAdmin ? formatValue(firstCardData[0].stationCode) : formatValue(stationInfo.stationId)}) 
             </Text>
           </View>
           <Text style={{ fontSize: 7, color: "#64748b" }}>Generated: {new Date().toLocaleDateString()}</Text>
@@ -186,11 +196,11 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
           </View>
           <View style={styles.stationItem}>
             <Text style={styles.stationLabel}>STATION NO</Text>
-            <Text style={styles.stationValue}>{formatValue(firstCardData[0].stationId)}</Text>
+            <Text style={styles.stationValue}>{superAdmin ? formatValue(firstCardData[0].stationCode) : formatValue(stationInfo.stationId)}</Text>
           </View>
           <View style={styles.stationItem}>
             <Text style={styles.stationLabel}>STATION NAME</Text>
-            <Text style={styles.stationValue}>{formatValue(firstCardData[0].stationName)}</Text>
+            <Text style={styles.stationValue}>{superAdmin ? formatValue(firstCardData[0].stationName) : formatValue(stationInfo.stationName)}</Text>
           </View>
           <View style={styles.stationItem}>
             <Text style={styles.stationLabel}>DATE</Text>
@@ -348,8 +358,8 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.layer4Form)}</Text>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.layer4Height)}</Text>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.layer4Amount)}</Text>
-                <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.rainfallTimeStart)}</Text>
-                <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.rainfallTimeEnd)}</Text>
+                <Text style={[styles.tableCell, { width: "2.5%" }]}>{moment(record.rainfallTimeStart).format("LT")}</Text>
+                <Text style={[styles.tableCell, { width: "2.5%" }]}>{moment(record.rainfallTimeEnd).format("LT")}</Text>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.rainfallSincePrevious)}</Text>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.rainfallDuringPrevious)}</Text>
                 <Text style={[styles.tableCell, { width: "2.5%" }]}>{formatValue(record.rainfallLast24Hours)}</Text>
@@ -425,10 +435,64 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
           </View>
         </View>
 
+        {/* Daily Summary Data - Compact */}
+        <View style={styles.compactSection}>
+          <Text style={styles.sectionTitle}>Daily Summary Data</Text>
+          <View style={styles.table}>
+            {/* Daily Summary Headers - Compact */}
+            <View style={styles.tableRow}>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Time</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Date</Text>
+              <Text style={[styles.tableCellHeader, { width: "6%" }]}>Av. Station Pressure (hPa)</Text>
+              <Text style={[styles.tableCellHeader, { width: "6%" }]}>Av. Sea-Level Pressure (hPa)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Av. Dry-Bulb Temp (°C)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Av. Wet Bulb Temp (°C)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Max Temperature (°C)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Min Temperature (°C)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Total Precipitation (mm)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Av. Dew Point Temp (°C)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Av. Relative Humidity (%)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Wind Speed (m/s)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Wind Direction</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Max Wind Speed (m/s)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Max Wind Direction</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Av. Total Cloud (octas)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Lowest Visibility (km)</Text>
+              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Total Rain Duration (H-M)</Text>
+            </View>
+
+            {/* Synoptic Data Rows - Limited to 6 rows */}
+            {dailySummeryData.slice(0, 8).map((record, index) => (
+              <View key={index} style={styles.tableRow}>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatTime(record.date)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{moment(record.date).format("ll")}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "6%" }]}>{formatValue(record.avStationPressure)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "6%" }]}>{formatValue(record.avSeaLevelPressure)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.avDryBulbTemperature)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.avWetBulbTemperature)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.maxTemperature)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.minTemperature)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.totalPrecipitation)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.avDewPointTemperature)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.avRelativeHumidity)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.windSpeed)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.windDirection)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.maxWindSpeed)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.maxWindDirection)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.avTotalCloud)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.lowestVisibility)}</Text>
+                <Text style={[styles.tableCellSynoptic, { width: "5.5%" }]}>{formatValue(record.totalRainDuration)}</Text>
+            </View>
+            ))}
+          </View>
+        </View>
+
+
+
         {/* Footer */}
         <View style={styles.footer}>
           <Text>
-            Weather Station Data Report - {firstCardData[0].stationName} ({firstCardData[0].stationId}) - {stationInfo.date}
+            Weather Station Data Report - {superAdmin ? formatValue(firstCardData[0].stationName) : formatValue(stationInfo.stationName)} ({superAdmin ? formatValue(firstCardData[0].stationCode) : formatValue(stationInfo.stationId)}) - {stationInfo.date}
           </Text>
         </View>
       </Page>
@@ -441,6 +505,7 @@ interface CompactPDFExportButtonProps {
   firstCardRef: React.RefObject<any>
   secondCardRef: React.RefObject<any>
   synopticRef: React.RefObject<any>
+  dailySummeryRef: React.RefObject<any>
   stationInfo?: {
     stationId: string
     stationName: string
@@ -452,6 +517,7 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
   firstCardRef,
   secondCardRef,
   synopticRef,
+  dailySummeryRef,
   stationInfo = {
     stationId: "41953",
     stationName: "Weather Station",
@@ -464,14 +530,16 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
     const firstCardData = firstCardRef.current?.getData?.() || []
     const secondCardData = secondCardRef.current?.getData?.() || []
     const synopticData = synopticRef.current?.getData?.() || []
+    const dailySummeryData = dailySummeryRef.current?.getData?.() || []
 
     return {
       firstCardData,
       secondCardData,
       synopticData,
+      dailySummeryData,
       stationInfo,
     }
-  }, [firstCardRef, secondCardRef, synopticRef, stationInfo])
+  }, [firstCardRef, secondCardRef, synopticRef, dailySummeryRef, stationInfo])
 
   return (
     <PDFDownloadLink
