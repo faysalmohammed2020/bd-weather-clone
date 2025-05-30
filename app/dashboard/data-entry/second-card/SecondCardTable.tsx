@@ -884,7 +884,7 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                           <td
                             className={`border border-slate-300 p-1 ${weatherObs?.rainfallTimeStart ? "text-emerald-700 font-medium" : ""}`}
                           >
-                            {weatherObs?.rainfallTimeStart || "--"}
+                            {moment{weatherObs?.rainfallTimeStart || "--"}}
                           </td>
                           <td
                             className={`border border-slate-300 p-1 ${weatherObs?.rainfallTimeEnd ? "text-emerald-700 font-medium" : ""}`}
