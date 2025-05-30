@@ -28,6 +28,7 @@ import {
   CollapsibleContent,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -38,7 +39,6 @@ const Sidebar = () => {
   const role = session?.user?.role;
   const pathname = usePathname();
 
-  // Close sidebar when clicking outside on mobile
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -56,36 +56,28 @@ const Sidebar = () => {
     };
   }, [isMobileOpen]);
 
-  // Auto-close mobile sidebar when route changes
   useEffect(() => {
     setIsMobileOpen(false);
   }, [pathname]);
 
-  // Auto-detect screen size and set appropriate state
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
-        // Mobile behavior
         setIsMobileOpen(false);
       } else if (window.innerWidth >= 768 && window.innerWidth < 1024) {
-        // Tablet behavior - auto collapse
         setIsCollapsed(true);
         setIsMobileOpen(false);
       } else {
-        // Desktop behavior - auto expand
         setIsCollapsed(false);
         setIsMobileOpen(false);
       }
     };
 
-    // Initialize on mount
     handleResize();
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Auto-open submenu if current path matches
   useEffect(() => {
     sidebarLinks.forEach((link) => {
       if (link.subMenu) {
@@ -103,6 +95,9 @@ const Sidebar = () => {
 
   const toggleMobileSidebar = () => {
     setIsMobileOpen((prev) => !prev);
+    if (!isMobileOpen && window.innerWidth < 768) {
+      setIsCollapsed(false);
+    }
   };
 
   const handleSubmenuToggle = (label: string) => {
@@ -197,38 +192,35 @@ const Sidebar = () => {
 
   return (
     <>
-      {!isMobileOpen && (
-        <div className="md:hidden fixed top-4 left-4 z-50">
-          <Button
-            onClick={toggleMobileSidebar}
-            variant="outline"
-            size="icon"
-            className="bg-white shadow-lg"
-          >
+      <div className="md:hidden fixed top-4 left-4 z-50">
+        <Button
+          onClick={toggleMobileSidebar}
+          variant="outline"
+          size="icon"
+          className="bg-white shadow-lg"
+          aria-label={isMobileOpen ? "Close menu" : "Open menu"}
+        >
+          {isMobileOpen ? (
+            <X className="w-5 h-5" />
+          ) : (
             <Menu className="w-5 h-5" />
-          </Button>
-        </div>
-      )}
+          )}
+        </Button>
+      </div>
 
-      {/* Sidebar */}
       <div
         ref={sidebarRef}
         className={cn(
           "bg-sky-700 text-white h-full transition-all duration-300 ease-in-out",
-          "fixed md:relative z-40 flex flex-col", // Increased z-index to 40
+          "fixed md:relative z-40 flex flex-col",
           "border-r border-sky-800",
           isCollapsed ? "w-16" : "w-64",
           isMobileOpen
             ? "translate-x-0 shadow-xl"
             : "-translate-x-full md:translate-x-0"
         )}
-        style={{
-          height: "100vh",
-          top: 0,
-          left: 0,
-        }}
+        style={{ height: "100vh", top: 0, left: 0 }}
       >
-        {/* Sidebar Header */}
         <div className="flex items-center justify-between p-4 border-b border-sky-800 z-40 bg-sky-700">
           {(!isCollapsed || isMobileOpen) && (
             <h2 className="text-lg font-bold whitespace-nowrap">BD Weather</h2>
@@ -253,7 +245,6 @@ const Sidebar = () => {
           </div>
         </div>
 
-        {/* Sidebar Links */}
         <nav className="flex-1 flex flex-col gap-1 px-2 py-4 overflow-y-auto overflow-x-hidden z-30">
           {sidebarLinks.map((link) => {
             if (!link.roles.includes(role as string)) return null;
@@ -281,7 +272,6 @@ const Sidebar = () => {
         </nav>
       </div>
 
-      {/* Overlay for mobile */}
       {isMobileOpen && (
         <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm"
@@ -349,53 +339,104 @@ const SidebarLink = ({
                 {icon}
               </span>
               {!isCollapsed && (
-                <span className="whitespace-nowrap">{label}</span>
+                <motion.span
+                  className="whitespace-nowrap"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {label}
+                </motion.span>
               )}
             </div>
             {!isCollapsed && (
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 transition-transform duration-200",
-                  isSubmenuOpen ? "rotate-180" : "",
-                  isActive ? "text-white" : "text-sky-200"
-                )}
-              />
+              <motion.div
+                animate={{ rotate: isSubmenuOpen ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown
+                  className={cn(
+                    "h-4 w-4",
+                    isActive ? "text-white" : "text-sky-200"
+                  )}
+                />
+              </motion.div>
             )}
           </Button>
         </CollapsibleTrigger>
-        <CollapsibleContent className="mt-1 flex flex-col space-y-1">
-          {subMenu.map((item) => {
-            const isItemActive = pathname === item.href;
-            return (
-              <Link key={item.href} href={item.href} onClick={handleLinkClick}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    "w-full flex items-center gap-3 justify-start",
-                    "py-1.5 pl-9 pr-3 rounded-md",
-                    "text-white hover:bg-white hover:text-sky-800",
-                    isItemActive && "bg-sky-600 text-white"
-                  )}
-                >
-                  {item.icon && (
-                    <span
-                      className={cn(
-                        "text-current",
-                        isItemActive ? "text-white" : "text-sky-200"
-                      )}
-                    >
-                      {item.icon}
-                    </span>
-                  )}
-                  {!isCollapsed && (
-                    <span className="whitespace-nowrap">{item.label}</span>
-                  )}
-                </Button>
-              </Link>
-            );
-          })}
-        </CollapsibleContent>
+
+        <AnimatePresence>
+          {isSubmenuOpen && (
+            <CollapsibleContent asChild forceMount>
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{
+                  height: "auto",
+                  opacity: 1,
+                  transition: {
+                    height: { duration: 0.2 },
+                    opacity: { duration: 0.1, delay: 0.1 },
+                  },
+                }}
+                exit={{
+                  height: 0,
+                  opacity: 0,
+                  transition: {
+                    height: { duration: 0.2 },
+                    opacity: { duration: 0.1 },
+                  },
+                }}
+                className="overflow-hidden"
+              >
+                <div className="mt-1 flex flex-col space-y-1">
+                  {subMenu.map((item) => {
+                    const isItemActive = pathname === item.href;
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={handleLinkClick}
+                      >
+                        <motion.div
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={cn(
+                              "w-full flex items-center gap-3 justify-start",
+                              "py-1.5 pl-9 pr-3 rounded-md",
+                              "text-white hover:bg-white hover:text-sky-800",
+                              isItemActive && "bg-sky-600 text-white"
+                            )}
+                          >
+                            {item.icon && (
+                              <span
+                                className={cn(
+                                  "text-current",
+                                  isItemActive ? "text-white" : "text-sky-200"
+                                )}
+                              >
+                                {item.icon}
+                              </span>
+                            )}
+                            {!isCollapsed && (
+                              <span className="whitespace-nowrap">
+                                {item.label}
+                              </span>
+                            )}
+                          </Button>
+                        </motion.div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            </CollapsibleContent>
+          )}
+        </AnimatePresence>
       </Collapsible>
     );
   }
