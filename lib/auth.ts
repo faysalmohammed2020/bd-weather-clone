@@ -37,6 +37,9 @@ export const auth = betterAuth({
     },
   },
   session: {
+    cookieCache: {
+      enabled: false,
+    },
     modelName: "sessions",
   },
   account: {

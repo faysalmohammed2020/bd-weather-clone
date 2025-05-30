@@ -3,7 +3,13 @@
 import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/getSession";
 
-export async function getLogs() {
+export async function getLogs({
+  limit = 10,
+  offset = 0,
+}: {
+  limit?: number;
+  offset?: number;
+} = {}) {
   try {
     const session = await getSession();
 
@@ -14,29 +20,45 @@ export async function getLogs() {
       };
     }
 
-    const logs = await prisma.logs.findMany({
-      where: {
-        AND: [
-          {
-            role: session.user.role == "super_admin" ? "super_admin" : "observer",
+    // Define the where condition based on user role
+    const whereCondition = {
+      AND: [
+        {
+          role: session.user.role === "super_admin" ? undefined : "observer",
+        },
+        {
+          actor: {
+            stationId: session.user.role === "super_admin" ? undefined : session.user.station?.id,
           },
-          {
-            actor: {
-              stationId: session.user.station?.id,
-            },
-          },
-        ],
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      include: {
-        actor: true,
-        targetUser: true,
-      },
-    });
+        },
+      ],
+    };
 
-    return logs;
+    // Get logs with pagination
+    const [logs, total] = await Promise.all([
+      prisma.logs.findMany({
+        where: whereCondition,
+        orderBy: {
+          createdAt: "desc",
+        },
+        skip: offset,
+        take: limit,
+        include: {
+          actor: true,
+          targetUser: true,
+        },
+      }),
+      prisma.logs.count({
+        where: whereCondition,
+      }),
+    ]);
+
+    return {
+      logs,
+      total,
+      limit,
+      offset,
+    };
   } catch (error) {
     console.error("Error fetching logs:", error);
     return {
