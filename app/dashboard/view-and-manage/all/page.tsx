@@ -57,50 +57,86 @@ export default function AllViewAndManagePage() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-800">All View & Manage</h1>
+    <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6 min-h-screen">
+      {/* Header Section - Responsive */}
+      <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 break-words">
+          All View & Manage
+        </h1>
 
-        {session?.user?.role === "super_admin" || session?.user?.role === "station_admin" ? (
-          <div className="flex items-center gap-3">
+        {/* Export Buttons - Responsive Layout */}
+        {(session?.user?.role === "super_admin" || session?.user?.role === "station_admin") && (
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
             {/* Excel Export Button */}
-            <Button onClick={exportToExcel} className="flex items-center gap-2 bg-green-600 hover:bg-green-700">
-              <Download className="h-4 w-4" />
-              Export All to Excel
+            <Button 
+              onClick={exportToExcel} 
+              className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 w-full sm:w-auto text-sm sm:text-base px-3 py-2"
+            >
+              <Download className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">Export All to Excel</span>
             </Button>
 
             {/* Compact PDF Export Button */}
-            <CompactPDFExportButton
-              firstCardRef={firstCardRef}
-              secondCardRef={secondCardRef}
-              synopticRef={synopticRef}
-              dailySummeryRef={dailySummeryRef}
-              stationInfo={stationInfo}
-            />
+            <div className="w-full sm:w-auto">
+              <CompactPDFExportButton
+                firstCardRef={firstCardRef}
+                secondCardRef={secondCardRef}
+                synopticRef={synopticRef}
+                dailySummeryRef={dailySummeryRef}
+                stationInfo={stationInfo}
+              />
+            </div>
           </div>
-        ) : null}
+        )}
       </div>
 
+      {/* Tabs Section - Responsive */}
       <Tabs defaultValue="first-card" onValueChange={(value) => setActiveTab(value)} className="w-full">
-        <TabsList className="bg-white shadow rounded-lg p-1 flex justify-start gap-2 overflow-x-auto">
-          <TabsTrigger value="first-card">First Card</TabsTrigger>
-          <TabsTrigger value="second-card">Second Card</TabsTrigger>
-          <TabsTrigger value="synoptic-code">Synoptic Code</TabsTrigger>
-          <TabsTrigger value="daily-summery">Daily Summery</TabsTrigger>
-        </TabsList>
+        {/* Tab Navigation - Responsive with Horizontal Scroll */}
+        <div className="w-full overflow-x-auto">
+          <TabsList className="bg-white shadow rounded-lg p-1 flex justify-start gap-1 sm:gap-2 min-w-max w-full sm:w-auto">
+            <TabsTrigger 
+              value="first-card" 
+              className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+            >
+              First Card
+            </TabsTrigger>
+            <TabsTrigger 
+              value="second-card"
+              className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+            >
+              Second Card
+            </TabsTrigger>
+            <TabsTrigger 
+              value="synoptic-code"
+              className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+            >
+              Synoptic Code
+            </TabsTrigger>
+            <TabsTrigger 
+              value="daily-summery"
+              className="whitespace-nowrap text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
+            >
+              Daily Summary
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-        <div className="mt-6 rounded-lg border bg-white p-4 shadow">
-          <div hidden={activeTab !== "first-card"}>
-            <FirstCardTable ref={firstCardRef} />
-          </div>
-          <div hidden={activeTab !== "second-card"}>
-            <SecondCardTable ref={secondCardRef} />
-          </div>
-          <div hidden={activeTab !== "synoptic-code"}>
-            <SynopticCodeTable ref={synopticRef} />
-          </div>
-          <div hidden={activeTab !== "daily-summery"}>
-            <DailySummaryTable ref={dailySummeryRef} />
+        {/* Content Area - Responsive */}
+        <div className="mt-4 md:mt-6 rounded-lg border bg-white shadow overflow-hidden">
+          <div className="p-2 sm:p-4 overflow-x-auto">
+            <div hidden={activeTab !== "first-card"}>
+              <FirstCardTable ref={firstCardRef} />
+            </div>
+            <div hidden={activeTab !== "second-card"}>
+              <SecondCardTable ref={secondCardRef} />
+            </div>
+            <div hidden={activeTab !== "synoptic-code"}>
+              <SynopticCodeTable ref={synopticRef} />
+            </div>
+            <div hidden={activeTab !== "daily-summery"}>
+              <DailySummaryTable ref={dailySummeryRef} />
+            </div>
           </div>
         </div>
       </Tabs>
