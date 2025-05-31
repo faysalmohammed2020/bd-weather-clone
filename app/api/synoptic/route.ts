@@ -121,7 +121,13 @@ export async function GET() {
     measurements[4] = `1${getTempValue(dryBulb)}`;
 
     // 6. 2SnTdTdTd (37-41) - Dew point temperature
-    const dewPoint = Number.parseFloat(firstCard.Td || "0");
+    // Remove last '0' if it exists and Td ends with '0'
+    const dewPointRaw = firstCard.Td || "0";
+    const dewPointTrimmed = dewPointRaw.endsWith("0")
+      ? dewPointRaw.slice(0, -1) // remove last character
+      : dewPointRaw;
+
+    const dewPoint = Number.parseFloat(dewPointTrimmed);
     measurements[5] = `2${getTempValue(dewPoint)}`;
 
     // 7. 3PPP/4PPP (42-46) - Station/sea level pressure
