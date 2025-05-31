@@ -292,8 +292,13 @@ export async function GET() {
     measurements[18] = `8${lowAmountSig}${lowFormSig}${lowHeightSig} / 8${mediumAmountSig}${mediumFormSig}${mediumHeightSig} / 8${highAmountSig}${highFormSig}${highHeightSig} /8${fourthAmountSig}${fourthFormSig}${fourthHeightSig}`;
 
     // 20. 90dqqqt (34-38) - Dew point depression
-    const dewDepression = dryBulb - dewPoint;
-    measurements[19] = `90${pad(Math.round(dewDepression * 10), 3)}`;
+    // const dewDepression = dryBulb - dewPoint;
+    // measurements[19] = `90${pad(Math.round(dewDepression * 10), 3)}`;
+
+    const sqD = firstCard.squallDirection;
+    const sqT = firstCard.squallTime;
+
+    measurements[19] = `90${sqD}0${sqT}`;
 
     // 21. 91fqfqfq (39-43) - Relative humidity
     const humidity = firstCard.relativeHumidity || "0";
