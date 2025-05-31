@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 export async function POST(req: Request) {
   try {
     const session = await getSession();
-    if (!session || !session.user) {
+    if (!session) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -193,7 +193,7 @@ export async function POST(req: Request) {
 export async function GET(req: Request) {
   try {
     const session = await getSession();
-    if (!session || !session.user) {
+    if (!session) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
@@ -267,7 +267,7 @@ export async function GET(req: Request) {
 export async function PUT(req: Request) {
   try {
     const session = await getSession();
-    if (!session || !session.user) {
+    if (!session) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 

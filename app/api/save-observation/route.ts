@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
 import { getSession } from "@/lib/getSession";
-import { hourToUtc } from "@/lib/utils";
+import { getTodayBDRange, getTodayUtcRange, hourToUtc } from "@/lib/utils";
 import { revalidateTag } from "next/cache";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import { diff } from "deep-object-diff";
+import { generateDailySummary } from "@/lib/getDailySummary";
 
 export async function POST(request: Request) {
   try {
@@ -105,43 +106,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Helper function to convert hour string to DateTime
-    const convertHourToDateTime = (hourString: string | null) => {
-      if (!hourString) return null;
-
-      // hourString ধরে নিচ্ছে "18:45" বা "04:05" ফরম্যাটে আসবে
-      const [hourPart, minutePart] = hourString.split(":");
-      const hour = parseInt(hourPart, 10);
-      const minute = parseInt(minutePart ?? "0", 10);
-
-      if (
-        isNaN(hour) ||
-        hour < 0 ||
-        hour > 23 ||
-        isNaN(minute) ||
-        minute < 0 ||
-        minute > 59
-      )
-        return null;
-
-      const now = new Date();
-
-      const dateTime = new Date(
-        Date.UTC(
-          now.getUTCFullYear(),
-          now.getUTCMonth(),
-          now.getUTCDate(),
-          hour,
-          minute, // <<== এখন মিনিটও যাবে!
-          0, // seconds
-          0 // milliseconds
-        )
-      );
-
-      return dateTime;
-    };
-
-    // নতুন helper ফাংশন
     const convertToUTCDateTime = (
       dateString: string | null,
       timeString: string | null
@@ -221,7 +185,7 @@ export async function POST(request: Request) {
       isIntermittentRain:
         typeof data.rainfall?.isIntermittentRain === "boolean"
           ? data.rainfall?.isIntermittentRain
-          : null, // ⭐️⭐️⭐️ নতুন লাইন
+          : null,
 
       // Wind
       windFirstAnemometer: data.wind?.["first-anemometer"] || null,
@@ -242,9 +206,6 @@ export async function POST(request: Request) {
       },
     });
 
-    // Revalidate time checking
-    revalidateTag("time-check");
-
     // Log The Action
     await LogAction({
       init: prisma,
@@ -255,6 +216,83 @@ export async function POST(request: Request) {
       actorEmail: session.user.email,
       module: LogModule.WEATHER_OBSERVATION,
     });
+
+    // Create daily 
+    const { startToday, endToday } = getTodayUtcRange();
+    const firstAndSecondCardData = await prisma.observingTime.findMany({
+      where: {
+        AND: [
+          {
+            utcTime: {
+              gte: startToday,
+              lte: endToday,
+            },
+          },
+          { stationId: stationRecord.id },
+        ],
+      },
+      include: {
+        station: true,
+        MeteorologicalEntry: true,
+        WeatherObservation: true,
+      },
+      orderBy: {
+        utcTime: "desc",
+      },
+      take: 100,
+    });
+
+    // Calculate Daily Summary
+    const getCalculatedDailySummary = generateDailySummary(
+      firstAndSecondCardData,
+      formattedObservingTime,
+      stationRecord.id
+    );
+
+    const { dataType, measurements } = getCalculatedDailySummary;
+
+      // Create Daily Summary
+      await prisma.dailySummary.create({
+        data: {
+          dataType: dataType,
+          avStationPressure: measurements[0],
+          avSeaLevelPressure: measurements[1],
+          avDryBulbTemperature: measurements[2],
+          avWetBulbTemperature: measurements[3],
+          maxTemperature: measurements[4],
+          minTemperature: measurements[5],
+          totalPrecipitation: measurements[6],
+          avDewPointTemperature: measurements[7],
+          avRelativeHumidity: measurements[8],
+          windSpeed: measurements[9],
+          windDirectionCode: measurements[10],
+          maxWindSpeed: measurements[11],
+          maxWindDirection: measurements[12],
+          avTotalCloud: measurements[13],
+          lowestVisibility: measurements[14],
+          totalRainDuration: measurements[15],
+          ObservingTime: {
+            connect: {
+              id: observingTime.id,
+              stationId: stationRecord.id,
+            },
+          },
+        },
+      });
+
+    // Log The Action
+    await LogAction({
+      init: prisma,
+      action: LogActionType.CREATE,
+      actionText: "Daily Summary Created",
+      role: session.user.role!,
+      actorId: session.user.id,
+      actorEmail: session.user.email,
+      module: LogModule.DAILY_SUMMARY,
+    });
+
+    // Revalidate time checking
+    revalidateTag("time-check");
 
     return NextResponse.json({
       error: false,
@@ -272,6 +310,7 @@ export async function POST(request: Request) {
   }
 }
 
+// GET Daily Summary
 export async function GET(request: Request) {
   try {
     const session = await getSession();

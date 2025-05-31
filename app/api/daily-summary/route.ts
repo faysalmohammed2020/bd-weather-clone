@@ -7,13 +7,14 @@ import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
-
+    
     const session = await getSession()
 
     if (!session || !session.user?.id) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
     }
+
+    const body = await req.json()
 
     // First, find the ObservingTime record by its UTC time
     const { startToday, endToday } = getTodayUtcRange()
@@ -48,14 +49,6 @@ export async function POST(req: Request) {
         utcTime: "desc",
       },
     })
-
-    if (!observingTime) {
-      return NextResponse.json({
-        success: false,
-        error: "No observing time for today",
-        status: 404,
-      })
-    }
 
     if (!observingTime) {
       return NextResponse.json({
