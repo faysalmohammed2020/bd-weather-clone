@@ -137,14 +137,7 @@ const validationSchema = yup.object({
     .string()
     .matches(/^\d{2}$/, "Must be exactly 2 digits")
     .required("Required"),
-  // rainfallTimeStart: yup
-  //   .string()
-  //   .matches(/^\d{2}$/, "Must be exactly 2 digits")
-  //   .required("Required"),
-  // rainfallTimeEnd: yup
-  //   .string()
-  //   .matches(/^\d{2}$/, "Must be exactly 2 digits")
-  //   .required("Required"),
+ 
   rainfallSincePrevious: yup
     .string()
     .matches(/^\d{2}$/, "Must be exactly 2 digits")
@@ -856,12 +849,14 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <th rowSpan={3} className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800">
                       STATION
                     </th>
-                    <th rowSpan={3} className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800 whitespace-nowrap">
-                      TOTAL CLOUD
-                    </th>
+                   
 
                     <th colSpan={11} className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 p-1 text-blue-800">
                       CLOUD
+                    </th>
+                     
+                     <th rowSpan={3} className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800">
+                      TOTAL CLOUD Amount (Octa)
                     </th>
 
                     <th colSpan={12} className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 p-1 text-indigo-800">
@@ -911,16 +906,16 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                   {/* Final Headers */}
                   <tr>
                     {/* LOW CLOUD */}
-                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800 whitespace-nowrap">Form (CL)</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800 whitespace-nowrap">Amount</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800 whitespace-nowrap">Direction</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800 whitespace-nowrap">Height (H)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800">Form (Code)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800">Amount (Octa)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800">Direction (Code)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800">Height Of Base (Code)</th>
 
                     {/* MEDIUM CLOUD */}
-                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800 whitespace-nowrap">Form (CM)</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800 whitespace-nowrap">Amount</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800 whitespace-nowrap">Direction</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800 whitespace-nowrap">Height (H)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800">Form (Code)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800">Amount (Octa)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800">Direction (Code)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-blue-50 to-blue-100 text-xs p-1 text-blue-800">Height Of Base (Code)</th>
 
 
                     {/* HIGH CLOUD */}
@@ -930,34 +925,34 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     
 
                     {/* SIGNIFICANT CLOUD */}
-                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800 whitespace-nowrap">Form (Code)</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800 whitespace-nowrap">Amount (Octa)</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800 whitespace-nowrap">Height of Base (Code)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800">Form (Code)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800">Amount (Octa)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800">Height of Base (Code)</th>
 
-                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800 whitespace-nowrap">Form (Code)</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800 whitespace-nowrap">Amount (Octa)</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800 whitespace-nowrap">Height of Base (Code)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800">Form (Code)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800">Amount (Octa)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800">Height of Base (Code)</th>
 
-                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800 whitespace-nowrap">Form (Code)</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800 whitespace-nowrap">Amount (Octa)</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800 whitespace-nowrap">Height of Base (Code)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800">Form (Code)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800">Amount (Octa)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800">Height of Base (Code)</th>
 
-                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800 whitespace-nowrap">Form (Code)</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800 whitespace-nowrap">Amount (Octa)</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800 whitespace-nowrap">Height of Base (Code)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800">Form (Code)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800">Amount (Octa)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-indigo-50 to-indigo-100 text-xs p-1 text-indigo-800">Height of Base (Code)</th>
 
                     {/* RainFall */}
-                    <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 p-1 font-medium text-emerald-800 whitespace-nowrap">Time Of Start</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 p-1 font-medium text-emerald-800 whitespace-nowrap">Time Of End</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 p-1 font-medium text-emerald-800 whitespace-nowrap">Since Previous</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 p-1 font-medium text-emerald-800 whitespace-nowrap">During Previous</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 p-1 font-medium text-emerald-800 whitespace-nowrap">Last 24 Hours</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 p-1 font-medium text-emerald-800">Time Of Start</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 p-1 font-medium text-emerald-800">Time Of End</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 p-1 font-medium text-emerald-800">Since Previous</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 p-1 font-medium text-emerald-800">During Previous</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-emerald-50 to-emerald-100 p-1 font-medium text-emerald-800">Last 24 Hours</th>
 
                     {/* Wind */}
-                    <th className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 p-1 font-medium text-amber-800 whitespace-nowrap">First Anemometer Reading</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 p-1 font-medium text-amber-800 whitespace-nowrap">Second Anemometer Reading</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 p-1 font-medium text-amber-800 whitespace-nowrap">Speed (KTS)</th>
-                    <th className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 p-1 font-medium text-amber-800 whitespace-nowrap">Direction</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 p-1 font-medium text-amber-800">First Anemometer Reading</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 p-1 font-medium text-amber-800">Second Anemometer Reading</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 p-1 font-medium text-amber-800">Speed (KTS)</th>
+                    <th className="border border-slate-300 bg-gradient-to-b from-amber-50 to-amber-100 p-1 font-medium text-amber-800">Direction</th>
 
 
                   </tr>
@@ -1007,11 +1002,7 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                               {record.station?.name + " " + record.station?.stationId || "--"}
                             </Badge>
                           </td>
-                          <td className="border border-slate-300 p-1">
-                            <Badge variant="outline" className={`${cloudClass} text-white`}>
-                              {totalCloudAmount}
-                            </Badge>
-                          </td>
+                          
 
                           {/* Low Cloud */}
                           <td
@@ -1076,6 +1067,12 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                             {weatherObs?.highCloudDirection || "--"}
                           </td>
 
+                          {/*Total Cloud  */}
+                          <td className="border border-slate-300 p-1">
+                            <Badge variant="outline" className={`${cloudClass} text-white`}>
+                              {totalCloudAmount}
+                            </Badge>
+                          </td>
 
                           {/* Significant Clouds */}
                           {/* layer1 */}
