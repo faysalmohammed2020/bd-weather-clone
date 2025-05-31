@@ -414,17 +414,22 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
     const { DpT, RH } = dbtEntry.values[diffIndex];
 
+    // ✅ ৩-ডিজিট ফরম্যাটিং করলাম নিচে
+    const formattedDpT = DpT.toString().padEnd(3, "0"); // e.g., 25 → "250"
+    const formattedRH = RH === 100 ? "100" : RH.toString().padStart(3, "0"); // e.g., 65 → "065"
+
     // Update state
     setHygrometricData({
       dryBulb: dryBulbValue.toFixed(1),
       wetBulb: wetBulbValue.toFixed(1),
       difference: difference.toString(),
-      dewPoint: DpT.toString(),
-      relativeHumidity: RH.toString(),
+      dewPoint: formattedDpT,
+      relativeHumidity: formattedRH,
     });
 
-    formik.setFieldValue("Td", DpT.toString());
-    formik.setFieldValue("relativeHumidity", RH.toString());
+    // Formik values set
+    formik.setFieldValue("Td", formattedDpT);
+    formik.setFieldValue("relativeHumidity", formattedRH);
 
     toast.success("Dew point and relative humidity calculated successfully");
   };
