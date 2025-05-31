@@ -992,13 +992,13 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                           className={`text-center font-mono hover:bg-blue-50 transition-colors ${rowClass}`}
                         >
                           <td className="border border-slate-300 p-1 font-medium text-sky-700">
-                            <div className="flex flex-col">{utcToHour(record.utcTime.toString())}</div>
+                            <div className="flex flex-col font-bold px-2">{utcToHour(record.utcTime.toString())}</div>
                           </td>
                           <td className="border border-slate-300 p-1 font-medium text-sky-700">
                             {new Date(record.utcTime).toLocaleDateString()}
                           </td>
                           <td className="border border-slate-300 p-1">
-                            <Badge variant="outline" className="font-mono">
+                            <Badge variant="outline" className="font-mono text-xs font-bold">
                               {record.station?.name + " " + record.station?.stationId || "--"}
                             </Badge>
                           </td>
