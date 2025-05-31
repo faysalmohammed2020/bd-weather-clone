@@ -10,16 +10,16 @@ const Profile = () => {
   const { data: session, isPending } = useSession();
 
   return (
-    <div className="flex items-center gap-6">
+    <div className="flex items-center gap-6 h-12">
       {isPending ? (
         <div>Loading...</div>
       ) : (
         <>
           <div className="flex flex-col">
-            <span className="whitespace-nowrap font-medium text-white uppercase text-shadow">
+            <span className="whitespace-nowrap text-xs md:text-md md:font-medium text-white uppercase text-shadow">
               {session?.user.name} ({session?.user.role})
             </span>
-            <span className="uppercase text-md text-white text-shadow">
+            <span className="uppercase text-xs md:text-md text-white text-shadow">
               {session?.user.station?.name} ({session?.user.station?.stationId})
             </span>
           </div>
@@ -28,6 +28,7 @@ const Profile = () => {
 
       <Button
         variant="secondary"
+        className="h-8 w-17 md:w-24"
         onClick={() => {
           signOut({
             fetchOptions: {
@@ -39,8 +40,8 @@ const Profile = () => {
           });
         }}
       >
-        <LogOut />
-        <span>Logout</span>
+        <LogOut className="text-xs md:text-md" />
+        <span className="text-xs md:text-md">Logout</span>
       </Button>
     </div>
   );

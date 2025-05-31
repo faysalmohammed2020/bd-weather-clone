@@ -144,7 +144,7 @@ export default function WeatherDashboard({
 
   if (loading) {
     return (
-      <div className="w-full p-6">
+      <div className="w-full md:p-6">
         <h2 className="text-2xl font-bold mb-4">Weather Dashboard</h2>
         <p className="text-blue-600">Loading weather data...</p>
       </div>
@@ -196,7 +196,7 @@ export default function WeatherDashboard({
   });
 
   return (
-    <div className="w-full p-6 bg-gray-50">
+    <div className="w-full mb-8 md:p-6 bg-gray-50">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">
