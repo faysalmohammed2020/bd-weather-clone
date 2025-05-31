@@ -1,23 +1,25 @@
-import { getSession } from "@/lib/getSession"
-import { LogAction, LogActionType, LogModule } from "@/lib/log"
-import prisma from "@/lib/prisma"
-import { getTodayUtcRange } from "@/lib/utils"
-import { diff } from "deep-object-diff"
-import { NextResponse } from "next/server"
+import { getSession } from "@/lib/getSession";
+import { LogAction, LogActionType, LogModule } from "@/lib/log";
+import prisma from "@/lib/prisma";
+import { getTodayUtcRange } from "@/lib/utils";
+import { diff } from "deep-object-diff";
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
-    
-    const session = await getSession()
+    const session = await getSession();
 
     if (!session || !session.user?.id) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    const body = await req.json()
+    const body = await req.json();
 
     // First, find the ObservingTime record by its UTC time
-    const { startToday, endToday } = getTodayUtcRange()
+    const { startToday, endToday } = getTodayUtcRange();
     // First, find the ObservingTime record by its UTC time
     const observingTime = await prisma.observingTime.findFirst({
       where: {
@@ -48,22 +50,27 @@ export async function POST(req: Request) {
       orderBy: {
         utcTime: "desc",
       },
-    })
+    });
 
     if (!observingTime) {
       return NextResponse.json({
         success: false,
         error: "No observing time for today",
         status: 404,
-      })
+      });
     }
 
-    if (observingTime && !observingTime._count.MeteorologicalEntry && !observingTime._count.WeatherObservation) {
+    if (
+      observingTime &&
+      !observingTime._count.MeteorologicalEntry &&
+      !observingTime._count.WeatherObservation
+    ) {
       return NextResponse.json({
         success: false,
-        error: "Meteorological entry and weather observation are not available for this time",
+        error:
+          "Meteorological entry and weather observation are not available for this time",
         status: 400,
-      })
+      });
     }
 
     if (observingTime && observingTime._count.DailySummary > 0) {
@@ -71,30 +78,30 @@ export async function POST(req: Request) {
         success: false,
         error: "Daily summary already exists for this time",
         status: 400,
-      })
+      });
     }
 
     // Get station ID from session
-    const stationId = session.user.station?.id
+    const stationId = session.user.station?.id;
     if (!stationId) {
       return NextResponse.json({
         success: false,
         error: "Station ID is required",
         status: 400,
-      })
+      });
     }
 
     // Find the station by stationId to get its primary key (id)
     const stationRecord = await prisma.station.findFirst({
       where: { id: stationId },
-    })
+    });
 
     if (!stationRecord) {
       return NextResponse.json({
         success: false,
         error: `No station found with ID: ${stationId}`,
         status: 404,
-      })
+      });
     }
 
     const entry = await prisma.dailySummary.create({
@@ -123,7 +130,7 @@ export async function POST(req: Request) {
           },
         },
       },
-    })
+    });
 
     // Log The Action
     await LogAction({
@@ -139,16 +146,16 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       message: "Daily summary saved successfully",
-    })
+    });
   } catch (err) {
-    console.error("❌ DB save error:", err)
+    console.error("❌ DB save error:", err);
     return NextResponse.json(
       {
         success: false,
         error: "Failed to save data",
       },
-      { status: 500 },
-    )
+      { status: 500 }
+    );
   }
 }
 
@@ -156,7 +163,10 @@ export async function GET(req: Request) {
   const session = await getSession();
 
   if (!session || !session.user?.id) {
-    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(
+      { success: false, error: "Unauthorized" },
+      { status: 401 }
+    );
   }
 
   const { searchParams } = new URL(req.url);
@@ -164,7 +174,9 @@ export async function GET(req: Request) {
   const endDate = searchParams.get("endDate");
   const stationIdParam = searchParams.get("stationId"); // optional
 
-  const startTime = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 7));
+  const startTime = startDate
+    ? new Date(startDate)
+    : new Date(new Date().setDate(new Date().getDate() - 7));
   startTime.setHours(0, 0, 0, 0);
 
   const endTime = endDate ? new Date(endDate) : new Date();
@@ -191,6 +203,11 @@ export async function GET(req: Request) {
             : [{ ObservingTime: { stationId: session.user.station?.id } }]),
         ],
       },
+      orderBy: {
+        ObservingTime: {
+          utcTime: "desc",
+        },
+      },
       include: {
         ObservingTime: {
           include: {
@@ -200,12 +217,16 @@ export async function GET(req: Request) {
       },
     });
 
+    console.log("Raw Summaries:", rawSummaries);
+
     // Group by stationId + date
     const grouped: Record<string, any[]> = {};
 
     for (const entry of rawSummaries) {
       const stationId = entry.ObservingTime.stationId;
-      const dateKey = new Date(entry.ObservingTime.utcTime).toISOString().split("T")[0]; // "YYYY-MM-DD"
+      const dateKey = new Date(entry.ObservingTime.utcTime)
+        .toISOString()
+        .split("T")[0]; // "YYYY-MM-DD"
       const key = `${stationId}_${dateKey}`;
 
       if (!grouped[key]) grouped[key] = [];
@@ -216,7 +237,9 @@ export async function GET(req: Request) {
       const first = entries[0];
 
       const averageField = (field: keyof typeof first, factor = 1) => {
-        const values = entries.map(e => parseFloat(e[field] as any)).filter(v => !isNaN(v));
+        const values = entries
+          .map((e) => parseFloat(e[field] as any))
+          .filter((v) => !isNaN(v));
         if (values.length === 0) return null;
         const avg = values.reduce((a, b) => a + b, 0) / values.length;
         return (avg / factor).toFixed(1);
@@ -248,39 +271,48 @@ export async function GET(req: Request) {
   }
 }
 
-
-
-
 export async function PUT(req: Request) {
   try {
-    const session = await getSession()
+    const session = await getSession();
     if (!session || !session.user?.id) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    const body = await req.json()
-    const { id, ObservingTime, ...updateData } = body
+    const body = await req.json();
+    const { id, ObservingTime, ...updateData } = body;
 
     const existingRecord = await prisma.dailySummary.findUnique({
       where: { id },
       include: { ObservingTime: true },
-    })
+    });
 
     if (!existingRecord) {
-      return NextResponse.json({ success: false, error: "Record not found" }, { status: 404 })
+      return NextResponse.json(
+        { success: false, error: "Record not found" },
+        { status: 404 }
+      );
     }
 
-    const userStationId = session.user.station?.id
-    const recordStationId = existingRecord.ObservingTime?.stationId
+    const userStationId = session.user.station?.id;
+    const recordStationId = existingRecord.ObservingTime?.stationId;
 
-    if (session.user.role !== "super_admin" && userStationId !== recordStationId) {
-      return NextResponse.json({ success: false, error: "Permission denied" }, { status: 403 })
+    if (
+      session.user.role !== "super_admin" &&
+      userStationId !== recordStationId
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Permission denied" },
+        { status: 403 }
+      );
     }
 
     const updatedRecord = await prisma.dailySummary.update({
       where: { id },
       data: updateData,
-    })
+    });
 
     // Log The Action
     const diffData = diff(existingRecord, updatedRecord);
@@ -295,16 +327,19 @@ export async function PUT(req: Request) {
       details: diffData,
     });
 
-    return NextResponse.json({ success: true, data: updatedRecord }, { status: 200 })
+    return NextResponse.json(
+      { success: true, data: updatedRecord },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error("Error updating daily summary record:", error)
+    console.error("Error updating daily summary record:", error);
     return NextResponse.json(
       {
         success: false,
         message: "Internal server error",
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 },
-    )
+      { status: 500 }
+    );
   }
 }

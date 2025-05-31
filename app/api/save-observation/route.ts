@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/getSession";
-import { getTodayBDRange, getTodayUtcRange, hourToUtc } from "@/lib/utils";
+import { getTodayUtcRange, hourToUtc } from "@/lib/utils";
 import { revalidateTag } from "next/cache";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import { diff } from "deep-object-diff";

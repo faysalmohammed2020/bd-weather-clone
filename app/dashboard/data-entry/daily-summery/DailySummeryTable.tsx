@@ -4,9 +4,9 @@ import { Fragment, useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, RefreshCw, AlertCircle } from "lucide-react";
-import { useSession } from "@/lib/auth-client";
-import { toast } from "sonner";
 import { utcToHour } from "@/lib/utils";
+import { DailySummary } from "@prisma/client";
+import { getDailySummary } from "@/app/actions/daily-summary";
 
 interface Data {
   id: string;
@@ -65,25 +65,22 @@ interface Data {
   };
 }
 
-const observationTimes = ["00", "03", "06", "09", "12", "15", "18", "21"];
-
 // State types
 type ObservationState = {
   firstCardData: Data["MeteorologicalEntry"][];
   secondCardData: Data["WeatherObservation"][];
-  dailySummary: Data["DailySummary"][];
+  dailySummary: Data["DailySummary"] | null;
 };
 
 export function WeatherDataTable() {
-  const { data: session } = useSession();
   const [observations, setObservations] = useState<ObservationState>({
     firstCardData: [],
     secondCardData: [],
-    dailySummary: [],
+    dailySummary: null,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>(
+  const [selectedDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
 
@@ -92,23 +89,22 @@ export function WeatherDataTable() {
       setLoading(true);
       setError(null);
 
-      const [firstCardPromise, secondCardPromise, dailySummaryPromise] =
+      const [firstCardPromise, secondCardPromise] =
         await Promise.all([
           fetch("/api/first-card-data"),
           fetch("/api/second-card-data"),
-          fetch("/api/daily-summary"),
         ]);
 
       const [firstCardData, secondCardData, dailySummary] = await Promise.all([
         firstCardPromise.json(),
         secondCardPromise.json(),
-        dailySummaryPromise.json(),
+        getDailySummary(selectedDate),
       ]);
 
       setObservations({
         firstCardData: firstCardData.entries,
         secondCardData,
-        dailySummary,
+        dailySummary: dailySummary.data,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to fetch data");
@@ -313,49 +309,60 @@ export function WeatherDataTable() {
                 })}
 
                 {/* Daily Summary Row */}
-                {observations.dailySummary.map((data, index) => {
-                  return (
-                    <tr
-                      key={`daily-${index}`}
-                      className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-25"}`}
-                    >
-                      <td className="px-4 py-3 text-center">Daily Summary</td>
-                      <td className="px-4 py-3 text-center">
-                        {formatValue(data?.avStationPressure)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {formatValue(data?.avSeaLevelPressure)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {formatValue(data?.avDryBulbTemperature)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {formatValue(data?.avWetBulbTemperature)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {formatValue(data.avDewPointTemperature)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {formatValue(data?.avRelativeHumidity)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {formatValue(data?.windSpeed)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {formatValue(data?.windDirectionCode)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {formatValue(data?.lowestVisibility)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {formatValue(data?.avTotalCloud)}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        {formatValue(data?.totalPrecipitation)}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {observations.dailySummary && (
+                  <tr key={`daily-0`} className={`border-b hover:bg-gray-50`}>
+                    <td className="px-4 py-3 text-center">Daily Summary</td>
+                    <td className="px-4 py-3 text-center">
+                      {formatValue(
+                        observations.dailySummary?.avStationPressure
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {formatValue(
+                        observations.dailySummary?.avSeaLevelPressure
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {formatValue(
+                        observations.dailySummary?.avDryBulbTemperature
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {formatValue(
+                        observations.dailySummary?.avWetBulbTemperature
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {formatValue(
+                        observations.dailySummary?.avDewPointTemperature
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {formatValue(
+                        observations.dailySummary?.avRelativeHumidity
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {formatValue(observations.dailySummary?.windSpeed)}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {formatValue(
+                        observations.dailySummary?.windDirectionCode
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {formatValue(observations.dailySummary?.lowestVisibility)}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {formatValue(observations.dailySummary?.avTotalCloud)}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {formatValue(
+                        observations.dailySummary?.totalPrecipitation
+                      )}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -365,7 +372,7 @@ export function WeatherDataTable() {
       {/* No Data Message */}
       {observations.firstCardData.length === 0 &&
         observations.secondCardData.length === 0 &&
-        observations.dailySummary.length === 0 && (
+        !observations.dailySummary && (
           <Card className="border-yellow-200 bg-yellow-50">
             <CardContent className="p-6 text-center">
               <AlertCircle className="h-12 w-12 text-yellow-600 mx-auto mb-4" />

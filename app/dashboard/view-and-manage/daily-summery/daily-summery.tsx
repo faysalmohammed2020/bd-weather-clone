@@ -688,7 +688,6 @@ const DailySummaryTable = forwardRef((props, ref) => {
             <table className="w-full border-collapse min-w-[1800px] text-base text-gray-800">
               <thead className="bg-gradient-to-b from-blue-600 to-blue-700 text-sm font-bold uppercase text-center text-white print:bg-blue-700">
                 <tr>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Time</th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Date</th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Station</th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Av. Station Pressure (hPa)</th>
@@ -714,17 +713,14 @@ const DailySummaryTable = forwardRef((props, ref) => {
                 {currentData && currentData.length > 0 ? (
                   currentData.map((entry, index) => {
                     const observingTime = entry.ObservingTime?.utcTime ? new Date(entry.ObservingTime.utcTime) : null
-                    const canEdit = user && canEditRecord(entry, user)
-                    const timeSlot = observingTime ? observingTime.getUTCHours().toString().padStart(2, "0") : "--"
 
                     return (
                       <tr key={index} className="bg-white hover:bg-blue-50 print:hover:bg-white">
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">{timeSlot}</td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap font-semibold text-blue-700">
                           {observingTime ? observingTime.toLocaleDateString() : "--"}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
-                          {getStationNameById(entry.ObservingTime?.stationId)}
+                          {getStationNameById(entry.ObservingTime.station.name)}
                         </td>
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
                           {formatValue(entry.avStationPressure)}
