@@ -1966,7 +1966,7 @@ function SignificantCloudSection({
   renderError: (field: string) => React.ReactNode;
 }) {
   // Generate height options from 0 to 99
-  const heightOptions = Array.from({ length: 100 }, (_, i) => i.toString());
+  const heightOptions = Array.from({ length: 100 }, (_, i) => i.toString().padStart(2, '0'));
 
   const cloudFormOptions = [
     { value: "0", label: "0 - Cirrus (Ci)" },

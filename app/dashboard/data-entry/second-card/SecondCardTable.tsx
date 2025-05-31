@@ -12,6 +12,7 @@ import { useSession } from "@/lib/auth-client"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { toast } from "sonner"
 import { utcToHour } from "@/lib/utils"
+import moment from "moment"
 
 // Define the structure of weather observation data
 interface WeatherObservation {
@@ -820,11 +821,6 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
 
                           {/* Significant Clouds */}
                           <td
-                            className={`border border-slate-300 p-1 ${weatherObs?.layer1Height ? "text-indigo-700 font-medium" : ""}`}
-                          >
-                            {weatherObs?.layer1Height || "--"}
-                          </td>
-                          <td
                             className={`border border-slate-300 p-1 ${weatherObs?.layer1Form ? "text-indigo-700 font-medium" : ""}`}
                           >
                             {weatherObs?.layer1Form || "--"}
@@ -835,10 +831,12 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                             {weatherObs?.layer1Amount || "--"}
                           </td>
                           <td
-                            className={`border border-slate-300 p-1 ${weatherObs?.layer2Height ? "text-indigo-700 font-medium" : ""}`}
+                            className={`border border-slate-300 p-1 ${weatherObs?.layer1Height ? "text-indigo-700 font-medium" : ""}`}
                           >
-                            {weatherObs?.layer2Height || "--"}
+                            {weatherObs?.layer1Height || "--"}
                           </td>
+                        
+                          {/* 2nd Layer */}
                           <td
                             className={`border border-slate-300 p-1 ${weatherObs?.layer2Form ? "text-indigo-700 font-medium" : ""}`}
                           >
@@ -850,10 +848,13 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                             {weatherObs?.layer2Amount || "--"}
                           </td>
                           <td
-                            className={`border border-slate-300 p-1 ${weatherObs?.layer3Height ? "text-indigo-700 font-medium" : ""}`}
+                            className={`border border-slate-300 p-1 ${weatherObs?.layer2Height ? "text-indigo-700 font-medium" : ""}`}
                           >
-                            {weatherObs?.layer3Height || "--"}
+                            {weatherObs?.layer2Height || "--"}
                           </td>
+                          
+                         
+                          {/* 3rd Layer */}
                           <td
                             className={`border border-slate-300 p-1 ${weatherObs?.layer3Form ? "text-indigo-700 font-medium" : ""}`}
                           >
@@ -865,11 +866,13 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                             {weatherObs?.layer3Amount || "--"}
                           </td>
                           <td
-                            className={`border border-slate-300 p-1 ${weatherObs?.layer4Height ? "text-indigo-700 font-medium" : ""}`}
+                            className={`border border-slate-300 p-1 ${weatherObs?.layer3Height ? "text-indigo-700 font-medium" : ""}`}
                           >
-                            {weatherObs?.layer4Height || "--"}
+                            {weatherObs?.layer3Height || "--"}
                           </td>
-                          <td
+                          
+                          {/* 4th Layer */}
+                           <td
                             className={`border border-slate-300 p-1 ${weatherObs?.layer4Form ? "text-indigo-700 font-medium" : ""}`}
                           >
                             {weatherObs?.layer4Form || "--"}
@@ -879,17 +882,23 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
                           >
                             {weatherObs?.layer4Amount || "--"}
                           </td>
+                          <td
+                            className={`border border-slate-300 p-1 ${weatherObs?.layer4Height ? "text-indigo-700 font-medium" : ""}`}
+                          >
+                            {weatherObs?.layer4Height || "--"}
+                          </td>
+                         
 
                           {/* Rainfall */}
                           <td
                             className={`border border-slate-300 p-1 ${weatherObs?.rainfallTimeStart ? "text-emerald-700 font-medium" : ""}`}
                           >
-                            {moment{weatherObs?.rainfallTimeStart || "--"}}
+                            {moment(weatherObs?.rainfallTimeStart || "--").format("LLL")}
                           </td>
                           <td
                             className={`border border-slate-300 p-1 ${weatherObs?.rainfallTimeEnd ? "text-emerald-700 font-medium" : ""}`}
                           >
-                            {weatherObs?.rainfallTimeEnd || "--"}
+                            {moment(weatherObs?.rainfallTimeEnd || "--").format("LLL")}
                           </td>
                           <td
                             className={`border border-slate-300 p-1 ${weatherObs?.rainfallSincePrevious ? "text-emerald-700 font-medium" : ""}`}
