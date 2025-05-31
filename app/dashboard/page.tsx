@@ -54,7 +54,7 @@ export default function DroughtDashboard() {
       </div>
 
       {/* Weather Dashboard always full width */}
-      <div className="grid grid-cols-1 gap-4 p-4">
+      <div className="grid grid-cols-1 gap-4 md:p-4 ">
         <WeatherDashboard selectedStation={selectedStation} />
       </div>
     </div>
