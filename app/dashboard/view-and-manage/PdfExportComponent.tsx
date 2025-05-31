@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.3,
     borderColor: "#74777B",
     textAlign: "center",
-    minHeight: 10,
+    minHeight: 12,
     maxHeight: 12,
   },
   tableCellSynoptic: {
@@ -81,8 +81,23 @@ const styles = StyleSheet.create({
     borderWidth: 0.3,
     borderColor: "#74777B",
     textAlign: "center",
-    minHeight: 30,
-    maxHeight: 32,
+    minHeight: 12,
+    maxHeight: 12,
+  },
+  tableCellHeaderSynoptic: {
+    margin: "auto",
+    fontSize: 8,
+    padding: 1.5,
+    borderStyle: "solid",
+    borderWidth: 0.3,
+    borderColor: "#74777B",
+    textAlign: "center",
+    maxLines: 2,
+    backgroundColor: "#3b82f6",
+    color: "#ffffff",
+    fontWeight: "bold",
+    minHeight: 23,
+    maxHeight: 23,
   },
   tableCellHeader: {
     margin: "auto",
@@ -96,8 +111,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#3b82f6",
     color: "#ffffff",
     fontWeight: "bold",
-    minHeight: 42,
-    maxHeight: 45,
+    minHeight: 40,
+    maxHeight: 40,
   },
   stationInfo: {
     flexDirection: "row",
@@ -379,29 +394,29 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
           <View style={styles.table}>
             {/* Synoptic Headers - Compact */}
             <View style={styles.tableRow}>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>Time</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>Date</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>C1</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>Iliii</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>iRiXhvv</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>Nddff</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>S1nTTT</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>S2nTdTdTd</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>P3PPP/4PPPP</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>6RRRtR</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>7wwW1W2</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>8NhClCmCh</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>2SnTnTnTn</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>56DlDmDh</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>57CDaEc</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>C2</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>GG</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>58/59P24</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>6/7R24</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>8NsChshs</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>90dqqqt</Text>
-              <Text style={[styles.tableCellHeader, { width: "4%" }]}>91fqfqfq</Text>
-              <Text style={[styles.tableCellHeader, { width: "12%" }]}>Remark</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>Time</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>Date</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>C1</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>Iliii</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>iRiXhvv</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>Nddff</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>S1nTTT</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>S2nTdTdTd</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>P3PPP/4PPPP</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>6RRRtR</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>7wwW1W2</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>8NhClCmCh</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>2SnTnTnTn</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>56DlDmDh</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>57CDaEc</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>C2</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>GG</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>58/59P24</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>6/7R24</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>8NsChshs</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>90dqqqt</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "4%" }]}>91fqfqfq</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "12%" }]}>Remark</Text>
             </View>
 
             {/* Synoptic Data Rows - Limited to 6 rows */}
@@ -441,24 +456,24 @@ const CompactWeatherPDFDocument: React.FC<CompactWeatherPDFProps> = ({
           <View style={styles.table}>
             {/* Daily Summary Headers - Compact */}
             <View style={styles.tableRow}>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Time</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Date</Text>
-              <Text style={[styles.tableCellHeader, { width: "6%" }]}>Av. Station Pressure (hPa)</Text>
-              <Text style={[styles.tableCellHeader, { width: "6%" }]}>Av. Sea-Level Pressure (hPa)</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Av. Dry-Bulb Temp (°C)</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Av. Wet Bulb Temp (°C)</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Max Temperature (°C)</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Min Temperature (°C)</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Total Precipitation (mm)</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Av. Dew Point Temp (°C)</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Av. Relative Humidity (%)</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Wind Speed (m/s)</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Wind Direction</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Max Wind Speed (m/s)</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Max Wind Direction</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Av. Total Cloud (octas)</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Lowest Visibility (km)</Text>
-              <Text style={[styles.tableCellHeader, { width: "5.5%" }]}>Total Rain Duration (H-M)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Time</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Date</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "6%" }]}>Av. Station Pressure (hPa)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "6%" }]}>Av. Sea-Level Pressure (hPa)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Av. Dry-Bulb Temp (°C)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Av. Wet Bulb Temp (°C)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Max Temperature (°C)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Min Temperature (°C)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Total Precipitation (mm)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Av. Dew Point Temp (°C)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Av. Relative Humidity (%)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Wind Speed (m/s)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Wind Direction</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Max Wind Speed (m/s)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Max Wind Direction</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Av. Total Cloud (octas)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Lowest Visibility (km)</Text>
+              <Text style={[styles.tableCellHeaderSynoptic, { width: "5.5%" }]}>Total Rain Duration (H-M)</Text>
             </View>
 
             {/* Synoptic Data Rows - Limited to 6 rows */}
