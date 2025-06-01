@@ -116,37 +116,38 @@ type WeatherObservationFormData = {
 // Updated validation schema with HH:MM format for rainfall times
 const rainfallSchema = Yup.object({
   rainfall: Yup.object({
-    // "time-start": Yup.string()
-    //   .required("Start time is required")
-    //   .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Use HH:MM 24-hour format"),
-    // "date-start": Yup.string().required("Start date is required"),
-    // "time-end": Yup.string()
-    //   .required("End time is required")
-    //   .matches(/^([01]\d|2[0-3]):([0-5]\d)$/, "Use HH:MM 24-hour format"),
-    // "date-end": Yup.string().required("End date is required"),
-
     "since-previous": Yup.string()
       .required("Since previous observation is required")
+      .matches(/^[1-9]\d{0,2}$/, "Must be a 1-3 digit number between 1 and 989")
       .test(
-        "is-non-negative-number",
-        "Please enter a non-negative number",
-        (value) =>
-          !value ||
-          (Number.parseFloat(value) >= 0 && !isNaN(Number.parseFloat(value)))
+        "is-valid-range",
+        "Value must be between 1 and 989",
+        (value) => {
+          const num = parseInt(value || "0");
+          return num >= 1 && num <= 989;
+        }
       ),
-
     "during-previous": Yup.string()
       .required("During previous 6 hours is required")
-      .matches(/^\d{4}$/, "Must be a 4-digit integer between 0000 and 9999"),
-
+      .matches(/^[1-9]\d{0,2}$/, "Must be a 1-3 digit number between 1 and 989")
+      .test(
+        "is-valid-range",
+        "Value must be between 1 and 989",
+        (value) => {
+          const num = parseInt(value || "0");
+          return num >= 1 && num <= 989;
+        }
+      ),
     "last-24-hours": Yup.string()
       .required("Last 24 hours precipitation is required")
+      .matches(/^[1-9]\d{0,2}$/, "Must be a 1-3 digit number between 1 and 989")
       .test(
-        "is-non-negative-number",
-        "Please enter a non-negative number",
-        (value) =>
-          !value ||
-          (Number.parseFloat(value) >= 0 && !isNaN(Number.parseFloat(value)))
+        "is-valid-range",
+        "Value must be between 1 and 989",
+        (value) => {
+          const num = parseInt(value || "0");
+          return num >= 1 && num <= 989;
+        }
       ),
   }),
 });
@@ -568,40 +569,30 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   };
 
   // Handle input changes and update the form data state
-  // Update the handleInputChange function to validate time fields immediately
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    formik.setFieldTouched(name, true, true);
-
-    // For numeric fields, validate immediately
-    const numericFields = [
-      "since-previous",
-      "during-previous",
-      "last-24-hours",
-      "first-anemometer",
-      "second-anemometer",
-      "speed",
-      "wind-direction",
-    ];
-
-    // Check if this is a numeric field and contains non-numeric characters
-    const isNumericField = numericFields.some((field) => name.includes(field));
-    if (isNumericField && value !== "" && !/^[0-9]+(\.[0-9]+)?$/.test(value)) {
-      // Touch the field to trigger validation
-      const fieldPath = name.includes("rainfall")
-        ? `rainfall.${name.replace("rainfall-", "")}`
-        : `wind.${name}`;
-
-      formik.setFieldTouched(fieldPath, true, false);
-
-      // Show toast for immediate feedback
-      formik.setFieldTouched(name, true, false);
-
-      toast.error("Please enter numbers only", {
-        description: `${name} field should contain numbers only`,
-        duration: 3000,
-      });
+    
+    // Guard clause for undefined or null name
+    if (!name) {
+      console.warn('Input element has no name attribute');
+      return;
     }
+    
+    // Update the form field value
+    if (name.startsWith("rainfall-")) {
+      const field = name.replace("rainfall-", "");
+      formik.setFieldValue(`rainfall.${field}`, value);
+    } else if (
+      name === "first-anemometer" ||
+      name === "second-anemometer" ||
+      name === "speed" ||
+      name === "wind-direction"
+    ) {
+      formik.setFieldValue(`wind.${name}`, value);
+    }
+    
+    // Mark the field as touched
+    formik.setFieldTouched(name, true, true);
 
     // Validate time fields for HH:MM format
     // if (name === "time-start" || name === "time-end") {
@@ -1262,65 +1253,50 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           <InputField
                             id="since-previous"
                             name="since-previous"
-                            label="Since Previous Observation"
+                            label="Since Previous Observation (mm)"
+                            placeholder="Enter value (1-989)"
                             accent="cyan"
-                            value={
-                              formik.values.rainfall["since-previous"] || ""
-                            }
+                            value={formik.values.rainfall["since-previous"] || ""}
                             onChange={handleInputChange}
-                            error={renderErrorMessage(
-                              "rainfall.since-previous"
-                            )}
+                            error={renderErrorMessage("rainfall.since-previous")}
                             required
                             numeric={true}
+                            maxLength={3}
+                            min={1}
+                            max={989}
                           />
-                          <div className="grid gap-2">
-                            <Label
-                              htmlFor="during-previous"
-                              className="font-medium text-gray-700 text-xs sm:text-sm"
-                            >
-                              During Previous 6 Hours Rainfall (At 00, 06, 12,
-                              18 UTC)
-                              <span className="text-red-500">*</span>
-                            </Label>
-                            <Input
-                              id="during-previous"
-                              name="during-previous"
-                              placeholder="Enter 4 digits (e.g., 0000)"
-                              value={
-                                formik.values.rainfall["during-previous"] || ""
-                              }
-                              onChange={handleInputChange}
-                              className={cn(
-                                "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3 text-xs sm:text-sm",
-                                {
-                                  "border-red-500":
-                                    formik.errors.rainfall?.["during-previous"],
-                                }
-                              )}
-                              required
-                            />
-                            <p className="text-red-500 text-xs sm:text-sm mt-1 flex items-start">
-                              {formik.errors.rainfall?.["during-previous"]}
-                            </p>
-                          </div>
-                          <div className="md:col-span-2">
-                            <InputField
-                              id="last-24-hours"
-                              name="last-24-hours"
-                              label="Last 24 Hours Precipitation"
-                              accent="cyan"
-                              value={
-                                formik.values.rainfall["last-24-hours"] || ""
-                              }
-                              onChange={handleInputChange}
-                              error={renderErrorMessage(
-                                "rainfall.last-24-hours"
-                              )}
-                              required
-                              numeric={true}
-                            />
-                          </div>
+
+                          <InputField
+                            id="during-previous"
+                            name="during-previous"
+                            label="During Previous 6 Hours Rainfall (mm)"
+                            placeholder="Enter value (1-989)"
+                            accent="cyan"
+                            value={formik.values.rainfall["during-previous"] || ""}
+                            onChange={handleInputChange}
+                            error={renderErrorMessage("rainfall.during-previous")}
+                            required
+                            numeric={true}
+                            maxLength={3}
+                            min={1}
+                            max={989}
+                          />
+
+                          <InputField
+                            id="last-24-hours"
+                            name="last-24-hours"
+                            label="Last 24 Hours Precipitation (mm)"
+                            placeholder="Enter value (1-989)"
+                            accent="cyan"
+                            value={formik.values.rainfall["last-24-hours"] || ""}
+                            onChange={handleInputChange}
+                            error={renderErrorMessage("rainfall.last-24-hours")}
+                            required
+                            numeric={true}
+                            maxLength={3}
+                            min={1}
+                            max={989}
+                          />
 
                           <div className="md:col-span-2 flex items-center gap-2 mt-2 sm:mt-4">
                             <input
@@ -1660,9 +1636,13 @@ function InputField({
   value,
   disabled = false,
   required = false,
+  placeholder = "",
   onChange,
   error,
   numeric = false,
+  maxLength,
+  min,
+  max,
 }: {
   id: string;
   name: string;
@@ -1672,9 +1652,13 @@ function InputField({
   value: string;
   disabled?: boolean;
   required?: boolean;
+  placeholder?: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   error?: React.ReactNode;
   numeric?: boolean;
+  maxLength?: number;
+  min?: number;
+  max?: number;
 }) {
   const focusClasses: Record<string, string> = {
     blue: "focus:ring-blue-500 focus:border-blue-500",
@@ -1688,19 +1672,45 @@ function InputField({
     indigo: "focus:ring-indigo-500 focus:border-indigo-500",
   };
 
-  // Handle input validation for numeric fields
-  const handleInputValidation = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value;
 
     // For numeric fields, validate immediately
-    if (numeric && value !== "" && !/^[0-9]+(\.[0-9]+)?$/.test(value)) {
-      // Show error styling immediately
-      e.target.classList.add("border-red-500");
-    } else {
-      e.target.classList.remove("border-red-500");
-    }
+    if (numeric) {
+      // Only allow numbers and empty string
+      if (value !== '' && !/^\d*$/.test(value)) {
+        return; // Don't update if not a number
+      }
 
-    onChange(e);
+      // Enforce max length
+      if (maxLength && value.length > maxLength) {
+        value = value.slice(0, maxLength);
+      }
+
+      // Enforce min/max if provided
+      if (value !== '') {
+        const numValue = parseInt(value, 10);
+        if (min !== undefined && numValue < min) {
+          value = min.toString();
+        }
+        if (max !== undefined && numValue > max) {
+          value = max.toString();
+        }
+      }
+
+    }
+    
+    // Create a new event with the updated value
+    const newEvent = {
+      ...e,
+      target: {
+        ...e.target,
+        value: value,
+        name: e.target.name // Ensure name is preserved
+      }
+    };
+
+    onChange(newEvent);
   };
 
   return (
@@ -1711,9 +1721,9 @@ function InputField({
       <Input
         id={id}
         name={name}
-        type={type}
+        type={numeric ? "number" : type}
         value={value}
-        onChange={numeric ? handleInputValidation : onChange}
+        onChange={handleInput}
         className={cn(
           `${focusClasses[accent]} border-gray-300 rounded-lg py-2 px-3`,
           {
@@ -1723,7 +1733,11 @@ function InputField({
         )}
         disabled={disabled}
         required={required}
-        inputMode={numeric ? "decimal" : "text"}
+        placeholder={placeholder}
+        inputMode={numeric ? "numeric" : "text"}
+        min={min}
+        max={max}
+        maxLength={maxLength}
       />
       {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
     </div>

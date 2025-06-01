@@ -1,43 +1,139 @@
-"use client"
+"use client";
 
-import { useFormikContext } from "formik"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useEffect, useState } from "react"
-import { useSession } from "@/lib/auth-client"
-import { AlertCircle, Loader2 } from "lucide-react"
-import moment from "moment"
+import { useFormikContext } from "formik";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { useSession } from "@/lib/auth-client";
+import { AlertCircle, Loader2 } from "lucide-react";
+import moment from "moment";
 
 // Daily Summary Form Values Interface
 interface DailySummaryFormValues {
-  measurements: string[]
-  dataType: string
-  stationNo: string
-  year: string
-  month: string
-  day: string
+  measurements: string[];
+  dataType: string;
+  stationNo: string;
+  year: string;
+  month: string;
+  day: string;
 }
 
 // Measurements configuration for daily summary
 const measurements = [
-  { id: 0, label: "Av. Station Pressure", range: "14-18", unit: "hPa", category: "pressure" },
-  { id: 1, label: "Av. Sea-Level Pressure", range: "19-23", unit: "hPa", category: "pressure" },
-  { id: 2, label: "Av. Dry-Bulb Temperature", range: "24-26", unit: "°C", category: "temperature" },
-  { id: 3, label: "Av. Wet Bulb Temperature", range: "27-29", unit: "°C", category: "temperature" },
-  { id: 4, label: "Max. Temperature", range: "30-32", unit: "°C", category: "temperature" },
-  { id: 5, label: "Min Temperature", range: "33-35", unit: "°C", category: "temperature" },
-  { id: 6, label: "Total Precipitation", range: "36-39", unit: "mm", category: "precipitation" },
-  { id: 7, label: "Av. Dew Point Temperature", range: "40-42", unit: "°C", category: "temperature" },
-  { id: 8, label: "Av. Rel Humidity", range: "43-45", unit: "%", category: "humidity" },
-  { id: 9, label: "Av. Wind Speed", range: "46-48", unit: "m/s", category: "wind" },
-  { id: 10, label: "Prevailing Wind Direction", range: "49-50", unit: "16Pts", category: "wind" },
-  { id: 11, label: "Max Wind Speed", range: "51-53", unit: "m/s", category: "wind" },
-  { id: 12, label: "Direction of Max Wind", range: "54-55", unit: "16Pts", category: "wind" },
-  { id: 13, label: "Av. Total Cloud", range: "56", unit: "octas", category: "cloud" },
-  { id: 14, label: "Lowest visibility", range: "57-59", unit: "km", category: "visibility" },
-  { id: 15, label: "Total Duration of Rain", range: "60-63", unit: "H-M", category: "precipitation" },
-]
+  {
+    id: 0,
+    label: "Av. Station Pressure",
+    range: "14-18",
+    unit: "hPa",
+    category: "pressure",
+  },
+  {
+    id: 1,
+    label: "Av. Sea-Level Pressure",
+    range: "19-23",
+    unit: "hPa",
+    category: "pressure",
+  },
+  {
+    id: 2,
+    label: "Av. Dry-Bulb Temperature",
+    range: "24-26",
+    unit: "°C",
+    category: "temperature",
+  },
+  {
+    id: 3,
+    label: "Av. Wet Bulb Temperature",
+    range: "27-29",
+    unit: "°C",
+    category: "temperature",
+  },
+  {
+    id: 4,
+    label: "Max. Temperature",
+    range: "30-32",
+    unit: "°C",
+    category: "temperature",
+  },
+  {
+    id: 5,
+    label: "Min Temperature",
+    range: "33-35",
+    unit: "°C",
+    category: "temperature",
+  },
+  {
+    id: 6,
+    label: "Total Precipitation",
+    range: "36-39",
+    unit: "mm",
+    category: "precipitation",
+  },
+  {
+    id: 7,
+    label: "Av. Dew Point Temperature",
+    range: "40-42",
+    unit: "°C",
+    category: "temperature",
+  },
+  {
+    id: 8,
+    label: "Av. Rel Humidity",
+    range: "43-45",
+    unit: "%",
+    category: "humidity",
+  },
+  {
+    id: 9,
+    label: "Av. Wind Speed",
+    range: "46-48",
+    unit: "m/s",
+    category: "wind",
+  },
+  {
+    id: 10,
+    label: "Prevailing Wind Direction",
+    range: "49-50",
+    unit: "16Pts",
+    category: "wind",
+  },
+  {
+    id: 11,
+    label: "Max Wind Speed",
+    range: "51-53",
+    unit: "m/s",
+    category: "wind",
+  },
+  {
+    id: 12,
+    label: "Direction of Max Wind",
+    range: "54-55",
+    unit: "16Pts",
+    category: "wind",
+  },
+  {
+    id: 13,
+    label: "Av. Total Cloud",
+    range: "56",
+    unit: "octas",
+    category: "cloud",
+  },
+  {
+    id: 14,
+    label: "Lowest visibility",
+    range: "57-59",
+    unit: "km",
+    category: "visibility",
+  },
+  {
+    id: 15,
+    label: "Total Duration of Rain",
+    range: "60-63",
+    unit: "H-M",
+    category: "precipitation",
+  },
+];
 
 const categoryColors = {
   pressure: "bg-blue-50 text-blue-700",
@@ -47,22 +143,24 @@ const categoryColors = {
   wind: "bg-emerald-50 text-emerald-700",
   cloud: "bg-slate-50 text-slate-700",
   visibility: "bg-yellow-50 text-yellow-700",
-}
+};
 
 export function DailySummaryForm() {
-  const { values, setFieldValue } = useFormikContext<DailySummaryFormValues>()
-  const { data: session } = useSession()
-  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0])
+  const { values, setFieldValue } = useFormikContext<DailySummaryFormValues>();
+  const { data: session } = useSession();
+  const [selectedDate, setSelectedDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
   const [dataStatus, setDataStatus] = useState<{
-    hasToday: boolean
-    message: string
-    isLoading: boolean
-    error?: string
+    hasToday: boolean;
+    message: string;
+    isLoading: boolean;
+    error?: string;
   }>({
     hasToday: true,
     message: "",
     isLoading: true,
-  })
+  });
 
   useEffect(() => {
     const fetchDailySummaryData = async () => {
@@ -71,66 +169,121 @@ export function DailySummaryForm() {
           ...prev,
           isLoading: true,
           error: undefined,
-        }))
+        }));
 
         // Fetch meteorological data
-        const firstCardResponse = await fetch("/api/first-card-data")
-        const formatedFirstCardData = await firstCardResponse.json()
-        const todayFirstCardData = await formatedFirstCardData.entries.flatMap((item: any) => item.MeteorologicalEntry)
+        const firstCardResponse = await fetch("/api/first-card-data");
+        const formatedFirstCardData = await firstCardResponse.json();
+        const todayFirstCardData = await formatedFirstCardData.entries.flatMap(
+          (item: any) => item.MeteorologicalEntry
+        );
 
         // Fetch weather observations
-        const observationsResponse = await fetch("/api/second-card-data")
-        const formatedObservationsData = await observationsResponse.json()
-        const todayWeatherObservations = formatedObservationsData.flatMap((item: any) => item.WeatherObservation)
+        const observationsResponse = await fetch("/api/second-card-data");
+        const formatedObservationsData = await observationsResponse.json();
+        const todayWeatherObservations = formatedObservationsData.flatMap(
+          (item: any) => item.WeatherObservation
+        );
 
-        const calculatedMeasurements = Array(16).fill("")
+        const calculatedMeasurements = Array(16).fill("");
 
         // Helper function to process meteorological data
-        const processFirstCard = (key: string, id: number, reducer: (arr: number[]) => number) => {
+        const processFirstCard = (
+          key: string,
+          id: number,
+          reducer: (arr: number[]) => number
+        ) => {
           const values = todayFirstCardData
             .map((item: any) => Number.parseFloat(item[key]))
-            .filter((val: number) => !isNaN(val))
-          if (values.length > 0) calculatedMeasurements[id] = Math.round(reducer(values)).toString()
-        }
+            .filter((val: number) => !isNaN(val));
+          if (values.length > 0)
+            calculatedMeasurements[id] = Math.round(reducer(values)).toString();
+        };
 
         // Calculate pressure measurements
-        processFirstCard("stationLevelPressure", 0, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
-        processFirstCard("correctedSeaLevelPressure", 1, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
+        processFirstCard(
+          "stationLevelPressure",
+          0,
+          (arr) => arr.reduce((a, b) => a + b, 0) / arr.length
+        );
+        processFirstCard(
+          "correctedSeaLevelPressure",
+          1,
+          (arr) => arr.reduce((a, b) => a + b, 0) / arr.length
+        );
 
         // Calculate temperature measurements
-        processFirstCard("dryBulbAsRead", 2, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
-        processFirstCard("wetBulbAsRead", 3, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
-        processFirstCard("maxMinTempAsRead", 4, (arr) => Math.max(...arr))
-        processFirstCard("maxMinTempAsRead", 5, (arr) => Math.min(...arr))
-        const rainfallLast24Hours = todayWeatherObservations.map((item: any) => Number.parseFloat(item.rainfallLast24Hours))
-        processFirstCard("Td", 7, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
+        processFirstCard(
+          "dryBulbAsRead",
+          2,
+          (arr) => arr.reduce((a, b) => a + b, 0) / arr.length
+        );
+        processFirstCard(
+          "wetBulbAsRead",
+          3,
+          (arr) => arr.reduce((a, b) => a + b, 0) / arr.length
+        );
+        processFirstCard("maxMinTempAsRead", 4, (arr) => Math.max(...arr));
+        processFirstCard("maxMinTempAsRead", 5, (arr) => Math.min(...arr));
+        const rainfallLast24Hours = todayWeatherObservations.map((item: any) =>
+          Number.parseFloat(item.rainfallLast24Hours)
+        );
+        processFirstCard(
+          "Td",
+          7,
+          (arr) => arr.reduce((a, b) => a + b, 0) / arr.length
+        );
 
         // Calculate humidity
-        processFirstCard("relativeHumidity", 8, (arr) => arr.reduce((a, b) => a + b, 0) / arr.length)
+        processFirstCard(
+          "relativeHumidity",
+          8,
+          (arr) => arr.reduce((a, b) => a + b, 0) / arr.length
+        );
 
         // Calculate visibility
-        processFirstCard("horizontalVisibility", 14, (arr) => Math.min(...arr))
+        // processFirstCard("horizontalVisibility", 14, (arr) => Math.min(...arr))
+        calculatedMeasurements[14] = ((values) =>
+          Math.min(...values)
+            .toString()
+            .padStart(3, "0"))(
+          todayFirstCardData
+            .map((item: any) => Number.parseFloat(item["horizontalVisibility"]))
+            .filter((val: number) => !isNaN(val))
+        );
 
         // Calculate precipitation
-        const totalPrecip = rainfallLast24Hours.reduce((sum: number, item: number) => isNaN(item) ? sum : sum + item, 0)
-        if (totalPrecip > 0) calculatedMeasurements[6] = totalPrecip.toString()
+        const totalPrecip = rainfallLast24Hours.reduce(
+          (sum: number, item: number) => (isNaN(item) ? sum : sum + item),
+          0
+        );
+        if (totalPrecip > 0) calculatedMeasurements[6] = totalPrecip.toString();
 
         // Calculate wind measurements
         const windSpeeds = todayWeatherObservations
           .map((item: any) => Number.parseFloat(item.windSpeed))
-          .filter((val) => !isNaN(val))
+          .filter((val) => !isNaN(val));
         if (windSpeeds.length > 0) {
-          calculatedMeasurements[9] = Math.round(windSpeeds.reduce((a, b) => a + b, 0) / windSpeeds.length).toString()
+          calculatedMeasurements[9] = Math.round(
+            windSpeeds.reduce((a, b) => a + b, 0) / windSpeeds.length
+          ).toString();
         }
 
         // Calculate prevailing wind direction
-        const directions = todayWeatherObservations.map((item: any) => item.windDirection)
+        const directions = todayWeatherObservations.map(
+          (item: any) => item.windDirection
+        );
         if (directions.length > 0) {
-          const dirCount = directions.reduce((acc: Record<string, number>, dir: string) => {
-            acc[dir] = (acc[dir] || 0) + 1
-            return acc
-          }, {})
-          calculatedMeasurements[10] = Object.entries(dirCount).reduce((a, b) => (a[1] > b[1] ? a : b))[0]
+          const dirCount = directions.reduce(
+            (acc: Record<string, number>, dir: string) => {
+              acc[dir] = (acc[dir] || 0) + 1;
+              return acc;
+            },
+            {}
+          );
+          calculatedMeasurements[10] = Object.entries(dirCount).reduce(
+            (a, b) => (a[1] > b[1] ? a : b)
+          )[0];
         }
 
         // Calculate max wind speed and direction
@@ -139,45 +292,58 @@ export function DailySummaryForm() {
             speed: Number.parseFloat(item.windSpeed),
             direction: item.windDirection,
           }))
-          .filter((item) => !isNaN(item.speed))
+          .filter((item) => !isNaN(item.speed));
         if (windData.length > 0) {
-          const maxWind = windData.reduce((max, item) => (item.speed > max.speed ? item : max))
-          calculatedMeasurements[11] = Math.round(maxWind.speed).toString()
-          calculatedMeasurements[12] = maxWind.direction
+          const maxWind = windData.reduce((max, item) =>
+            item.speed > max.speed ? item : max
+          );
+          calculatedMeasurements[11] = Math.round(maxWind.speed).toString();
+          calculatedMeasurements[12] = maxWind.direction;
         }
 
         // Calculate cloud amount
         const cloudAmounts = todayWeatherObservations
           .map((item: any) => Number.parseFloat(item.totalCloudAmount))
-          .filter((val) => !isNaN(val))
+          .filter((val) => !isNaN(val));
         if (cloudAmounts.length > 0) {
           calculatedMeasurements[13] = Math.round(
-            cloudAmounts.reduce((a, b) => a + b, 0) / cloudAmounts.length,
-          ).toString()
+            cloudAmounts.reduce((a, b) => a + b, 0) / cloudAmounts.length
+          ).toString();
         }
 
         // Calculate rain duration
-        const totalRainDuration = todayWeatherObservations.reduce((totalMinutes: number, item: any) => {
-          if (item.rainfallTimeStart && item.rainfallTimeEnd) {
-            const startTime = moment(item.rainfallTimeStart, 'YYYY-MM-DD HH:mm:ss');
-            const endTime = moment(item.rainfallTimeEnd, 'YYYY-MM-DD HH:mm:ss');
-            
-            let duration = moment.duration(endTime.diff(startTime)).asMinutes();
-            
-            if (duration < 0) {
-              duration += 1440; // add 24 hours if crossed midnight
+        const totalRainDuration = todayWeatherObservations.reduce(
+          (totalMinutes: number, item: any) => {
+            if (item.rainfallTimeStart && item.rainfallTimeEnd) {
+              const startTime = moment(
+                item.rainfallTimeStart,
+                "YYYY-MM-DD HH:mm:ss"
+              );
+              const endTime = moment(
+                item.rainfallTimeEnd,
+                "YYYY-MM-DD HH:mm:ss"
+              );
+
+              let duration = moment
+                .duration(endTime.diff(startTime))
+                .asMinutes();
+
+              if (duration < 0) {
+                duration += 1440; // add 24 hours if crossed midnight
+              }
+
+              return totalMinutes + duration;
             }
-            
-            return totalMinutes + duration;
-          }
-          return totalMinutes;
-        }, 0);
-        
+            return totalMinutes;
+          },
+          0
+        );
+
         // Convert total minutes to H:MM format
         const hours = Math.floor(totalRainDuration / 60);
         const minutes = Math.round(totalRainDuration % 60);
-        const formattedDuration = `${hours}:${minutes.toString().padStart(2, '0')}`;
-        
+        const formattedDuration = `${hours}:${minutes.toString().padStart(2, "0")}`;
+
         if (totalRainDuration > 0) {
           const hours = Math.floor(totalRainDuration / 60);
           const minutes = totalRainDuration % 60;
@@ -185,47 +351,61 @@ export function DailySummaryForm() {
         }
 
         // Check if today's date matches the selected date
-        const today = new Date()
+        const today = new Date();
         const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(
-          today.getDate(),
-        ).padStart(2, "0")}`
-        const isToday = todayStr === selectedDate
+          today.getDate()
+        ).padStart(2, "0")}`;
+        const isToday = todayStr === selectedDate;
 
         setDataStatus({
           hasToday: isToday,
-          message: isToday ? "Using today's weather data" : "No data available for today, using most recent data",
+          message: isToday
+            ? "Using today's weather data"
+            : "No data available for today, using most recent data",
           isLoading: false,
-        })
+        });
 
         // Update form fields
-        setFieldValue("measurements", calculatedMeasurements)
-        setFieldValue("stationNo", session?.user?.station?.stationId || "41953")
-        setFieldValue("dataType", "SY")
-        setFieldValue("year", new Date(selectedDate).getFullYear().toString())
-        setFieldValue("month", (new Date(selectedDate).getMonth() + 1).toString().padStart(2, "0"))
-        setFieldValue("day", new Date(selectedDate).getDate().toString().padStart(2, "0"))
+        setFieldValue("measurements", calculatedMeasurements);
+        setFieldValue(
+          "stationNo",
+          session?.user?.station?.stationId || "41953"
+        );
+        setFieldValue("dataType", "SY");
+        setFieldValue("year", new Date(selectedDate).getFullYear().toString());
+        setFieldValue(
+          "month",
+          (new Date(selectedDate).getMonth() + 1).toString().padStart(2, "0")
+        );
+        setFieldValue(
+          "day",
+          new Date(selectedDate).getDate().toString().padStart(2, "0")
+        );
       } catch (error) {
-        console.error("Error fetching daily summary data:", error)
+        console.error("Error fetching daily summary data:", error);
         setDataStatus({
           hasToday: false,
           message: "Error loading weather data",
           isLoading: false,
           error: error instanceof Error ? error.message : "Unknown error",
-        })
+        });
 
         // Set default values on error
-        const now = new Date(selectedDate)
-        setFieldValue("measurements", Array(16).fill(""))
-        setFieldValue("stationNo", session?.user?.station?.stationId || "41953")
-        setFieldValue("dataType", "SY")
-        setFieldValue("year", now.getFullYear().toString())
-        setFieldValue("month", String(now.getMonth() + 1).padStart(2, "0"))
-        setFieldValue("day", String(now.getDate()).padStart(2, "0"))
+        const now = new Date(selectedDate);
+        setFieldValue("measurements", Array(16).fill(""));
+        setFieldValue(
+          "stationNo",
+          session?.user?.station?.stationId || "41953"
+        );
+        setFieldValue("dataType", "SY");
+        setFieldValue("year", now.getFullYear().toString());
+        setFieldValue("month", String(now.getMonth() + 1).padStart(2, "0"));
+        setFieldValue("day", String(now.getDate()).padStart(2, "0"));
       }
-    }
+    };
 
-    fetchDailySummaryData()
-  }, [selectedDate, setFieldValue, session])
+    fetchDailySummaryData();
+  }, [selectedDate, setFieldValue, session]);
 
   if (dataStatus.isLoading) {
     return (
@@ -235,7 +415,7 @@ export function DailySummaryForm() {
           <p className="text-gray-500">Loading daily summary data...</p>
         </div>
       </div>
-    )
+    );
   }
 
   // const handleSubmit = async () => {
@@ -272,14 +452,13 @@ export function DailySummaryForm() {
   // }
 
   const handleMeasurementChange = (index: number, value: string) => {
-    const newMeasurements = [...values.measurements]
-    newMeasurements[index] = value
-    setFieldValue("measurements", newMeasurements)
-  }
+    const newMeasurements = [...values.measurements];
+    newMeasurements[index] = value;
+    setFieldValue("measurements", newMeasurements);
+  };
 
   return (
     <div className="space-y-6">
-
       {/* Status Messages */}
       {dataStatus.error ? (
         <div className="p-3 rounded-md bg-red-100 text-red-800 text-sm">
@@ -291,8 +470,11 @@ export function DailySummaryForm() {
       ) : (
         dataStatus.message && (
           <div
-            className={`p-3 rounded-md text-sm ${dataStatus.hasToday ? "bg-blue-100 text-blue-800" : "bg-amber-100 text-amber-800"
-              }`}
+            className={`p-3 rounded-md text-sm ${
+              dataStatus.hasToday
+                ? "bg-blue-100 text-blue-800"
+                : "bg-amber-100 text-amber-800"
+            }`}
           >
             <div className="flex items-center">
               {dataStatus.hasToday ? (
@@ -324,7 +506,9 @@ export function DailySummaryForm() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="border-blue-200 bg-white shadow-sm">
           <CardHeader className="pb-2 pt-4 px-4 bg-blue-50">
-            <CardTitle className="text-sm font-medium text-blue-700">Measurements 1-8</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700">
+              Measurements 1-8
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
             <div className="space-y-3">
@@ -337,10 +521,15 @@ export function DailySummaryForm() {
                     {item.id + 1}
                   </div>
                   <div className="col-span-5">
-                    <Label htmlFor={`measurement-${item.id}`} className="text-sm font-medium">
+                    <Label
+                      htmlFor={`measurement-${item.id}`}
+                      className="text-sm font-medium"
+                    >
                       {item.label}
                     </Label>
-                    <div className={`text-xs px-1 py-0.5 rounded mt-1 ${categoryColors[item.category]}`}>
+                    <div
+                      className={`text-xs px-1 py-0.5 rounded mt-1 ${categoryColors[item.category]}`}
+                    >
                       {item.unit}
                     </div>
                   </div>
@@ -351,7 +540,9 @@ export function DailySummaryForm() {
                     <Input
                       id={`measurement-${item.id}`}
                       value={values.measurements[item.id] || ""}
-                      onChange={(e) => handleMeasurementChange(item.id, e.target.value)}
+                      onChange={(e) =>
+                        handleMeasurementChange(item.id, e.target.value)
+                      }
                       className="border-blue-200 bg-white cursor-text disabled:opacity-80 disabled:font-semibold"
                       placeholder="--"
                       disabled
@@ -365,7 +556,9 @@ export function DailySummaryForm() {
 
         <Card className="border-blue-200 bg-white shadow-sm">
           <CardHeader className="pb-2 pt-4 px-4 bg-blue-50">
-            <CardTitle className="text-sm font-medium text-blue-700">Measurements 9-16</CardTitle>
+            <CardTitle className="text-sm font-medium text-blue-700">
+              Measurements 9-16
+            </CardTitle>
           </CardHeader>
           <CardContent className="p-4">
             <div className="space-y-3">
@@ -378,10 +571,15 @@ export function DailySummaryForm() {
                     {item.id + 1}
                   </div>
                   <div className="col-span-5">
-                    <Label htmlFor={`measurement-${item.id}`} className="text-sm font-medium">
+                    <Label
+                      htmlFor={`measurement-${item.id}`}
+                      className="text-sm font-medium"
+                    >
                       {item.label}
                     </Label>
-                    <div className={`text-xs px-1 py-0.5 rounded mt-1 ${categoryColors[item.category]}`}>
+                    <div
+                      className={`text-xs px-1 py-0.5 rounded mt-1 ${categoryColors[item.category]}`}
+                    >
                       {item.unit}
                     </div>
                   </div>
@@ -392,7 +590,9 @@ export function DailySummaryForm() {
                     <Input
                       id={`measurement-${item.id}`}
                       value={values.measurements[item.id] || ""}
-                      onChange={(e) => handleMeasurementChange(item.id, e.target.value)}
+                      onChange={(e) =>
+                        handleMeasurementChange(item.id, e.target.value)
+                      }
                       className="border-blue-200 bg-white cursor-text disabled:opacity-80 disabled:font-semibold"
                       placeholder="--"
                       disabled
@@ -416,7 +616,5 @@ export function DailySummaryForm() {
         </Button>
       </div> */}
     </div>
-  )
+  );
 }
-
-
