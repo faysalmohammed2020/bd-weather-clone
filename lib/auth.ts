@@ -42,7 +42,7 @@ export const auth = betterAuth({
       enabled: false,
     },
     modelName: "sessions",
-    updateAge: 0,
+    expiresIn: 60 * 60 * 24, // 1 day
   },
   account: {
     modelName: "accounts",

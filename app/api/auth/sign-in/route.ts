@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import moment from "moment";
 
 export async function POST(request: NextRequest) {
   try {
@@ -76,8 +77,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // If user already has a session, prevent the new login
-    if (existingSession) {
+    // If user already has a session and not expired, prevent the new login
+    const isSessionExpired = moment(existingSession?.expiresAt).isBefore(moment());
+    if (existingSession && !isSessionExpired) {
       return NextResponse.json(
         { error: "You are already logged in from another device" },
         { status: 403 }
