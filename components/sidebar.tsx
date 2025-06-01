@@ -67,6 +67,8 @@ const Sidebar = () => {
       } else if (window.innerWidth >= 768 && window.innerWidth < 1024) {
         setIsCollapsed(true);
         setIsMobileOpen(false);
+        // Reset active submenu when sidebar is collapsed
+        setActiveSubmenu(null);
       } else {
         setIsCollapsed(false);
         setIsMobileOpen(false);
@@ -79,18 +81,23 @@ const Sidebar = () => {
   }, []);
 
   useEffect(() => {
-    sidebarLinks.forEach((link) => {
-      if (link.subMenu) {
-        const isActive = link.subMenu.some((item) => item.href === pathname);
-        if (isActive) {
-          setActiveSubmenu(link.label);
+    // Only set active submenu if sidebar is expanded
+    if (!isCollapsed && !isMobileOpen) {
+      sidebarLinks.forEach((link) => {
+        if (link.subMenu) {
+          const isActive = link.subMenu.some((item) => item.href === pathname);
+          if (isActive) {
+            setActiveSubmenu(link.label);
+          }
         }
-      }
-    });
-  }, [pathname]);
+      });
+    }
+  }, [pathname, isCollapsed, isMobileOpen]);
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
+    // Reset active submenu when sidebar is collapsed
+    setActiveSubmenu(null);
   };
 
   const toggleMobileSidebar = () => {
@@ -98,6 +105,8 @@ const Sidebar = () => {
     if (!isMobileOpen && window.innerWidth < 768) {
       setIsCollapsed(false);
     }
+    // Reset active submenu when mobile menu is opened
+    setActiveSubmenu(null);
   };
 
   const handleSubmenuToggle = (label: string) => {
@@ -262,7 +271,11 @@ const Sidebar = () => {
                     (link.subMenu &&
                       link.subMenu.some((item) => item.href === pathname))
                   }
-                  isSubmenuOpen={activeSubmenu === link.label}
+                  isSubmenuOpen={
+                    activeSubmenu === link.label &&
+                    !isCollapsed &&
+                    !isMobileOpen
+                  }
                   onSubmenuToggle={() => handleSubmenuToggle(link.label)}
                   onMobileLinkClick={toggleMobileSidebar}
                 />
@@ -356,7 +369,7 @@ const SidebarLink = ({
               >
                 <ChevronDown
                   className={cn(
-                    "h-4 w-4",
+                    "size-5",
                     isActive ? "text-white" : "text-sky-200"
                   )}
                 />

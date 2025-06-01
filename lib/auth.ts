@@ -42,20 +42,23 @@ export const auth = betterAuth({
       enabled: false,
     },
     modelName: "sessions",
+    updateAge: 0,
   },
   account: {
     modelName: "accounts",
   },
   verification: {
     modelName: "verifications",
+    disableCleanup: true,
   },
   emailAndPassword: {
     enabled: true,
+    revokeSessionsOnPasswordReset: true,
   },
   appName: "BD Weather",
   plugins: [
     multiSession({
-      maximumSessions: 1
+      maximumSessions: 1,
     }),
     admin({
       defaultRole: "observer",

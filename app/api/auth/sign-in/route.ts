@@ -5,10 +5,18 @@ import prisma from "@/lib/prisma";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, role, securityCode, stationId, stationName } = body;
+    const { email, password, role, securityCode, stationId, stationName } =
+      body;
 
     // Validate required fields
-    if (!email || !password || !role || !securityCode || !stationId || !stationName) {
+    if (
+      !email ||
+      !password ||
+      !role ||
+      !securityCode ||
+      !stationId ||
+      !stationName
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -17,14 +25,11 @@ export async function POST(request: NextRequest) {
 
     // 1. Check if the station exists and security code matches
     const station = await prisma.station.findFirst({
-      where: { stationId: stationId }
+      where: { stationId: stationId },
     });
 
     if (!station) {
-      return NextResponse.json(
-        { error: "Station not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Station not found" }, { status: 404 });
     }
 
     if (station.securityCode !== securityCode) {
@@ -37,16 +42,16 @@ export async function POST(request: NextRequest) {
     // 2. Check if user exists with the given email and role
     // Use select to explicitly specify which fields to retrieve to avoid schema mismatch issues
     const user = await prisma.users.findFirst({
-      where: { 
+      where: {
         email,
-        role
+        role,
       },
       select: {
         id: true,
         email: true,
         role: true,
-        Station: true
-      }
+        Station: true,
+      },
     });
 
     if (!user) {
@@ -64,24 +69,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 4. Authenticate the user using better-auth
+    // Check if the user already has an active session (prevent multiple logins)
+    const existingSession = await prisma.sessions.findFirst({
+      where: {
+        userId: user.id,
+      },
+    });
 
-      // Use the official better-auth API as per documentation
-      const response = await auth.api.signInEmail({
-        asResponse: true,
-        body: {
-          email,
-          password
-        }
-      });
-      
-      // Return a success response
-      // better-auth will automatically handle setting the cookies
-      return response;
-    } catch {
+    // If user already has a session, prevent the new login
+    if (existingSession) {
       return NextResponse.json(
-        { error: "An error occurred during sign in" },
-        { status: 500 }
+        { error: "You are already logged in from another device" },
+        { status: 403 }
+      );
+    }
+
+    // 4. Authenticate the user using better-auth
+    const response = await auth.api.signInEmail({
+      asResponse: true,
+      body: {
+        email,
+        password,
+      },
+    });
+
+    return response;
+  } catch {
+    return NextResponse.json(
+      { error: "An error occurred during sign in" },
+      { status: 500 }
     );
   }
 }
