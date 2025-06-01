@@ -201,7 +201,7 @@ const Sidebar = () => {
 
   return (
     <>
-      <div className="md:hidden fixed top-4 left-4 z-50">
+      <div className="md:hidden fixed top-4 left-4">
         <Button
           onClick={toggleMobileSidebar}
           variant="outline"
@@ -220,7 +220,7 @@ const Sidebar = () => {
       <div
         ref={sidebarRef}
         className={cn(
-          "bg-sky-700 text-white h-full transition-all duration-300 ease-in-out",
+          "bg-sky-700 text-white h-full transition-all duration-300 ease-in-out shrink-0",
           "fixed md:relative z-40 flex flex-col",
           "border-r border-sky-800",
           isCollapsed ? "w-16" : "w-64",
