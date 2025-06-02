@@ -75,15 +75,20 @@ export async function POST(request: NextRequest) {
       where: {
         userId: user.id,
       },
+      orderBy: {
+        expiresAt: "desc",
+      },
     });
 
-    // If user already has a session and not expired, prevent the new login
-    const isSessionExpired = moment(existingSession?.expiresAt).isBefore(moment());
-    if (existingSession && !isSessionExpired) {
-      return NextResponse.json(
-        { error: "You are already logged in from another device" },
-        { status: 403 }
-      );
+    // Check if session already exist and if not expired (Then don't allow multiple session)
+    if (existingSession) {
+      const isSessionExpired = moment(existingSession?.expiresAt).isBefore();
+      if (!isSessionExpired) {
+        return NextResponse.json(
+          { error: "You are already logged in from another device" },
+          { status: 403 }
+        );
+      }
     }
 
     // 4. Authenticate the user using better-auth
