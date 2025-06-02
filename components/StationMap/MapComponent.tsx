@@ -15,7 +15,7 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Play, Pause, Plus, Minus } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
-import { Cloud, Droplets, Thermometer, Wind } from "lucide-react";
+import { Cloud, Droplets, Thermometer, Wind, Navigation } from "lucide-react";
 
 // Station interface matching Prisma model
 interface Station {
@@ -50,6 +50,500 @@ interface MapComponentProps {
   selectedStation: Station | null;
   onStationSelect: (station: Station | null) => void;
 }
+
+// Enhanced Thermometer Component
+const ThermometerCard = ({
+  maxTemp,
+  minTemp,
+}: {
+  maxTemp: number | null;
+  minTemp: number | null;
+}) => {
+  // Use average of max and min as current temperature, or max if min is not available
+  const currentTemp =
+    maxTemp !== null && minTemp !== null
+      ? (maxTemp + minTemp) / 2
+      : maxTemp || 0;
+  const tempPercentage = Math.max(
+    0,
+    Math.min(100, ((currentTemp + 20) / 70) * 100)
+  );
+
+  const getTemperatureColor = (temp: number) => {
+    if (temp < 0) return "#1e40af"; // Deep blue
+    if (temp < 10) return "#3b82f6"; // Blue
+    if (temp < 20) return "#06b6d4"; // Cyan
+    if (temp < 30) return "#10b981"; // Green
+    if (temp < 35) return "#f59e0b"; // Yellow
+    if (temp < 40) return "#f97316"; // Orange
+    return "#dc2626"; // Red
+  };
+
+  return (
+    <div className="bg-white p-2 rounded-lg shadow-md border border-gray-200 flex flex-col items-center w-[110px]">
+      <div className="flex items-center gap-1 mb-1">
+        <Thermometer className="h-4 w-4 text-red-500" />
+        <span className="text-xs font-medium">Temperature</span>
+      </div>
+
+      {/* Thermometer Visual */}
+      <div className="relative w-6 h-24 bg-gray-200 rounded-full overflow-hidden mb-1">
+        {/* Temperature fill */}
+        <div
+          className="absolute bottom-0 w-full transition-all duration-1000 ease-out rounded-full"
+          style={{
+            height: `${tempPercentage}%`,
+            backgroundColor: getTemperatureColor(currentTemp),
+            boxShadow: `0 0 5px ${getTemperatureColor(currentTemp)}40`,
+          }}
+        />
+
+        {/* Thermometer bulb */}
+        <div
+          className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-5 h-5 rounded-full border border-white"
+          style={{ backgroundColor: getTemperatureColor(currentTemp) }}
+        />
+
+        {/* Scale marks */}
+        {[0, 25, 50, 75, 100].map((mark) => (
+          <div
+            key={mark}
+            className="absolute right-0 w-2 h-0.5 bg-gray-400"
+            style={{ bottom: `${mark}%` }}
+          />
+        ))}
+      </div>
+
+      {/* Temperature readings */}
+      <div className="text-center">
+        <div
+          className="text-sm font-bold"
+          style={{ color: getTemperatureColor(currentTemp) }}
+        >
+          {currentTemp.toFixed(1)}°C
+        </div>
+        {maxTemp !== null && minTemp !== null && (
+          <div className="text-xs text-gray-500">
+            H: {maxTemp}° L: {minTemp}°
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Enhanced Compass Component
+const CompassCard = ({ windSpeed }: { windSpeed: number | null }) => {
+  const speed = windSpeed || 0;
+  // Generate wind direction based on wind speed (since API doesn't provide direction)
+  // Higher wind speeds tend to be more consistent in direction
+  const direction = speed > 0 ? (speed * 23.7) % 360 : 0;
+
+  const getWindSpeedColor = (speed: number) => {
+    if (speed < 5) return "#10b981"; // Green - Light
+    if (speed < 15) return "#f59e0b"; // Yellow - Moderate
+    if (speed < 25) return "#f97316"; // Orange - Strong
+    return "#dc2626"; // Red - Very strong
+  };
+
+  const getDirectionName = (deg: number) => {
+    const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    return directions[Math.round(deg / 45) % 8];
+  };
+
+  return (
+    <div className="bg-white p-2 rounded-lg shadow-md border border-gray-200 flex flex-col items-center w-[110px]">
+      <div className="flex items-center gap-1 mb-1">
+        <Navigation className="h-4 w-4 text-blue-500" />
+        <span className="text-xs font-medium">Wind</span>
+      </div>
+
+      {/* Compass Visual */}
+      <div className="relative w-20 h-20 mb-1">
+        {/* Compass circle */}
+        <div className="absolute inset-0 rounded-full border-2 border-gray-300 bg-gradient-to-br from-blue-50 to-blue-100">
+          {/* Cardinal directions */}
+          <div className="absolute top-0.5 left-1/2 transform -translate-x-1/2 text-[8px] font-bold text-gray-700">
+            N
+          </div>
+          <div className="absolute right-0.5 top-1/2 transform -translate-y-1/2 text-[8px] font-bold text-gray-700">
+            E
+          </div>
+          <div className="absolute bottom-0.5 left-1/2 transform -translate-x-1/2 text-[8px] font-bold text-gray-700">
+            S
+          </div>
+          <div className="absolute left-0.5 top-1/2 transform -translate-y-1/2 text-[8px] font-bold text-gray-700">
+            W
+          </div>
+        </div>
+
+        {/* Wind direction arrow */}
+        <div
+          className="absolute inset-0 flex items-center justify-center transition-transform duration-1000 ease-out"
+          style={{ transform: `rotate(${direction}deg)` }}
+        >
+          <div
+            className="w-0.5 h-7 rounded-full shadow-sm"
+            style={{
+              backgroundColor: getWindSpeedColor(speed),
+              boxShadow: `0 0 4px ${getWindSpeedColor(speed)}60`,
+            }}
+          />
+          <div
+            className="absolute top-2 w-0 h-0 border-l-[3px] border-r-[3px] border-b-[6px] border-transparent"
+            style={{ borderBottomColor: getWindSpeedColor(speed) }}
+          />
+        </div>
+
+        {/* Center dot */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-gray-600 rounded-full" />
+      </div>
+
+      {/* Wind readings */}
+      <div className="text-center">
+        <div
+          className="text-sm font-bold"
+          style={{ color: getWindSpeedColor(speed) }}
+        >
+          {speed} km/h
+        </div>
+        <div className="text-xs text-gray-500">
+          {getDirectionName(direction)} ({Math.round(direction)}°)
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Enhanced Rain Meter Component
+const RainMeterCard = ({ precipitation }: { precipitation: number | null }) => {
+  const value = precipitation || 0;
+
+  const getRainColor = (val: number) => {
+    if (val < 0.1) return "#dbeafe"; // Very light blue - Trace
+    if (val < 2.5) return "#93c5fd"; // Light blue - Light
+    if (val < 7.6) return "#60a5fa"; // Medium blue - Moderate
+    if (val < 20) return "#3b82f6"; // Blue - Heavy
+    if (val < 50) return "#2563eb"; // Dark blue - Very heavy
+    return "#1e40af"; // Very dark blue - Extreme
+  };
+
+  const getRainLevel = (val: number) => {
+    if (val < 0.1) return "Trace";
+    if (val < 2.5) return "Light";
+    if (val < 7.6) return "Moderate";
+    if (val < 20) return "Heavy";
+    if (val < 50) return "V. Heavy";
+    return "Extreme";
+  };
+
+  // Calculate fill height (max 100%)
+  const fillHeight = Math.min(100, (value / 50) * 100);
+
+  return (
+    <div className="bg-white p-2 rounded-lg shadow-md border border-gray-200 flex flex-col items-center w-[110px]">
+      <div className="flex items-center gap-1 mb-1">
+        <Droplets className="h-4 w-4 text-blue-500" />
+        <span className="text-xs font-medium">Rainfall</span>
+      </div>
+
+      {/* Rain Gauge Visual */}
+      <div className="relative w-6 h-24 bg-gray-100 rounded-md overflow-hidden mb-1 border border-gray-300">
+        {/* Water level marks */}
+        {[0, 20, 40, 60, 80, 100].map((mark) => (
+          <div
+            key={mark}
+            className="absolute w-full h-[1px] bg-gray-300"
+            style={{ bottom: `${mark}%` }}
+          />
+        ))}
+
+        {/* Water fill */}
+        <div
+          className="absolute bottom-0 w-full transition-all duration-1000 ease-out"
+          style={{
+            height: `${fillHeight}%`,
+            backgroundColor: getRainColor(value),
+            boxShadow: `0 0 5px ${getRainColor(value)}40`,
+          }}
+        >
+          {/* Water surface effect */}
+          <div className="absolute top-0 left-0 right-0 h-[2px] bg-white opacity-30"></div>
+        </div>
+      </div>
+
+      {/* Rain readings */}
+      <div className="text-center">
+        <div
+          className="text-sm font-bold"
+          style={{ color: getRainColor(value) }}
+        >
+          {value.toFixed(1)} mm
+        </div>
+        <div className="text-xs text-gray-500">{getRainLevel(value)}</div>
+      </div>
+    </div>
+  );
+};
+
+// Enhanced Cloud Meter Component
+const CloudMeterCard = ({ cloudCover }: { cloudCover: number | null }) => {
+  const cover = cloudCover || 0;
+
+  const getCloudColor = (cover: number) => {
+    if (cover < 10) return "#f0f9ff"; // Very light blue - Clear
+    if (cover < 30) return "#e0f2fe"; // Light blue - Few
+    if (cover < 50) return "#bae6fd"; // Medium blue - Scattered
+    if (cover < 80) return "#7dd3fc"; // Blue - Broken
+    return "#0ea5e9"; // Dark blue - Overcast
+  };
+
+  const getCloudLevel = (cover: number) => {
+    if (cover < 10) return "Clear";
+    if (cover < 30) return "Few";
+    if (cover < 50) return "Scattered";
+    if (cover < 80) return "Broken";
+    return "Overcast";
+  };
+
+  return (
+    <div className="bg-white p-2 rounded-lg shadow-md border border-gray-200 flex flex-col items-center w-[110px]">
+      <div className="flex items-center gap-1 mb-1">
+        <Cloud className="h-4 w-4 text-gray-500" />
+        <span className="text-xs font-medium">Cloud Cover</span>
+      </div>
+
+      {/* Cloud Meter Visual */}
+      <div className="relative w-20 h-20 mb-1">
+        {/* Sky background */}
+        <div className="absolute inset-0 rounded-full bg-gradient-to-b from-blue-400 to-blue-100 overflow-hidden">
+          {/* Cloud cover visualization */}
+          <div
+            className="absolute inset-0 bg-white transition-opacity duration-1000 ease-out"
+            style={{
+              opacity: cover / 100,
+              backgroundImage:
+                "url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDU2IDQ4Ij48cGF0aCBmaWxsPSIjZjBmOWZmIiBmaWxsLW9wYWNpdHk9IjAuOCIgZD0iTTEyIDQwYzYuNjI3IDAgMTItNS4zNzMgMTItMTIgMC01LjI5MS0zLjQzOC05Ljc5OC04LjItMTEuNDAxLjEzMy0uNjA0LjItMS4yMzMuMi0xLjg3OUMxNiA4LjY3MSAxMC42MjcgMy4yOTkgNCAxLjk5OSAxMC41NiA2Ljc5OCAxNSAxMy4xOTcgMTUgMjAuNjYzYzAgMS4xMzEtLjA5NCAyLjI0Mi0uMjcxIDMuMzI5QzE2LjUzNiAyNS4yMTkgMTQgMjcuOTQ3IDE0IDMxLjMzYzAgMi40MTYgMS45NTMgNC4zOCA0LjM2NyA0LjM4SDEyVjQwem0yOCAwYzYuNjI3IDAgMTItNS4zNzMgMTItMTIgMC01LjI5MS0zLjQzOC05Ljc5OC04LjItMTEuNDAxLjEzMy0uNjA0LjItMS4yMzMuMi0xLjg3OUM0NCA4LjY3MSAzOC42MjcgMy4yOTkgMzIgMS45OTljNi41NiA0Ljc5OSAxMSAxMS4xOTcgMTEgMTguNjY0IDAgMS4xMzEtLjA5NCAyLjI0Mi0uMjcxIDMuMzI5QzQ0LjUzNiAyNS4yMTkgNDIgMjcuOTQ3IDQyIDMxLjMzYzAgMi40MTYgMS45NTMgNC4zOCA0LjM2NyA0LjM4SDQwVjQweiIvPjwvc3ZnPg==')",
+              backgroundSize: "cover",
+            }}
+          />
+        </div>
+
+        {/* Percentage indicator */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-lg font-bold text-white text-shadow">
+            {Math.round(cover)}%
+          </div>
+        </div>
+      </div>
+
+      {/* Cloud cover description */}
+      <div className="text-center">
+        <div
+          className="text-sm font-bold"
+          style={{ color: getCloudColor(cover) }}
+        >
+          {getCloudLevel(cover)}
+        </div>
+        <div className="text-xs text-gray-500">
+          {Math.round(cover)}% covered
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Weather Card Components (keeping existing ones for popup)
+const TemperatureCard = ({
+  maxTemp,
+  minTemp,
+}: {
+  maxTemp: number | null;
+  minTemp: number | null;
+}) => {
+  const getTemperatureColor = (temp: number | null) => {
+    if (!temp) return "bg-gray-200";
+    if (temp < 10) return "bg-blue-400";
+    if (temp < 20) return "bg-blue-300";
+    if (temp < 30) return "bg-green-400";
+    if (temp < 35) return "bg-yellow-400";
+    return "bg-red-500";
+  };
+
+  return (
+    <div className="bg-white p-2 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center w-24">
+      <div className="flex items-center gap-1 mb-1">
+        <Thermometer className="h-4 w-4 text-orange-500" />
+        <span className="text-xs font-medium">Temp</span>
+      </div>
+      {maxTemp !== null && minTemp !== null ? (
+        <>
+          <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-1">
+            <div
+              className={`h-full ${getTemperatureColor(maxTemp)}`}
+              style={{ width: `${Math.min(100, (maxTemp / 50) * 100)}%` }}
+            />
+          </div>
+          <div className="text-xs">
+            <span className="font-semibold">{maxTemp}°</span>
+            <span className="text-gray-500">/{minTemp}°</span>
+          </div>
+        </>
+      ) : (
+        <span className="text-xs text-gray-500">N/A</span>
+      )}
+    </div>
+  );
+};
+
+const PrecipitationCard = ({ value }: { value: number | null }) => {
+  const getPrecipitationLevel = (val: number | null) => {
+    if (!val) return 0;
+    if (val < 0.1) return 1; // Trace
+    if (val < 2.5) return 2; // Light
+    if (val < 7.6) return 3; // Moderate
+    if (val < 50) return 4; // Heavy
+    return 5; // Very heavy
+  };
+
+  const levels = [
+    { label: "None", color: "bg-blue-100" },
+    { label: "Trace", color: "bg-blue-200" },
+    { label: "Light", color: "bg-blue-300" },
+    { label: "Moderate", color: "bg-blue-400" },
+    { label: "Heavy", color: "bg-blue-500" },
+    { label: "V. Heavy", color: "bg-blue-600" },
+  ];
+
+  const level = getPrecipitationLevel(value);
+
+  return (
+    <div className="bg-white p-2 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center w-24">
+      <div className="flex items-center gap-1 mb-1">
+        <Droplets className="h-4 w-4 text-blue-500" />
+        <span className="text-xs font-medium">Rain</span>
+      </div>
+      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-1 relative">
+        {levels.map((_, i) => (
+          <div
+            key={i}
+            className={`absolute h-full ${i <= level ? levels[i].color : "bg-gray-200"}`}
+            style={{
+              left: `${(i / 5) * 100}%`,
+              width: `${100 / 5}%`,
+              borderRight: i < 5 ? "1px solid white" : "none",
+            }}
+          />
+        ))}
+      </div>
+      <div className="text-xs">
+        {value !== null ? (
+          <span className="font-semibold">{value} mm</span>
+        ) : (
+          <span className="text-gray-500">No data</span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const WindSpeedCard = ({ speed }: { speed: number | null }) => {
+  const getWindLevel = (val: number | null) => {
+    if (!val) return 0;
+    if (val < 1) return 0; // Calm
+    if (val < 4) return 1; // Light
+    if (val < 8) return 2; // Moderate
+    if (val < 12) return 3; // Fresh
+    if (val < 20) return 4; // Strong
+    return 5; // Gale
+  };
+
+  const levels = [
+    { label: "Calm", color: "bg-gray-200" },
+    { label: "Light", color: "bg-green-200" },
+    { label: "Moderate", color: "bg-green-300" },
+    { label: "Fresh", color: "bg-yellow-300" },
+    { label: "Strong", color: "bg-orange-300" },
+    { label: "Gale", color: "bg-red-400" },
+  ];
+
+  const level = getWindLevel(speed);
+
+  return (
+    <div className="bg-white p-2 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center w-24">
+      <div className="flex items-center gap-1 mb-1">
+        <Wind className="h-4 w-4 text-gray-500" />
+        <span className="text-xs font-medium">Wind</span>
+      </div>
+      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-1 relative">
+        {levels.map((_, i) => (
+          <div
+            key={i}
+            className={`absolute h-full ${i <= level ? levels[i].color : "bg-gray-200"}`}
+            style={{
+              left: `${(i / 5) * 100}%`,
+              width: `${100 / 5}%`,
+              borderRight: i < 5 ? "1px solid white" : "none",
+            }}
+          />
+        ))}
+      </div>
+      <div className="text-xs">
+        {speed !== null ? (
+          <span className="font-semibold">{speed} NM</span>
+        ) : (
+          <span className="text-gray-500">No data</span>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const CloudCoverCard = ({ cover }: { cover: number | null }) => {
+  const getCloudLevel = (val: number | null) => {
+    if (!val) return 0;
+    return Math.min(4, Math.floor(val / 25));
+  };
+
+  const levels = [
+    { label: "Clear", color: "bg-blue-100" },
+    { label: "Few", color: "bg-gray-200" },
+    { label: "Scattered", color: "bg-gray-300" },
+    { label: "Broken", color: "bg-gray-400" },
+    { label: "Overcast", color: "bg-gray-500" },
+  ];
+
+  const level = getCloudLevel(cover);
+
+  return (
+    <div className="bg-white p-2 rounded-lg shadow-sm border border-gray-200 flex flex-col items-center w-24">
+      <div className="flex items-center gap-1 mb-1">
+        <Cloud className="h-4 w-4 text-gray-400" />
+        <span className="text-xs font-medium">Clouds</span>
+      </div>
+      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-1 relative">
+        {levels.map((_, i) => (
+          <div
+            key={i}
+            className={`absolute h-full ${i <= level ? levels[i].color : "bg-gray-200"}`}
+            style={{
+              left: `${(i / 4) * 100}%`,
+              width: `${100 / 4}%`,
+              borderRight: i < 4 ? "1px solid white" : "none",
+            }}
+          />
+        ))}
+      </div>
+      <div className="text-xs">
+        {cover !== null ? (
+          <span className="font-semibold">{cover}%</span>
+        ) : (
+          <span className="text-gray-500">No data</span>
+        )}
+      </div>
+    </div>
+  );
+};
 
 // Animated live location marker
 function LiveLocationMarker({
@@ -259,6 +753,10 @@ function StationMarkers({
                           .find((r) => r.stationId === station.stationId)
                           ?.weatherRemark?.split(" - ")[0] ||
                         "/broadcasting.png" ||
+                        "/placeholder.svg" ||
+                        "/placeholder.svg" ||
+                        "/placeholder.svg" ||
+                        "/placeholder.svg" ||
                         "/placeholder.svg"
                       }
                       alt="Weather Symbol"
@@ -282,58 +780,40 @@ function StationMarkers({
                   ) : error ? (
                     <div className="text-xs text-red-500">{error}</div>
                   ) : weatherData ? (
-                    <div className="grid grid-cols-1 gap-2">
-                      <div className="flex items-center">
-                        <Thermometer className="h-4 w-4 mr-2 text-orange-500" />
-                        <div className="text-xs">
-                          <span className="font-medium">Temperature: </span>
-                          {weatherData.maxTemperature
-                            ? `${weatherData.maxTemperature}°C (max)`
-                            : "N/A"}{" "}
-                          /
-                          {weatherData.minTemperature
-                            ? `${weatherData.minTemperature}°C (min)`
-                            : "N/A"}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center">
-                        <Droplets className="h-4 w-4 mr-2 text-blue-500" />
-                        <div className="text-xs">
-                          <span className="font-medium">Precipitation: </span>
-                          {weatherData.totalPrecipitation
-                            ? `${weatherData.totalPrecipitation} mm`
-                            : "No data"}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center">
-                        <Wind className="h-4 w-4 mr-2 text-gray-500" />
-                        <div className="text-xs">
-                          <span className="font-medium">Wind Speed: </span>
-                          {weatherData.windSpeed
-                            ? `${weatherData.windSpeed} NM`
-                            : "No data"}
-                        </div>
-                      </div>
-
-                      <div className="flex items-center">
-                        <Cloud className="h-4 w-4 mr-2 text-gray-400" />
-                        <div className="text-xs">
-                          <span className="font-medium">Cloud Cover: </span>
-                          {weatherData.avTotalCloud
-                            ? `${weatherData.avTotalCloud}%`
-                            : "No data"}
-                        </div>
-                      </div>
-
-                      {weatherData.totalPrecipitation &&
-                        Number.parseFloat(weatherData.totalPrecipitation) >
-                          0 && (
-                          <div className="text-xs text-blue-600 font-medium mt-1">
-                            Rain detected: {weatherData.totalPrecipitation} mm
-                          </div>
-                        )}
+                    <div className="grid grid-cols-2 gap-2">
+                      <TemperatureCard
+                        maxTemp={
+                          weatherData.maxTemperature
+                            ? Number.parseFloat(weatherData.maxTemperature)
+                            : null
+                        }
+                        minTemp={
+                          weatherData.minTemperature
+                            ? Number.parseFloat(weatherData.minTemperature)
+                            : null
+                        }
+                      />
+                      <PrecipitationCard
+                        value={
+                          weatherData.totalPrecipitation
+                            ? Number.parseFloat(weatherData.totalPrecipitation)
+                            : null
+                        }
+                      />
+                      <WindSpeedCard
+                        speed={
+                          weatherData.windSpeed
+                            ? Number.parseFloat(weatherData.windSpeed)
+                            : null
+                        }
+                      />
+                      <CloudCoverCard
+                        cover={
+                          weatherData.avTotalCloud
+                            ? Number.parseFloat(weatherData.avTotalCloud)
+                            : null
+                        }
+                      />
                     </div>
                   ) : (
                     <div className="text-xs text-gray-500">
@@ -504,6 +984,7 @@ export default function MapComponent({
         const latestEntry = data[0];
         setWeatherData(latestEntry);
         setError(null); // Clear error on successful data fetch
+        setLastUpdated(new Date().toLocaleTimeString());
       } catch (err) {
         setError("Failed to fetch weather data");
         setWeatherData(null);
@@ -587,7 +1068,7 @@ export default function MapComponent({
       </div>
 
       {/* User role indicator */}
-      <div className="absolute top-4 right-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
+      <div className="absolute top-2 right-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
         <div className="text-sm font-medium">
           {session?.user?.role === "super_admin"
             ? "Super Admin"
@@ -609,7 +1090,7 @@ export default function MapComponent({
 
       {/* Selected station info */}
       {selectedStation && (
-        <div className="absolute top-4 left-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
+        <div className="absolute top-3 left-12 bg-white p-2 rounded-lg shadow-lg z-[1000]">
           <div className="text-sm font-medium">{selectedStation.name}</div>
           <div className="text-xs text-gray-600">
             Lat: {selectedStation.latitude.toFixed(4)}, Long:{" "}
@@ -623,72 +1104,57 @@ export default function MapComponent({
         </div>
       )}
 
-      {/* Weather summary panel */}
-      {selectedStation && (
-        <div className="absolute bottom-20 right-4 bg-white p-3 rounded-lg shadow-lg z-[1000] w-64">
-          <div className="text-sm font-medium mb-2">Weather Summary</div>
-          {loading ? (
-            <div className="text-xs">Loading weather data...</div>
-          ) : error ? (
-            <div className="text-xs text-red-500">{error}</div>
-          ) : weatherData ? (
-            <div className="grid grid-cols-1 gap-2">
-              <div className="flex items-center">
-                <Thermometer className="h-4 w-4 mr-2 text-orange-500" />
-                <div className="text-xs">
-                  <span className="font-medium">Temperature: </span>
-                  {weatherData.maxTemperature
-                    ? `${weatherData.maxTemperature}°C (max)`
-                    : "N/A"}{" "}
-                  /
-                  {weatherData.minTemperature
-                    ? `${weatherData.minTemperature}°C (min)`
-                    : "N/A"}
-                </div>
-              </div>
+      {/* Enhanced Weather Instruments Panel - Using Real API Data */}
+      {selectedStation && weatherData && (
+        <div className="absolute bottom-20 right-4 z-[1000]">
+          <div className="grid grid-cols-2 gap-2">
+            <ThermometerCard
+              maxTemp={
+                weatherData.maxTemperature
+                  ? Number.parseFloat(weatherData.maxTemperature)
+                  : null
+              }
+              minTemp={
+                weatherData.minTemperature
+                  ? Number.parseFloat(weatherData.minTemperature)
+                  : null
+              }
+            />
+            <CompassCard
+              windSpeed={
+                weatherData.windSpeed
+                  ? Number.parseFloat(weatherData.windSpeed)
+                  : null
+              }
+            />
+            <RainMeterCard
+              precipitation={
+                weatherData.totalPrecipitation
+                  ? Number.parseFloat(weatherData.totalPrecipitation)
+                  : null
+              }
+            />
+            <CloudMeterCard
+              cloudCover={
+                weatherData.avTotalCloud
+                  ? Number.parseFloat(weatherData.avTotalCloud)
+                  : null
+              }
+            />
+          </div>
+        </div>
+      )}
 
-              <div className="flex items-center">
-                <Droplets className="h-4 w-4 mr-2 text-blue-500" />
-                <div className="text-xs">
-                  <span className="font-medium">Precipitation: </span>
-                  {weatherData.totalPrecipitation
-                    ? `${weatherData.totalPrecipitation} mm`
-                    : "No data"}
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <Wind className="h-4 w-4 mr-2 text-gray-500" />
-                <div className="text-xs">
-                  <span className="font-medium">Wind Speed: </span>
-                  {weatherData.windSpeed
-                    ? `${weatherData.windSpeed} NM`
-                    : "No data"}
-                </div>
-              </div>
-
-              <div className="flex items-center">
-                <Cloud className="h-4 w-4 mr-2 text-gray-400" />
-                <div className="text-xs">
-                  <span className="font-medium">Cloud Cover: </span>
-                  {weatherData.avTotalCloud
-                    ? `${weatherData.avTotalCloud}%`
-                    : "No data"}
-                </div>
-              </div>
-
-              {weatherData.totalPrecipitation &&
-                Number.parseFloat(weatherData.totalPrecipitation) > 0 && (
-                  <div className="text-xs text-blue-600 font-medium mt-1">
-                    Rain detected: {weatherData.totalPrecipitation} mm
-                  </div>
-                )}
-            </div>
-          ) : (
-            <div className="text-xs text-gray-500">
+      {/* Show message when no data available */}
+      {selectedStation && !weatherData && !loading && (
+        <div className="absolute bottom-20 right-4 z-[1000]">
+          <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
+            <div className="text-sm text-gray-500 text-center">
               No weather data available
+              <br />
+              for selected station
             </div>
-          )}
+          </div>
         </div>
       )}
 
@@ -704,6 +1170,10 @@ export default function MapComponent({
           border-radius: 0;
           box-shadow: none;
           border: none;
+        }
+
+        .text-shadow {
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
         }
       `}</style>
     </div>

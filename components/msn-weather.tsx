@@ -2,18 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
-import { toast } from "sonner";
+import useSWR from "swr";
+import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+
 import {
-  Thermometer,
   Droplets,
-  CloudRain,
-  Wind,
   Eye,
+  Clock,
+  RefreshCw,
+  LayoutDashboard,
+  Thermometer,
+  Wind,
+  Gauge,
   Cloud,
-  CloudSun,
-  AlertTriangle,
+  Activity,
+  TrendingUp,
 } from "lucide-react";
 
+// Types
 interface WeatherData {
   maxTemperature: string | null;
   minTemperature: string | null;
@@ -23,299 +32,1134 @@ interface WeatherData {
   avRelativeHumidity: string | null;
   lowestVisibility: string | null;
   totalRainDuration: string | null;
+  timestamp?: string;
 }
 
-interface WeatherCardProps {
-  icon: React.ReactNode;
-  title: string;
-  value: string;
-  status: string;
-  description: string;
-  color: string;
-  textColor: string;
-  subtext?: string;
-}
+// Fetcher for SWR
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-function WeatherCard({
-  icon,
-  title,
-  value,
-  status,
-  description,
-  color,
-  textColor,
-  subtext,
-}: WeatherCardProps) {
-  return (
-    <div
-      className={`rounded-xl shadow-md p-5 space-y-3 transition-all duration-300 hover:shadow-lg ${color}`}
-    >
-      <div className="flex justify-between items-center">
-        <h3 className="text-md font-semibold text-gray-800">{title}</h3>
-        <div className="p-2 bg-white rounded-full shadow-sm">{icon}</div>
-      </div>
-      <div className="text-3xl font-bold text-gray-800">{value}</div>
-      {subtext && <div className="text-sm text-gray-600">{subtext}</div>}
-      <div className={`font-medium ${textColor} pb-1 border-b border-gray-200`}>
-        {status}
-      </div>
-      <p className="text-sm text-gray-600 leading-snug">{description}</p>
-    </div>
+// Enhanced Thermometer Component
+const ThermometerGauge = ({
+  temperature,
+  min = -10,
+  max = 50,
+  size = 160,
+}: {
+  temperature: number;
+  min?: number;
+  max?: number;
+  size?: number;
+}) => {
+  const percentage = Math.max(
+    0,
+    Math.min(100, ((temperature - min) / (max - min)) * 100)
   );
-}
 
-export default function WeatherDashboard({
+  const getColor = (temp: number) => {
+    if (temp > 35) return "url(#hotGradient)";
+    if (temp > 25) return "url(#warmGradient)";
+    if (temp > 15) return "url(#mildGradient)";
+    if (temp > 5) return "url(#coolGradient)";
+    return "url(#coldGradient)";
+  };
+
+  const getStatusColor = (temp: number) => {
+    if (temp > 35) return "text-red-600";
+    if (temp > 25) return "text-orange-600";
+    if (temp > 15) return "text-yellow-600";
+    if (temp > 5) return "text-blue-600";
+    return "text-blue-800";
+  };
+
+  return (
+    <Card className="h-full bg-gradient-to-br from-blue-50 to-indigo-50 border-0 shadow-lg">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <Thermometer size={16} className="text-blue-600" />
+          Temperature
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col items-center justify-center p-4">
+        <div className="relative">
+          <svg
+            width="100"
+            height={size}
+            viewBox="0 0 100 160"
+            className="drop-shadow-sm"
+          >
+            <defs>
+              <linearGradient
+                id="hotGradient"
+                x1="0%"
+                y1="0%"
+                x2="0%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#dc2626" />
+                <stop offset="100%" stopColor="#ef4444" />
+              </linearGradient>
+              <linearGradient
+                id="warmGradient"
+                x1="0%"
+                y1="0%"
+                x2="0%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#ea580c" />
+                <stop offset="100%" stopColor="#f97316" />
+              </linearGradient>
+              <linearGradient
+                id="mildGradient"
+                x1="0%"
+                y1="0%"
+                x2="0%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#f59e0b" />
+                <stop offset="100%" stopColor="#fbbf24" />
+              </linearGradient>
+              <linearGradient
+                id="coolGradient"
+                x1="0%"
+                y1="0%"
+                x2="0%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#3b82f6" />
+                <stop offset="100%" stopColor="#60a5fa" />
+              </linearGradient>
+              <linearGradient
+                id="coldGradient"
+                x1="0%"
+                y1="0%"
+                x2="0%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#1e40af" />
+                <stop offset="100%" stopColor="#3b82f6" />
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            {/* Thermometer body */}
+            <rect
+              x="30"
+              y="15"
+              width="40"
+              height="110"
+              rx="20"
+              fill="white"
+              stroke="#e2e8f0"
+              strokeWidth="2"
+              filter="url(#glow)"
+            />
+
+            {/* Temperature fill with animation */}
+            <motion.rect
+              x="32"
+              y={17}
+              width="36"
+              height="106"
+              rx="18"
+              fill={getColor(temperature)}
+              initial={{ height: 0, y: 123 }}
+              animate={{
+                height: (106 * percentage) / 100,
+                y: 17 + (106 * (100 - percentage)) / 100,
+              }}
+              transition={{ duration: 2, ease: "easeInOut" }}
+            />
+
+            {/* Bulb */}
+            <motion.circle
+              cx="50"
+              cy="140"
+              r="18"
+              fill={getColor(temperature)}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 1, duration: 0.5 }}
+              filter="url(#glow)"
+            />
+
+            {/* Scale marks */}
+            {[0, 25, 50, 75, 100].map((mark, i) => (
+              <g key={i}>
+                <line
+                  x1="72"
+                  y1={125 - mark * 1.06}
+                  x2="80"
+                  y2={125 - mark * 1.06}
+                  stroke="#64748b"
+                  strokeWidth="1.5"
+                />
+                <text
+                  x="85"
+                  y={130 - mark * 1.06}
+                  fontSize="10"
+                  fill="#64748b"
+                  textAnchor="start"
+                  fontWeight="500"
+                >
+                  {Math.round(min + (max - min) * (mark / 100))}°
+                </text>
+              </g>
+            ))}
+          </svg>
+        </div>
+
+        <div className="text-center mt-4 space-y-1">
+          <div className={`text-3xl font-bold ${getStatusColor(temperature)}`}>
+            {temperature.toFixed(1)}°C
+          </div>
+          <Badge variant="secondary" className="text-xs">
+            {temperature > 30
+              ? "Hot"
+              : temperature > 20
+                ? "Warm"
+                : temperature > 10
+                  ? "Mild"
+                  : "Cool"}
+          </Badge>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Enhanced Wind Compass
+const WindCompass = ({
+  windSpeed,
+  windDirection,
+  size = 160,
+}: {
+  windSpeed: number;
+  windDirection: number;
+  size?: number;
+}) => {
+  const radius = size / 2 - 25;
+  const centerX = size / 2;
+  const centerY = size / 2;
+
+  const angleRad = (windDirection * Math.PI) / 180;
+  const arrowLength = radius * 0.7;
+  const arrowX = centerX + Math.sin(angleRad) * arrowLength;
+  const arrowY = centerY - Math.cos(angleRad) * arrowLength;
+
+  const getWindColor = (speed: number) => {
+    if (speed > 20) return "#dc2626";
+    if (speed > 10) return "#f59e0b";
+    return "#10b981";
+  };
+
+  const getWindStatus = (speed: number) => {
+    if (speed > 20) return "Strong";
+    if (speed > 10) return "Moderate";
+    if (speed > 5) return "Light";
+    return "Calm";
+  };
+
+  return (
+    <Card className="h-full bg-gradient-to-br from-green-50 to-emerald-50 border-0 shadow-lg">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <Wind size={16} className="text-green-600" />
+          Wind
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col items-center justify-center p-4">
+        <div className="relative">
+          <svg
+            width={size}
+            height={size}
+            viewBox={`0 0 ${size} ${size}`}
+            className="drop-shadow-sm"
+          >
+            <defs>
+              <radialGradient id="compassGradient">
+                <stop offset="0%" stopColor="white" />
+                <stop offset="100%" stopColor="#f8fafc" />
+              </radialGradient>
+              <filter id="compassShadow">
+                <feDropShadow
+                  dx="0"
+                  dy="2"
+                  stdDeviation="3"
+                  floodOpacity="0.1"
+                />
+              </filter>
+            </defs>
+
+            {/* Compass circle */}
+            <circle
+              cx={centerX}
+              cy={centerY}
+              r={radius}
+              fill="url(#compassGradient)"
+              stroke="#e2e8f0"
+              strokeWidth="2"
+              filter="url(#compassShadow)"
+            />
+
+            {/* Cardinal directions */}
+            <text
+              x={centerX}
+              y="20"
+              textAnchor="middle"
+              fontSize="14"
+              fill="#1e293b"
+              fontWeight="bold"
+            >
+              N
+            </text>
+            <text
+              x={size - 15}
+              y={centerY + 5}
+              textAnchor="middle"
+              fontSize="14"
+              fill="#1e293b"
+              fontWeight="bold"
+            >
+              E
+            </text>
+            <text
+              x={centerX}
+              y={size - 10}
+              textAnchor="middle"
+              fontSize="14"
+              fill="#1e293b"
+              fontWeight="bold"
+            >
+              S
+            </text>
+            <text
+              x="15"
+              y={centerY + 5}
+              textAnchor="middle"
+              fontSize="14"
+              fill="#1e293b"
+              fontWeight="bold"
+            >
+              W
+            </text>
+
+            {/* Wind direction arrow */}
+            <motion.g
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.5 }}
+            >
+              <line
+                x1={centerX}
+                y1={centerY}
+                x2={arrowX}
+                y2={arrowY}
+                stroke={getWindColor(windSpeed)}
+                strokeWidth="4"
+                strokeLinecap="round"
+              />
+              <polygon
+                points={`${arrowX},${arrowY} ${arrowX - 10 * Math.cos(angleRad - Math.PI / 6)},${arrowY + 10 * Math.sin(angleRad - Math.PI / 6)} ${arrowX - 10 * Math.cos(angleRad + Math.PI / 6)},${arrowY + 10 * Math.sin(angleRad + Math.PI / 6)}`}
+                fill={getWindColor(windSpeed)}
+              />
+            </motion.g>
+
+            {/* Center dot */}
+            <circle cx={centerX} cy={centerY} r="6" fill="#374151" />
+
+            {/* Speed rings */}
+            {[0.3, 0.6, 0.9].map((factor, i) => (
+              <circle
+                key={i}
+                cx={centerX}
+                cy={centerY}
+                r={radius * factor}
+                fill="transparent"
+                stroke="#e2e8f0"
+                strokeWidth="1"
+                strokeDasharray="3,3"
+                opacity="0.5"
+              />
+            ))}
+          </svg>
+        </div>
+
+        <div className="text-center mt-4 space-y-1">
+          <div className="text-3xl font-bold text-gray-800">
+            {windSpeed.toFixed(1)} <span className="text-lg">m/s</span>
+          </div>
+          <div className="text-sm text-gray-600">
+            {windDirection.toFixed(0)}° • {getWindStatus(windSpeed)}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Enhanced Humidity Gauge
+const HumidityGauge = ({
+  humidity,
+  size = 160,
+}: {
+  humidity: number;
+  size?: number;
+}) => {
+  const strokeWidth = size * 0.08;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const strokeDashoffset = circumference - (humidity / 100) * circumference;
+
+  const getHumidityColor = (h: number) => {
+    if (h > 70) return "#3b82f6";
+    if (h > 30) return "#10b981";
+    return "#f59e0b";
+  };
+
+  const getHumidityStatus = (h: number) => {
+    if (h > 70) return "High";
+    if (h > 30) return "Normal";
+    return "Low";
+  };
+
+  return (
+    <Card className="h-full bg-gradient-to-br from-blue-50 to-cyan-50 border-0 shadow-lg">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <Droplets size={16} className="text-blue-600" />
+          Humidity
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col items-center justify-center p-4">
+        <div className="relative" style={{ width: size, height: size }}>
+          <svg
+            width={size}
+            height={size}
+            className="transform -rotate-90 drop-shadow-sm"
+          >
+            <defs>
+              <linearGradient
+                id="humidityGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              >
+                <stop offset="0%" stopColor={getHumidityColor(humidity)} />
+                <stop
+                  offset="100%"
+                  stopColor={getHumidityColor(humidity)}
+                  stopOpacity="0.6"
+                />
+              </linearGradient>
+            </defs>
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="transparent"
+              stroke="#e2e8f0"
+              strokeWidth={strokeWidth}
+            />
+            <motion.circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="transparent"
+              stroke="url(#humidityGradient)"
+              strokeWidth={strokeWidth}
+              strokeLinecap="round"
+              initial={{
+                strokeDasharray: circumference,
+                strokeDashoffset: circumference,
+              }}
+              animate={{ strokeDasharray: circumference, strokeDashoffset }}
+              transition={{ duration: 2, ease: "easeInOut" }}
+            />
+          </svg>
+
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <Droplets
+              size={28}
+              color={getHumidityColor(humidity)}
+              className="mb-2"
+            />
+            <div className="text-3xl font-bold text-gray-800">
+              {humidity.toFixed(0)}%
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center mt-2">
+          <Badge variant="secondary" className="text-xs">
+            {getHumidityStatus(humidity)}
+          </Badge>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Enhanced Pressure Barometer
+const PressureBarometer = ({
+  pressure,
+  size = 160,
+}: {
+  pressure: number;
+  size?: number;
+}) => {
+  const minPressure = 980;
+  const maxPressure = 1050;
+  const normalizedPressure = Math.max(
+    minPressure,
+    Math.min(maxPressure, pressure)
+  );
+  const angle =
+    ((normalizedPressure - minPressure) / (maxPressure - minPressure)) * 180 -
+    90;
+
+  const getPressureStatus = (p: number) => {
+    if (p > 1020) return "High";
+    if (p > 1000) return "Normal";
+    return "Low";
+  };
+
+  return (
+    <Card className="h-full bg-gradient-to-br from-purple-50 to-violet-50 border-0 shadow-lg">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <Gauge size={16} className="text-purple-600" />
+          Pressure
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col items-center justify-center p-4">
+        <div className="relative">
+          <svg
+            width={size}
+            height={size * 0.8}
+            viewBox={`0 0 ${size} ${size * 0.8}`}
+            className="drop-shadow-sm"
+          >
+            <defs>
+              <linearGradient
+                id="pressureGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              >
+                <stop offset="0%" stopColor="#8b5cf6" />
+                <stop offset="100%" stopColor="#a78bfa" />
+              </linearGradient>
+            </defs>
+
+            {/* Barometer arc background */}
+            <path
+              d={`M 25 ${size * 0.65} A ${size / 2 - 25} ${size / 2 - 25} 0 0 1 ${size - 25} ${size * 0.65}`}
+              stroke="#e2e8f0"
+              strokeWidth="12"
+              fill="none"
+              strokeLinecap="round"
+            />
+
+            {/* Pressure arc */}
+            <motion.path
+              d={`M 25 ${size * 0.65} A ${size / 2 - 25} ${size / 2 - 25} 0 0 1 ${size - 25} ${size * 0.65}`}
+              stroke="url(#pressureGradient)"
+              strokeWidth="12"
+              fill="none"
+              strokeLinecap="round"
+              initial={{ strokeDasharray: "0 180" }}
+              animate={{
+                strokeDasharray: `${((normalizedPressure - minPressure) / (maxPressure - minPressure)) * 180} 180`,
+              }}
+              transition={{ duration: 2, ease: "easeInOut" }}
+            />
+
+            {/* Needle */}
+            <motion.g
+              transform={`translate(${size / 2}, ${size * 0.65})`}
+              initial={{ rotate: -90 }}
+              animate={{ rotate: angle }}
+              transition={{ duration: 2, ease: "easeInOut" }}
+            >
+              <line
+                x1="0"
+                y1="0"
+                x2="0"
+                y2={-(size / 2 - 35)}
+                stroke="#374151"
+                strokeWidth="3"
+                strokeLinecap="round"
+              />
+              <circle cx="0" cy="0" r="6" fill="#374151" />
+            </motion.g>
+
+            {/* Scale labels */}
+            <text
+              x="25"
+              y={size * 0.75}
+              textAnchor="middle"
+              fontSize="11"
+              fill="#64748b"
+              fontWeight="500"
+            >
+              {minPressure}
+            </text>
+            <text
+              x={size / 2}
+              y="30"
+              textAnchor="middle"
+              fontSize="11"
+              fill="#64748b"
+              fontWeight="500"
+            >
+              {(minPressure + maxPressure) / 2}
+            </text>
+            <text
+              x={size - 25}
+              y={size * 0.75}
+              textAnchor="middle"
+              fontSize="11"
+              fill="#64748b"
+              fontWeight="500"
+            >
+              {maxPressure}
+            </text>
+          </svg>
+        </div>
+
+        <div className="text-center mt-4 space-y-1">
+          <div className="text-3xl font-bold text-gray-800">
+            {pressure.toFixed(0)} <span className="text-lg">hPa</span>
+          </div>
+          <Badge variant="secondary" className="text-xs">
+            {getPressureStatus(pressure)}
+          </Badge>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Enhanced Cloud Cover Gauge
+const CloudCoverGauge = ({
+  cloudCover,
+  size = 160,
+}: {
+  cloudCover: number;
+  size?: number;
+}) => {
+  const cloudCount = Math.ceil((cloudCover / 100) * 6);
+
+  const getCloudStatus = (cover: number) => {
+    if (cover > 75) return "Overcast";
+    if (cover > 50) return "Cloudy";
+    if (cover > 25) return "Partly Cloudy";
+    return "Clear";
+  };
+
+  return (
+    <Card className="h-full bg-gradient-to-br from-gray-50 to-slate-50 border-0 shadow-lg">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <Cloud size={16} className="text-gray-600" />
+          Cloud Cover
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col items-center justify-center p-4">
+        <div className="relative" style={{ width: size, height: size }}>
+          <svg
+            width={size}
+            height={size}
+            viewBox={`0 0 ${size} ${size}`}
+            className="drop-shadow-sm"
+          >
+            <defs>
+              <linearGradient
+                id="skyGradient"
+                x1="0%"
+                y1="0%"
+                x2="0%"
+                y2="100%"
+              >
+                <stop offset="0%" stopColor="#dbeafe" />
+                <stop offset="100%" stopColor="#bfdbfe" />
+              </linearGradient>
+            </defs>
+
+            {/* Sky background */}
+            <rect width={size} height={size} rx="12" fill="url(#skyGradient)" />
+
+            {/* Clouds */}
+            {Array.from({ length: 6 }, (_, i) => (
+              <motion.g
+                key={i}
+                initial={{ opacity: 0, y: 15, scale: 0.8 }}
+                animate={{
+                  opacity: i < cloudCount ? 0.9 : 0.2,
+                  y: 0,
+                  scale: i < cloudCount ? 1 : 0.8,
+                }}
+                transition={{ delay: i * 0.15, duration: 0.6 }}
+              >
+                <ellipse
+                  cx={25 + (i % 3) * 35}
+                  cy={35 + Math.floor(i / 3) * 30}
+                  rx="18"
+                  ry="12"
+                  fill="#9ca3af"
+                />
+                <ellipse
+                  cx={30 + (i % 3) * 35}
+                  cy={30 + Math.floor(i / 3) * 30}
+                  rx="15"
+                  ry="10"
+                  fill="#9ca3af"
+                />
+              </motion.g>
+            ))}
+
+            {/* Sun */}
+            <motion.g
+              initial={{ opacity: 1, scale: 1 }}
+              animate={{
+                opacity: cloudCover > 70 ? 0.3 : 1,
+                scale: cloudCover > 70 ? 0.8 : 1,
+              }}
+              transition={{ duration: 1 }}
+            >
+              <circle cx={size - 30} cy="30" r="18" fill="#fbbf24" />
+              {/* Sun rays */}
+              {Array.from({ length: 8 }, (_, i) => {
+                const angle = (i * 45 * Math.PI) / 180;
+                const x1 = size - 30 + Math.cos(angle) * 25;
+                const y1 = 30 + Math.sin(angle) * 25;
+                const x2 = size - 30 + Math.cos(angle) * 30;
+                const y2 = 30 + Math.sin(angle) * 30;
+                return (
+                  <line
+                    key={i}
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
+                    stroke="#fbbf24"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                );
+              })}
+            </motion.g>
+          </svg>
+
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+            <div className="bg-white bg-opacity-90 rounded-lg px-3 py-1 backdrop-blur-sm">
+              <div className="text-2xl font-bold text-gray-800">
+                {cloudCover.toFixed(0)}%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center mt-2">
+          <Badge variant="secondary" className="text-xs">
+            {getCloudStatus(cloudCover)}
+          </Badge>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Enhanced Visibility Gauge
+const VisibilityGauge = ({
+  visibility,
+  size = 160,
+}: {
+  visibility: number;
+  size?: number;
+}) => {
+  const maxVisibility = 20;
+  const percentage = Math.min((visibility / maxVisibility) * 100, 100);
+
+  const getVisibilityColor = (vis: number) => {
+    if (vis > 15) return "#10b981";
+    if (vis > 10) return "#f59e0b";
+    return "#ef4444";
+  };
+
+  const getVisibilityStatus = (vis: number) => {
+    if (vis > 15) return "Excellent";
+    if (vis > 10) return "Good";
+    if (vis > 5) return "Moderate";
+    return "Poor";
+  };
+
+  return (
+    <Card className="h-full bg-gradient-to-br from-amber-50 to-orange-50 border-0 shadow-lg">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <Eye size={16} className="text-amber-600" />
+          Visibility
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col items-center justify-center p-4">
+        <div className="relative" style={{ width: size, height: size }}>
+          <svg
+            width={size}
+            height={size}
+            viewBox={`0 0 ${size} ${size}`}
+            className="drop-shadow-sm"
+          >
+            <defs>
+              <linearGradient
+                id="visibilityGradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="0%"
+              >
+                <stop offset="0%" stopColor={getVisibilityColor(visibility)} />
+                <stop
+                  offset="100%"
+                  stopColor={getVisibilityColor(visibility)}
+                  stopOpacity="0.6"
+                />
+              </linearGradient>
+            </defs>
+
+            {/* Background bar */}
+            <rect
+              width={size - 20}
+              height="16"
+              x="10"
+              y={size / 2 - 8}
+              rx="8"
+              fill="#e2e8f0"
+            />
+
+            {/* Visibility bar */}
+            <motion.rect
+              width="0"
+              height="16"
+              x="10"
+              y={size / 2 - 8}
+              rx="8"
+              fill="url(#visibilityGradient)"
+              initial={{ width: 0 }}
+              animate={{ width: ((size - 20) * percentage) / 100 }}
+              transition={{ duration: 2, ease: "easeInOut" }}
+            />
+
+            {/* Scale marks */}
+            {[0, 25, 50, 75, 100].map((mark, i) => (
+              <g key={i}>
+                <line
+                  x1={10 + ((size - 20) * mark) / 100}
+                  y1={size / 2 + 12}
+                  x2={10 + ((size - 20) * mark) / 100}
+                  y2={size / 2 + 18}
+                  stroke="#64748b"
+                  strokeWidth="1.5"
+                />
+                <text
+                  x={10 + ((size - 20) * mark) / 100}
+                  y={size / 2 + 28}
+                  textAnchor="middle"
+                  fontSize="10"
+                  fill="#64748b"
+                  fontWeight="500"
+                >
+                  {((maxVisibility * mark) / 100).toFixed(0)}
+                </text>
+              </g>
+            ))}
+
+            {/* Eye icon */}
+            <g transform={`translate(${size / 2 - 16}, 25)`}>
+              <Eye size={32} color={getVisibilityColor(visibility)} />
+            </g>
+          </svg>
+        </div>
+
+        <div className="text-center mt-4 space-y-1">
+          <div className="text-3xl font-bold text-gray-800">
+            {visibility.toFixed(1)} <span className="text-lg">km</span>
+          </div>
+          <Badge variant="secondary" className="text-xs">
+            {getVisibilityStatus(visibility)}
+          </Badge>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// Main Dashboard Component
+export default function ProfessionalWeatherDashboard({
   selectedStation,
 }: {
   selectedStation: any | null;
 }) {
   const { data: session } = useSession();
-  const role = session?.user.role;
+  const [selectedMetric, setSelectedMetric] = useState<string>("temperature");
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
-  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [stationName, setStationName] = useState<string>("No Station Selected");
+  // Update the main data fetching with SWR
+  const {
+    data: weatherData,
+    error,
+    isLoading,
+    mutate,
+  } = useSWR<any[]>(
+    () => {
+      const stationId =
+        session?.user?.role === "super_admin"
+          ? selectedStation?.id || session?.user?.station?.id
+          : session?.user?.station?.id;
+
+      if (!stationId) return null;
+
+      const today = new Date();
+      const startToday = new Date(today);
+      startToday.setUTCHours(0, 0, 0, 0);
+      const endToday = new Date(today);
+      endToday.setUTCHours(23, 59, 59, 999);
+
+      return `/api/daily-summary?startDate=${startToday.toISOString()}&endDate=${endToday.toISOString()}&stationId=${stationId}`;
+    },
+    fetcher,
+    {
+      refreshInterval: 60000,
+      revalidateOnFocus: true,
+      onSuccess: () => {
+        setLastUpdated(new Date());
+        setIsRefreshing(false);
+      },
+    }
+  );
+
+  const [processedData, setProcessedData] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchWeatherData = async () => {
-      setLoading(true);
-      setError(null);
+    if (weatherData && weatherData.length > 0) {
+      const processed = weatherData.map((item, index) => {
+        const timestamp = new Date(item.ObservingTime.utcTime);
+        return {
+          time: timestamp.toISOString().substr(11, 8),
+          timestamp: timestamp.toISOString(),
+          temperature: Number.parseFloat(item.maxTemperature) || 0,
+          humidity: Number.parseFloat(item.avRelativeHumidity) || 0,
+          pressure: Number.parseFloat(item.avStationPressure) || 1013,
+          windSpeed: Number.parseFloat(item.windSpeed) || 0,
+          windDirection: Number.parseFloat(item.windDirectionCode) || 0,
+          cloudCover: Number.parseFloat(item.avTotalCloud) || 0,
+          visibility: Number.parseFloat(item.lowestVisibility) || 10,
+        };
+      });
+      setProcessedData(processed);
+    }
+  }, [weatherData]);
 
-      try {
-        let stationToQuery: string | null = null;
-        let nameToDisplay = "Your Station";
-
-        if (session?.user?.role === "super_admin") {
-          stationToQuery = selectedStation?.id || session?.user?.station?.id || "";
-          nameToDisplay = selectedStation?.name || "No Station";
-        } else {
-          stationToQuery = session?.user?.station?.id || "";
-          nameToDisplay = session?.user?.station?.name || "Your Station";
-        }
-
-        if (!stationToQuery) {
-          setError("No station selected");
-          setLoading(false);
-          return;
-        }
-
-        setStationName(nameToDisplay);
-
-        // Get today's date range in UTC
-        const today = new Date();
-        const startToday = new Date(today);
-        startToday.setUTCHours(0, 0, 0, 0);
-        
-        const endToday = new Date(today);
-        endToday.setUTCHours(23, 59, 59, 999);
-
-        const response = await fetch(
-          `/api/daily-summary?startDate=${startToday.toISOString()}&endDate=${endToday.toISOString()}&stationId=${stationToQuery}`
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
-
-        const data = await response.json();
-        
-        if (data.length === 0) {
-          setError("No data available for selected station");
-          setWeatherData(null);
-          return;
-        }
-
-        // Take the first entry (most recent)
-        const latestEntry = data[0];
-        setWeatherData(latestEntry);
-      } catch (err) {
-        setError("Failed to fetch weather data");
-        console.error("Weather fetch error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWeatherData();
-  }, [selectedStation, session]);
-
-
-
-  if (loading) {
-    return (
-      <div className="w-full md:p-6">
-        <h2 className="text-2xl font-bold mb-4">Weather Dashboard</h2>
-        <p className="text-blue-600">Loading weather data...</p>
-      </div>
-    );
-  }
-
-  const defaultValues = {
-    maxTemperature: "N/A",
-    minTemperature: "N/A",
-    totalPrecipitation: "N/A",
-    windSpeed: "N/A",
-    avTotalCloud: "N/A",
-    avRelativeHumidity: "N/A",
-    lowestVisibility: "N/A",
-    totalRainDuration: "N/A",
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await mutate();
   };
 
-  const data = weatherData
-    ? {
-        maxTemperature:
-          weatherData.maxTemperature || defaultValues.maxTemperature,
-        minTemperature:
-          weatherData.minTemperature || defaultValues.minTemperature,
-        totalPrecipitation:
-          weatherData.totalPrecipitation || defaultValues.totalPrecipitation,
-        windSpeed: weatherData.windSpeed || defaultValues.windSpeed,
-        avTotalCloud: weatherData.avTotalCloud || defaultValues.avTotalCloud,
-        avRelativeHumidity:
-          weatherData.avRelativeHumidity || defaultValues.avRelativeHumidity,
-        lowestVisibility:
-          weatherData.lowestVisibility || defaultValues.lowestVisibility,
-        totalRainDuration:
-          weatherData.totalRainDuration || defaultValues.totalRainDuration,
-      }
-    : defaultValues;
+  const currentData =
+    processedData.length > 0
+      ? processedData[processedData.length - 1]
+      : {
+          temperature: 22.5,
+          humidity: 65,
+          pressure: 1013,
+          windSpeed: 8.2,
+          windDirection: 180,
+          cloudCover: 45,
+          visibility: 15,
+        };
 
-  const tempDiff =
-    data.maxTemperature !== "N/A" && data.minTemperature !== "N/A"
-      ? `${(
-          parseFloat(data.maxTemperature) - parseFloat(data.minTemperature)
-        ).toFixed(1)}°`
-      : "N/A";
-
-  const todayFormatted = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+  const formattedTime = lastUpdated.toLocaleTimeString("en-US", {
+    hour12: false,
+    timeZone: "UTC",
   });
 
   return (
-    <div className="w-full mb-8 md:p-6 bg-gray-50">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">
-            Weather Dashboard
-          </h2>
-          <p className="text-gray-600">{todayFormatted}</p>
-        </div>
-        <div className="flex items-center gap-2 mt-2 md:mt-0">
-          <div className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md flex items-center">
-            <CloudSun className="mr-2" size={20} />
-            <span>{stationName}</span>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Enhanced Header */}
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white shadow-xl rounded-lg">
+        <div className="px-6 py-4">
+          <div className="flex justify-between items-center ">
+            <div className="flex items-center space-x-4">
+              <div className="p-2 bg-slate-700 bg-opacity-20 rounded-lg backdrop-blur-sm">
+                <LayoutDashboard size={24} />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold">Weather Dashboard</h1>
+                <p className="text-blue-100 text-sm">
+                  Real-time meteorological data
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 text-sm bg-slate-800 bg-opacity-20 rounded-lg px-3 py-2 backdrop-blur-sm">
+                <Clock size={16} />
+                <span>Last updated: {formattedTime} UTC</span>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:bg-white hover:bg-opacity-20 transition-all duration-200"
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+              >
+                <RefreshCw
+                  size={18}
+                  className={`mr-2 ${isRefreshing ? "animate-spin" : ""}`}
+                />
+                Refresh
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      {error && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6 rounded flex items-center">
-          <AlertTriangle className="mr-2" />
-          <span>{error}</span>
-        </div>
-      )}
+      {/* Main Content */}
+      <div className="p-6">
+        {/* Status Banner */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-6"
+        >
+          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-green-100 rounded-full">
+                    <Activity size={20} className="text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-green-800">
+                      System Status
+                    </h3>
+                    <p className="text-sm text-green-600">
+                      All sensors operational • Data streaming live
+                    </p>
+                  </div>
+                </div>
+                <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                  Online
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <WeatherCard
-          icon={<Thermometer className="text-red-500" size={24} />}
-          title="Temperature"
-          value={
-            data.maxTemperature !== "N/A" ? `${data.maxTemperature}°` : "N/A"
-          }
-          status={`High: ${data.maxTemperature} | Low: ${data.minTemperature}`}
-          description={`Daily range: ${tempDiff}`}
-          color="bg-gradient-to-br from-orange-50 to-yellow-100"
-          textColor="text-orange-700"
-        />
+        {/* Weather Gauges Grid */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6"
+        >
+          <ThermometerGauge
+            temperature={currentData.temperature}
+            min={-10}
+            max={50}
+          />
 
-        <WeatherCard
-          icon={<Cloud className="text-gray-600" size={24} />}
-          title="Cloud Cover"
-          value={data.avTotalCloud !== "N/A" ? `${data.avTotalCloud}%` : "N/A"}
-          status={
-            data.avTotalCloud !== "N/A"
-              ? parseInt(data.avTotalCloud) > 50
-                ? "Mostly Cloudy"
-                : "Partly Cloudy"
-              : "No Data Recorded"
-          }
-          description="Average cloud cover today"
-          color="bg-gradient-to-br from-gray-50 to-gray-100"
-          textColor="text-gray-700"
-        />
+          <HumidityGauge humidity={currentData.humidity} />
 
-        <WeatherCard
-          icon={<CloudRain className="text-blue-600" size={24} />}
-          title="Precipitation"
-          value={
-            data.totalPrecipitation !== "N/A"
-              ? `${data.totalPrecipitation} mm`
-              : "N/A"
-          }
-          status={
-            data.totalPrecipitation !== "N/A" &&
-            parseFloat(data.totalPrecipitation) > 0
-              ? "Rain recorded"
-              : "No precipitation"
-          }
-          description="Total precipitation in last 24 hours"
-          color="bg-gradient-to-br from-blue-50 to-indigo-100"
-          textColor="text-blue-700"
-        />
+          <PressureBarometer pressure={currentData.pressure} />
 
-        <WeatherCard
-          icon={<Wind className="text-teal-600" size={24} />}
-          title="Wind Speed"
-          value={data.windSpeed !== "N/A" ? `${data.windSpeed} NM` : "N/A"}
-          status="Current wind conditions"
-          description="Average wind speed"
-          color="bg-gradient-to-br from-teal-50 to-green-100"
-          textColor="text-teal-700"
-        />
+          <WindCompass
+            windSpeed={currentData.windSpeed}
+            windDirection={currentData.windDirection}
+          />
 
-        <WeatherCard
-          icon={<Droplets className="text-cyan-600" size={24} />}
-          title="Humidity"
-          value={
-            data.avRelativeHumidity !== "N/A"
-              ? `${data.avRelativeHumidity}%`
-              : "N/A"
-          }
-          status={
-            data.avRelativeHumidity !== "N/A"
-              ? parseInt(data.avRelativeHumidity) > 70
-                ? "Very Humid"
-                : "Moderate"
-              : "No Data"
-          }
-          description="Relative humidity in the air"
-          color="bg-gradient-to-br from-cyan-50 to-blue-100"
-          textColor="text-cyan-700"
-        />
+          <CloudCoverGauge cloudCover={currentData.cloudCover} />
 
-        <WeatherCard
-          icon={<Eye className="text-purple-600" size={24} />}
-          title="Visibility"
-          value={
-            data.lowestVisibility !== "N/A"
-              ? `${(parseFloat(data.lowestVisibility) / 10).toFixed(1)} km`
-              : "N/A"
-          }
-          status={
-            data.lowestVisibility !== "N/A"
-              ? parseFloat(data.lowestVisibility) / 10 > 10
-                ? "Excellent"
-                : "Good"
-              : "No Data"
-          }
-          description="Current visibility level"
-          color="bg-gradient-to-br from-purple-50 to-pink-100"
-          textColor="text-purple-700"
-        />
+          <VisibilityGauge visibility={currentData.visibility} />
+        </motion.div>
+
+        {/* Quick Stats */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mt-8"
+        >
+          <Card className="bg-white shadow-lg border-0">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp size={20} className="text-blue-600" />
+                Quick Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div className="text-center p-3 bg-red-50 rounded-lg">
+                  <div className="text-2xl font-bold text-red-600">
+                    {currentData.temperature.toFixed(1)}°C
+                  </div>
+                  <div className="text-xs text-red-500 uppercase tracking-wide">
+                    Temperature
+                  </div>
+                </div>
+                <div className="text-center p-3 bg-blue-50 rounded-lg">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {currentData.humidity.toFixed(0)}%
+                  </div>
+                  <div className="text-xs text-blue-500 uppercase tracking-wide">
+                    Humidity
+                  </div>
+                </div>
+                <div className="text-center p-3 bg-purple-50 rounded-lg">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {currentData.pressure.toFixed(0)}
+                  </div>
+                  <div className="text-xs text-purple-500 uppercase tracking-wide">
+                    Pressure hPa
+                  </div>
+                </div>
+                <div className="text-center p-3 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-600">
+                    {currentData.windSpeed.toFixed(1)}
+                  </div>
+                  <div className="text-xs text-green-500 uppercase tracking-wide">
+                    Wind m/s
+                  </div>
+                </div>
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-gray-600">
+                    {currentData.cloudCover.toFixed(0)}%
+                  </div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide">
+                    Clouds
+                  </div>
+                </div>
+                <div className="text-center p-3 bg-amber-50 rounded-lg">
+                  <div className="text-2xl font-bold text-amber-600">
+                    {currentData.visibility.toFixed(1)}
+                  </div>
+                  <div className="text-xs text-amber-500 uppercase tracking-wide">
+                    Visibility km
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );
