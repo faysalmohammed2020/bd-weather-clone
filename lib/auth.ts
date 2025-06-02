@@ -9,7 +9,7 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  trustedOrigins: ["http://localhost:7999"],
+  trustedOrigins: ["http://localhost:7999", "http://localhost:3000"],
   user: {
     modelName: "users",
     additionalFields: {
@@ -42,7 +42,7 @@ export const auth = betterAuth({
       enabled: false,
     },
     modelName: "sessions",
-    expiresIn: 60 * 60 * 24, // 1 day
+    expiresIn: 60 * 15, // 15 minutes
   },
   account: {
     modelName: "accounts",
