@@ -22,19 +22,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-// Types
-interface WeatherData {
-  maxTemperature: string | null;
-  minTemperature: string | null;
-  totalPrecipitation: string | null;
-  windSpeed: string | null;
-  avTotalCloud: string | null;
-  avRelativeHumidity: string | null;
-  lowestVisibility: string | null;
-  totalRainDuration: string | null;
-  timestamp?: string;
-}
-
 // Fetcher for SWR
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -909,15 +896,13 @@ export default function ProfessionalWeatherDashboard({
   selectedStation: any | null;
 }) {
   const { data: session } = useSession();
-  const [selectedMetric, setSelectedMetric] = useState<string>("temperature");
+  // const [selectedMetric, setSelectedMetric] = useState<string>("temperature");
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   // Update the main data fetching with SWR
   const {
     data: weatherData,
-    error,
-    isLoading,
     mutate,
   } = useSWR<any[]>(
     () => {

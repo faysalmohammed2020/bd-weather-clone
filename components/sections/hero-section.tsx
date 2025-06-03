@@ -22,7 +22,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
 } from "recharts";
 
 export default function HeroSection() {
@@ -73,15 +72,6 @@ export default function HeroSection() {
     { name: "Dec", rainfall: 12 },
   ];
 
-  const weeklyForecast = [
-    { day: "Mon", temp: 28, rain: 40 },
-    { day: "Tue", temp: 29, rain: 20 },
-    { day: "Wed", temp: 30, rain: 10 },
-    { day: "Thu", temp: 31, rain: 5 },
-    { day: "Fri", temp: 30, rain: 15 },
-    { day: "Sat", temp: 29, rain: 30 },
-    { day: "Sun", temp: 28, rain: 60 },
-  ];
 
   return (
     <section className="relative w-full py-12 md:py-24 lg:py-32 xl:py-48 overflow-hidden">
