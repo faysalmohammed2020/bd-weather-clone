@@ -1163,7 +1163,7 @@ const PrecipitationCard = ({
 
         <div className="text-center mt-4 space-y-1">
           <div className="text-3xl font-bold text-gray-800">
-            {precipitation.toFixed(2)} <span className="text-lg">in</span>
+            {precipitation.toFixed(2)} <span className="text-lg">mm</span>
           </div>
           <Badge variant="secondary" className="text-xs">
             {getPrecipitationStatus(precipitation)}
@@ -1172,7 +1172,7 @@ const PrecipitationCard = ({
 
         <div className="mt-4 text-sm text-gray-600 text-center">
           <div className="font-medium">
-            {next24h.toFixed(2)} in{" "}
+            {next24h.toFixed(2)} mm{" "}
             <span className="text-gray-500">in next 24h</span>
           </div>
           <p className="text-xs mt-2 text-gray-500">
