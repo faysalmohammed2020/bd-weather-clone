@@ -1251,28 +1251,6 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                 </tbody>
               </table>
             </div>
-
-            {/* <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-sky-500" />
-                <span className="text-sm text-slate-600">
-                  Date Range:{" "}
-                  <span className="font-medium text-slate-800">
-                    {`${format(new Date(startDate), "MMM d")} - ${format(new Date(endDate), "MMM d, yyyy")}`}
-                  </span>
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-sky-100 text-sky-800 hover:bg-sky-200">
-                  {filteredData.length} record(s)
-                </Badge>
-                {stationFilter !== "all" && (
-                  <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
-                    Station: {stationFilter}
-                  </Badge>
-                )}
-              </div>
-            </div> */}
           </div>
         </div>
 
