@@ -12,7 +12,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  Calendar,
   ChevronLeft,
   ChevronRight,
   CloudSun,
@@ -833,7 +832,6 @@ const FirstCardTable = forwardRef(
           throw new Error(errorData.message || "Failed to update record");
         }
 
-        const updatedRecord = await response.json();
 
         // Update the local state
         setFlattenedData((prevData) =>
@@ -881,10 +879,7 @@ const FirstCardTable = forwardRef(
       }
     };
 
-    const getStationNameById = (stationId: string): string => {
-      const station = stations.find((s) => s.stationId === stationId);
-      return station ? station.name : stationId;
-    };
+    
 
     const getInitialValues = () => {
       if (!selectedRecord) return {};

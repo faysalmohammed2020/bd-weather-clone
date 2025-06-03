@@ -496,20 +496,6 @@ export default function MapComponent() {
   ]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Helper function to zoom to a location with boundary - kept for reference
-  // const zoomToBoundary = (boundary: L.LatLngExpression[][], level: keyof typeof ZOOM_LEVELS) => {
-  //   if (mapRef.current && boundary.length > 0) {
-  //     const polygon = L.polygon(boundary);
-  //     mapRef.current.flyToBounds(polygon.getBounds(), {
-  //       padding: [50, 50],
-  //       maxZoom: ZOOM_LEVELS[level],
-  //       duration: 0.8, // Faster animation
-  //     });
-  //     return true;
-  //   }
-  //   return false;
-  // };
-
   const fetchBoundary = useCallback(
     async (osmId: number, type: "division" | "district" | "upazila") => {
       setIsLoading(true);
@@ -582,9 +568,7 @@ export default function MapComponent() {
     },
     [mapRef]
   );
-
-  // No longer needed since we always fetch boundaries
-  // const initialSelectionRef = useRef(true);
+  
 
   // Effect to clear boundaries when selection changes
   useEffect(() => {

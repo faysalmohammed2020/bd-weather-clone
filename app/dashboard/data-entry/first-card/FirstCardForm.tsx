@@ -1,6 +1,5 @@
 "use client";
 
-import * as Yup from "yup";
 import type React from "react";
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -32,98 +31,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import type { MeteorologicalEntry } from "@prisma/client";
 import type { TimeInfo } from "@/lib/data-type";
 
-// Validation schemas for each tab
-const temperatureSchema = Yup.object({
-  dryBulbAsRead: Yup.string()
-    .required("Dry-bulb অবশ্যই পূরণ করতে হবে")
-    .matches(/^\d{3}$/, "Must be exactly 3 digits (e.g., 256 for 25.6°C)")
-    .test("is-numeric", "Only numeric values allowed", (value) =>
-      /^\d+$/.test(value || "")
-    ),
-  wetBulbAsRead: Yup.string()
-    .required("Wet-bulb অবশ্যই পূরণ করতে হবে")
-    .matches(/^\d{3}$/, "Must be exactly 3 digits (e.g., 256 for 25.6°C)")
-    .test("is-numeric", "Only numeric values allowed", (value) =>
-      /^\d+$/.test(value || "")
-    ),
-  maxMinTempAsRead: Yup.string()
-    .required("MAX/MIN অবশ্যই পূরণ করতে হবে")
-    .matches(/^\d{3}$/, "Must be exactly 3 digits (e.g., 256 for 25.6°C)")
-    .test("is-numeric", "Only numeric values allowed", (value) =>
-      /^\d+$/.test(value || "")
-    ),
-});
-
-const pressureSchema = Yup.object({
-  barAsRead: Yup.string()
-    .required("Bar As Read অবশ্যই পূরণ করতে হবে")
-    .matches(/^\d{5}$/, "Must be exactly 5 digits (e.g., 10142 for 1014.2 hPa)")
-    .test("is-numeric", "Only numeric values allowed", (value) =>
-      /^\d+$/.test(value || "")
-    ),
-});
-
-const squallSchema = Yup.object({
-  // Conditional validation for squall fields
-  squallForce: Yup.string().when("squallConfirmed", {
-    is: true,
-    then: (schema) =>
-      schema
-        .required("Squall Force অবশ্যই পূরণ করতে হবে")
-        .test("is-numeric", "Only numeric values allowed", (value) =>
-          /^\d+$/.test(value || "")
-        ),
-    otherwise: (schema) => schema,
-  }),
-  squallDirection: Yup.string().when("squallConfirmed", {
-    is: true,
-    then: (schema) =>
-      schema
-        .required("Squall Direction অবশ্যই পূরণ করতে হবে")
-        .test("is-numeric", "Only numeric values allowed", (value) =>
-          /^\d+$/.test(value || "")
-        ),
-    otherwise: (schema) => schema,
-  }),
-  squallTime: Yup.string().when("squallConfirmed", {
-    is: true,
-    then: (schema) => schema.required("Squall Time অবশ্যই পূরণ করতে হবে"),
-    otherwise: (schema) => schema,
-  }),
-});
-
-const visibilitySchema = Yup.object({
-  horizontalVisibility: Yup.string()
-    .required("Horizontal Visibility অবশ্যই পূরণ করতে হবে")
-    .matches(/^\d{3}$/, "Must be exactly 3 digits (e.g., 050, 999)")
-    .test("is-numeric", "Only numeric values allowed", (value) =>
-      /^\d+$/.test(value || "")
-    ),
-});
-
-const weatherSchema = Yup.object({
-  pastWeatherW1: Yup.string()
-    .required("Past Weather (W1) অবশ্যই পূরণ করতে হবে")
-    .matches(/^[0-9]$/, "Past Weather (W1) শুধুমাত্র 0-9 সংখ্যা হতে হবে"),
-  pastWeatherW2: Yup.string()
-    .required("Past Weather (W2) অবশ্যই পূরণ করতে হবে")
-    .matches(/^[0-9]$/, "Past Weather (W2) শুধুমাত্র 0-9 সংখ্যা হতে হবে"),
-  presentWeatherWW: Yup.string()
-    .required("Present Weather অবশ্যই পূরণ করতে হবে")
-    .matches(/^\d{2}$/, "Must be exactly 2 digits (e.g., 01, 23, 99)")
-    .test("is-numeric", "Only numeric values allowed", (value) =>
-      /^\d+$/.test(value || "")
-    ),
-});
-
-// Combined schema for the entire form
-const validationSchema = Yup.object({
-  ...temperatureSchema.fields,
-  ...pressureSchema.fields,
-  ...squallSchema.fields,
-  ...visibilitySchema.fields,
-  ...weatherSchema.fields,
-});
+// Import validation schemas from separate file
+import { validationSchema } from "@/validations/first-card-validation";
 
 export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const [activeTab, setActiveTab] = useState("pressure");
@@ -184,7 +93,6 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       card: "bg-gradient-to-br from-emerald-50 via-white to-white border-l-4 border-emerald-300 shadow-sm",
       icon: <Flame className="size-5 mr-2 text-emerald-500" />,
     },
-
     weather: {
       tab: "border border-cyan-500 px-4 py-3 !bg-cyan-50 text-cyan-800 hover:opacity-90 shadow-sm shadow-cyan-500/50",
       card: "bg-gradient-to-br from-cyan-50 to-white border-l-4 border-cyan-200 shadow-sm",
@@ -1614,7 +1522,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   <Card
                     className={cn("overflow-hidden", tabStyles["meteors"].card)}
                   >
-                     <div className="p-4 bg-gradient-to-r from-emerald-100 to-emerald-200 text-blue-800">
+                    <div className="p-4 bg-gradient-to-r from-emerald-100 to-emerald-200 text-blue-800">
                       <h3 className="text-lg font-semibold flex items-center">
                         <Thermometer className="mr-2" /> Mise Meteors(Code)
                       </h3>

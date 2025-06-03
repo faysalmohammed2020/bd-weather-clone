@@ -1583,29 +1583,29 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 }
 
 // Reusable Components
-function SectionCard({
-  title,
-  icon,
-  children,
-  className = "",
-}: {
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <Card className={`border-2 ${className} shadow-sm`}>
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-3 text-xl">
-          {icon}
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-    </Card>
-  );
-}
+// function SectionCard({
+//   title,
+//   icon,
+//   children,
+//   className = "",
+// }: {
+//   title: string;
+//   icon: React.ReactNode;
+//   children: React.ReactNode;
+//   className?: string;
+// }) {
+//   return (
+//     <Card className={`border-2 ${className} shadow-sm`}>
+//       <CardHeader className="pb-4">
+//         <CardTitle className="flex items-center gap-3 text-xl">
+//           {icon}
+//           {title}
+//         </CardTitle>
+//       </CardHeader>
+//       <CardContent>{children}</CardContent>
+//     </Card>
+//   );
+// }
 
 // Update the InputField component to support disabled state and error display
 
@@ -1807,7 +1807,6 @@ function CloudLevelSection({
   prefix,
   color = "blue",
   data,
-  onChange,
   onSelectChange,
   renderError,
 }: {
