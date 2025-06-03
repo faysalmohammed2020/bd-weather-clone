@@ -561,7 +561,7 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
       document={<CompactWeatherPDFDocument {...generatePDFData()} />}
       fileName={`Weather_Data_Compact_${stationInfo.date.replace(/\//g, "-")}.pdf`}
     >
-      {({ blob, url, loading, error }) => (
+      {({ loading }) => (
         <Button
           disabled={loading || isGenerating}
           className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white"

@@ -7,8 +7,7 @@ import {
   Loader2,
   RefreshCw,
   AlertCircle,
-  Clock,
-  TrendingUp,
+  Clock
 } from "lucide-react";
 import { utcToHour } from "@/lib/utils";
 import { getDailySummary } from "@/app/actions/daily-summary";
