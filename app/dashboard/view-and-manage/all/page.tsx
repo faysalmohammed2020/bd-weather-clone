@@ -24,30 +24,111 @@ export default function AllViewAndManagePage() {
   const dailySummeryRef = useRef<any>(null)
 
   const exportToExcel = () => {
-    // Create a new workbook
-    const wb = XLSX.utils.book_new()
+  const wb = XLSX.utils.book_new();
 
-    // Get data from each component
-    const firstCardData = firstCardRef.current?.getData?.() || []
-    const secondCardData = secondCardRef.current?.getData?.() || []
-    const synopticData = synopticRef.current?.getData?.() || []
-    const dailySummeryData = dailySummeryRef.current?.getData?.() || []
+  const firstCardData = firstCardRef.current?.getData?.() || [];
+  const secondCardData = secondCardRef.current?.getData?.() || [];
+  const synopticData = synopticRef.current?.getData?.() || [];
+  const dailySummaryData = dailySummeryRef.current?.getData?.() || [];
 
-    // Create worksheets for each dataset
-    const firstCardSheet = XLSX.utils.json_to_sheet(firstCardData)
-    const secondCardSheet = XLSX.utils.json_to_sheet(secondCardData)
-    const synopticSheet = XLSX.utils.json_to_sheet(synopticData)
-    const dailySummerySheet = XLSX.utils.json_to_sheet(dailySummeryData)
+  const excludedKeys = [
+    'id',
+    'stationId',
+    'stationCode',
+    'stationName',
+    'submittedAt',
+    'createdAt',
+    'updatedAt',
+    'tabActive',
+    'observingTime',
+    'observingTimeId',
+    'localTime',
+    'c2Indicator'
+  ];
 
-    // Add worksheets to the workbook with appropriate names
-    XLSX.utils.book_append_sheet(wb, firstCardSheet, "First Card")
-    XLSX.utils.book_append_sheet(wb, secondCardSheet, "Second Card")
-    XLSX.utils.book_append_sheet(wb, synopticSheet, "Synoptic Code")
-    XLSX.utils.book_append_sheet(wb, dailySummerySheet, "Daily Summery")
+  const cleanFirst = firstCardData.map(item => {
+    const cleaned = {};
+    Object.keys(item).forEach(key => {
+      if (!excludedKeys.includes(key)) {
+        cleaned[key] = item[key];
+      }
+    });
+    return cleaned;
+  });
 
-    // Generate Excel file and trigger download
-    XLSX.writeFile(wb, "Weather_Data_All_Tabs.xlsx")
+  const cleanSecond = secondCardData.map(item => {
+    const cleaned = {};
+    Object.keys(item).forEach(key => {
+      if (!excludedKeys.includes(key)) {
+        cleaned[key] = item[key];
+      }
+    });
+    return cleaned;
+  });
+
+  const firstKeys = Object.keys(cleanFirst[0] || {});
+  const secondKeys = Object.keys(cleanSecond[0] || {});
+
+  const firstHeader = Array(firstKeys.length).fill("First Card");
+  const secondHeader = Array(secondKeys.length).fill("Second Card");
+
+  const fullHeaderRow = [...firstHeader, ...secondHeader];
+  const subHeaderRow = [...firstKeys, ...secondKeys];
+
+  const maxLength = Math.max(cleanFirst.length, cleanSecond.length);
+  const mergedRows = [];
+
+  for (let i = 0; i < maxLength; i++) {
+    const firstRow = cleanFirst[i] || {};
+    const secondRow = cleanSecond[i] || {};
+
+    mergedRows.push([
+      ...firstKeys.map(k => firstRow[k] || ""),
+      ...secondKeys.map(k => secondRow[k] || "")
+    ]);
   }
+
+  const finalData = [fullHeaderRow, subHeaderRow, ...mergedRows];
+  const mergedSheet = XLSX.utils.aoa_to_sheet(finalData);
+
+  // Merge headers
+  mergedSheet["!merges"] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: firstKeys.length - 1 } },
+    { s: { r: 0, c: firstKeys.length }, e: { r: 0, c: firstKeys.length + secondKeys.length - 1 } }
+  ];
+
+  // Add merged sheet
+  XLSX.utils.book_append_sheet(wb, mergedSheet, "First+Second Card");
+
+  // Synoptic
+  const cleanSynoptic = synopticData.map(item => {
+    const cleaned = {};
+    Object.keys(item).forEach(key => {
+      if (!excludedKeys.includes(key)) {
+        cleaned[key] = item[key];
+      }
+    });
+    return cleaned;
+  });
+  const synopticSheet = XLSX.utils.json_to_sheet(cleanSynoptic);
+  XLSX.utils.book_append_sheet(wb, synopticSheet, "Synoptic");
+
+  // Daily Summary
+  const cleanSummary = dailySummaryData.map(item => {
+    const cleaned = {};
+    Object.keys(item).forEach(key => {
+      if (!excludedKeys.includes(key)) {
+        cleaned[key] = item[key];
+      }
+    });
+    return cleaned;
+  });
+  const summarySheet = XLSX.utils.json_to_sheet(cleanSummary);
+  XLSX.utils.book_append_sheet(wb, summarySheet, "Daily Summary");
+
+  // Export
+  XLSX.writeFile(wb, "Weather_Data_All_Tabs.xlsx");
+};
 
   // Prepare station info for PDF
   const stationInfo = {
