@@ -24,6 +24,7 @@ import {
   Sun,
   CloudSun,
 } from "lucide-react";
+import DailySummaryChart from "./StationMap/weatherChart";
 
 // Fetcher for SWR
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
@@ -1403,7 +1404,7 @@ export default function ProfessionalWeatherDashboard({
       <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white shadow-xl rounded-lg">
         <div className="px-6 py-4">
           <div className="flex justify-between items-center ">
-            <div className="flex items-center space-x-4">
+            {/* <div className="flex items-center space-x-4">
               <div className="p-2 bg-slate-700 bg-opacity-20 rounded-lg backdrop-blur-sm">
                 <LayoutDashboard size={24} />
               </div>
@@ -1432,7 +1433,9 @@ export default function ProfessionalWeatherDashboard({
                 />
                 Refresh
               </Button>
-            </div>
+            </div> */}
+
+            <DailySummaryChart/>
           </div>
         </div>
       </div>
