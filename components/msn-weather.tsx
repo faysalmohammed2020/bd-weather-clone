@@ -20,6 +20,9 @@ import {
   Cloud,
   Activity,
   TrendingUp,
+  Umbrella,
+  Sun,
+  CloudSun,
 } from "lucide-react";
 
 // Types
@@ -37,6 +40,196 @@ interface WeatherData {
 
 // Fetcher for SWR
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+// All weather
+const CurrentWeather = ({
+  temperature,
+  condition,
+  windSpeed,
+  humidity,
+  feelsLike,
+  dewPoint,
+  pressure,
+  visibility,
+  uvIndex,
+  airQuality,
+}: {
+  temperature: number;
+  condition: string;
+  windSpeed: number;
+  humidity: number;
+  feelsLike: number;
+  dewPoint: number;
+  pressure: number;
+  visibility: number;
+  uvIndex: number;
+  airQuality: number;
+}) => {
+  const getConditionIcon = (condition: string) => {
+    switch (condition.toLowerCase()) {
+      case "sunny":
+        return <Sun size={16} className="text-yellow-500" />;
+      case "partly cloudy":
+        return <CloudSun size={16} className="text-blue-400" />;
+      default:
+        return <Cloud size={16} className="text-blue-500" />;
+    }
+  };
+
+  const getAirQualityColor = (aqi: number) => {
+    if (aqi <= 50) return "bg-green-100 text-green-800";
+    if (aqi <= 100) return "bg-yellow-100 text-yellow-800";
+    if (aqi <= 150) return "bg-orange-100 text-orange-800";
+    return "bg-red-100 text-red-800";
+  };
+
+  const getUVIndexColor = (uv: number) => {
+    if (uv <= 2) return "bg-green-100 text-green-800";
+    if (uv <= 5) return "bg-yellow-100 text-yellow-800";
+    if (uv <= 7) return "bg-orange-100 text-orange-800";
+    return "bg-red-100 text-red-800";
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Card className="bg-blue-50 border border-blue-200 shadow-sm">
+        <CardHeader className="pb-1">
+          <CardTitle className="text-blue-800 text-sm font-semibold flex items-center gap-2">
+            {getConditionIcon(condition)}
+            Current Weather
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-0 text-xs text-blue-900">
+          {/* Temperature Section */}
+          <motion.div
+            className="col-span-1"
+            initial={{ scale: 0.9 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.1 }}
+          >
+            <div className="text-4xl font-bold text-blue-700">
+              {temperature}°F
+            </div>
+            <div className="text-sm text-blue-500 capitalize">{condition}</div>
+
+            {/* Animated weather icon */}
+            <motion.div
+              className="mt-2"
+              animate={{
+                y: [0, -3, 0],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              {getConditionIcon(condition)}
+            </motion.div>
+          </motion.div>
+
+          {/* Primary Metrics */}
+          <div className="space-y-2 col-span-1 text-xs">
+            <motion.div
+              className="flex items-center gap-2"
+              initial={{ x: -10, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <Wind size={14} className="text-blue-600" />
+              Wind: {windSpeed} mph
+            </motion.div>
+
+            <motion.div
+              className="flex items-center gap-2"
+              initial={{ x: -10, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <Droplets size={14} className="text-blue-600" />
+              Humidity: {humidity}%
+            </motion.div>
+
+            <motion.div
+              className="flex items-center gap-2"
+              initial={{ x: -10, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Thermometer size={14} className="text-blue-600" />
+              Feels like: {feelsLike}°F
+            </motion.div>
+
+            <motion.div
+              className="flex items-center gap-2"
+              initial={{ x: -10, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Thermometer size={14} className="text-blue-600" />
+              Dew point: {dewPoint}°F
+            </motion.div>
+          </div>
+
+          {/* Secondary Metrics */}
+          <div className="space-y-2 col-span-1 text-xs">
+            <motion.div
+              className="flex items-center gap-2"
+              initial={{ x: -10, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.6 }}
+            >
+              <Gauge size={14} className="text-blue-600" />
+              Pressure: {pressure} in
+            </motion.div>
+
+            <motion.div
+              className="flex items-center gap-2"
+              initial={{ x: -10, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.7 }}
+            >
+              <Eye size={14} className="text-blue-600" />
+              Visibility: {visibility} mi
+            </motion.div>
+
+            <motion.div
+              className="flex items-center gap-2"
+              initial={{ x: -10, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.8 }}
+            >
+              <Sun size={14} className="text-blue-600" />
+              UV index:{" "}
+              <Badge className={`ml-1 ${getUVIndexColor(uvIndex)}`}>
+                {uvIndex}
+              </Badge>
+            </motion.div>
+
+            <motion.div
+              className="flex items-center gap-2"
+              initial={{ x: -10, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.9 }}
+            >
+              <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-xs">
+                🟠
+              </div>
+              Air Quality:{" "}
+              <Badge className={`ml-1 ${getAirQualityColor(airQuality)}`}>
+                {airQuality}
+              </Badge>
+            </motion.div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
 
 // Enhanced Thermometer Component
 const ThermometerGauge = ({
@@ -902,6 +1095,231 @@ const VisibilityGauge = ({
   );
 };
 
+//precipitation:
+
+const PrecipitationCard = ({
+  precipitation,
+  next24h,
+  size = 160,
+}: {
+  precipitation: number;
+  next24h: number;
+  size?: number;
+}) => {
+  const getPrecipitationColor = (amount: number) => {
+    if (amount === 0) return "#60a5fa"; // Blue for no precipitation
+    if (amount < 0.1) return "#38bdf8"; // Light blue for trace amounts
+    if (amount < 0.5) return "#0ea5e9"; // Medium blue for light rain
+    return "#0369a1"; // Dark blue for heavier rain
+  };
+
+  const getPrecipitationStatus = (amount: number) => {
+    if (amount === 0) return "No Precipitation";
+    if (amount < 0.1) return "Trace Precipitation";
+    if (amount < 0.5) return "Light Rain";
+    if (amount < 2) return "Moderate Rain";
+    return "Heavy Rain";
+  };
+
+  return (
+    <Card className="h-full bg-gradient-to-br from-blue-50 to-cyan-50 border-0 shadow-lg">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
+          <Umbrella size={16} className="text-blue-600" />
+          Precipitation
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex flex-col items-center justify-center p-4">
+        <div className="relative" style={{ width: size, height: size }}>
+          <svg
+            width={size}
+            height={size}
+            viewBox={`0 0 ${size} ${size}`}
+            className="drop-shadow-sm"
+          >
+            {/* Raindrop visualization */}
+            <motion.path
+              d={`M${size / 2} 40 L${size / 2 - 20} 80 L${size / 2 + 20} 80 Z`}
+              fill={getPrecipitationColor(precipitation)}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8 }}
+            />
+
+            {/* Animated falling rain drops */}
+            {precipitation > 0 && (
+              <>
+                {[...Array(8)].map((_, i) => (
+                  <motion.line
+                    key={i}
+                    x1={size / 4 + (i * size) / 8}
+                    y1="30"
+                    x2={size / 4 + (i * size) / 8}
+                    y2="50"
+                    stroke={getPrecipitationColor(precipitation)}
+                    strokeWidth="1.5"
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: [0, 0.6, 0], y: 80 }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      delay: i * 0.2,
+                      ease: "linear",
+                    }}
+                  />
+                ))}
+              </>
+            )}
+          </svg>
+        </div>
+
+        <div className="text-center mt-4 space-y-1">
+          <div className="text-3xl font-bold text-gray-800">
+            {precipitation.toFixed(2)} <span className="text-lg">in</span>
+          </div>
+          <Badge variant="secondary" className="text-xs">
+            {getPrecipitationStatus(precipitation)}
+          </Badge>
+        </div>
+
+        <div className="mt-4 text-sm text-gray-600 text-center">
+          <div className="font-medium">
+            {next24h.toFixed(2)} in{" "}
+            <span className="text-gray-500">in next 24h</span>
+          </div>
+          <p className="text-xs mt-2 text-gray-500">
+            {precipitation > 0
+              ? "Light rain expected in next 24 hours."
+              : "No precipitation expected in next 24 hours."}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+// UV Index Card
+const UVIndexCard = ({
+  uvIndex,
+  maxUvIndex,
+  description,
+}: {
+  uvIndex: number;
+  maxUvIndex: number;
+  description?: string;
+}) => {
+  const getUVColor = (index: number) => {
+    if (index <= 2) return "#4ade80"; // Vibrant green
+    if (index <= 5) return "#facc15"; // Bright yellow
+    if (index <= 7) return "#fb923c"; // Orange
+    if (index <= 10) return "#f87171"; // Coral red
+    return "#c084fc"; // Purple
+  };
+
+  const getUVStatus = (index: number) => {
+    if (index <= 2) return "Low";
+    if (index <= 5) return "Moderate";
+    if (index <= 7) return "High";
+    if (index <= 10) return "Very High";
+    return "Extreme";
+  };
+
+  const uvPercentage = Math.min((uvIndex / 11) * 100, 100);
+  const maxUvPercentage = Math.min((maxUvIndex / 11) * 100, 100);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="h-full w-full"
+    >
+      <Card className="h-full w-full bg-gradient-to-br from-purple-50 to-blue-50 border-0 shadow-lg">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-purple-800 text-lg font-bold flex items-center gap-3">
+            <motion.div
+              animate={{
+                rotate: 360,
+              }}
+              transition={{
+                duration: 15,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            >
+              <Sun size={24} className="text-yellow-500" />
+            </motion.div>
+            UV INDEX
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="h-[calc(100%-60px)] flex flex-col p-4">
+          {/* Main UV Display */}
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <motion.div 
+              className="relative mb-8"
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="absolute inset-0 rounded-full bg-yellow-100 blur-md opacity-70"></div>
+              <div 
+                className="relative w-32 h-32 rounded-full flex items-center justify-center text-5xl font-bold"
+                style={{ backgroundColor: getUVColor(uvIndex), color: uvIndex > 7 ? 'white' : 'black' }}
+              >
+                {uvIndex}
+              </div>
+            </motion.div>
+
+            <Badge 
+              className={`text-lg py-2 px-4 mb-6 ${getUVColor(uvIndex) === "#4ade80" ? "bg-green-100 text-green-800" : 
+                        getUVColor(uvIndex) === "#facc15" ? "bg-yellow-100 text-yellow-800" : 
+                        getUVColor(uvIndex) === "#fb923c" ? "bg-orange-100 text-orange-800" : 
+                        getUVColor(uvIndex) === "#f87171" ? "bg-red-100 text-red-800" : "bg-purple-100 text-purple-800"}`}
+            >
+              {getUVStatus(uvIndex)} RISK
+            </Badge>
+          </div>
+
+          {/* UV Scale */}
+          <div className="w-full mb-6">
+            <div className="flex justify-between text-sm font-medium text-purple-800 mb-1">
+              <span>Low</span>
+              <span>Extreme</span>
+            </div>
+            <div className="relative h-4 bg-gradient-to-r from-green-400 via-yellow-400 via-orange-500 to-red-500 to-purple-500 rounded-full overflow-hidden">
+              <motion.div
+                className="absolute top-0 h-full w-1.5 bg-white shadow-md"
+                initial={{ left: "0%" }}
+                animate={{ left: `${uvPercentage}%` }}
+                transition={{ duration: 1, delay: 0.5 }}
+              />
+            </div>
+            <div className="flex justify-between text-xs text-purple-600 mt-1">
+              <span>0</span>
+              <span>11+</span>
+            </div>
+          </div>
+
+          {/* Max UV and Description */}
+          <div className="text-center">
+            <div className="text-lg font-bold text-purple-800 mb-1">
+              Peak Today: {maxUvIndex} ({getUVStatus(maxUvIndex)})
+            </div>
+            <motion.p 
+              className="text-sm text-purple-600"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+            >
+              {description || `Maximum UV exposure will reach ${getUVStatus(maxUvIndex).toLowerCase()} levels today.`}
+            </motion.p>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
+
 // Main Dashboard Component
 export default function ProfessionalWeatherDashboard({
   selectedStation,
@@ -962,6 +1380,7 @@ export default function ProfessionalWeatherDashboard({
           windSpeed: Number.parseFloat(item.windSpeed) || 0,
           windDirection: Number.parseFloat(item.windDirectionCode) || 0,
           cloudCover: Number.parseFloat(item.avTotalCloud) || 0,
+          precipitation: Number.parseFloat(item.totalPrecipitation) || 0,
           visibility: Number.parseFloat(item.lowestVisibility) || 10,
         };
       });
@@ -984,6 +1403,7 @@ export default function ProfessionalWeatherDashboard({
           windSpeed: 8.2,
           windDirection: 180,
           cloudCover: 45,
+          precipitation: 0.2,
           visibility: 15,
         };
 
@@ -1065,12 +1485,29 @@ export default function ProfessionalWeatherDashboard({
           </Card>
         </motion.div>
 
+        {/* Main Weather Component */}
+
+        {/* <div className="py-4">
+          <CurrentWeather
+            temperature={90}
+            condition="Mostly cloudy"
+            windSpeed={9}
+            humidity={69}
+            feelsLike={100}
+            dewPoint={78}
+            pressure={29.59}
+            visibility={2.2}
+            uvIndex={5}
+            airQuality={121}
+          />
+        </div> */}
+
         {/* Weather Gauges Grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
         >
           <ThermometerGauge
             temperature={currentData.temperature}
@@ -1089,7 +1526,18 @@ export default function ProfessionalWeatherDashboard({
 
           <CloudCoverGauge cloudCover={currentData.cloudCover} />
 
+          <PrecipitationCard
+            precipitation={currentData.precipitation}
+            next24h={0.8}
+          />
+
           <VisibilityGauge visibility={currentData.visibility} />
+
+          <UVIndexCard
+            uvIndex={7}
+            maxUvIndex={8}
+            description="Maximum UV exposure for today will be high."
+          />
         </motion.div>
 
         {/* Quick Stats */}
@@ -1107,7 +1555,7 @@ export default function ProfessionalWeatherDashboard({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4">
                 <div className="text-center p-3 bg-red-50 rounded-lg">
                   <div className="text-2xl font-bold text-red-600">
                     {currentData.temperature.toFixed(1)}°C
@@ -1148,12 +1596,29 @@ export default function ProfessionalWeatherDashboard({
                     Clouds
                   </div>
                 </div>
+                 <div className="text-center p-3 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-gray-600">
+                    {currentData.precipitation.toFixed(0)} mm
+                  </div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wide">
+                    Total Precipitation
+                  </div>
+                </div>
                 <div className="text-center p-3 bg-amber-50 rounded-lg">
                   <div className="text-2xl font-bold text-amber-600">
                     {currentData.visibility.toFixed(1)}
                   </div>
                   <div className="text-xs text-amber-500 uppercase tracking-wide">
                     Visibility km
+                  </div>
+                </div>
+
+                <div className="text-center p-3 bg-amber-50 rounded-lg">
+                  <div className="text-2xl font-bold text-amber-600">
+                    7
+                  </div>
+                  <div className="text-xs text-amber-500 uppercase tracking-wide">
+                    UV Index
                   </div>
                 </div>
               </div>
