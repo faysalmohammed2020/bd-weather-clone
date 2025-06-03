@@ -1547,38 +1547,6 @@ const FirstCardTable = forwardRef(
                   </tbody>
                 </table>
               </div>
-
-              {/* <div className="mt-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-sky-500" />
-                  <span className="text-sm text-slate-600">
-                    Date Range:{" "}
-                    <div className="text-center text-lg font-semibold text-slate-600">
-                      {`${format(parseISO(startDate), "MMM d")} - ${format(parseISO(endDate), "MMM d, yyyy")}`}
-                    </div>
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className="bg-sky-100 text-sky-800 hover:bg-sky-200"
-                  >
-                    {data.reduce(
-                      (count, item) => count + item.MeteorologicalEntry.length,
-                      0
-                    )}{" "}
-                    record(s)
-                  </Badge>
-                  {stationFilter !== "all" && (
-                    <Badge
-                      variant="outline"
-                      className="bg-blue-100 text-blue-800 hover:bg-blue-200"
-                    >
-                      Station: {stationFilter}
-                    </Badge>
-                  )}
-                </div>
-              </div> */}
             </div>
           </div>
 

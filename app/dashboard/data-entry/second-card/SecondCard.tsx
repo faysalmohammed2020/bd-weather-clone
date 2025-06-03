@@ -328,10 +328,6 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
         layer4: formData?.significantClouds?.layer4 || {},
       },
       rainfall: {
-        // "date-start": formData?.rainfall?.["date-start"] || "",
-        // "time-start": formData?.rainfall?.["time-start"] || "",
-        // "date-end": formData?.rainfall?.["date-end"] || "",
-        // "time-end": formData?.rainfall?.["time-end"] || "",
         "since-previous": formData?.rainfall?.["since-previous"] || "",
         "during-previous": formData?.rainfall?.["during-previous"] || "",
         "last-24-hours": formData?.rainfall?.["last-24-hours"] || "",
@@ -379,9 +375,6 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
         );
       case "rainfall":
         return !(
-          // (touched.rainfall?.["time-start"] &&
-          //   errors.rainfall?.["time-start"]) ||
-          // (touched.rainfall?.["time-end"] && errors.rainfall?.["time-end"]) ||
           (
             (touched.rainfall?.["since-previous"] &&
               errors.rainfall?.["since-previous"]) ||
@@ -593,17 +586,6 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
     
     // Mark the field as touched
     formik.setFieldTouched(name, true, true);
-
-    // Validate time fields for HH:MM format
-    // if (name === "time-start" || name === "time-end") {
-    //   if (value !== "" && !/^([01]\d|2[0-3]):([0-5]\d)$/.test(value)) {
-    //     formik.setFieldTouched(`rainfall.${name}`, true, false);
-    //     toast.error("Invalid time format", {
-    //       description: "Please enter time in HH:MM format (00:00 to 23:59)",
-    //       duration: 3000,
-    //     });
-    //   }
-    // }
 
     // Update the appropriate section of the form data based on the input name
     if (name.startsWith("low-cloud-")) {

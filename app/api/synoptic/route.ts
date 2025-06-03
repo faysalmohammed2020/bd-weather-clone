@@ -275,23 +275,6 @@ export async function GET() {
     measurements[17] = `${measurements[7]}`;
 
     // 19. 8N5Ch5h5 (29-33) - Cloud information
-    // let lowFormSig = weatherObs.layer1Form || "0";
-    // let mediumFormSig = weatherObs.layer2Form || "0";
-    // let highFormSig = weatherObs.layer3Form || "0";
-    // let fourthFormSig = weatherObs.layer4Form || "0";
-
-    // let lowAmountSig = weatherObs.layer1Amount || "0";
-    // let mediumAmountSig = weatherObs.layer2Amount || "0";
-    // let highAmountSig = weatherObs.layer3Amount || "0";
-    // let fourthAmountSig = weatherObs.layer4Amount || "0";
-
-    // let lowHeightSig = pad(Number(weatherObs.layer1Height) || 0, 2);
-    // let mediumHeightSig = pad(Number(weatherObs.layer2Height) || 0, 2);
-    // let highHeightSig = pad(Number(weatherObs.layer3Height) || 0, 2);
-    // let fourthHeightSig = pad(Number(weatherObs.layer4Height) || 0, 2);
-    // measurements[18] = `8${lowAmountSig}${lowFormSig}${lowHeightSig} / 8${mediumAmountSig}${mediumFormSig}${mediumHeightSig} / 8${highAmountSig}${highFormSig}${highHeightSig} /8${fourthAmountSig}${fourthFormSig}${fourthHeightSig}`;\
-
-    // 19. 8N5Ch5h5 (29-33) - Cloud information
     const cloudSegments: string[] = [];
 
     const pushCloudSegment = (
@@ -331,9 +314,6 @@ export async function GET() {
     measurements[18] = cloudSegments.join(" / ");
 
     // 20. 90dqqqt (34-38) - Dew point depression
-    // const dewDepression = dryBulb - dewPoint;
-    // measurements[19] = `90${pad(Math.round(dewDepression * 10), 3)}`;
-
     const sqD = firstCard.squallDirection;
     const sqT = firstCard.squallTime;
 

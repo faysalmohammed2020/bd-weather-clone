@@ -498,13 +498,6 @@ export function WeatherDataTable() {
                       </td>
 
                       {/* 15. Lowest visibility */}
-                      {/* <td className="px-3 py-3 text-center">
-                        {firstData?.MeteorologicalEntry?.[0]
-                          ? formatValue(firstData.MeteorologicalEntry[0]?.horizontalVisibility)
-                          : "--"}
-                      </td> */}
-
-                      {/* 15. Lowest visibility */}
                       <td className="px-3 py-3 text-center">
                         {firstData?.MeteorologicalEntry?.length
                           ? ((values) =>

@@ -418,39 +418,6 @@ export function DailySummaryForm() {
     );
   }
 
-  // const handleSubmit = async () => {
-  //   try {
-  //     const payload = {
-  //       dataType: values.dataType || "SY",
-  //       measurements: values.measurements,
-  //       windDirection: values.measurements[10] || "",
-  //     }
-
-  //     const response = await fetch("/api/daily-summary", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(payload),
-  //     })
-
-  //     const result = await response.json()
-
-  //     if (!result.success) {
-  //       return toast.error(result.error)
-  //     }
-
-  //     if (!response.ok) {
-  //       return toast.error(result.error)
-  //     }
-
-  //     if (result.success) {
-  //       toast.success(result.message)
-  //     }
-  //   } catch (error) {
-  //     console.error("Submit error:", error)
-  //     toast.error("❌ Something went wrong")
-  //   }
-  // }
-
   const handleMeasurementChange = (index: number, value: string) => {
     const newMeasurements = [...values.measurements];
     newMeasurements[index] = value;
@@ -605,16 +572,6 @@ export function DailySummaryForm() {
         </Card>
       </div>
 
-      {/* Submit Button */}
-      {/* <div className="flex justify-end mt-6">
-        <Button
-          type="button"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-md shadow-sm text-lg"
-          onClick={handleSubmit}
-        >
-          Submit Daily Summary
-        </Button>
-      </div> */}
     </div>
   );
 }
