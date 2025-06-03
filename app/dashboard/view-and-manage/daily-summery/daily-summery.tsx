@@ -28,10 +28,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { toast } from "sonner"
 import { differenceInDays, parseISO, isValid, format } from "date-fns"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import moment from "moment"
+
 
 interface Station {
   id: string
@@ -288,49 +287,49 @@ const DailySummaryTable = forwardRef((props, ref) => {
     return station ? station.name : stationId
   }
 
-  // Handle edit click
-  const handleEditClick = (record: any) => {
-    if (user && canEditRecord(record, user)) {
-      setSelectedRecord(record)
-      setEditFormData(record)
-      setFieldErrors({}) // Clear any previous errors
-      setIsEditDialogOpen(true)
-    } else {
-      setIsPermissionDeniedOpen(true)
-    }
-  }
+  // // Handle edit click
+  // const handleEditClick = (record: any) => {
+  //   if (user && canEditRecord(record, user)) {
+  //     setSelectedRecord(record)
+  //     setEditFormData(record)
+  //     setFieldErrors({}) // Clear any previous errors
+  //     setIsEditDialogOpen(true)
+  //   } else {
+  //     setIsPermissionDeniedOpen(true)
+  //   }
+  // }
 
   // In your component, add this handler for input validation
-  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target
-    const validation = fieldValidations[id as keyof typeof fieldValidations]
+  // const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const { id, value } = e.target
+  //   const validation = fieldValidations[id as keyof typeof fieldValidations]
 
-    // Only allow numbers (no decimals, letters, or special characters)
-    const numericValue = value.replace(/[^0-9]/g, "")
+  //   // Only allow numbers (no decimals, letters, or special characters)
+  //   const numericValue = value.replace(/[^0-9]/g, "")
 
-    // Enforce maximum length
-    const truncatedValue = numericValue.slice(0, validation.length)
+  //   // Enforce maximum length
+  //   const truncatedValue = numericValue.slice(0, validation.length)
 
-    // Validate the input and set appropriate error messages
-    let error = ""
-    if (truncatedValue.length === 0) {
-      error = `This field is required`
-    } else if (truncatedValue.length < validation.length) {
-      error = `Must be exactly ${validation.length} digits (currently ${truncatedValue.length})`
-    } else if (truncatedValue.length > validation.length) {
-      error = `Cannot exceed ${validation.length} digits`
-    }
+  //   // Validate the input and set appropriate error messages
+  //   let error = ""
+  //   if (truncatedValue.length === 0) {
+  //     error = `This field is required`
+  //   } else if (truncatedValue.length < validation.length) {
+  //     error = `Must be exactly ${validation.length} digits (currently ${truncatedValue.length})`
+  //   } else if (truncatedValue.length > validation.length) {
+  //     error = `Cannot exceed ${validation.length} digits`
+  //   }
 
-    setEditFormData((prev: any) => ({
-      ...prev,
-      [id]: truncatedValue,
-    }))
+  //   setEditFormData((prev: any) => ({
+  //     ...prev,
+  //     [id]: truncatedValue,
+  //   }))
 
-    setFieldErrors((prev) => ({
-      ...prev,
-      [id]: error,
-    }))
-  }
+  //   setFieldErrors((prev) => ({
+  //     ...prev,
+  //     [id]: error,
+  //   }))
+  // }
 
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {}
@@ -399,7 +398,6 @@ const DailySummaryTable = forwardRef((props, ref) => {
         throw new Error("Failed to update record")
       }
 
-      const result = await response.json()
 
       // Update local state
       setCurrentData((prevData) =>

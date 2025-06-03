@@ -5,15 +5,10 @@ import Link from "next/link";
 import { ArrowRight, Cloud, Sun, CloudRain, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  BarChart,
-  Bar,
   AreaChart,
   Area,
-  LineChart,
-  Line,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
@@ -33,20 +28,6 @@ const temperatureData = [
   { name: "Dec", temp: 20.1 },
 ];
 
-const rainfallData = [
-  { name: "Jan", rainfall: 7 },
-  { name: "Feb", rainfall: 28 },
-  { name: "Mar", rainfall: 58 },
-  { name: "Apr", rainfall: 116 },
-  { name: "May", rainfall: 267 },
-  { name: "Jun", rainfall: 358 },
-  { name: "Jul", rainfall: 397 },
-  { name: "Aug", rainfall: 316 },
-  { name: "Sep", rainfall: 300 },
-  { name: "Oct", rainfall: 172 },
-  { name: "Nov", rainfall: 34 },
-  { name: "Dec", rainfall: 12 },
-];
 
 const currentWeatherData = [
   { name: "Temp", value: 28.5, unit: "°C" },
@@ -321,82 +302,6 @@ export default function HowItWorksSection() {
           transition={{ delay: 0.4, duration: 0.6 }}
           viewport={{ once: true }}
         >
-          {/* <div className="p-6 md:p-8">
-            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
-              Bangladesh Climate Patterns
-            </h3>
-            <div className="grid md:grid-cols-2 gap-8">
-              <div>
-                <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center">
-                  <Sun className="w-5 h-5 mr-2 text-yellow-500" />
-                  Average Temperature (°C)
-                </h4>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={temperatureData}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="#e5e7eb"
-                        vertical={false}
-                      />
-                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip
-                        contentStyle={{
-                          background: "rgba(255, 255, 255, 0.95)",
-                          borderRadius: "0.5rem",
-                          borderColor: "#3b82f6",
-                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                          fontSize: "0.8rem",
-                        }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="temp"
-                        stroke="#3b82f6"
-                        strokeWidth={2}
-                        dot={{ r: 4, fill: "#3b82f6" }}
-                        activeDot={{ r: 6, stroke: "#3b82f6", strokeWidth: 2 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              <div>
-                <h4 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4 flex items-center">
-                  <CloudRain className="w-5 h-5 mr-2 text-blue-500" />
-                  Monthly Rainfall (mm)
-                </h4>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={rainfallData}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="#e5e7eb"
-                        vertical={false}
-                      />
-                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip
-                        contentStyle={{
-                          background: "rgba(255, 255, 255, 0.95)",
-                          borderRadius: "0.5rem",
-                          borderColor: "#3b82f6",
-                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                          fontSize: "0.8rem",
-                        }}
-                      />
-                      <Bar
-                        dataKey="rainfall"
-                        fill="#3b82f6"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-          </div> */}
         </motion.div>
 
         <motion.div

@@ -163,7 +163,6 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"))
   const [stationFilter, setStationFilter] = useState("all")
   const [stations, setStations] = useState<{ id: string; stationId: string; name: string }[]>([])
-  const [isRefreshing, setIsRefreshing] = useState(false)
   const { data: session } = useSession()
   const user = session?.user
 
@@ -220,22 +219,6 @@ export function SecondCardTable({ refreshTrigger = 0 }: SecondCardTableProps) {
   useEffect(() => {
     fetchData()
   }, [selectedDate, startDate, endDate, stationFilter, refreshTrigger])
-
-  // Navigate to previous day
-  const goToPreviousDay = () => {
-    const currentDate = new Date(selectedDate)
-    const previousDay = new Date(currentDate)
-    previousDay.setDate(currentDate.getDate() - 1)
-    setSelectedDate(format(previousDay, "yyyy-MM-dd"))
-  }
-
-  // Navigate to next day
-  const goToNextDay = () => {
-    const currentDate = new Date(selectedDate)
-    const nextDay = new Date(currentDate)
-    nextDay.setDate(currentDate.getDate() + 1)
-    setSelectedDate(format(nextDay, "yyyy-MM-dd"))
-  }
 
   // Handle opening the edit dialog
   const handleEditClick = (record: ObservationData) => {
