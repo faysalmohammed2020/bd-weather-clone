@@ -179,10 +179,3 @@ export function getTimeDiffInHours(savedUtcTime: string): number {
 
   return Number(diffHours.toFixed(2));
 }
-
-
-// const startDateParam = startDate ? moment(startDate).utc().add(1, "day").startOf("day").toDate() : null;
-// const endDateParam = endDate ? moment(endDate).utc().add(1, "day").endOf("day").toDate() : null;
-
-// const statTime = startDateParam || moment().utc().startOf("day").toDate();
-// const endTime = endDateParam || moment().utc().endOf("day").toDate();
