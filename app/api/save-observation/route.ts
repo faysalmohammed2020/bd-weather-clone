@@ -137,6 +137,7 @@ export async function POST(request: Request) {
 
       // Observer info
       observerInitial: data.observer?.["observer-initial"] || null,
+      cardIndicator: "2",
 
       // Cloud
       lowCloudForm: data.clouds?.low?.form || null,

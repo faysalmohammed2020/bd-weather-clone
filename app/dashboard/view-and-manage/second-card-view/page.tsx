@@ -179,6 +179,7 @@ type FormData = yup.InferType<typeof validationSchema>
 interface WeatherObservation {
   id: string
   observingTimeId: string
+  cardIndicator: string
   tabActive: string
   observerInitial: string | null
   lowCloudForm: string | null
@@ -846,6 +847,9 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                     <th rowSpan={3} className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800">
                       Time of Observation (UTC)
                     </th>
+                    <th rowSpan={3} className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800">
+                      C2 Indicator
+                    </th>
                      <th rowSpan={3} className="border border-slate-300 bg-gradient-to-b from-sky-50 to-sky-100 p-1 text-sky-800">
                       DATE
                     </th>
@@ -996,6 +1000,9 @@ const SecondCardTable = forwardRef(({ refreshTrigger = 0 }: SecondCardTableProps
                         >
                           <td className="border border-slate-300 p-1 font-medium text-sky-700">
                             <div className="flex flex-col font-bold px-2">{utcToHour(record.utcTime.toString())}</div>
+                          </td>
+                          <td className="border border-slate-300 p-1 font-medium text-sky-700">
+                            <div className="flex flex-col font-bold px-2">{weatherObs.cardIndicator}</div>
                           </td>
                           <td className="border border-slate-300 p-1 text-sm font-bold text-sky-700">
                             {new Date(record.utcTime).toLocaleDateString()}
