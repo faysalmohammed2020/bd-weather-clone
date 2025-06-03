@@ -18,6 +18,7 @@ import {
   ChevronRight,
   ChevronLeft,
   AlertCircle,
+  Flame,
 } from "lucide-react";
 import { toast } from "sonner";
 import { hygrometricTable } from "@/data/hygrometric-table";
@@ -30,43 +31,6 @@ import HourSelector from "@/components/hour-selector";
 import { AnimatePresence, motion } from "framer-motion";
 import type { MeteorologicalEntry } from "@prisma/client";
 import type { TimeInfo } from "@/lib/data-type";
-
-// type MeteorologicalFormData = {
-//   presentWeatherWW?: string;
-//   subIndicator?: string;
-//   attachedThermometer?: string;
-//   barAsRead?: string;
-//   correctedForIndex?: string;
-//   heightDifference?: string;
-//   stationLevelPressure?: string;
-//   seaLevelReduction?: string;
-//   correctedSeaLevelPressure?: string;
-//   afternoonReading?: string;
-//   pressureChange24h?: string;
-//   dryBulbAsRead?: string;
-//   wetBulbAsRead?: string;
-//   maxMinTempAsRead?: string;
-//   dryBulbCorrected?: string;
-//   wetBulbCorrected?: string;
-//   maxMinTempCorrected?: string;
-//   Td?: string;
-//   relativeHumidity?: string;
-//   squallConfirmed?: boolean;
-//   squallForce?: string;
-//   squallDirection?: string;
-//   squallTime?: string;
-//   horizontalVisibility?: string;
-//   miscMeteors?: string;
-//   pastWeatherW1?: string;
-//   pastWeatherW2?: string;
-//   c2Indicator?: string;
-//   observationTime?: string;
-//   stationNo?: string;
-//   year?: string;
-//   cloudCover?: string;
-//   visibility?: string;
-//   // Add any other fields you use in formData here
-// };
 
 // Validation schemas for each tab
 const temperatureSchema = Yup.object({
@@ -162,7 +126,7 @@ const validationSchema = Yup.object({
 });
 
 export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
-  const [activeTab, setActiveTab] = useState("temperature");
+  const [activeTab, setActiveTab] = useState("pressure");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     isHourSelected,
@@ -184,19 +148,26 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const { data: session } = useSession();
 
   // Tab order for navigation
-  const tabOrder = ["temperature", "pressure", "squall", "V.V", "weather"];
+  const tabOrder = [
+    "pressure",
+    "temperature",
+    "squall",
+    "V.V",
+    "meteors",
+    "weather",
+  ];
 
   // Tab styles with gradients and more vibrant colors
   const tabStyles = {
-    temperature: {
-      tab: "border border-blue-500 px-4 py-3 !bg-blue-50 text-blue-800 hover:opacity-90 shadow-sm shadow-blue-500/50",
-      card: "bg-gradient-to-br from-blue-50 to-white border-l-4 border-blue-200 shadow-sm",
-      icon: <Thermometer className="size-5 mr-2" />,
-    },
     pressure: {
       tab: "border border-rose-500 px-4 py-3 !bg-rose-50 text-rose-800 hover:opacity-90 shadow-sm shadow-rose-500/50",
       card: "bg-gradient-to-br from-rose-50 to-white border-l-4 border-rose-200 shadow-sm",
       icon: <BarChart3 className="size-5 mr-2" />,
+    },
+    temperature: {
+      tab: "border border-blue-500 px-4 py-3 !bg-blue-50 text-blue-800 hover:opacity-90 shadow-sm shadow-blue-500/50",
+      card: "bg-gradient-to-br from-blue-50 to-white border-l-4 border-blue-200 shadow-sm",
+      icon: <Thermometer className="size-5 mr-2" />,
     },
     squall: {
       tab: "border border-amber-500 px-4 py-3 !bg-amber-50 text-amber-800 hover:opacity-90 shadow-sm shadow-amber-500/50",
@@ -208,6 +179,12 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       card: "bg-gradient-to-br from-orange-50 to-white border-l-4 border-orange-200 shadow-sm",
       icon: <Eye className="size-5 mr-2" />,
     },
+    meteors: {
+      tab: "border border-emerald-600 px-4 py-3 !bg-emerald-50 text-emerald-800 hover:bg-emerald-100 shadow-sm shadow-emerald-400/50",
+      card: "bg-gradient-to-br from-emerald-50 via-white to-white border-l-4 border-emerald-300 shadow-sm",
+      icon: <Flame className="size-5 mr-2 text-emerald-500" />,
+    },
+
     weather: {
       tab: "border border-cyan-500 px-4 py-3 !bg-cyan-50 text-cyan-800 hover:opacity-90 shadow-sm shadow-cyan-500/50",
       card: "bg-gradient-to-br from-cyan-50 to-white border-l-4 border-cyan-200 shadow-sm",
@@ -552,46 +529,6 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
     };
   };
 
-  // async function calculateCorrectedTemperatures(
-  //   dryBulbAsRead: string,
-  //   wetBulbAsRead: string,
-  //   maxMinTempAsRead: string,
-  //   stationId: string,
-  // ) {
-  //   if (!dryBulbAsRead || !wetBulbAsRead || !maxMinTempAsRead || !stationId) return
-
-  //   const userStationData = stationDataMap[stationId]
-  //   if (!userStationData) {
-  //     toast.error("Station data not found for temperature correction")
-  //     return
-  //   }
-
-  //   // Convert 3-digit inputs to actual temperature values (e.g., "256" → 25.6)
-  //   const dryBulbValue = Number.parseFloat(`${dryBulbAsRead.slice(0, 2)}.${dryBulbAsRead.slice(2)}`)
-  //   const wetBulbValue = Number.parseFloat(`${wetBulbAsRead.slice(0, 2)}.${wetBulbAsRead.slice(2)}`)
-  //   const maxMinTempValue = Number.parseFloat(`${maxMinTempAsRead.slice(0, 2)}.${maxMinTempAsRead.slice(2)}`)
-
-  //   // Apply temperature corrections (you can customize these correction factors)
-  //   // For now, using standard meteorological corrections
-  //   const temperatureCorrection = userStationData.station.temperatureCorrection || 0
-
-  //   const correctedDryBulb = dryBulbValue + temperatureCorrection
-  //   const correctedWetBulb = wetBulbValue + temperatureCorrection
-  //   const correctedMaxMinTemp = maxMinTempValue + temperatureCorrection
-
-  //   // Convert back to 3-digit format
-  //   const formatTemperature = (temp: number) => {
-  //     const rounded = Math.round(temp * 10)
-  //     return rounded.toString().padStart(3, "0")
-  //   }
-
-  //   return {
-  //     dryBulbCorrected: formatTemperature(correctedDryBulb),
-  //     wetBulbCorrected: formatTemperature(correctedWetBulb),
-  //     maxMinTempCorrected: formatTemperature(correctedMaxMinTemp),
-  //   }
-  // }
-
   async function handleSubmit(values: MeteorologicalEntry) {
     // Prevent duplicate submissions
     if (isSubmitting) return;
@@ -922,7 +859,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
     toast.info("All form data has been cleared.");
 
     // Reset to first tab
-    setActiveTab("temperature");
+    setActiveTab("pressure");
   };
 
   // Navigation functions
@@ -1000,7 +937,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                 onValueChange={handleTabChange}
                 className="w-full"
               >
-                <TabsList className="grid w-full grid-cols-2 mb-20 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-3 rounded-xl p-1 border-0 bg-transparent">
+                <TabsList className="grid w-full grid-cols-2 mb-20 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 md:gap-3 rounded-xl p-1 border-0 bg-transparent">
                   {Object.entries(tabStyles).map(([key, style]) => (
                     <TabsTrigger
                       key={key}
@@ -1192,15 +1129,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         />
                       </div>
                     </CardContent>
-                    <CardFooter className="flex justify-between">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={prevTab}
-                        disabled={isFirstTab}
-                      >
-                        <ChevronLeft className="mr-2 h-4 w-4" /> Previous
-                      </Button>
+                    <CardFooter className="flex justify-end">
                       <Button
                         type="button"
                         onClick={nextTab}
@@ -1233,16 +1162,16 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         {/* Temperature Values */}
                         <TabsContent value="temperature" className="mt-4">
                           <Tabs defaultValue="as-read" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2 bg-blue-50/50 rounded-lg">
+                            <TabsList className="grid w-full grid-cols-2 gap-5 bg-blue-50/50 rounded-lg">
                               <TabsTrigger
                                 value="as-read"
-                                className="data-[state=active]:bg-blue-200 data-[state=active]:text-blue-800"
+                                className="data-[state=active]:bg-blue-200 data-[state=active]:text-blue-800 border border-blue-300"
                               >
                                 As Read
                               </TabsTrigger>
                               <TabsTrigger
                                 value="corrected"
-                                className="data-[state=active]:bg-blue-200 data-[state=active]:text-blue-800"
+                                className="data-[state=active]:bg-blue-200 data-[state=active]:text-blue-800 border border-blue-300"
                               >
                                 Corrected
                               </TabsTrigger>
@@ -1423,7 +1352,15 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         </TabsContent>
                       </Tabs>
                     </CardContent>
-                    <CardFooter className="flex justify-end p-6">
+                    <CardFooter className="flex justify-between p-6">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={prevTab}
+                        disabled={isFirstTab}
+                      >
+                        <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                      </Button>
                       <Button
                         type="button"
                         onClick={nextTab}
@@ -1653,7 +1590,36 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         />
                         {renderErrorMessage("horizontalVisibility")}
                       </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-between p-6">
+                      <Button type="button" variant="outline" onClick={prevTab}>
+                        <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={nextTab}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        Next <ChevronRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </TabsContent>
 
+                {/* Mice Meteors */}
+                <TabsContent
+                  value="meteors"
+                  className="mt-6 transition-all duration-500"
+                >
+                  <Card
+                    className={cn("overflow-hidden", tabStyles["meteors"].card)}
+                  >
+                     <div className="p-4 bg-gradient-to-r from-emerald-100 to-emerald-200 text-blue-800">
+                      <h3 className="text-lg font-semibold flex items-center">
+                        <Thermometer className="mr-2" /> Mise Meteors(Code)
+                      </h3>
+                    </div>
+                    <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="miscMeteors">Misc Meteors(Code)</Label>
                         <Input

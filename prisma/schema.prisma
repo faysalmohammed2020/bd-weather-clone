@@ -198,6 +198,7 @@ model MeteorologicalEntry {
 model WeatherObservation {
   id              String @id @default(cuid())
   tabActive       String
+  cardIndicator   String?
   observingTimeId String
 
   // LOW CLOUD
