@@ -1243,14 +1243,14 @@ const UVIndexCard = ({
         <CardContent className="h-[calc(100%-60px)] flex flex-col p-4">
           {/* Main UV Display */}
           <div className="flex-1 flex flex-col items-center justify-center">
-            <motion.div 
+            <motion.div
               className="relative mb-8"
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2 }}
             >
               <div className="absolute inset-0 rounded-full bg-yellow-100 blur-md opacity-70"></div>
-              <div 
+              <div
                 className="relative w-32 h-32 rounded-full flex items-center justify-center text-5xl font-bold"
                 style={{ backgroundColor: getUVColor(uvIndex), color: uvIndex > 7 ? 'white' : 'black' }}
               >
@@ -1258,11 +1258,11 @@ const UVIndexCard = ({
               </div>
             </motion.div>
 
-            <Badge 
-              className={`text-lg py-2 px-4 mb-6 ${getUVColor(uvIndex) === "#4ade80" ? "bg-green-100 text-green-800" : 
-                        getUVColor(uvIndex) === "#facc15" ? "bg-yellow-100 text-yellow-800" : 
-                        getUVColor(uvIndex) === "#fb923c" ? "bg-orange-100 text-orange-800" : 
-                        getUVColor(uvIndex) === "#f87171" ? "bg-red-100 text-red-800" : "bg-purple-100 text-purple-800"}`}
+            <Badge
+              className={`text-lg py-2 px-4 mb-6 ${getUVColor(uvIndex) === "#4ade80" ? "bg-green-100 text-green-800" :
+                getUVColor(uvIndex) === "#facc15" ? "bg-yellow-100 text-yellow-800" :
+                  getUVColor(uvIndex) === "#fb923c" ? "bg-orange-100 text-orange-800" :
+                    getUVColor(uvIndex) === "#f87171" ? "bg-red-100 text-red-800" : "bg-purple-100 text-purple-800"}`}
             >
               {getUVStatus(uvIndex)} RISK
             </Badge>
@@ -1293,7 +1293,7 @@ const UVIndexCard = ({
             <div className="text-lg font-bold text-purple-800 mb-1">
               Peak Today: {maxUvIndex} ({getUVStatus(maxUvIndex)})
             </div>
-            <motion.p 
+            <motion.p
               className="text-sm text-purple-600"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -1383,15 +1383,15 @@ export default function ProfessionalWeatherDashboard({
     processedData.length > 0
       ? processedData[processedData.length - 1]
       : {
-          temperature: 22.5,
-          humidity: 65,
-          pressure: 1013,
-          windSpeed: 8.2,
-          windDirection: 180,
-          cloudCover: 45,
-          precipitation: 0.2,
-          visibility: 15,
-        };
+        temperature: 22.5,
+        humidity: 65,
+        pressure: 1013,
+        windSpeed: 8.2,
+        windDirection: 180,
+        cloudCover: 45,
+        precipitation: 0.2,
+        visibility: 15,
+      };
 
   const formattedTime = lastUpdated.toLocaleTimeString("en-US", {
     hour12: false,
@@ -1400,50 +1400,15 @@ export default function ProfessionalWeatherDashboard({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      {/* Enhanced Header */}
-      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white shadow-xl rounded-lg">
-        <div className="px-6 py-4">
-          <div className="flex justify-between items-center ">
-            {/* <div className="flex items-center space-x-4">
-              <div className="p-2 bg-slate-700 bg-opacity-20 rounded-lg backdrop-blur-sm">
-                <LayoutDashboard size={24} />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">Weather Dashboard</h1>
-                <p className="text-blue-100 text-sm">
-                  Real-time meteorological data
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-sm bg-slate-800 bg-opacity-20 rounded-lg px-3 py-2 backdrop-blur-sm">
-                <Clock size={16} />
-                <span>Last updated: {formattedTime} UTC</span>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-white hover:bg-white hover:bg-opacity-20 transition-all duration-200"
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-              >
-                <RefreshCw
-                  size={18}
-                  className={`mr-2 ${isRefreshing ? "animate-spin" : ""}`}
-                />
-                Refresh
-              </Button>
-            </div> */}
 
-            <DailySummaryChart/>
-          </div>
-        </div>
+      <div>
+        <DailySummaryChart />
       </div>
 
       {/* Main Content */}
       <div className="p-6">
         {/* Status Banner */}
-        <motion.div
+        {/* <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -1471,7 +1436,7 @@ export default function ProfessionalWeatherDashboard({
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </motion.div> */}
 
         {/* Main Weather Component */}
 
@@ -1584,7 +1549,7 @@ export default function ProfessionalWeatherDashboard({
                     Clouds
                   </div>
                 </div>
-                 <div className="text-center p-3 bg-gray-50 rounded-lg">
+                <div className="text-center p-3 bg-gray-50 rounded-lg">
                   <div className="text-2xl font-bold text-gray-600">
                     {currentData.precipitation.toFixed(0)} mm
                   </div>
