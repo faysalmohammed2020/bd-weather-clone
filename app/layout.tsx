@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { Inter, Amiri } from "next/font/google";
-import { Toaster } from "../components/ui/sonner";
-import "./globals.css";
-import { cn } from "@/lib/utils";
 import { getLocale } from "next-intl/server";
-import { getLangDir } from "rtl-detect";
+import { Inter, Amiri } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
+import { cn } from "@/lib/utils";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "BD Weather",
@@ -30,10 +29,9 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
-  const direction = getLangDir(locale);
 
   return (
-    <html lang={locale} dir={direction} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={cn("antialiased", {
           [inter.className]: locale === "en",
@@ -41,7 +39,7 @@ export default async function RootLayout({
         })}
       >
         {children}
-        <Toaster richColors/>
+        <Toaster richColors />
       </body>
     </html>
   );
