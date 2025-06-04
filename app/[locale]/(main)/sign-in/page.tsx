@@ -33,12 +33,13 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { FormError } from "@/components/ui/form-error";
 import { Station } from "@/data/stations";
+import { useTranslations } from "next-intl";
 
 // Available roles
 const roles = [
-  { value: "super_admin", label: "Super Admin" },
-  { value: "station_admin", label: "Station Admin" },
-  { value: "observer", label: "Observer" },
+  { value: "super_admin", label: "superAdmin" },
+  { value: "station_admin", label: "stationAdmin" },
+  { value: "observer", label: "observer" },
 ];
 
 export default function SignInForm() {
@@ -53,6 +54,7 @@ export default function SignInForm() {
   const [stations, setStations] = useState<Station[]>([]);
   const [fetchError, setFetchError] = useState("");
   const router = useRouter();
+  const t = useTranslations("signin");
 
   useEffect(() => {
     const fetchStations = async () => {
@@ -83,7 +85,7 @@ export default function SignInForm() {
   const handleStationSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedStation) {
-      setFormError("Please select a station");
+      setFormError(t("emptyStation"));
       return;
     }
     setStep("security");
@@ -98,7 +100,7 @@ export default function SignInForm() {
     const station = stations.find((s) => s.name === selectedStation);
 
     if (!station) {
-      setFormError("Invalid station selection");
+      setFormError(t("invalidStation"));
       setLoading(false);
       return;
     }
@@ -108,7 +110,7 @@ export default function SignInForm() {
       setStep("credentials");
       setFormError("");
     } else {
-      setFormError("Invalid security code. Please try again.");
+      setFormError(t("invalidSecurityCode"));
     }
 
     setLoading(false);
@@ -121,7 +123,7 @@ export default function SignInForm() {
 
     // Client-side validation first
     if (!role) {
-      setFormError("Please select a role");
+      setFormError(t("SelectRole"));
       return;
     }
 
@@ -130,14 +132,14 @@ export default function SignInForm() {
     const password = formData.get("password") as string;
 
     if (!email || !password) {
-      setFormError("Please enter both email and password");
+      setFormError(t("emptyCredentials"));
       return;
     }
 
     // Find the selected station
     const station = stations.find((s) => s.name === selectedStation);
     if (!station) {
-      setFormError("Invalid station selection");
+      setFormError(t("invalidStation"));
       return;
     }
 
@@ -173,7 +175,7 @@ export default function SignInForm() {
       // If the response is successful, redirect to dashboard
       if (response.ok) {
         // Success - show toast and redirect to dashboard
-        toast.success("Login successful");
+        toast.success(t("loginSuccessful"));
         router.push("/dashboard");
         router.refresh();
         return;
@@ -361,7 +363,7 @@ export default function SignInForm() {
         >
           <LogoHeader />
           <p className="text-center text-sm text-gray-500">
-            Select your weather station to continue.
+            {t("selectStation")}
           </p>
 
           <div className="space-y-4">
@@ -370,7 +372,7 @@ export default function SignInForm() {
                 htmlFor="station"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Weather Station
+                {t("stationLabel")}
               </Label>
               {fetchError ? (
                 <div className="text-red-500 text-sm mb-2">{fetchError}</div>
@@ -385,8 +387,8 @@ export default function SignInForm() {
                   <SelectValue
                     placeholder={
                       stations.length === 0
-                        ? "Loading stations..."
-                        : "Select your station"
+                        ? t("loadingStations")
+                        : t("selectStation")
                     }
                   />
                 </SelectTrigger>
@@ -410,17 +412,17 @@ export default function SignInForm() {
             type="submit"
             className="w-full bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400 text-white shadow-md flex items-center justify-center gap-2"
           >
-            Continue
+            {t("continue")}
             <ChevronRight className="h-4 w-4" />
           </Button>
 
           <p className="text-center text-sm text-gray-600">
-            Don&apos;t have an account?{" "}
+            {t("don'tHaveAccount")}{" "}
             <Link
               href="/sign-up"
               className="font-medium text-blue-700 hover:underline"
             >
-              Create an account
+              {t("createAccount")}
             </Link>
           </p>
         </motion.form>
@@ -443,21 +445,21 @@ export default function SignInForm() {
         >
           <LogoHeader />
           <p className="text-center text-sm text-gray-500">
-            Enter security code for{" "}
-            <span className="font-semibold">{selectedStation}</span> station.
+            {t("securityPrompt")}{" "}
+            <span className="font-semibold">{selectedStation}</span> {t("station")}.
           </p>
 
           <div className="space-y-4">
             <div className="relative">
               <Label htmlFor="securityCode" className="sr-only">
-                Security Code
+                {t("securityCode")}
               </Label>
               <Shield className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 id="securityCode"
                 name="securityCode"
                 type={showSecurityCode ? "text" : "password"}
-                placeholder="Enter your station security code"
+                placeholder={t("securityCodePlaceholder")}
                 className="pl-10 pr-10"
                 value={securityCode}
                 onChange={(e) => setSecurityCode(e.target.value)}
@@ -507,11 +509,11 @@ export default function SignInForm() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                     ></path>
                   </svg>
-                  Verifying...
+                  {t("verifying")}
                 </>
               ) : (
                 <>
-                  Continue
+                  {t("continue")}
                   <ChevronRight className="h-4 w-4" />
                 </>
               )}
@@ -527,7 +529,7 @@ export default function SignInForm() {
               }}
             >
               <ArrowLeft className="h-4 w-4" />
-              Back to Station Selection
+             {t("backToStation")}
             </Button>
           </div>
         </motion.form>
@@ -549,7 +551,7 @@ export default function SignInForm() {
       >
         <LogoHeader />
         <p className="text-center text-sm text-gray-500">
-          Enter your credentials to sign in to{" "}
+          {t("credentialsPrompt")}{" "}
           <span className="font-semibold">{selectedStation}</span>.
         </p>
 
@@ -559,11 +561,11 @@ export default function SignInForm() {
               htmlFor="role"
               className="block text-sm font-medium text-gray-700 mb-1"
             >
-              Role
+              {t("role")}
             </Label>
             <Select value={role} onValueChange={setRole} required>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select your role" />
+                <SelectValue placeholder={t("SelectRole")} />
               </SelectTrigger>
               <SelectContent>
                 {getAvailableRoles().map((role) => (
@@ -577,7 +579,7 @@ export default function SignInForm() {
 
           <div className="relative">
             <Label htmlFor="email" className="sr-only">
-              Email
+              {t("email")}
             </Label>
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
@@ -592,7 +594,7 @@ export default function SignInForm() {
 
           <div className="relative">
             <Label htmlFor="password" className="sr-only">
-              Password
+              {t("password")}
             </Label>
             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
@@ -620,10 +622,10 @@ export default function SignInForm() {
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
             <Checkbox id="remember" />
-            <Label htmlFor="remember">Remember me</Label>
+            <Label htmlFor="remember">{t("remember")}</Label>
           </div>
           <a href="#" className="text-sm text-black hover:underline">
-            Forgot password
+            {t("forgotPassword")}
           </a>
         </div>
 
@@ -657,7 +659,7 @@ export default function SignInForm() {
                 ></path>
               </svg>
             )}
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? t("signingIn") : t("signIn")}
           </Button>
           <Button
             type="button"
@@ -669,7 +671,7 @@ export default function SignInForm() {
             }}
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Security Code
+            {t("backToSecurity")}
           </Button>
         </div>
       </motion.form>
