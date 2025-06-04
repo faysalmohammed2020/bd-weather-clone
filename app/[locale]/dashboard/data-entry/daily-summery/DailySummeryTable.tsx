@@ -10,7 +10,7 @@ import {
   Clock
 } from "lucide-react";
 import { utcToHour } from "@/lib/utils";
-import { getDailySummary } from "@/app/[lang]/actions/daily-summary";
+import { getDailySummary } from "@/app/[locale]/actions/daily-summary";
 
 interface Data {
   id: string;
