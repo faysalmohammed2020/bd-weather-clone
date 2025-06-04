@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 import {
   Droplets,
@@ -53,6 +54,7 @@ const CurrentWeather = ({
   uvIndex: number;
   airQuality: number;
 }) => {
+  const t = useTranslations();
   const getConditionIcon = (condition: string) => {
     switch (condition.toLowerCase()) {
       case "sunny":
@@ -88,7 +90,7 @@ const CurrentWeather = ({
         <CardHeader className="pb-1">
           <CardTitle className="text-blue-800 text-sm font-semibold flex items-center gap-2">
             {getConditionIcon(condition)}
-            Current Weather
+            {t("dashboard.currentWeather")}
           </CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4 pt-0 text-xs text-blue-900">
@@ -129,7 +131,7 @@ const CurrentWeather = ({
               transition={{ delay: 0.2 }}
             >
               <Wind size={14} className="text-blue-600" />
-              Wind: {windSpeed} mph
+              {t("dashboard.wind")}: {windSpeed} {t("common.units.windSpeed")}
             </motion.div>
 
             <motion.div
@@ -139,7 +141,7 @@ const CurrentWeather = ({
               transition={{ delay: 0.3 }}
             >
               <Droplets size={14} className="text-blue-600" />
-              Humidity: {humidity}%
+              {t("dashboard.humidity")}: {humidity}%
             </motion.div>
 
             <motion.div
@@ -149,7 +151,7 @@ const CurrentWeather = ({
               transition={{ delay: 0.4 }}
             >
               <Thermometer size={14} className="text-blue-600" />
-              Feels like: {feelsLike}°F
+              {t("dashboard.feelsLike")}: {feelsLike}°F
             </motion.div>
 
             <motion.div
@@ -159,7 +161,7 @@ const CurrentWeather = ({
               transition={{ delay: 0.5 }}
             >
               <Thermometer size={14} className="text-blue-600" />
-              Dew point: {dewPoint}°F
+              {t("dashboard.dewPoint")}: {dewPoint}°F
             </motion.div>
           </div>
 
@@ -172,7 +174,7 @@ const CurrentWeather = ({
               transition={{ delay: 0.6 }}
             >
               <Gauge size={14} className="text-blue-600" />
-              Pressure: {pressure} in
+              {t("dashboard.pressure")}: {pressure}
             </motion.div>
 
             <motion.div
@@ -182,7 +184,7 @@ const CurrentWeather = ({
               transition={{ delay: 0.7 }}
             >
               <Eye size={14} className="text-blue-600" />
-              Visibility: {visibility} mi
+              {t("dashboard.visibility")}: {visibility} {t("common.units.km")}
             </motion.div>
 
             <motion.div
@@ -192,7 +194,7 @@ const CurrentWeather = ({
               transition={{ delay: 0.8 }}
             >
               <Sun size={14} className="text-blue-600" />
-              UV index:{" "}
+              {t("common.units.uvIndex")}:{" "}
               <Badge className={`ml-1 ${getUVIndexColor(uvIndex)}`}>
                 {uvIndex}
               </Badge>
@@ -207,7 +209,7 @@ const CurrentWeather = ({
               <div className="w-3.5 h-3.5 rounded-full flex items-center justify-center text-xs">
                 🟠
               </div>
-              Air Quality:{" "}
+              {t("dashboard.airQuality")}:{" "}
               <Badge className={`ml-1 ${getAirQualityColor(airQuality)}`}>
                 {airQuality}
               </Badge>
@@ -236,6 +238,8 @@ const ThermometerGauge = ({
     Math.min(100, ((temperature - min) / (max - min)) * 100)
   );
 
+  const t = useTranslations();
+
   const getColor = (temp: number) => {
     if (temp > 35) return "url(#hotGradient)";
     if (temp > 25) return "url(#warmGradient)";
@@ -257,7 +261,7 @@ const ThermometerGauge = ({
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
           <Thermometer size={16} className="text-blue-600" />
-          Temperature
+          {t("dashboard.temperature")}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center p-4">
@@ -432,6 +436,7 @@ const WindCompass = ({
   const arrowLength = radius * 0.7;
   const arrowX = centerX + Math.sin(angleRad) * arrowLength;
   const arrowY = centerY - Math.cos(angleRad) * arrowLength;
+  const t = useTranslations();
 
   const getWindColor = (speed: number) => {
     if (speed > 20) return "#dc2626";
@@ -451,7 +456,7 @@ const WindCompass = ({
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
           <Wind size={16} className="text-green-600" />
-          Wind
+          {t("dashboard.wind")}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center p-4">
@@ -497,7 +502,7 @@ const WindCompass = ({
               fill="#1e293b"
               fontWeight="bold"
             >
-              N
+              {t("common.units.n")}
             </text>
             <text
               x={size - 15}
@@ -507,7 +512,7 @@ const WindCompass = ({
               fill="#1e293b"
               fontWeight="bold"
             >
-              E
+              {t("common.units.e")}
             </text>
             <text
               x={centerX}
@@ -517,7 +522,7 @@ const WindCompass = ({
               fill="#1e293b"
               fontWeight="bold"
             >
-              S
+              {t("common.units.s")}
             </text>
             <text
               x="15"
@@ -527,7 +532,7 @@ const WindCompass = ({
               fill="#1e293b"
               fontWeight="bold"
             >
-              W
+              {t("common.units.w")}
             </text>
 
             {/* Wind direction arrow */}
@@ -609,12 +614,14 @@ const HumidityGauge = ({
     return "Low";
   };
 
+  const t = useTranslations();
+
   return (
     <Card className="h-full bg-gradient-to-br from-blue-50 to-cyan-50 border-0 shadow-lg">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
           <Droplets size={16} className="text-blue-600" />
-          Humidity
+          {t("common.units.humidity")}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center p-4">
@@ -711,12 +718,14 @@ const PressureBarometer = ({
     return "Low";
   };
 
+  const t = useTranslations();
+
   return (
     <Card className="h-full bg-gradient-to-br from-purple-50 to-violet-50 border-0 shadow-lg">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
           <Gauge size={16} className="text-purple-600" />
-          Pressure
+          {t("common.units.pressure")}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center p-4">
@@ -774,7 +783,7 @@ const PressureBarometer = ({
                 x1="0"
                 y1="0"
                 x2="0"
-                y2={-(size / 2 - 35)}
+                y2={-(size / 2 - 35)} 
                 stroke="#374151"
                 strokeWidth="3"
                 strokeLinecap="round"
@@ -818,7 +827,7 @@ const PressureBarometer = ({
 
         <div className="text-center mt-4 space-y-1">
           <div className="text-3xl font-bold text-gray-800">
-            {pressure.toFixed(0)} <span className="text-lg">hPa</span>
+            {pressure.toFixed(0)} <span className="text-lg">{t("common.units.pressure")}</span>
           </div>
           <Badge variant="secondary" className="text-xs">
             {getPressureStatus(pressure)}
@@ -846,12 +855,14 @@ const CloudCoverGauge = ({
     return "Clear";
   };
 
+  const t = useTranslations();
+
   return (
     <Card className="h-full bg-gradient-to-br from-gray-50 to-slate-50 border-0 shadow-lg">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
           <Cloud size={16} className="text-gray-600" />
-          Cloud Cover
+          {t("dashboard.cloudCover")}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center p-4">
@@ -983,12 +994,14 @@ const VisibilityGauge = ({
     return "Poor";
   };
 
+  const t = useTranslations();
+
   return (
     <Card className="h-full bg-gradient-to-br from-amber-50 to-orange-50 border-0 shadow-lg">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
           <Eye size={16} className="text-amber-600" />
-          Visibility
+          {t("dashboard.visibility")}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center p-4">
@@ -1109,12 +1122,14 @@ const PrecipitationCard = ({
     return "Heavy Rain";
   };
 
+  const t = useTranslations();
+
   return (
     <Card className="h-full bg-gradient-to-br from-blue-50 to-cyan-50 border-0 shadow-lg">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm font-medium text-gray-700">
           <Umbrella size={16} className="text-blue-600" />
-          Precipitation
+          {t("dashboard.precipitation")}
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center p-4">
@@ -1163,7 +1178,7 @@ const PrecipitationCard = ({
 
         <div className="text-center mt-4 space-y-1">
           <div className="text-3xl font-bold text-gray-800">
-            {precipitation.toFixed(2)} <span className="text-lg">mm</span>
+            {precipitation.toFixed(2)} {t("common.units.mm")}
           </div>
           <Badge variant="secondary" className="text-xs">
             {getPrecipitationStatus(precipitation)}
@@ -1172,8 +1187,8 @@ const PrecipitationCard = ({
 
         <div className="mt-4 text-sm text-gray-600 text-center">
           <div className="font-medium">
-            {next24h.toFixed(2)} mm{" "}
-            <span className="text-gray-500">in next 24h</span>
+            {next24h.toFixed(2)} { t("common.units.mm")}{" "}
+            <span className="text-gray-500">{t("common.units.mm")} {t("dashboard.next24h")}</span>
           </div>
           <p className="text-xs mt-2 text-gray-500">
             {precipitation > 0
@@ -1196,6 +1211,7 @@ const UVIndexCard = ({
   maxUvIndex: number;
   description?: string;
 }) => {
+  const t = useTranslations();
   const getUVColor = (index: number) => {
     if (index <= 2) return "#4ade80"; // Vibrant green
     if (index <= 5) return "#facc15"; // Bright yellow
@@ -1205,12 +1221,14 @@ const UVIndexCard = ({
   };
 
   const getUVStatus = (index: number) => {
-    if (index <= 2) return "Low";
-    if (index <= 5) return "Moderate";
-    if (index <= 7) return "High";
-    if (index <= 10) return "Very High";
-    return "Extreme";
+    if (index <= 2) return t("weather.uvStatus.low");
+    if (index <= 5) return t("weather.uvStatus.moderate");
+    if (index <= 7) return t("weather.uvStatus.high");
+    if (index <= 10) return t("weather.uvStatus.veryHigh");
+    return t("weather.uvStatus.extreme");
   };
+
+ 
 
   const uvPercentage = Math.min((uvIndex / 11) * 100, 100);
   const maxUvPercentage = Math.min((maxUvIndex / 11) * 100, 100);
@@ -1237,7 +1255,7 @@ const UVIndexCard = ({
             >
               <Sun size={24} className="text-yellow-500" />
             </motion.div>
-            UV INDEX
+            {t("dashboard.uvIndex")}
           </CardTitle>
         </CardHeader>
         <CardContent className="h-[calc(100%-60px)] flex flex-col p-4">
@@ -1264,15 +1282,15 @@ const UVIndexCard = ({
                   getUVColor(uvIndex) === "#fb923c" ? "bg-orange-100 text-orange-800" :
                     getUVColor(uvIndex) === "#f87171" ? "bg-red-100 text-red-800" : "bg-purple-100 text-purple-800"}`}
             >
-              {getUVStatus(uvIndex)} RISK
+              {getUVStatus(uvIndex)} {t("dashboard.risk")}
             </Badge>
           </div>
 
           {/* UV Scale */}
           <div className="w-full mb-6">
             <div className="flex justify-between text-sm font-medium text-purple-800 mb-1">
-              <span>Low</span>
-              <span>Extreme</span>
+              <span>{t("weather.uvStatus.low")}</span>
+              <span>{t("weather.uvStatus.extreme")}</span>
             </div>
             <div className="relative h-4 bg-gradient-to-r from-green-400 via-yellow-400 via-orange-500 to-red-500 to-purple-500 rounded-full overflow-hidden">
               <motion.div
@@ -1283,15 +1301,15 @@ const UVIndexCard = ({
               />
             </div>
             <div className="flex justify-between text-xs text-purple-600 mt-1">
-              <span>0</span>
-              <span>11+</span>
+              <span>{t("weather.uvStatus.low")}</span>
+              <span>{t("weather.uvStatus.extreme")}</span>
             </div>
           </div>
 
           {/* Max UV and Description */}
           <div className="text-center">
             <div className="text-lg font-bold text-purple-800 mb-1">
-              Peak Today: {maxUvIndex} ({getUVStatus(maxUvIndex)})
+              {t("weather.uvStatus.peakToday")}: {maxUvIndex} ({getUVStatus(maxUvIndex)})
             </div>
             <motion.p
               className="text-sm text-purple-600"
@@ -1299,7 +1317,7 @@ const UVIndexCard = ({
               animate={{ opacity: 1 }}
               transition={{ delay: 0.8 }}
             >
-              {description || `Maximum UV exposure will reach ${getUVStatus(maxUvIndex).toLowerCase()} levels today.`}
+              {description || `${t("weather.uvStatus.maxUvIndex")} ${getUVStatus(maxUvIndex).toLowerCase()} ${t("weather.uvStatus.uvLavl")}.`}
             </motion.p>
           </div>
         </CardContent>
@@ -1318,6 +1336,7 @@ export default function ProfessionalWeatherDashboard({
   // const [selectedMetric, setSelectedMetric] = useState<string>("temperature");
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const t = useTranslations();
 
   // Update the main data fetching with SWR
   const {
@@ -1407,54 +1426,6 @@ export default function ProfessionalWeatherDashboard({
 
       {/* Main Content */}
       <div className="p-6">
-        {/* Status Banner */}
-        {/* <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-6"
-        >
-          <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 shadow-sm">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-green-100 rounded-full">
-                    <Activity size={20} className="text-green-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-green-800">
-                      System Status
-                    </h3>
-                    <p className="text-sm text-green-600">
-                      All sensors operational • Data streaming live
-                    </p>
-                  </div>
-                </div>
-                <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                  Online
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div> */}
-
-        {/* Main Weather Component */}
-
-        {/* <div className="py-4">
-          <CurrentWeather
-            temperature={90}
-            condition="Mostly cloudy"
-            windSpeed={9}
-            humidity={69}
-            feelsLike={100}
-            dewPoint={78}
-            pressure={29.59}
-            visibility={2.2}
-            uvIndex={5}
-            airQuality={121}
-          />
-        </div> */}
-
         {/* Weather Gauges Grid */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -1489,7 +1460,7 @@ export default function ProfessionalWeatherDashboard({
           <UVIndexCard
             uvIndex={7}
             maxUvIndex={8}
-            description="Maximum UV exposure for today will be high."
+            description={t("weather.uvStatus.maxUvIndex")}
           />
         </motion.div>
 
@@ -1504,7 +1475,7 @@ export default function ProfessionalWeatherDashboard({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp size={20} className="text-blue-600" />
-                Quick Overview
+                {t("dashboard.quickOverview")}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1514,7 +1485,7 @@ export default function ProfessionalWeatherDashboard({
                     {currentData.temperature.toFixed(1)}°C
                   </div>
                   <div className="text-xs text-red-500 uppercase tracking-wide">
-                    Temperature
+                    {t("dashboard.quickStats.temperature")}
                   </div>
                 </div>
                 <div className="text-center p-3 bg-blue-50 rounded-lg">
@@ -1522,7 +1493,7 @@ export default function ProfessionalWeatherDashboard({
                     {currentData.humidity.toFixed(0)}%
                   </div>
                   <div className="text-xs text-blue-500 uppercase tracking-wide">
-                    Humidity
+                    {t("dashboard.quickStats.humidity")}
                   </div>
                 </div>
                 <div className="text-center p-3 bg-purple-50 rounded-lg">
@@ -1530,7 +1501,7 @@ export default function ProfessionalWeatherDashboard({
                     {currentData.pressure.toFixed(0)}
                   </div>
                   <div className="text-xs text-purple-500 uppercase tracking-wide">
-                    Pressure hPa
+                    {t("dashboard.quickStats.pressure")}
                   </div>
                 </div>
                 <div className="text-center p-3 bg-green-50 rounded-lg">
@@ -1538,7 +1509,7 @@ export default function ProfessionalWeatherDashboard({
                     {currentData.windSpeed.toFixed(1)}
                   </div>
                   <div className="text-xs text-green-500 uppercase tracking-wide">
-                    Wind m/s
+                    {t("dashboard.quickStats.wind")}
                   </div>
                 </div>
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
@@ -1546,7 +1517,7 @@ export default function ProfessionalWeatherDashboard({
                     {currentData.cloudCover.toFixed(0)}%
                   </div>
                   <div className="text-xs text-gray-500 uppercase tracking-wide">
-                    Clouds
+                    {t("dashboard.quickStats.clouds")}
                   </div>
                 </div>
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
@@ -1554,7 +1525,7 @@ export default function ProfessionalWeatherDashboard({
                     {currentData.precipitation.toFixed(0)} mm
                   </div>
                   <div className="text-xs text-gray-500 uppercase tracking-wide">
-                    Total Precipitation
+                    {t("dashboard.quickStats.precipitation")}
                   </div>
                 </div>
                 <div className="text-center p-3 bg-amber-50 rounded-lg">
@@ -1562,16 +1533,16 @@ export default function ProfessionalWeatherDashboard({
                     {currentData.visibility.toFixed(1)}
                   </div>
                   <div className="text-xs text-amber-500 uppercase tracking-wide">
-                    Visibility km
+                    {t("dashboard.quickStats.visibility")}
                   </div>
                 </div>
 
                 <div className="text-center p-3 bg-amber-50 rounded-lg">
                   <div className="text-2xl font-bold text-amber-600">
-                    7
+                    {currentData.uvIndex}
                   </div>
                   <div className="text-xs text-amber-500 uppercase tracking-wide">
-                    UV Index
+                    {t("dashboard.quickStats.uvIndex")}
                   </div>
                 </div>
               </div>
