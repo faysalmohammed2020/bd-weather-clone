@@ -1063,7 +1063,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   >
                     <div className="p-4 bg-gradient-to-r from-blue-200 to-blue-300 text-blue-800">
                       <h3 className="text-lg font-semibold flex items-center">
-                        <Thermometer className="mr-2" /> Temperature
+                        <Thermometer className="mr-2" /> {t('temperatureSection.title')}
                       </h3>
                     </div>
                     <CardContent className="pt-6">
@@ -1076,13 +1076,13 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                 value="as-read"
                                 className="data-[state=active]:bg-blue-200 data-[state=active]:text-blue-800 border border-blue-300"
                               >
-                                As Read
+                               {t('temperatureSection.asRead')}
                               </TabsTrigger>
                               <TabsTrigger
                                 value="corrected"
                                 className="data-[state=active]:bg-blue-200 data-[state=active]:text-blue-800 border border-blue-300"
                               >
-                                Corrected
+                               {t("temperatureSection.corrected")}
                               </TabsTrigger>
                             </TabsList>
 
@@ -1091,7 +1091,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
                                   <Label htmlFor="dryBulbAsRead">
-                                    Dry-bulb (°C)
+                                   {t('temperatureSection.dryBulb')}
                                   </Label>
                                   <Input
                                     id="dryBulbAsRead"
@@ -1113,7 +1113,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                                 <div className="space-y-2">
                                   <Label htmlFor="wetBulbAsRead">
-                                    Wet-bulb (°C)
+                                   {t("temperatureSection.wetBulb")}
                                   </Label>
                                   <Input
                                     id="wetBulbAsRead"
@@ -1135,7 +1135,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                                 <div className="space-y-2">
                                   <Label htmlFor="maxMinTempAsRead">
-                                    MAX/MIN (°C)
+                                   {t('temperatureSection.maxMin')}
                                   </Label>
                                   <Input
                                     id="maxMinTempAsRead"
@@ -1162,7 +1162,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="space-y-2">
                                   <Label htmlFor="dryBulbCorrected">
-                                    Dry-bulb (°C)
+                                    {t('temperatureSection.dryBulb')}
                                   </Label>
                                   <Input
                                     id="dryBulbCorrected"
@@ -1175,7 +1175,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                                 <div className="space-y-2">
                                   <Label htmlFor="wetBulbCorrected">
-                                    Wet-bulb (°C)
+                                    {t("temperatureSection.wetBulb")}
                                   </Label>
                                   <Input
                                     id="wetBulbCorrected"
@@ -1188,7 +1188,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                                 <div className="space-y-2">
                                   <Label htmlFor="maxMinTempCorrected">
-                                    MAX/MIN (°C)
+                                    {t('temperatureSection.maxMin')}
                                   </Label>
                                   <Input
                                     id="maxMinTempCorrected"
@@ -1207,14 +1207,13 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           <div className="mt-6 space-y-4">
                             <div className="p-4 bg-gradient-to-r from-blue-200 to-blue-300 text-blue-800">
                               <h3 className="text-lg font-semibold flex items-center">
-                                <Thermometer className="mr-2" /> Dew-Point &
-                                Humidity
+                                <Thermometer className="mr-2" /> {t('dewPointHumidity.title')}
                               </h3>
                             </div>
                             <div className="grid gap-4 sm:grid-cols-2">
                               <div className="space-y-2">
                                 <Label htmlFor="Td">
-                                  Dew-Point Temperature (&deg;C)
+                                 {t('dewPointHumidity.dewPoint')}
                                 </Label>
                                 <Input
                                   id="Td"
@@ -1236,7 +1235,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               </div>
                               <div className="space-y-2">
                                 <Label htmlFor="relativeHumidity">
-                                  Relative Humidity (%)
+                                 {t('dewPointHumidity.relativeHumidity')}
                                 </Label>
                                 <Input
                                   id="relativeHumidity"
@@ -1268,14 +1267,14 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         onClick={prevTab}
                         disabled={isFirstTab}
                       >
-                        <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                        <ChevronLeft className="mr-2 h-4 w-4" /> {t('buttons.previous')}
                       </Button>
                       <Button
                         type="button"
                         onClick={nextTab}
                         className="bg-blue-600 hover:bg-blue-700"
                       >
-                        Next <ChevronRight className="ml-2 h-4 w-4" />
+                         {t('buttons.next')} <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>
                     </CardFooter>
                   </Card>
@@ -1291,7 +1290,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   >
                     <div className="p-4 bg-gradient-to-r from-amber-200 to-amber-300 text-amber-800">
                       <h3 className="text-lg font-semibold flex items-center">
-                        <Wind className="mr-2" /> Squall Measurements
+                        <Wind className="mr-2" /> {t('squallMeasurements.title')}
                       </h3>
                     </div>
                     <CardContent className="pt-6 space-y-4">
@@ -1330,7 +1329,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                       ) : formik.values.squallConfirmed ? (
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div className="space-y-2">
-                            <Label htmlFor="squallForce">Force (KTS)</Label>
+                            <Label htmlFor="squallForce">{t('squallMeasurements.force')}</Label>
                             <Input
                               id="squallForce"
                               name="squallForce"
@@ -1351,7 +1350,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                           <div className="space-y-2">
                             <Label htmlFor="squallDirection">
-                              Direction (°d)
+                              {t('squallMeasurements.direction')}
                             </Label>
                             <Input
                               id="squallDirection"
@@ -1375,7 +1374,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="squallTime">Time(qt)</Label>
+                            <Label htmlFor="squallTime">{t('squallMeasurements.time')}</Label>
                             <select
                               id="squallTime"
                               name="squallTime"
@@ -1396,7 +1395,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                 }
                               )}
                             >
-                              <option value="">-- Select Time (qt) --</option>
+                              <option value="">-- {t('squallMeasurements.selectTime')} --</option>
                               <option value="0">
                                 0 → 0 to ½ hour before observation
                               </option>
@@ -1434,7 +1433,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                       ) : (
                         <div className="p-4 bg-slate-50 border border-slate-200 rounded-md flex justify-between items-center">
                           <p className="text-slate-600">
-                            Squall measurements skipped
+                           {t("squallMeasurements.squallMeasurementsSkipped")}
                           </p>
                           <Button
                             type="button"
@@ -1444,21 +1443,21 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               formik.setFieldValue("squallConfirmed", true);
                             }}
                           >
-                            Fill Measurements
+                           {t("squallMeasurements.fillMeasurements")}
                           </Button>
                         </div>
                       )}
                     </CardContent>
                     <CardFooter className="flex justify-between p-6">
                       <Button type="button" variant="outline" onClick={prevTab}>
-                        <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                        <ChevronLeft className="mr-2 h-4 w-4" /> {t('buttons.previous')}
                       </Button>
                       <Button
                         type="button"
                         onClick={nextTab}
                         className="bg-blue-600 hover:bg-blue-700"
                       >
-                        Next <ChevronRight className="ml-2 h-4 w-4" />
+                        {t('buttons.next')} <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>
                     </CardFooter>
                   </Card>
@@ -1474,13 +1473,13 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   >
                     <div className="p-4 bg-gradient-to-r from-orange-200 to-orange-300 text-orange-800">
                       <h3 className="text-lg font-semibold flex items-center">
-                        <Eye className="mr-2" /> Visibility Measurements
+                        <Eye className="mr-2" /> {t('visibilityMeasurements.title')}
                       </h3>
                     </div>
                     <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="horizontalVisibility">
-                          Horizontal Visibility
+                         {t('visibilityMeasurements.horizontalVisibility')}
                         </Label>
                         <Input
                           id="horizontalVisibility"
@@ -1502,14 +1501,14 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                     </CardContent>
                     <CardFooter className="flex justify-between p-6">
                       <Button type="button" variant="outline" onClick={prevTab}>
-                        <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                        <ChevronLeft className="mr-2 h-4 w-4" /> {t('buttons.previous')}
                       </Button>
                       <Button
                         type="button"
                         onClick={nextTab}
                         className="bg-blue-600 hover:bg-blue-700"
                       >
-                        Next <ChevronRight className="ml-2 h-4 w-4" />
+                       {t('buttons.next')} <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>
                     </CardFooter>
                   </Card>
@@ -1525,12 +1524,12 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   >
                     <div className="p-4 bg-gradient-to-r from-emerald-100 to-emerald-200 text-blue-800">
                       <h3 className="text-lg font-semibold flex items-center">
-                        <Thermometer className="mr-2" /> Mise Meteors(Code)
+                        <Thermometer className="mr-2" /> {t('miscMeteors.title')}
                       </h3>
                     </div>
                     <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="miscMeteors">Misc Meteors(Code)</Label>
+                        <Label htmlFor="miscMeteors">{t('miscMeteors.inputLabel')}</Label>
                         <Input
                           id="miscMeteors"
                           name="miscMeteors"
@@ -1542,14 +1541,14 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                     </CardContent>
                     <CardFooter className="flex justify-between p-6">
                       <Button type="button" variant="outline" onClick={prevTab}>
-                        <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                        <ChevronLeft className="mr-2 h-4 w-4" /> {t('buttons.previous')}
                       </Button>
                       <Button
                         type="button"
                         onClick={nextTab}
                         className="bg-blue-600 hover:bg-blue-700"
                       >
-                        Next <ChevronRight className="ml-2 h-4 w-4" />
+                        {t('buttons.next')} <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>
                     </CardFooter>
                   </Card>
@@ -1566,7 +1565,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                     {/* Header */}
                     <div className="p-4 bg-gradient-to-r from-cyan-200 to-cyan-300 text-cyan-800">
                       <h3 className="text-lg font-semibold flex items-center">
-                        <Cloud className="mr-2" /> Weather Conditions
+                        <Cloud className="mr-2" /> {t('weatherConditions.title')}
                       </h3>
                     </div>
 
@@ -1574,11 +1573,11 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
                       {/* Past Weather W1 */}
                       <div className="space-y-2">
-                        <Label htmlFor="pastWeatherW1">Past Weather (W1)</Label>
+                        <Label htmlFor="pastWeatherW1">{t('weatherConditions.pastWeatherW1.label')}</Label>
                         <Input
                           id="pastWeatherW1"
                           name="pastWeatherW1"
-                          placeholder="Enter past weather code (0-9)"
+                          placeholder={t('weatherConditions.pastWeatherW1.placeholder')}
                           value={formik.values.pastWeatherW1 || ""}
                           onChange={handleChange}
                           onBlur={formik.handleBlur}
@@ -1593,18 +1592,17 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         />
                         {renderErrorMessage("pastWeatherW1")}
                         <p className="text-xs text-muted-foreground mt-1">
-                          Weather code for the first part of the observation
-                          period
+                          {t('weatherConditions.pastWeatherW1.description')}
                         </p>
                       </div>
 
                       {/* Past Weather W2 */}
                       <div className="space-y-2">
-                        <Label htmlFor="pastWeatherW2">Past Weather (W2)</Label>
+                        <Label htmlFor="pastWeatherW2">{t('weatherConditions.pastWeatherW2.label')}</Label>
                         <Input
                           id="pastWeatherW2"
                           name="pastWeatherW2"
-                          placeholder="Enter past weather code (0-9)"
+                          placeholder={t('weatherConditions.pastWeatherW2.placeholder')}
                           value={formik.values.pastWeatherW2 || ""}
                           onChange={handleChange}
                           onBlur={formik.handleBlur}
@@ -1619,20 +1617,19 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         />
                         {renderErrorMessage("pastWeatherW2")}
                         <p className="text-xs text-muted-foreground mt-1">
-                          Weather code for the second part of the observation
-                          period
+                          {t('weatherConditions.pastWeatherW2.description')}
                         </p>
                       </div>
 
                       {/* Present Weather WW (full width on small) */}
                       <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="presentWeatherWW">
-                          Present Weather (WW)
+                          {t('weatherConditions.presentWeatherWW.label')}
                         </Label>
                         <Input
                           id="presentWeatherWW"
                           name="presentWeatherWW"
-                          placeholder="Enter present weather"
+                          placeholder= {t('weatherConditions.presentWeatherWW.placeholder')}
                           value={formik.values.presentWeatherWW || ""}
                           onChange={handleNumericInput}
                           onBlur={formik.handleBlur}
@@ -1644,7 +1641,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         />
                         {renderErrorMessage("presentWeatherWW")}
                         <p className="text-xs text-muted-foreground mt-1">
-                          Current weather conditions at time of observation
+                         {t('weatherConditions.presentWeatherWW.description')}
                         </p>
                       </div>
                     </CardContent>
@@ -1657,7 +1654,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         onClick={prevTab}
                         className="w-full sm:w-auto"
                       >
-                        <ChevronLeft className="mr-2 h-4 w-4" /> Previous
+                        <ChevronLeft className="mr-2 h-4 w-4" /> {t('buttons.previous')}
                       </Button>
 
                       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
@@ -1667,14 +1664,14 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           className="w-full sm:w-auto border-slate-600 hover:bg-slate-100 transition-all duration-300"
                           onClick={handleReset}
                         >
-                          Reset
+                          {t('buttons.reset')}
                         </Button>
                         <Button
                           type="submit"
                           className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
                           disabled={isSubmitting}
                         >
-                          {isSubmitting ? "Saving..." : "Submit Data"}
+                          {isSubmitting ? "Saving..." : t("buttons.submit")}
                         </Button>
                       </div>
                     </CardFooter>

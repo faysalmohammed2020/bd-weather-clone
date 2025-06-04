@@ -1,4 +1,4 @@
-  "use client";
+"use client";
 
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -47,6 +47,9 @@ export default function LanguageSwitcher() {
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => switchLanguage("ar")}>
           <span className={locale === "ar" ? "font-bold" : ""}>العربية</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => switchLanguage("ja")}>
+          <span className={locale === "ja" ? "font-bold" : ""}>日本語</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
