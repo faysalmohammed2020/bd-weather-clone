@@ -633,6 +633,172 @@
         "uvRisk": "{status} RISK",
         "uvDescription": "Maximum UV exposure will reach {status} levels today."
     },
+    "userTable": {
+        "title": "User Management",
+        "createUser": "+ Create User",
+        "editUser": "Edit User",
+        "createNewUser": "Create New User",
+        "updateUser": "Update User",
+        "form": {
+            "name": "Name",
+            "email": "Email",
+            "password": "Password",
+            "newPassword": "New Password",
+            "role": "Role",
+            "selectRole": "Select Role",
+            "stationName": "Station Name",
+            "stationId": "Station ID",
+            "stationCode": "Station Code (Security Code)",
+            "division": "Division",
+            "district": "District",
+            "upazila": "Upazila",
+            "selectDivision": "Select Division",
+            "selectDistrict": "Select District",
+            "selectUpazila": "Select Upazila",
+            "selectStation": "Select Station",
+            "loading": "Loading...",
+            "minCharacters": "Min {count} characters"
+        },
+        "validation": {
+            "selectRoleFirst": "Please select a role first",
+            "fillAllFields": "Please fill all required fields",
+            "passwordLength": "Password must be at least {count} characters for {role} role"
+        },
+        "toast": {
+            "createSuccess": "User created successfully",
+            "createFailed": "Failed to create user",
+            "updateSuccess": "User updated successfully",
+            "updateFailed": "Failed to update user",
+            "deleteSuccess": "User deleted successfully",
+            "deleteFailed": "Failed to delete user",
+            "cannotDeleteSelf": "You cannot delete your own account",
+            "cannotDeleteSuperAdmin": "Super admin accounts cannot be deleted",
+            "cannotModifySuperAdmin": "Super admin roles cannot be modified"
+        },
+        "table": {
+            "headers": {
+                "name": "Name",
+                "email": "Email",
+                "role": "Role",
+                "station": "Station",
+                "joined": "Joined",
+                "actions": "Actions"
+            },
+            "loading": "Loading...",
+            "noUsers": "No users found.",
+            "edit": "Edit",
+            "delete": "Delete"
+        },
+        "pagination": {
+            "showing": "Showing {from} to {to} of {total} users",
+            "previous": "Previous",
+            "next": "Next"
+        },
+        "dialogs": {
+            "delete": {
+                "title": "Confirm Deletion",
+                "description": "Are you sure you want to delete this user? This action cannot be undone.",
+                "cancel": "Cancel",
+                "confirm": "Delete"
+            },
+            "roleChange": {
+                "title": "Confirm Role Change",
+                "description": "Are you sure you want to change this user's role from {original} to {updated}?",
+                "warning": "Changing user roles affects their permissions and access levels in the system.",
+                "cancel": "Cancel",
+                "confirm": "Confirm Change"
+            }
+        }
+    },
+    "pagination": {
+        "page": "Page",
+        "of": "of",
+        "previous": "Previous",
+        "next": "Next"
+    },
+    "logsTable": {
+        "title": "Logs",
+        "headers": {
+            "time": "Time",
+            "actorName": "Actor Name",
+            "actorEmail": "Actor Email",
+            "actorRole": "Actor Role",
+            "targetUser": "Target User",
+            "targetEmail": "Target Email",
+            "action": "Action",
+            "actionText": "Action Text",
+            "module": "Module",
+            "details": "Details"
+        },
+        "viewButton": "View",
+        "pagination": {
+            "showing": "Showing",
+            "to": "to",
+            "of": "of",
+            "results": "results",
+            "previous": "Previous",
+            "next": "Next"
+        },
+        "dialog": {
+            "title": "Log Details",
+            "subtitle": "(Changes made)"
+        }
+    },
+    "settings": {
+        "title": "Account Settings",
+        "securitySectionTitle": "Security",
+        "twoFactor": {
+            "title": "Two-Factor Authentication",
+            "description": "Add an extra layer of security to your account by requiring a verification code",
+            "enable": {
+                "title": "Enable Two-Factor Authentication",
+                "description": "Enter your password to enable two-factor authentication.",
+                "passwordLabel": "Password",
+                "passwordPlaceholder": "Enter your password",
+                "buttonCancel": "Cancel",
+                "buttonContinue": "Continue",
+                "processing": "Processing..."
+            },
+            "qrcode": {
+                "title": "Scan QR Code",
+                "description": "Scan this QR code with your authenticator app.",
+                "instruction": "After scanning the QR code, your authenticator app will display a 6-digit code.",
+                "backupCodesTitle": "Backup Codes",
+                "backupCodesDescription": "Save these backup codes in a secure place. You can use them to sign in if you lose access to your authenticator app.",
+                "buttonCancel": "Cancel",
+                "buttonContinue": "Continue to Verification"
+            },
+            "verify": {
+                "title": "Verify Authentication Code",
+                "description": "Enter the 6-digit code from your authenticator app.",
+                "codeLabel": "Verification Code",
+                "codePlaceholder": "Enter 6-digit code",
+                "buttonBack": "Back",
+                "buttonVerify": "Verify & Enable 2FA",
+                "verifying": "Verifying..."
+            },
+            "disable": {
+                "title": "Disable Two-Factor Authentication",
+                "description": "Enter your password to disable two-factor authentication. This will make your account less secure.",
+                "passwordLabel": "Password",
+                "passwordPlaceholder": "Enter your password",
+                "buttonCancel": "Cancel",
+                "buttonDisable": "Disable 2FA",
+                "disabling": "Disabling..."
+            },
+            "errors": {
+                "passwordRequired": "Password is required",
+                "verificationRequired": "Verification code is required",
+                "initiateFailed": "Failed to initiate 2FA setup",
+                "verifyFailed": "Failed to verify code",
+                "disableFailed": "Failed to disable 2FA"
+            },
+            "success": {
+                "enabled": "Two-factor authentication enabled successfully!",
+                "disabled": "Two-factor authentication disabled successfully"
+            }
+        }
+    },
     "common": {
         "loading": "Loading...",
         "lastUpdated": "Last updated at",
