@@ -8,7 +8,6 @@
     "signIn": "تسجيل الدخول",
     "accessDashboard": "الوصول إلى لوحة التحكم",
     "brandName": "طقس بنغلاديش",
-
     "heroSection": {
       "liveUpdate": "تحديثات الطقس الحية",
       "heading": "لوحة تحكم الطقس في بنغلاديش",
@@ -32,7 +31,6 @@
       }
     }
   },
-
   "sidebar": {
     "dashboard": "لوحة التحكم",
     "dataEntry": "إدخال البيانات",
@@ -46,7 +44,6 @@
     "dailySummary": "الملخص اليومي",
     "viewAllExport": "عرض الكل وتصدير"
   },
-
   "firstCard": {
     "title": "ساعة التوقيت العالمي",
     "observingTime": "وقت المراقبة",
@@ -63,7 +60,6 @@
       "altimeterSetting": "إعداد مقياس الارتفاع (QNH)",
       "twentyFourHourChange": "تغير الضغط خلال 24 ساعة"
     },
-
     "temperatureSection": {
       "title": "درجة الحرارة",
       "asRead": "كما قرئ",
@@ -125,7 +121,6 @@
       "weather": "الظروف الجوية"
     }
   },
-
   "signin": {
     "title": "طقس بنغلاديش",
     "selectStation": "اختر محطة الطقس الخاصة بك للمتابعة.",
@@ -172,6 +167,14 @@
       "yes": "من المتوقع هطول أمطار خفيفة خلال الـ 24 ساعة القادمة.",
       "no": "لا يُتوقع هطول أمطار خلال الـ 24 ساعة القادمة."
     },
+    "mapControls": {
+      "title": "عناصر التحكم في الخريطة",
+      "stationsLabel": "محطات الرصد",
+      "loading": "جاري التحميل...",
+      "noStations": "لا توجد محطات",
+      "selectStation": "اختر محطة",
+      "error": "خطأ: {error}"
+    },
     "statusBanner": {
       "title": "حالة النظام",
       "message": "جميع الحساسات تعمل • البيانات تُبث مباشرة",
@@ -188,6 +191,29 @@
       "visibility": "الرؤية كم",
       "uvIndex": "مؤشر الأشعة فوق البنفسجية"
     }
+  },
+  "DailySummaryChart": {
+    "fetchError": "فشل في جلب البيانات: {status}",
+    "unknownError": "حدث خطأ غير معروف",
+    "chartTitle": "بيانات {metric} اليومية",
+    "weatherData": "الطقس",
+    "7days": "٧ أيام",
+    "30days": "٣٠ يومًا",
+    "90days": "٩٠ يومًا",
+    "atStation": "في محطة {station}",
+    "chartDescription": "عرض بيانات {metric} لآخر {days}{station}",
+    "value": "القيمة",
+    "loading": "جاري تحميل بيانات الطقس...",
+    "dashboardTitle": "لوحة بيانات الطقس",
+    "errorTitle": "خطأ في تحميل البيانات",
+    "errorHeading": "فشل تحميل بيانات الطقس",
+    "retry": "إعادة المحاولة",
+    "noDataTitle": "لا توجد بيانات متاحة",
+    "noDataHeading": "لا توجد بيانات للطقس",
+    "noDataSuggestion": "حاول تعديل النطاق الزمني أو تحقق من وجود بيانات للفترة المحددة.",
+    "recordCount": "{count} سجل",
+    "selectMetric": "اختر المقياس",
+    "timeRange": "النطاق الزمني"
   },
   "weather": {
     "conditions": {
@@ -390,7 +416,6 @@
       }
     }
   },
-
   "secondCardValidation": {
     "required": "هذا الحقل مطلوب",
     "invalidFormat": "تنسيق غير صالح",
@@ -412,136 +437,6 @@
     "precipitationValue": "أدخل قيمة بين 1 و 989",
     "intermittentRain": "حدد ما إذا كانت الأمطار متقطعة",
     "observationTime": "اختر ساعة رصد صالحة"
-  },
-  "secondCardTable": {
-    "title": "بيانات رصد الطقس",
-    "filters": {
-      "station": "محطة",
-      "allStations": "جميع المحطات",
-      "dateRange": "نطاق التاريخ",
-      "to": "إلى",
-      "stationId": "معرّف المحطة",
-      "selectStation": "اختر المحطة"
-    },
-    "header": {
-      "dataType": "نوع البيانات",
-      "stationNo": "رقم المحطة",
-      "stationName": "اسم المحطة",
-      "date": "التاريخ"
-    },
-    "table": {
-      "timeUtc": "وقت الرصد (UTC)",
-      "obsDate": "تاريخ الرصد",
-      "stationId": "معرّف المحطة",
-      "totalCloud": "الكمية (N)",
-      "lowCloud": {
-        "direction": "الاتجاه",
-        "height": "الارتفاع (H)",
-        "form": "الشكل (CL)",
-        "amount": "الكمية"
-      },
-      "mediumCloud": {
-        "direction": "الاتجاه",
-        "height": "الارتفاع (H)",
-        "form": "الشكل (CM)",
-        "amount": "الكمية"
-      },
-      "highCloud": {
-        "direction": "الاتجاه",
-        "height": "الارتفاع (H)",
-        "form": "الشكل (CH)",
-        "amount": "الكمية"
-      },
-      "significantCloud": {
-        "height1": "الارتفاع 1",
-        "form1": "الشكل 1",
-        "amount1": "الكمية 1",
-        "height2": "الارتفاع 2",
-        "form2": "الشكل 2",
-        "amount2": "الكمية 2",
-        "height3": "الارتفاع 3",
-        "form3": "الشكل 3",
-        "amount3": "الكمية 3",
-        "height4": "الارتفاع 4",
-        "form4": "الشكل 4",
-        "amount4": "الكمية 4"
-      },
-      "rainfall": {
-        "start": "وقت البدء",
-        "end": "وقت الانتهاء",
-        "sincePrev": "منذ الملاحظة السابقة",
-        "duringPrev": "خلال الست ساعات السابقة",
-        "last24": "آخر 24 ساعة"
-      },
-      "wind": {
-        "anemo1": "مقياس الرياح الأول",
-        "anemo2": "مقياس الرياح الثاني",
-        "speed": "السرعة",
-        "direction": "الاتجاه"
-      },
-      "observer": "أحرف المراقب الأولى",
-      "actions": "تعديل"
-    },
-    "states": {
-      "loading": "جارٍ تحميل البيانات...",
-      "noData": "لم يتم العثور على بيانات رصد جوية",
-      "tryDifferent": "جرّب اختيار تاريخ أو محطة مختلفة"
-    },
-    "footer": {
-      "date": "التاريخ",
-      "records": "{{count}} سجل(ات)",
-      "station": "المحطة: {{station}}"
-    },
-    "editDialog": {
-      "title": "تعديل بيانات رصد الطقس",
-      "save": "حفظ التغييرات",
-      "cancel": "إلغاء",
-      "saving": "جارٍ الحفظ...",
-      "fields": {
-        "totalCloud": "كمية السحب الكلية",
-        "rainfall": {
-          "start": "وقت بدء هطول المطر",
-          "end": "وقت انتهاء هطول المطر",
-          "sincePrev": "الهطول منذ الرصد السابق",
-          "duringPrev": "الهطول خلال الست ساعات السابقة",
-          "last24": "الهطول خلال آخر 24 ساعة"
-        },
-        "wind": {
-          "anemo1": "مقياس الرياح الأول",
-          "anemo2": "مقياس الرياح الثاني",
-          "speed": "سرعة الرياح",
-          "direction": "اتجاه الرياح"
-        },
-        "observerInitial": "أحرف المراقب الأولى",
-        "clouds": {
-          "low": {
-            "direction": "اتجاه السحب المنخفضة",
-            "height": "ارتفاع السحب المنخفضة",
-            "form": "شكل السحب المنخفضة",
-            "amount": "كمية السحب المنخفضة"
-          },
-          "medium": {
-            "direction": "اتجاه السحب المتوسطة",
-            "height": "ارتفاع السحب المتوسطة",
-            "form": "شكل السحب المتوسطة",
-            "amount": "كمية السحب المتوسطة"
-          },
-          "high": {
-            "direction": "اتجاه السحب العالية",
-            "height": "ارتفاع السحب العالية",
-            "form": "شكل السحب العالية",
-            "amount": "كمية السحب العالية"
-          },
-          "significant": {
-            "layer1": {
-              "height": "ارتفاع الطبقة 1",
-              "form": "شكل الطبقة 1",
-              "amount": "كمية الطبقة 1"
-            }
-          }
-        }
-      }
-    }
   },
   "firstCardTable": {
     "dateRange": "نطاق التاريخ",
@@ -650,6 +545,166 @@
       "pastWeatherW2": "الطقس السابق (W₂)",
       "presentWeatherWW": "الطقس الحالي (ww)",
       "c2Indicator": "المؤشر C2"
+    }
+  },
+  "secondCardTable": {
+    "title": "جدول بيانات البطاقة الثانية",
+    "loading": "جاري تحميل البيانات...",
+    "dateRange": {
+      "to": "إلى"
+    },
+    "filters": {
+      "station": "المحطة",
+      "allStations": "جميع المحطات"
+    },
+    "actions": {
+      "exportCSV": "تصدير CSV",
+      "editRecord": "تعديل هذا السجل",
+      "noPermission": "ليس لديك صلاحية لتعديل هذا السجل",
+      "cancel": "إلغاء",
+      "saving": "جاري الحفظ...",
+      "saveChanges": "حفظ التغييرات",
+      "close": "إغلاق"
+    },
+    "form": {
+      "dataType": "نوع البيانات",
+      "stationNo": "رقم المحطة",
+      "year": "السنة",
+      "station": "المحطة",
+      "fields": {
+        "totalCloudAmount": "إجمالي كمية السحب (رقم واحد)",
+        "lowCloudDirection": "اتجاه السحب المنخفضة (رقم واحد)",
+        "lowCloudHeight": "ارتفاع السحب المنخفضة (رقم واحد)",
+        "lowCloudForm": "شكل السحب المنخفضة (رقم واحد)",
+        "lowCloudAmount": "كمية السحب المنخفضة (رقم واحد)",
+        "mediumCloudDirection": "اتجاه السحب المتوسطة (رقم واحد)",
+        "mediumCloudHeight": "ارتفاع السحب المتوسطة (رقم واحد)",
+        "mediumCloudForm": "شكل السحب المتوسطة (رقم واحد)",
+        "mediumCloudAmount": "كمية السحب المتوسطة (رقم واحد)",
+        "highCloudDirection": "اتجاه السحب العالية (رقم واحد)",
+        "highCloudHeight": "ارتفاع السحب العالية (رقم واحد)",
+        "highCloudForm": "شكل السحب العالية (رقم واحد)",
+        "highCloudAmount": "كمية السحب العالية (رقم واحد)",
+        "rainfallStartTime": "وقت بداية المطر",
+        "rainfallEndTime": "وقت نهاية المطر",
+        "rainfallSincePrevious": "المطر منذ السابق (رقمان)",
+        "rainfallDuringPrevious": "المطر خلال السابق (4 أرقام)",
+        "rainfallLast24Hours": "المطر في آخر 24 ساعة (رقمان)",
+        "windFirstAnemometer": "مقياس الرياح الأول (5 أرقام)",
+        "windSecondAnemometer": "مقياس الرياح الثاني (5 أرقام)",
+        "windSpeed": "سرعة الرياح (3 أرقام)",
+        "windDirection": "اتجاه الرياح (3 أرقام)",
+        "observerInitial": "أحرف المراقب الأولى (للقراءة فقط)",
+        "layer1Height": "ارتفاع الطبقة الأولى (رقمان)",
+        "layer1Form": "شكل الطبقة الأولى (رقم واحد)",
+        "layer1Amount": "كمية الطبقة الأولى (رقم واحد)",
+        "layer2Height": "ارتفاع الطبقة الثانية (رقمان)",
+        "layer2Form": "شكل الطبقة الثانية (رقم واحد)",
+        "layer2Amount": "كمية الطبقة الثانية (رقم واحد)",
+        "layer3Height": "ارتفاع الطبقة الثالثة (رقمان)",
+        "layer3Form": "شكل الطبقة الثالثة (رقم واحد)",
+        "layer3Amount": "كمية الطبقة الثالثة (رقم واحد)",
+        "layer4Height": "ارتفاع الطبقة الرابعة (رقمان)",
+        "layer4Form": "شكل الطبقة الرابعة (رقم واحد)",
+        "layer4Amount": "كمية الطبقة الرابعة (رقم واحد)"
+      }
+    },
+    "table": {
+      "headers": {
+        "timeUTC": "وقت المراقبة (UTC)",
+        "c2Indicator": "مؤشر C2",
+        "date": "التاريخ",
+        "station": "المحطة",
+        "totalCloudAmount": "إجمالي كمية السحب (أوكتا)",
+        "lowCloudDirection": "اتجاه السحب المنخفضة",
+        "lowCloudHeight": "ارتفاع السحب المنخفضة",
+        "lowCloudForm": "شكل السحب المنخفضة",
+        "lowCloudAmount": "كمية السحب المنخفضة",
+        "mediumCloudDirection": "اتجاه السحب المتوسطة",
+        "mediumCloudHeight": "ارتفاع السحب المتوسطة",
+        "mediumCloudForm": "شكل السحب المتوسطة",
+        "mediumCloudAmount": "كمية السحب المتوسطة",
+        "highCloudDirection": "اتجاه السحب العالية",
+        "highCloudHeight": "ارتفاع السحب العالية",
+        "highCloudForm": "شكل السحب العالية",
+        "highCloudAmount": "كمية السحب العالية",
+        "layer1Height": "ارتفاع الطبقة الأولى",
+        "layer1Form": "شكل الطبقة الأولى",
+        "layer1Amount": "كمية الطبقة الأولى",
+        "layer2Height": "ارتفاع الطبقة الثانية",
+        "layer2Form": "شكل الطبقة الثانية",
+        "layer2Amount": "كمية الطبقة الثانية",
+        "layer3Height": "ارتفاع الطبقة الثالثة",
+        "layer3Form": "شكل الطبقة الثالثة",
+        "layer3Amount": "كمية الطبقة الثالثة",
+        "layer4Height": "ارتفاع الطبقة الرابعة",
+        "layer4Form": "شكل الطبقة الرابعة",
+        "layer4Amount": "كمية الطبقة الرابعة",
+        "rainfallStartTime": "وقت بداية المطر",
+        "rainfallEndTime": "وقت نهاية المطر",
+        "sincePrevious": "منذ السابق",
+        "duringPrevious": "خلال السابق",
+        "last24Hours": "آخر 24 ساعة",
+        "windFirstAnemometer": "قراءة مقياس الرياح الأول",
+        "windSecondAnemometer": "قراءة مقياس الرياح الثاني",
+        "speedKTS": "السرعة (عقدة)",
+        "windSpeed": "سرعة الرياح",
+        "windDirection": "اتجاه الرياح",
+        "direction": "الاتجاه",
+        "observerInitial": "أحرف المراقب الأولى",
+        "observer": "المراقب",
+        "actions": "الإجراءات",
+        "formCode": "شكل (كود)",
+        "amountOcta": "كمية (أوكتا)",
+        "directionCode": "اتجاه (كود)",
+        "heightOfBaseCode": "ارتفاع القاعدة (كود)",
+        "timeOfStart": "وقت البداية",
+        "timeOfEnd": "وقت النهاية",
+        "firstAnemometerReading": "قراءة مقياس الرياح الأول",
+        "secondAnemometerReading": "قراءة مقياس الرياح الثاني"
+      },
+      "sections": {
+        "cloud": "السحب",
+        "significantCloud": "السحب المهمة",
+        "lowCloud": "منخفضة",
+        "mediumCloud": "متوسطة",
+        "highCloud": "عالية",
+        "layer1": "الطبقة الأولى",
+        "layer2": "الطبقة الثانية",
+        "layer3": "الطبقة الثالثة",
+        "layer4": "الطبقة الرابعة",
+        "rainfall": "الأمطار",
+        "wind": "الرياح"
+      }
+    },
+    "dialog": {
+      "editTitle": "تعديل مراقبة الطقس",
+      "editDescription": "تعديل سجل من {station} في {date}",
+      "unknownStation": "محطة غير معروفة",
+      "unknownDate": "تاريخ غير معروف",
+      "permissionDeniedTitle": "تم رفض الإذن",
+      "permissionDeniedMessage": "ليس لديك صلاحية لتعديل هذا السجل. قد يكون هذا بسبب:",
+      "permissionReasons": {
+        "tooOld": "السجل قديم جداً للتعديل",
+        "differentStation": "السجل ينتمي لمحطة مختلفة",
+        "insufficientRole": "ليس لديك صلاحيات الدور المطلوبة"
+      }
+    },
+    "messages": {
+      "updateSuccess": "تم تحديث مراقبة الطقس بنجاح",
+      "exportSuccess": "تم بدء تصدير CSV"
+    },
+    "errors": {
+      "fetchFailed": "فشل في جلب بيانات مراقبة الطقس",
+      "updateFailed": "فشل في تحديث مراقبة الطقس",
+      "noDataToExport": "لا توجد بيانات مراقبة طقس متاحة للتصدير",
+      "invalidDate": "تنسيق تاريخ غير صالح",
+      "startDateAfterEnd": "تاريخ البداية لا يمكن أن يكون بعد تاريخ النهاية",
+      "endDateBeforeStart": "تاريخ النهاية لا يمكن أن يكون قبل تاريخ البداية"
+    },
+    "noData": {
+      "title": "لم يتم العثور على مراقبات طقس",
+      "subtitle": "جرب اختيار تاريخ أو محطة مختلفة"
     }
   },
   "synopticCode": {
