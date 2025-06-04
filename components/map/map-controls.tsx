@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useSession } from "@/lib/auth-client";
+import { useTranslations } from "next-intl";
 
 interface Station {
   id: string;
@@ -22,7 +23,6 @@ interface Station {
 }
 
 export default function MapControls({
-
   setSelectedRegion,
   selectedStation,
   setSelectedStation,
@@ -36,12 +36,12 @@ export default function MapControls({
   selectedStation: Station | null;
   setSelectedStation: (station: Station | null) => void;
 }) {
+  const t = useTranslations("dashboard.mapControls");
   const { data: session } = useSession();
   const [stations, setStations] = useState<Station[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch stations based on user role
   useEffect(() => {
     const fetchStations = async () => {
       setLoading(true);
@@ -54,13 +54,13 @@ export default function MapControls({
         const data = await response.json();
         setStations(data);
 
-        // If user is station_admin or observer, auto-select their station
         if (
           session?.user?.role === "station_admin" ||
           session?.user?.role === "observer"
         ) {
           const userStation = data.find(
-            (station: Station) => station.stationId === session?.user?.station?.stationId
+            (station: Station) =>
+              station.stationId === session?.user?.station?.stationId
           );
           if (userStation) {
             setSelectedStation(userStation);
@@ -68,7 +68,7 @@ export default function MapControls({
           }
         }
       } catch (err) {
-        setError("Failed to fetch stations");
+        setError("fetch");
         console.error("Error fetching stations:", err);
       } finally {
         setLoading(false);
@@ -78,21 +78,24 @@ export default function MapControls({
     fetchStations();
   }, [session, setSelectedStation, setSelectedRegion]);
 
-  // Filter stations based on user role
   const permittedStations =
     session?.user.role === "super_admin"
       ? stations
       : stations.filter(
-          (station) => station.stationId === session?.user?.station?.stationId
+          (station) =>
+            station.stationId === session?.user?.station?.stationId
         );
 
   return (
     <div className="p-4">
       <h3 className="text-lg font-medium bg-blue-400 text-white py-2 px-4 mb-4 rounded">
-        Map Controls
+        {t("title")}
       </h3>
 
-<label className="block text-sm font-medium text-gray-700 mb-1.5">Stations</label>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        {t("stationsLabel")}
+      </label>
+
       <Select
         value={selectedStation?.stationId || ""}
         onValueChange={(value) => {
@@ -105,10 +108,10 @@ export default function MapControls({
           <SelectValue
             placeholder={
               loading
-                ? "Loading..."
+                ? t("loading")
                 : permittedStations.length === 0
-                  ? "No stations"
-                  : "Select Station"
+                ? t("noStations")
+                : t("selectStation")
             }
           />
         </SelectTrigger>
@@ -121,7 +124,11 @@ export default function MapControls({
         </SelectContent>
       </Select>
 
-      {error && <div className="mt-4 text-red-600 text-sm">Error: {error}</div>}
+      {error && (
+        <div className="mt-4 text-red-600 text-sm">
+          {t("error", { error })}
+        </div>
+      )}
     </div>
   );
 }
