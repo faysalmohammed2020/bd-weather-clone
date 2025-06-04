@@ -6,16 +6,18 @@
         "loadingStations": "Loading stations...",
         "stationPlaceholder": "Select your station",
         "continue": "Continue",
+        "verifying": "Verifying...",
         "backToStation": "Back to Station Selection",
         "securityPrompt": "Enter security code for",
         "credentialsPrompt": "Enter your credentials to sign in to",
         "role": "Role",
-        "emailPlaceholder": "Enter your email address",
-        "passwordPlaceholder": "Enter your password",
+        "email": "Enter your email address",
+        "password": "Enter your password",
         "remember": "Remember me",
         "forgotPassword": "Forgot password",
         "signIn": "Sign In",
-        "backToSecurity": "Back to Security Code"
+        "backToSecurity": "Back to Security Code",
+        "signingIn": "Signing in..."
     },
     "authErrors": {
         "invalidCredentials": "Invalid email or password",
@@ -28,6 +30,45 @@
         "emptyRole": "Please select a role",
         "emptyCredentials": "Please enter both email and password",
         "invalidStation": "Invalid station selection"
+    },
+    "signUpForm": {
+        "title": "Create Account",
+        "subtitle": "Join us today! It's quick and easy.",
+        "name": {
+            "label": "Name",
+            "placeholder": "Enter your name"
+        },
+        "station": {
+            "label": "Weather Station",
+            "placeholder": "Select your station",
+            "error": "Could not load stations. Please try again later."
+        },
+        "email": {
+            "label": "Email",
+            "placeholder": "Enter your email address"
+        },
+        "role": {
+            "label": "Role"
+        },
+        "password": {
+            "label": "Password",
+            "placeholder": "Enter your password",
+            "show": "Show",
+            "hide": "Hide"
+        },
+        "terms": {
+            "label": "I agree to the",
+            "link": "terms and conditions"
+        },
+        "button": {
+            "signUp": "Sign Up",
+            "creating": "Creating..."
+        },
+        "alreadyHaveAccount": "Already have an account?",
+        "signIn": "Sign In",
+        "toast": {
+            "success": "Registration successful"
+        }
     },
     "mapControls": {
         "title": "Map Controls",
