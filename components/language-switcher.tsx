@@ -1,44 +1,54 @@
-"use client"
+  "use client";
 
-import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Globe } from "lucide-react"
-import type { Locale } from "@/i18n-config"
+import { useRouter, usePathname } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Globe } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 
-interface LanguageSwitcherProps {
-  lang: Locale
-  dictionary: any
-}
+export default function LanguageSwitcher() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const { locale } = useParams();
+  const t = useTranslations();
 
-export default function LanguageSwitcher({ lang, dictionary }: LanguageSwitcherProps) {
-  const pathname = usePathname()
-  const otherLang = lang === "ar" ? "en" : "ar"
-  const isRtl = lang === "ar"
+  // Set initial direction based on current locale
+  useEffect(() => {
+    document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
+    document.documentElement.lang = locale as string;
+  }, [locale]);
 
-  // Replace the current language segment with the other language
-  // or add the language segment if it's a non-localized route
-  const newPathname = pathname.startsWith(`/${lang}`)
-    ? pathname.replace(`/${lang}`, `/${otherLang}`)
-    : `/${otherLang}${pathname}`
-
-  const handleLanguageChange = () => {
-    // Force a full page reload to ensure all RTL/LTR styles are properly applied
-    window.location.href = newPathname
-  }
+  const switchLanguage = (newLocale: string) => {
+    router.push(pathname, { locale: newLocale });
+    // The useEffect will handle the direction change after the locale changes
+  };
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="text-muted-foreground hover:text-foreground"
-      onClick={handleLanguageChange}
-    >
-      <Globe className={`h-4 w-4 ${isRtl ? "ml-1.5" : "mr-1.5"}`} />
-      <span>
-        {dictionary.header?.switchToArabic ||
-          dictionary.common?.switchLanguage ||
-          (lang === "ar" ? "English" : "العربية")}
-      </span>
-    </Button>
-  )
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="bg-green-700 hover:bg-green-600 text-white hover:text-white"
+        >
+          <Globe className="h-5 w-5" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => switchLanguage("en")}>
+          <span className={locale === "en" ? "font-bold" : ""}>English</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => switchLanguage("ar")}>
+          <span className={locale === "ar" ? "font-bold" : ""}>العربية</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }

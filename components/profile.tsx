@@ -4,6 +4,7 @@ import { signOut, useSession } from "@/lib/auth-client";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
+import LanguageSwitcher from "./language-switcher";
 
 const Profile = () => {
   const router = useRouter();
@@ -25,6 +26,8 @@ const Profile = () => {
           </div>
         </>
       )}
+
+      <LanguageSwitcher />
 
       <Button
         variant="secondary"
