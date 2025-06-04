@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Cloud, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link"; 
+import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 // Import components for each section
 import HeroSection from "@/components/sections/hero-section";
@@ -16,6 +17,7 @@ import WeatherAlertsSection from "@/components/sections/weather-alerts-section";
 import TestimonialsSection from "@/components/sections/testimonials-section";
 import CtaSection from "@/components/sections/cta-section";
 import Footer from "@/components/footer";
+import LanguageSwitcher from "@/components/language-switcher";
 
 export default function LandingPage() {
   // Header state
@@ -35,6 +37,8 @@ export default function LandingPage() {
     return pathname === path;
   };
 
+  const t = useTranslations("landingPage");
+
   return (
     <div className="flex min-h-screen flex-col">
       {/* Header */}
@@ -52,7 +56,7 @@ export default function LandingPage() {
               <Cloud className="h-8 w-8 text-white absolute inset-0" />
             </div>
             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400">
-              BD Weather
+              {t("brandName")}
             </span>
           </Link>
 
@@ -66,7 +70,7 @@ export default function LandingPage() {
                   : "text-gray-700 dark:text-gray-300"
               }`}
             >
-              Home
+              {t("home")}
             </Link>
             <Link
               href="/features"
@@ -76,7 +80,7 @@ export default function LandingPage() {
                   : "text-gray-700 dark:text-gray-300"
               }`}
             >
-              Features
+              {t("features")}
             </Link>
             <Link
               href="/about"
@@ -86,7 +90,7 @@ export default function LandingPage() {
                   : "text-gray-700 dark:text-gray-300"
               }`}
             >
-              About
+              {t("about")}
             </Link>
             <Link
               href="/data-sources"
@@ -96,7 +100,7 @@ export default function LandingPage() {
                   : "text-gray-700 dark:text-gray-300"
               }`}
             >
-              Data Sources
+              {t("dataSources")}
             </Link>
             <Link
               href="/contact"
@@ -106,14 +110,15 @@ export default function LandingPage() {
                   : "text-gray-700 dark:text-gray-300"
               }`}
             >
-              Contact
+              {t("contact")}
             </Link>
           </nav>
 
           <div className="flex items-center gap-4">
             <Link href="/sign-in" className="hidden md:block">
               <Button className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center gap-2">
-                Sign In
+                {t("signIn")}
+
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
@@ -131,6 +136,9 @@ export default function LandingPage() {
                 <Menu className="h-6 w-6" />
               )}
             </Button>
+            <div>
+              <LanguageSwitcher />
+            </div>
           </div>
         </div>
 
@@ -155,7 +163,7 @@ export default function LandingPage() {
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Home
+                    {t("home")}
                   </Link>
                   <Link
                     href="/features"
@@ -166,7 +174,7 @@ export default function LandingPage() {
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Features
+                    {t("features")}
                   </Link>
                   <Link
                     href="/about"
@@ -177,7 +185,7 @@ export default function LandingPage() {
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    About
+                    {t("about")}
                   </Link>
                   <Link
                     href="/data-sources"
@@ -188,7 +196,7 @@ export default function LandingPage() {
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Data Sources
+                    {t("dataSources")}
                   </Link>
                   <Link
                     href="/contact"
@@ -199,7 +207,7 @@ export default function LandingPage() {
                     }`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Contact
+                    {t("contact")}
                   </Link>
                   <Link
                     href="/dashboard"
@@ -207,7 +215,7 @@ export default function LandingPage() {
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Button className="w-full bg-gradient-to-r from-cyan-600 to-blue-600">
-                      Access Dashboard
+                      {t("accessDashboard")}
                     </Button>
                   </Link>
                 </nav>
