@@ -1026,7 +1026,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                       <div className="space-y-2">
                         <Label htmlFor="pressureChange24h">
-                          {t('barPressuretwentyFourHourChange')}
+                          {t('barPressure.twentyFourHourChange')}
                         </Label>
                         <Input
                           id="pressureChange24h"
@@ -1044,7 +1044,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         onClick={nextTab}
                         className="bg-blue-600 hover:bg-blue-700"
                       >
-                        {t("barPressure.next")} <ChevronRight className="ml-2 h-4 w-4" />
+                        {t("buttons.next")} <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>
                     </CardFooter>
                   </Card>
