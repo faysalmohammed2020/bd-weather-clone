@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -113,91 +114,93 @@ const Sidebar = () => {
     setActiveSubmenu(activeSubmenu === label ? null : label);
   };
 
+  const t = useTranslations("sidebar");
+
   const sidebarLinks = [
-    {
-      href: "/dashboard",
-      icon: <LayoutDashboard className="w-5 h-5" />,
-      label: "Dashboard",
-      roles: ["super_admin", "observer", "station_admin"],
-    },
-    {
-      icon: <PencilIcon className="w-5 h-5" />,
-      label: "Data Entry",
-      roles: ["observer", "station_admin", "super_admin"],
-      subMenu: [
-        {
-          icon: <CloudHail className="w-5 h-5" />,
-          href: "/dashboard/data-entry/first-card",
-          label: "First Card",
-        },
-        {
-          icon: <Binoculars className="w-5 h-5" />,
-          href: "/dashboard/data-entry/second-card",
-          label: "Second Card",
-        },
-        {
-          icon: <Codesandbox className="w-5 h-5" />,
-          href: "/dashboard/data-entry/synoptic-code",
-          label: "Synoptic Code",
-        },
-        {
-          icon: <BarChart className="w-5 h-5" />,
-          href: "/dashboard/data-entry/daily-summery",
-          label: "Daily Summery",
-        },
-      ],
-    },
-    {
-      icon: <Eye className="w-5 h-5" />,
-      label: "View & Manage",
-      roles: ["observer", "station_admin", "super_admin"],
-      subMenu: [
-        {
-          icon: <CloudHail className="w-5 h-5" />,
-          href: "/dashboard/view-and-manage/first-card-view",
-          label: "First Card",
-        },
-        {
-          icon: <Binoculars className="w-5 h-5" />,
-          href: "/dashboard/view-and-manage/second-card-view",
-          label: "Second Card",
-        },
-        {
-          icon: <Codesandbox className="w-5 h-5" />,
-          href: "/dashboard/view-and-manage/synoptic-code",
-          label: "Synoptic Code",
-        },
-        {
-          icon: <BarChart className="w-5 h-5" />,
-          href: "/dashboard/view-and-manage/daily-summery",
-          label: "Daily Summary",
-        },
-        {
-          icon: <FileBarChart className="w-5 h-5" />,
-          href: "/dashboard/view-and-manage/all",
-          label: "View all & Export",
-        },
-      ],
-    },
-    {
-      href: "/dashboard/user",
-      icon: <Users className="w-5 h-5" />,
-      label: "User Management",
-      roles: ["super_admin", "station_admin"],
-    },
-    {
-      href: "/dashboard/stations",
-      icon: <CloudFog className="w-5 h-5" />,
-      label: "Station Management",
-      roles: ["super_admin"],
-    },
-    {
-      href: "/dashboard/settings",
-      icon: <Settings className="w-5 h-5" />,
-      label: "Settings",
-      roles: ["super_admin"],
-    },
-  ];
+  {
+    href: "/dashboard",
+    icon: <LayoutDashboard className="w-5 h-5" />,
+    label: t("dashboard"),
+    roles: ["super_admin", "observer", "station_admin"],
+  },
+  {
+    icon: <PencilIcon className="w-5 h-5" />,
+    label: t("dataEntry"),
+    roles: ["observer", "station_admin", "super_admin"],
+    subMenu: [
+      {
+        icon: <CloudHail className="w-5 h-5" />,
+        href: "/dashboard/data-entry/first-card",
+        label: t('firstCard'), // Optional: translate if needed
+      },
+      {
+        icon: <Binoculars className="w-5 h-5" />,
+        href: "/dashboard/data-entry/second-card",
+        label: t("secondCard"),
+      },
+      {
+        icon: <Codesandbox className="w-5 h-5" />,
+        href: "/dashboard/data-entry/synoptic-code",
+        label: t("synopticCode"),
+      },
+      {
+        icon: <BarChart className="w-5 h-5" />,
+        href: "/dashboard/data-entry/daily-summery",
+        label: t("dailySummary"),
+      },
+    ],
+  },
+  {
+    icon: <Eye className="w-5 h-5" />,
+    label: t("viewManage"),
+    roles: ["observer", "station_admin", "super_admin"],
+    subMenu: [
+      {
+        icon: <CloudHail className="w-5 h-5" />,
+        href: "/dashboard/view-and-manage/first-card-view",
+        label: t('firstCard'),
+      },
+      {
+        icon: <Binoculars className="w-5 h-5" />,
+        href: "/dashboard/view-and-manage/second-card-view",
+        label: t("secondCard"),
+      },
+      {
+        icon: <Codesandbox className="w-5 h-5" />,
+        href: "/dashboard/view-and-manage/synoptic-code",
+        label:  t("synopticCode"),
+      },
+      {
+        icon: <BarChart className="w-5 h-5" />,
+        href: "/dashboard/view-and-manage/daily-summery",
+        label: t("dailySummary"),
+      },
+      {
+        icon: <FileBarChart className="w-5 h-5" />,
+        href: "/dashboard/view-and-manage/all",
+        label: t("viewAllExport"),
+      },
+    ],
+  },
+  {
+    href: "/dashboard/user",
+    icon: <Users className="w-5 h-5" />,
+    label: t("userManagement"),
+    roles: ["super_admin", "station_admin"],
+  },
+  {
+    href: "/dashboard/stations",
+    icon: <CloudFog className="w-5 h-5" />,
+    label: t("stationManagement"),
+    roles: ["super_admin"],
+  },
+  {
+    href: "/dashboard/settings",
+    icon: <Settings className="w-5 h-5" />,
+    label: t("settings"),
+    roles: ["super_admin"],
+  },
+];
 
   return (
     <>

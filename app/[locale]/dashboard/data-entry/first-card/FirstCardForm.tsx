@@ -33,6 +33,7 @@ import type { TimeInfo } from "@/lib/data-type";
 
 // Import validation schemas from separate file
 import { validationSchema } from "@/validations/first-card-validation";
+import { useTranslations } from "next-intl";
 
 export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const [activeTab, setActiveTab] = useState("pressure");
@@ -55,7 +56,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   });
 
   const { data: session } = useSession();
-
+  const t = useTranslations('firstCard')
   // Tab order for navigation
   const tabOrder = [
     "pressure",
@@ -893,12 +894,12 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                   >
                     <div className="p-4 bg-rose-200 text-rose-800">
                       <h3 className="text-lg font-semibold flex items-center">
-                        <BarChart3 className="mr-2" /> Bar Pressure Measurements
+                        <BarChart3 className="mr-2" /> {t('barPressure.title')}
                       </h3>
                     </div>
                     <CardContent className="pt-6 grid gap-4 sm:grid-cols-2">
                       <div className="space-y-2">
-                        <Label htmlFor="subIndicator">1st Card Indicator</Label>
+                        <Label htmlFor="subIndicator">{t('barPressure.cardIndicator')}</Label>
                         <Input
                           id="subIndicator"
                           name="subIndicator"
@@ -911,7 +912,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                       <div className="space-y-2">
                         <Label htmlFor="attachedThermometer">
-                          Attached Thermometer
+                          {t("barPressure.attachedThermometer")}
                         </Label>
                         <Input
                           id="alteredThermometer"
@@ -923,7 +924,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="barAsRead">Bar As Read(hPa)</Label>
+                        <Label htmlFor="barAsRead">{t("barPressure.barAsRead")}</Label>
                         <Input
                           id="barAsRead"
                           name="barAsRead"
@@ -943,7 +944,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                       <div className="space-y-2">
                         <Label htmlFor="correctedForIndex">
-                          Corrected for Index Temp-gravity(hPa)
+                         {t('barPressure.correctedForIndex')}
                         </Label>
                         <Input
                           id="correctedForIndex"
@@ -956,7 +957,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                       <div className="space-y-2">
                         <Label htmlFor="heightDifference">
-                          Height Difference Correction(hPa)
+                          {t('barPressure.heightDiffCorrection')}
                         </Label>
                         <Input
                           id="heightDifference"
@@ -970,7 +971,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                       <div className="space-y-2">
                         <Label htmlFor="stationLevelPressure">
-                          Station Level Pressure (P.P.P.P.hpa)
+                          {t('barPressure.stationLevelPressure')}
                         </Label>
                         <Input
                           id="stationLevelPressure"
@@ -984,7 +985,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                       <div className="space-y-2">
                         <Label htmlFor="seaLevelReduction">
-                          Sea Level Reduction Constant
+                         {t('barPressure.seaLevelReductionConstant')}
                         </Label>
                         <Input
                           id="seaLevelReduction"
@@ -998,7 +999,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                       <div className="space-y-2">
                         <Label htmlFor="correctedSeaLevelPressure">
-                          Sea-Level Pressure(PPPP)hpa
+                          {t('barPressure.seaLevelPressure')}
                         </Label>
                         <Input
                           id="correctedSeaLevelPressure"
@@ -1012,7 +1013,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                       <div className="space-y-2">
                         <Label htmlFor="afternoonReading">
-                          Altimeter setting(QNH)
+                          {t('barPressure.altimeterSetting')}
                         </Label>
                         <Input
                           id="afternoonReading"
@@ -1025,7 +1026,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                       <div className="space-y-2">
                         <Label htmlFor="pressureChange24h">
-                          24-Hour Pressure Change
+                          {t('barPressuretwentyFourHourChange')}
                         </Label>
                         <Input
                           id="pressureChange24h"
@@ -1043,7 +1044,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         onClick={nextTab}
                         className="bg-blue-600 hover:bg-blue-700"
                       >
-                        Next <ChevronRight className="ml-2 h-4 w-4" />
+                        {t("barPressure.next")} <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>
                     </CardFooter>
                   </Card>
