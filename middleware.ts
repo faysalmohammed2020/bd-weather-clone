@@ -15,18 +15,16 @@ async function authMiddleware(request: NextRequest, response: NextResponse) {
 
   const { pathname } = request.nextUrl;
 
-  type RoutePrefix = `/${string}/`;
-  const authRoutePrefix = ["/sign-in", "/sign-up"];
-  const protectedRoutePrefix: RoutePrefix[] = ["/dashboard/"];
+  const matchRoute = (path: string, routes: string[]) => {
+    return routes.some(route => 
+      path === route || 
+      path.endsWith(route) || 
+      routes.some(prefix => path.startsWith(prefix))
+    );
+  };
 
-  const isAuthRoute = authRoutePrefix.some((prefix) =>
-    pathname.startsWith(prefix)
-  );
-
-  const isProtectedRoute =
-    pathname === "/dashboard" ||
-    pathname.endsWith("/dashboard") ||
-    protectedRoutePrefix.some((prefix) => pathname.startsWith(prefix));
+  const isAuthRoute = matchRoute(pathname, ["/sign-in", "/sign-up"]);
+  const isProtectedRoute = matchRoute(pathname, ["/dashboard"]);
 
   if (isProtectedRoute && !session) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
