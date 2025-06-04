@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import SecondCardForm from "./SecondCard";
-import { getTimeData } from "@/app/actions/time-check";
+import { getTimeData } from "@/app/[lang]/actions/time-check";
 
 export default async function Home() {
   const timeInformation = await getTimeData();

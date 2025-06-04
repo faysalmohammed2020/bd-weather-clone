@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { LogsTable } from "./logs-table";
 import { UserTable } from "./user-table";
-import { getLogs } from "@/app/actions/logs";
+import { getLogs } from "@/app/[lang]/actions/logs";
 
 const UserPage = async ({ searchParams }: { searchParams: Promise<{ page?: string; limit?: string }> }) => {
   const { page, limit } = await searchParams;

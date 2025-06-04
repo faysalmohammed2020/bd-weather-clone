@@ -1,4 +1,4 @@
-import Sidebar from "./../../components/sidebar";
+import Sidebar from "../../../components/sidebar";
 import { LocationProvider } from "@/contexts/divisionContext";
 import { HourProvider } from "@/contexts/hourContext";
 import Profile from "@/components/profile";
