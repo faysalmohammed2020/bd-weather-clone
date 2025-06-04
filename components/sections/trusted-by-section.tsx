@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 export default function TrustedBySection() {
   const partners = [
@@ -10,6 +11,7 @@ export default function TrustedBySection() {
     "ICIMOD",
     "World Bank",
   ];
+  const t = useTranslations("landingPage.trustedBySection");
 
   return (
     <section className="relative w-full pb-10 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
@@ -22,15 +24,13 @@ export default function TrustedBySection() {
           viewport={{ once: true }}
         >
           <p className="text-sm font-semibold tracking-widest text-cyan-600 dark:text-cyan-400 uppercase">
-            Trusted by
+            {t("label")}
           </p>
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">
-            Leading Institutions & Global Partners
+            {t("title")}
           </h2>
           <p className="max-w-xl text-gray-500 dark:text-gray-400 text-sm md:text-base">
-            We proudly collaborate with esteemed organizations to deliver
-            reliable and innovative weather solutions across Bangladesh and
-            beyond.
+            {t("description")}
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-6 md:gap-10">
