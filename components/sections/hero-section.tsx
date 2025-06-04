@@ -23,6 +23,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useTranslations } from "next-intl";
 
 export default function HeroSection() {
   // Animation variants
@@ -30,6 +31,8 @@ export default function HeroSection() {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 },
   };
+
+  const t = useTranslations("landingPage.heroSection");
 
   const staggerContainer = {
     hidden: { opacity: 0 },
@@ -71,7 +74,6 @@ export default function HeroSection() {
     { name: "Nov", rainfall: 34 },
     { name: "Dec", rainfall: 12 },
   ];
-
 
   return (
     <section className="relative w-full py-12 md:py-24 lg:py-32 xl:py-48 overflow-hidden">
@@ -195,7 +197,7 @@ export default function HeroSection() {
               variants={fadeIn}
             >
               <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-xs font-medium">Live Weather Updates</span>
+              <span className="text-xs font-medium">{t("liveUpdate")}</span>
             </motion.div>
 
             <div className="space-y-2">
@@ -203,15 +205,13 @@ export default function HeroSection() {
                 className="pb-6 text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400"
                 variants={fadeIn}
               >
-                Bangladesh Weather Dashboard
+                {t("heading")}
               </motion.h1>
               <motion.p
                 className="max-w-[600px] text-gray-700 dark:text-gray-300 md:text-xl"
                 variants={fadeIn}
               >
-                Professional weather monitoring and forecasting for Bangladesh.
-                Access real-time data, forecasts, and historical trends with our
-                interactive dashboard.
+                {t("description")}
               </motion.p>
             </div>
 
@@ -224,7 +224,7 @@ export default function HeroSection() {
                   size="lg"
                   className="px-8 bg-gradient-to-r from-cyan-700 to-blue-700 hover:from-cyan-600 hover:to-blue-600 shadow-lg hover:shadow-blue-500/25 transition-all duration-300"
                 >
-                  Launch Dashboard
+                  {t("launchDashboard")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
@@ -234,7 +234,7 @@ export default function HeroSection() {
                   variant="outline"
                   className="px-8 border-cyan-300 dark:border-cyan-700 hover:bg-cyan-50 dark:hover:bg-cyan-950/30"
                 >
-                  Explore Features
+                  {t("exploreFeatures")}
                 </Button>
               </Link>
             </motion.div>
@@ -257,7 +257,7 @@ export default function HeroSection() {
                   64
                 </span>
                 <span className="text-xs text-gray-600 dark:text-gray-400">
-                  Districts
+                  {t("stats.districts")}
                 </span>
               </motion.div>
               <motion.div
@@ -273,7 +273,7 @@ export default function HeroSection() {
                   24/7
                 </span>
                 <span className="text-xs text-gray-600 dark:text-gray-400">
-                  Monitoring
+                  {t("stats.monitoring")}
                 </span>
               </motion.div>
               <motion.div
@@ -289,7 +289,7 @@ export default function HeroSection() {
                   95%
                 </span>
                 <span className="text-xs text-gray-600 dark:text-gray-400">
-                  Accuracy
+                  {t("stats.accuracy")}
                 </span>
               </motion.div>
             </motion.div>
@@ -466,9 +466,9 @@ export default function HeroSection() {
                 }}
               >
                 <Thermometer className="h-5 w-5 text-red-500" />
-                <span className="font-bold">28°C</span>
+                <span className="font-bold">{t("cards.tempValue")}</span>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Dhaka
+                  {t("cards.tempLocation")}
                 </span>
               </motion.div>
 
@@ -486,9 +486,9 @@ export default function HeroSection() {
                 }}
               >
                 <CloudRain className="h-5 w-5 text-blue-500" />
-                <span className="font-bold">15mm</span>
+                <span className="font-bold">{t("cards.rainfallValue")}</span>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Rainfall
+                  {t("stats.rainfall")}
                 </span>
               </motion.div>
 
@@ -506,9 +506,9 @@ export default function HeroSection() {
                 }}
               >
                 <Wind className="h-5 w-5 text-green-500" />
-                <span className="font-bold">12NM</span>
+                <span className="font-bold">{t("cards.windValue")}</span>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Wind
+                  {t("stats.wind")}
                 </span>
               </motion.div>
 
@@ -526,9 +526,9 @@ export default function HeroSection() {
                 }}
               >
                 <Droplets className="h-5 w-5 text-cyan-500" />
-                <span className="font-bold">65%</span>
+                <span className="font-bold">{t("cards.humidityValue")}</span>
                 <span className="text-sm text-gray-600 dark:text-gray-400">
-                  Humidity
+                  {t("stats.humidity")}
                 </span>
               </motion.div>
             </div>
