@@ -1664,14 +1664,14 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           className="w-full sm:w-auto border-slate-600 hover:bg-slate-100 transition-all duration-300"
                           onClick={handleReset}
                         >
-                          Reset
+                          {t('buttons.reset')}
                         </Button>
                         <Button
                           type="submit"
                           className="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 shadow-sm"
                           disabled={isSubmitting}
                         >
-                          {isSubmitting ? "Saving..." : "Submit Data"}
+                          {isSubmitting ? "Saving..." : t("buttons.submit")}
                         </Button>
                       </div>
                     </CardFooter>
