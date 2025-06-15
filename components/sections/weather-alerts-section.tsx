@@ -400,19 +400,19 @@ export default function WeatherAlertsSection() {
                     <Bar
                       dataKey="alerts"
                       fill="#f59e0b"
-                      name="Total Alerts"
+                      name={t("totalAlerts")}
                       radius={[4, 4, 0, 0]}
                     />
                     <Bar
                       dataKey="floods"
                       fill="#3b82f6"
-                      name="Floods"
+                      name={t("floods")}
                       radius={[4, 4, 0, 0]}
                     />
                     <Bar
                       dataKey="cyclones"
                       fill="#ef4444"
-                      name="Cyclones"
+                      name={t("cyclones")}
                       radius={[4, 4, 0, 0]}
                     />
                   </BarChart>
