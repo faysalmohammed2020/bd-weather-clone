@@ -98,7 +98,7 @@
       "totalAlerts": "Total Alerts",
       "floods": "Floods",
       "cyclones": "Cyclones",
-      "weatherTrends24h":"24 Hour Weather Trends",
+      "weatherTrends24h": "24 Hour Weather Trends",
       "activeAlerts": {
         "title": "Active Alerts",
         "floodWarnings": "Flood Warnings",
@@ -111,6 +111,25 @@
           "floods": "8",
           "cyclones": "2"
         }
+      }
+    },
+
+    "testimonials": {
+      "title": "Testimonials",
+      "subtitle": "Trusted by Professionals Across Bangladesh",
+      "description": "See what our users have to say about our weather dashboard.",
+      "reviews": {
+        "name1": "Dr. Rahman",
+        "role1": "Agricultural Scientist",
+        "quote1": "The rainfall forecasting has been instrumental in helping farmers in our region plan their planting and harvesting schedules. The accuracy is impressive.",
+
+        "name2": "Fatima Begum",
+        "role2": "Emergency Response Coordinator",
+        "quote2": "The early warning system for cyclones has been a game-changer for our coastal communities. We've been able to evacuate people well in advance of severe weather events.",
+
+        "name3": "Mohammed Ali",
+        "role3": "Research Analyst",
+        "quote3": "The historical data analysis tools have been invaluable for our climate change research. We can now identify long-term trends with much greater precision."
       }
     }
   },
