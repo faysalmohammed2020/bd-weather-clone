@@ -10,6 +10,7 @@ import {
   RadialChart,
   DonutChart,
 } from "@/components/charts";
+import { useTranslations } from "next-intl";
 
 export default function FeaturesSection() {
   const container = {
@@ -37,14 +38,15 @@ export default function FeaturesSection() {
     },
   };
 
+  const t = useTranslations("landingPage");
   const features = [
     {
       icon: (
         <Thermometer className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
       ),
-      title: "Temperature Analytics",
+      title: t('featuresSection.temperatureAnalytics'),
       description:
-        "Real-time and historical temperature data with interactive visualizations.",
+        t("featuresSection.temperatureDescription"),
       chart: (
         <LineChart
           data={[
@@ -64,9 +66,9 @@ export default function FeaturesSection() {
       icon: (
         <CloudRain className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
       ),
-      title: "Rainfall Patterns",
+      title: t('featuresSection.rainfallPatterns'),
       description:
-        "Precipitation analysis with regional comparisons and forecasts.",
+        t('featuresSection.rainfallDescription'),
       chart: (
         <BarChart
           data={[
@@ -82,8 +84,8 @@ export default function FeaturesSection() {
     },
     {
       icon: <Wind className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />,
-      title: "Wind Conditions",
-      description: "Wind speed and direction monitoring with safety alerts.",
+      title: t('featuresSection.windConditions'),
+      description: t('featuresSection.windDescription'),
       chart: (
         <RadialChart
           value={65}
@@ -96,8 +98,8 @@ export default function FeaturesSection() {
     },
     {
       icon: <Map className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />,
-      title: "Regional Insights",
-      description: "Comparative weather analysis across Bangladesh regions.",
+      title: t('featuresSection.regionalInsights'),
+      description: t('featuresSection.regionalDescription'),
       chart: (
         <DonutChart
           data={[
@@ -135,7 +137,7 @@ export default function FeaturesSection() {
             viewport={{ once: true }}
             className="inline-block px-3 py-1 text-xs font-medium rounded-full bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300"
           >
-            Weather Intelligence
+           {t('featuresSection.weatherIntelligence')}
           </motion.span>
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -144,7 +146,7 @@ export default function FeaturesSection() {
             viewport={{ once: true }}
             className="text-3xl font-bold tracking-tight md:text-4xl text-gray-900 dark:text-white"
           >
-            Advanced Meteorological Data
+           {t('featuresSection.advancedMeteorologicalData')}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -153,8 +155,7 @@ export default function FeaturesSection() {
             viewport={{ once: true }}
             className="max-w-2xl text-gray-600 dark:text-gray-300"
           >
-            Precise weather analytics and forecasting tools for informed
-            decision making across Bangladesh.
+           {t('featuresSection.description')}
           </motion.p>
         </motion.div>
 
@@ -192,7 +193,7 @@ export default function FeaturesSection() {
                 href="/features"
                 className="mt-4 inline-flex items-center text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors group"
               >
-                Explore data
+               {t('featuresSection.exploreData')}
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
             </motion.div>
@@ -213,7 +214,7 @@ export default function FeaturesSection() {
               className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors shadow-sm hover:shadow-md"
             >
               <span className="flex items-center">
-                View Full Dashboard
+                {t('featuresSection.viewFullDashboard')}
                 <ArrowRight className="ml-3 h-4 w-4" />
               </span>
             </Button>

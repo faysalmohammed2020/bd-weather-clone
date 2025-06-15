@@ -43,6 +43,20 @@
         "ICIMOD",
         "World Bank"
       ]
+    },
+    "featuresSection": {
+      "weatherIntelligence": "Weather Intelligence",
+      "advancedMeteorologicalData": "Advanced Meteorological Data",
+      "description": "Precise weather analytics and forecasting tools for informed decision making across Bangladesh.",
+      "temperatureAnalytics": "Temperature Analytics",
+      "temperatureDescription": "Real-time and historical temperature data with interactive visualizations.",
+      "rainfallPatterns": "Rainfall Patterns",
+      "rainfallDescription": "Precipitation analysis with regional comparisons and forecasts.",
+      "windConditions": "Wind Conditions",
+      "windDescription": "Wind speed and direction monitoring with safety alerts.",
+      "regionalInsights": "Regional Insights",
+      "regionalDescription": "Comparative weather analysis across Bangladesh regions.",
+      "viewFullDashboard": "View full dashboard"
     }
   },
 

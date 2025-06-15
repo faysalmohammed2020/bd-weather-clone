@@ -41,6 +41,21 @@
         "إسي مود (ICIMOD)",
         "البنك الدولي"
       ]
+    },
+    "featuresSection": {
+      "weatherIntelligence": "الذكاء الطقسي",
+      "advancedMeteorologicalData": "بيانات أرصاد جوية متقدمة",
+      "description": "تحليلات دقيقة للأحوال الجوية وأدوات التنبؤ لاتخاذ قرارات مستنيرة في جميع أنحاء بنغلاديش.",
+      "temperatureAnalytics": "تحليلات درجات الحرارة",
+      "temperatureDescription": "بيانات درجات الحرارة في الوقت الفعلي والتاريخي مع تصورات تفاعلية.",
+      "rainfallPatterns": "أنماط هطول الأمطار",
+      "rainfallDescription": "تحليل هطول الأمطار مع مقارنات إقليمية وتنبؤات مستقبلية.",
+      "windConditions": "ظروف الرياح",
+      "windDescription": "مراقبة سرعة الرياح واتجاهها مع تنبيهات للسلامة.",
+      "regionalInsights": "رؤى إقليمية",
+      "regionalDescription": "تحليل مقارن للأحوال الجوية عبر مناطق بنغلاديش.",
+      "exploreData": "استكشاف البيانات",
+      "viewFullDashboard": "عرض لوحة المعلومات الكاملة"
     }
   },
   "sidebar": {
