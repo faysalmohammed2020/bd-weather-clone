@@ -55,6 +55,7 @@ export default function SignInForm() {
   const [fetchError, setFetchError] = useState("");
   const router = useRouter();
   const t = useTranslations("signin");
+  const common = useTranslations("common");
 
   useEffect(() => {
     const fetchStations = async () => {
@@ -343,7 +344,7 @@ export default function SignInForm() {
         className="text-4xl text-center font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400"
         variants={fadeIn}
       >
-        BD Weather
+        {common("title")}
       </motion.h1>
     </>
   );

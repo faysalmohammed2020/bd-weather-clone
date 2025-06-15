@@ -309,9 +309,11 @@
     "uvDescription": "ستصل أقصى مستويات التعرض للأشعة فوق البنفسجية اليوم إلى مستوى {status}."
   },
   "common": {
+    "title": "بنغلاديش الطقس",
     "loading": "جارٍ التحميل...",
     "lastUpdated": "آخر تحديث في",
     "refresh": "تحديث",
+    "logout": "تسجيل الخروج",
     "units": {
       "celsius": "°م",
       "fahrenheit": "°ف",
@@ -321,7 +323,12 @@
       "visibility": "كم",
       "precipitation": "ملم",
       "uvIndex": "مؤشر الأشعة فوق البنفسجية",
-      "degrees": "°"
+      "degrees": "°",
+      "n": "شمال",
+      "s": "جنوب",
+      "e": "شرق",
+      "w": "غرب",
+      "mm": "ملليمتر"
     }
   },
   "secondCard": {
@@ -542,7 +549,9 @@
         "maxMinAsRead": "أقصى/أدنى كما هو مقروء (°م)",
         "dryCorrected": "الجاف بعد التصحيح (°م)",
         "wetCorrected": "الرطب بعد التصحيح (°م)",
-        "maxMinCorrected": "أقصى/أدنى بعد التصحيح (°م)"
+        "maxMinCorrected": "أقصى/أدنى بعد التصحيح (°م)",
+        "asRead": "كما قرأت",
+        "corrected": "تصحيح"
       },
       "dew": "درجة حرارة نقطة الندى (°م)",
       "humidity": "الرطوبة النسبية (%)",
@@ -767,5 +776,169 @@
     "tooltipWarning": "يرجى التحقق مرتين من البيانات المطابقة\nفي البطاقة الأولى والثانية! لا يوجد منطق!",
     "manualOverride": "تحليل باستخدام بيانات البطاقة",
     "loading": "جارٍ تحميل بيانات الطقس..."
+  },
+  "SynopticCodeTable": {
+    "title": "بيانات الشفرة الجوية",
+    "noData": "لا توجد بيانات متاحة",
+    "noDataDescription": "لا توجد بيانات جوية متاحة للفلاتر المحددة.",
+    "tryAgain": "حاول مرة أخرى",
+    "dataType": "نوع البيانات",
+    "stationNo": "رقم المحطة",
+    "year": "السنة",
+    "month": "الشهر",
+    "day": "اليوم",
+    "time": "الوقت",
+    "date": "التاريخ",
+    "station": "المحطة",
+    "weatherRemarks": "ملاحظات الطقس",
+    "action": "إجراء",
+    "exportCSV": "تصدير CSV",
+    "allStations": "كل المحطات",
+    "filter": "تصفية",
+    "generated": "تم الإنشاء",
+    "editDialog": {
+      "title": "تعديل بيانات الشفرة الجوية",
+      "description": "تعديل السجل من {station} بتاريخ {date}",
+      "cancel": "إلغاء",
+      "saveChanges": "حفظ التغييرات",
+      "saving": "جاري الحفظ...",
+      "fields": {
+        "C1": "مؤشر C1",
+        "Iliii": "معرف المحطة",
+        "iRiXhvv": "iRiXhvv",
+        "Nddff": "Nddff",
+        "S1nTTT": "1SnTTT",
+        "S2nTddTddTdd": "2SnTdTdTd",
+        "P3PPP4PPPP": "3PPP/4PPP",
+        "RRRtR6": "6RRRtR",
+        "wwW1W2": "7wwW1W2",
+        "NhClCmCh": "8NhClCmCh",
+        "S2nTnTnTnInInInIn": "2SnTnTnTn/InInInIn",
+        "D56DLDMDH": "56DlDmDh",
+        "CD57DaEc": "57CDaEc",
+        "C2": "مؤشر C2",
+        "GG": "GG",
+        "P24Group58_59": "58/59P24",
+        "R24Group6_7": "(6RRRtR)/7R24",
+        "NsChshs": "8N5Ch5h5",
+        "dqqqt90": "90dqqqt",
+        "fqfqfq91": "91fqfqfq",
+        "weatherRemark": "ملاحظات الطقس"
+      }
+    },
+    "permissionDialog": {
+      "title": "تم رفض الإذن",
+      "description": "ليس لديك إذن لتعديل هذا السجل. قد يكون هذا بسبب:",
+      "reasons": [
+        "السجل قديم جدًا للتعديل",
+        "السجل ينتمي إلى محطة مختلفة",
+        "ليس لديك أذونات الدور المطلوبة"
+      ],
+      "close": "إغلاق"
+    },
+    "errors": {
+      "fetchFailed": "فشل جلب البيانات الجوية",
+      "updateFailed": "فشل تحديث السجل",
+      "invalidDate": "تنسيق التاريخ غير صالح",
+      "startAfterEnd": "لا يمكن أن يكون تاريخ البدء بعد تاريخ الانتهاء",
+      "endBeforeStart": "لا يمكن أن يكون تاريخ الانتهاء قبل تاريخ البدء",
+      "stationsFetchFailed": "فشل جلب المحطات"
+    },
+    "loading": "جاري تحميل البيانات الجوية...",
+    "toDate": "إلى",
+    "unknownStation": "محطة غير معروفة",
+    "unknownDate": "تاريخ غير معروف"
+  },
+  "DailySummaryTable": {
+    "title": "ملخص البيانات اليومية",
+    "noData": "لا توجد بيانات متاحة",
+    "noDataDescription": "لا توجد بيانات ملخص يومي متاحة للفلاتر المحددة.",
+    "tryAgain": "حاول مرة أخرى",
+    "dataType": "نوع البيانات",
+    "stationNo": "رقم المحطة",
+    "year": "السنة",
+    "month": "الشهر",
+    "day": "اليوم",
+    "date": "التاريخ",
+    "station": "المحطة",
+    "exportCSV": "تصدير CSV",
+    "allStations": "كل المحطات",
+    "filter": "تصفية",
+    "generated": "تم الإنشاء",
+    "dateRange": "نطاق التاريخ",
+    "records": "سجل",
+    "editDialog": {
+      "title": "تعديل ملخص البيانات اليومية",
+      "description": "تعديل السجل من {station} بتاريخ {date}",
+      "cancel": "إلغاء",
+      "saveChanges": "حفظ التغييرات",
+      "saving": "جاري الحفظ...",
+      "fields": {
+        "avStationPressure": "متوسط ضغط المحطة (hPa)",
+        "avSeaLevelPressure": "متوسط ضغط مستوى سطح البحر (hPa)",
+        "avDryBulbTemperature": "متوسط درجة حرارة البصيلة الجافة (°C)",
+        "avWetBulbTemperature": "متوسط درجة حرارة البصيلة المبتلة (°C)",
+        "maxTemperature": "أقصى درجة حرارة (°C)",
+        "minTemperature": "أدنى درجة حرارة (°C)",
+        "totalPrecipitation": "إجمالي هطول الأمطار (مم)",
+        "avDewPointTemperature": "متوسط درجة حرارة نقطة الندى (°C)",
+        "avRelativeHumidity": "متوسط الرطوبة النسبية (%)",
+        "windSpeed": "سرعة الرياح (م/ث)",
+        "windDirectionCode": "اتجاه الرياح (16 نقطة)",
+        "maxWindSpeed": "أقصى سرعة رياح (م/ث)",
+        "maxWindDirection": "اتجاه أقصى سرعة رياح (16 نقطة)",
+        "avTotalCloud": "متوسط الغطاء السحابي الكلي (أوكتا)",
+        "lowestVisibility": "أدنى رؤية (كم)",
+        "totalRainDuration": "المدة الإجمالية للأمطار (س-د)"
+      },
+      "validation": {
+        "required": "هذا الحقل مطلوب",
+        "exactLength": "يجب أن يكون بالضبط {length} أرقام (حاليًا {current})",
+        "maxLength": "لا يمكن أن يتجاوز {length} أرقام"
+      }
+    },
+    "permissionDialog": {
+      "title": "تم رفض الإذن",
+      "description": "ليس لديك إذن لتعديل هذا السجل. قد يكون هذا بسبب:",
+      "reasons": [
+        "السجل قديم جدًا للتعديل",
+        "السجل ينتمي إلى محطة مختلفة",
+        "ليس لديك أذونات الدور المطلوبة"
+      ],
+      "close": "إغلاق"
+    },
+    "errors": {
+      "fetchFailed": "فشل جلب البيانات اليومية",
+      "updateFailed": "فشل تحديث السجل",
+      "invalidDate": "تنسيق التاريخ غير صالح",
+      "startAfterEnd": "لا يمكن أن يكون تاريخ البدء بعد تاريخ الانتهاء",
+      "endBeforeStart": "لا يمكن أن يكون تاريخ الانتهاء قبل تاريخ البدء",
+      "stationsFetchFailed": "فشل جلب المحطات",
+      "validationErrors": "يرجى تصحيح جميع أخطاء التحقق قبل الحفظ"
+    },
+    "loading": "جاري تحميل البيانات اليومية...",
+    "toDate": "إلى",
+    "unknownStation": "محطة غير معروفة",
+    "unknownDate": "تاريخ غير معروف"
+  },
+  "AllViewAndManagePage": {
+    "title": "عرض وإدارة جميع البيانات",
+    "exportExcel": "تصدير إلى إكسل",
+    "loadingPDF": "جاري التحميل...",
+    "exportPDF": "تصدير إلى PDF",
+    "tabs": {
+      "firstCard": "البطاقة الأولى",
+      "secondCard": "البطاقة الثانية",
+      "synopticCode": "الشفرة الجوية",
+      "dailySummary": "ملخص يومي"
+    },
+    "errors": {
+      "exportFailed": "فشل تصدير البيانات",
+      "dataLoading": "حدث خطأ أثناء تحميل البيانات"
+    },
+    "success": {
+      "exportSuccess": "تم تصدير البيانات بنجاح"
+    },
+    "loading": "جاري التحميل..."
   }
 }

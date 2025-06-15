@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { Cloud, Facebook, Twitter, Linkedin, Mail, Github } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function Footer() {
+  const common = useTranslations("common");
   return (
     <footer className="w-full bg-gradient-to-b from-blue-50 to-white py-12">
       <div className="container px-4 md:px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -12,7 +14,7 @@ export default function Footer() {
               <Cloud className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-              BD Weather
+              {common("title")}
             </span>
           </div>
           <p className="text-sm text-gray-600 max-w-xs leading-relaxed">

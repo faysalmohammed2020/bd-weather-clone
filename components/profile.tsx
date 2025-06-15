@@ -5,10 +5,12 @@ import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import LanguageSwitcher from "./language-switcher";
+import { useTranslations } from "next-intl";
 
 const Profile = () => {
   const router = useRouter();
   const { data: session, isPending } = useSession();
+  const t = useTranslations("common");
 
   return (
     <div className="flex items-center gap-6 h-12">
@@ -44,7 +46,7 @@ const Profile = () => {
         }}
       >
         <LogOut className="text-xs md:text-md" />
-        <span className="text-xs md:text-md">Logout</span>
+        <span className="text-xs md:text-md">{t("logout")}</span>
       </Button>
     </div>
   );

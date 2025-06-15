@@ -30,6 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useTranslations } from "next-intl";
 
 interface Station {
   id: string;
@@ -110,6 +111,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
   const [editFormData, setEditFormData] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
   const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false);
+  const t = useTranslations("SynopticCodeTable");
 
   // Expose the getData method via ref
   useImperativeHandle(ref, () => ({
@@ -131,7 +133,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
         }`;
       const res = await fetch(url);
       if (!res.ok) {
-        throw new Error("Failed to fetch synoptic data");
+        throw new Error(t("errors.fetchFailed"));
       }
       const data = await res.json();
 
@@ -156,7 +158,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
       }
     } catch (error) {
       console.error("Failed to fetch latest data:", error);
-      toast.error("Failed to fetch synoptic data");
+      toast.error(t("errors.fetchFailed"));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -169,13 +171,13 @@ const SynopticCodeTable = forwardRef((props, ref) => {
       try {
         const response = await fetch("/api/stations");
         if (!response.ok) {
-          throw new Error("Failed to fetch stations");
+          throw new Error(t("errors.stationsFetchFailed"));
         }
         const stationsResult = await response.json();
         setStations(stationsResult);
       } catch (error) {
         console.error("Error fetching stations:", error);
-        toast.error("Failed to fetch stations");
+        toast.error(t("errors.stationsFetchFailed"));
       }
     }
   };
@@ -250,7 +252,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
       type === "start" ? new Date(endDate) : new Date(startDate);
 
     if (isNaN(date.getTime())) {
-      setDateError("Invalid date format");
+      setDateError(t("errors.invalidDate"));
       return;
     }
 
@@ -259,13 +261,13 @@ const SynopticCodeTable = forwardRef((props, ref) => {
 
     if (type === "start") {
       if (date > otherDate) {
-        setDateError("Start date cannot be after end date");
+        setDateError(t("errors.startAfterEnd"));
         return;
       }
       setStartDate(newDate);
     } else {
       if (date < otherDate) {
-        setDateError("End date cannot be before start date");
+        setDateError(t("errors.endBeforeStart"));
         return;
       }
       setEndDate(newDate);
@@ -275,7 +277,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
   // Get station name by ID
   const getStationNameById = (stationId: string): string => {
     const station = stations.find((s) => s.id === stationId);
-    return station ? station.name : stationId;
+    return station ? station.name : t("unknownStation");
   };
 
   // Handle edit click
@@ -316,7 +318,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update record");
+        throw new Error(t("errors.updateFailed"));
       }
 
       const result = await response.json();
@@ -328,11 +330,11 @@ const SynopticCodeTable = forwardRef((props, ref) => {
         )
       );
 
-      toast.success("Record updated successfully");
+      toast.success(t("editDialog.saveChanges"));
       setIsEditDialogOpen(false);
     } catch (error) {
       console.error("Error updating record:", error);
-      toast.error(`Failed to update record: ${error.message}`);
+      toast.error(`${t("errors.updateFailed")}: ${error.message}`);
     } finally {
       setIsSaving(false);
     }
@@ -393,16 +395,11 @@ const SynopticCodeTable = forwardRef((props, ref) => {
     document.body.removeChild(link);
   };
 
-  // Function to print the table
-  const printTable = () => {
-    window.print();
-  };
-
   return (
-    <div className="space-y-6 print:space-y-0 m-2">
+    <div className="space-y-6 print:space-y-0 m-2" dir="rtl">
 
       <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-        <span className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mr-3">
+        <span className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center ml-3">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -420,9 +417,8 @@ const SynopticCodeTable = forwardRef((props, ref) => {
             <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
           </svg>
         </span>
-        Synoptic Code Data
+        {t("title")}
       </h2>
-
 
       {/* Date and station filter controls */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 sm:gap-4 bg-slate-100 p-3 sm:p-4 md:p-5 rounded-lg print:hidden">
@@ -446,7 +442,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                 max={endDate}
                 className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full sm:w-auto min-w-[120px]"
               />
-              <span className="text-sm text-slate-600 whitespace-nowrap">to</span>
+              <span className="text-sm text-slate-600 whitespace-nowrap">{t("toDate")}</span>
               <input
                 type="date"
                 value={endDate}
@@ -478,7 +474,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                 disabled={!currentData || currentData.length === 0}
               >
                 <Download size={18} className="flex-shrink-0" />
-                <span className="text-sm sm:text-base whitespace-nowrap">Export CSV</span>
+                <span className="text-sm sm:text-base whitespace-nowrap">{t("exportCSV")}</span>
               </Button>
             </div>
           )}
@@ -491,15 +487,15 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                   htmlFor="stationFilter"
                   className="whitespace-nowrap font-medium text-slate-700 text-sm sm:text-base"
                 >
-                  Station:
+                  {t("filter")}:
                 </Label>
               </div>
               <Select value={stationFilter} onValueChange={setStationFilter}>
                 <SelectTrigger className="w-full sm:w-[180px] md:w-[200px] border-slate-300 focus:ring-purple-500 text-sm sm:text-base">
-                  <SelectValue placeholder="All Stations" />
+                  <SelectValue placeholder={t("allStations")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Stations</SelectItem>
+                  <SelectItem value="all">{t("allStations")}</SelectItem>
                   {stations.map((station) => (
                     <SelectItem key={station.id} value={station.id}>
                       {station.name} ({station.stationId})
@@ -520,7 +516,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
           <span className="ml-3 text-lg text-gray-700">
-            Loading synoptic data...
+            {t("loading")}
           </span>
         </div>
       ) : !currentData || currentData.length === 0 ? (
@@ -546,17 +542,17 @@ const SynopticCodeTable = forwardRef((props, ref) => {
               <path d="M14 16h4" />
             </svg>
             <h3 className="text-xl font-semibold text-gray-800 mb-3">
-              No Data Available
+              {t("noData")}
             </h3>
             <p className="text-lg text-gray-600 mb-5">
-              There is no synoptic data available for the selected filters.
+              {t("noDataDescription")}
             </p>
             <Button
               variant="outline"
               className="bg-white text-blue-700 border-blue-300 hover:bg-blue-50 text-base"
               onClick={fetchLatestData}
             >
-              Try Again
+              {t("tryAgain")}
             </Button>
           </div>
         </div>
@@ -566,9 +562,9 @@ const SynopticCodeTable = forwardRef((props, ref) => {
           <div className="mb-4 print:mb-2">
             <div className="text-center border-b-2 border-blue-200 bg-gradient-to-b from-blue-50 to-white py-4 sm:py-6 print:py-3 rounded-t-lg">
               <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-10 print:gap-6 max-w-full sm:max-w-lg md:max-w-2xl lg:max-w-5xl mx-auto px-3 sm:px-4">
-                <div className="text-left">
+                <div className="text-right">
                   <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
-                    DATA TYPE
+                    {t("dataType")}
                   </div>
                   <div className="flex gap-1 sm:gap-2">
                     {headerInfo.dataType.split("").map((char, i) => (
@@ -582,9 +578,9 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                   </div>
                 </div>
 
-                <div className="text-left">
+                <div className="text-right">
                   <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
-                    STATION NO.
+                    {t("stationNo")}
                   </div>
                   <div className="flex gap-1 sm:gap-2">
                     {headerInfo.stationNo.split("").map((char, i) => (
@@ -598,9 +594,9 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                   </div>
                 </div>
 
-                <div className="text-left">
+                <div className="text-right">
                   <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
-                    YEAR
+                    {t("year")}
                   </div>
                   <div className="flex gap-1 sm:gap-2">
                     {headerInfo.year.split("").map((char, i) => (
@@ -614,9 +610,9 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                   </div>
                 </div>
 
-                <div className="text-left">
+                <div className="text-right">
                   <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
-                    MONTH
+                    {t("month")}
                   </div>
                   <div className="flex gap-1 sm:gap-2">
                     {headerInfo.month.split("").map((char, i) => (
@@ -630,9 +626,9 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                   </div>
                 </div>
 
-                <div className="text-left">
+                <div className="text-right">
                   <div className="font-bold text-sm sm:text-base mb-2 text-gray-600">
-                    DAY
+                    {t("day")}
                   </div>
                   <div className="flex gap-1 sm:gap-2">
                     {headerInfo.day.split("").map((char, i) => (
@@ -654,13 +650,13 @@ const SynopticCodeTable = forwardRef((props, ref) => {
               <thead className="bg-gradient-to-b from-blue-600 to-blue-700 text-sm font-bold uppercase text-center text-white print:bg-blue-700">
                 <tr>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
-                    Time
+                    {t("time")}
                   </th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
-                    Date
+                    {t("date")}
                   </th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
-                    Station
+                    {t("station")}
                   </th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
                     C1
@@ -723,10 +719,10 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                     91fqfqfq
                   </th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
-                    Remarks
+                    {t("weatherRemarks")}
                   </th>
                   <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">
-                    Action
+                    {t("action")}
                   </th>
                 </tr>
               </thead>
@@ -817,7 +813,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                         <td className="border border-blue-200 px-4 py-3 whitespace-nowrap">
                           {entry.fqfqfq91 || ""}
                         </td>
-                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap text-left text-gray-700">
+                        <td className="border border-blue-200 px-4 py-3 whitespace-nowrap text-right text-gray-700">
                           {entry.weatherRemark ? (
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center p-1 shadow-inner">
@@ -851,8 +847,8 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                               </TooltipTrigger>
                               <TooltipContent>
                                 {canEdit
-                                  ? "Edit this record"
-                                  : "You don't have permission to edit this record"}
+                                  ? t("editTooltip")
+                                  : t("editPermissionTooltip")}
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -863,7 +859,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
                 ) : (
                   <tr>
                     <td colSpan={22} className="text-center py-8 text-gray-500">
-                      No synoptic data available for today
+                      {t("noData")}
                     </td>
                   </tr>
                 )}
@@ -871,9 +867,9 @@ const SynopticCodeTable = forwardRef((props, ref) => {
             </table>
 
             {/* Optional footer */}
-            <div className="text-right text-sm text-blue-600 mt-2 pr-4 pb-2 print:hidden">
-              Generated:{" "}
-              {new Date().toLocaleString("en-GB", { timeZone: "Asia/Dhaka" })}
+            <div className="text-left text-sm text-blue-600 mt-2 pr-4 pb-2 print:hidden">
+              {t("generated")}:{" "}
+              {new Date().toLocaleString("ar-EG", { timeZone: "Asia/Dhaka" })}
             </div>
           </div>
         </div>
@@ -884,48 +880,29 @@ const SynopticCodeTable = forwardRef((props, ref) => {
         <DialogContent className="w-[90vw] !max-w-[95vw] rounded-xl border-0 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 shadow-xl">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-indigo-800">
-              Edit Synoptic Code Data
+              {t("editDialog.title")}
             </DialogTitle>
             <DialogDescription className="text-slate-600">
-              Editing record from {selectedRecord?.ObservingTime?.station?.name || "Unknown Station"}
-              on {selectedRecord?.createdAt ? format(new Date(selectedRecord.createdAt), "MMMM d, yyyy") : "Unknown Date"}
+              {t("editDialog.description", {
+                station: selectedRecord?.ObservingTime?.station?.name || t("unknownStation"),
+                date: selectedRecord?.createdAt ? format(new Date(selectedRecord.createdAt), "MMMM d, yyyy") : t("unknownDate")
+              })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4 max-h-[65vh] overflow-y-auto pr-2">
-            {[
-              { id: "C1", label: "C1 Indicator", bg: "bg-blue-50" },
-              { id: "Iliii", label: "Station Identifier", bg: "bg-indigo-50" },
-              { id: "iRiXhvv", label: "iRiXhvv", bg: "bg-blue-50" },
-              { id: "Nddff", label: "Nddff", bg: "bg-indigo-50" },
-              { id: "S1nTTT", label: "1SnTTT", bg: "bg-blue-50" },
-              { id: "S2nTddTddTdd", label: "2SnTdTdTd", bg: "bg-indigo-50" },
-              { id: "P3PPP4PPPP", label: "3PPP/4PPP", bg: "bg-blue-50" },
-              { id: "RRRtR6", label: "6RRRtR", bg: "bg-indigo-50" },
-              { id: "wwW1W2", label: "7wwW1W2", bg: "bg-blue-50" },
-              { id: "NhClCmCh", label: "8NhClCmCh", bg: "bg-indigo-50" },
-              { id: "S2nTnTnTnInInInIn", label: "2SnTnTnTn/InInInIn", bg: "bg-blue-50" },
-              { id: "D56DLDMDH", label: "56DlDmDh", bg: "bg-indigo-50" },
-              { id: "CD57DaEc", label: "57CDaEc", bg: "bg-blue-50" },
-              { id: "C2", label: "C2 Indicator", bg: "bg-blue-50" },
-              { id: "GG", label: "GG", bg: "bg-indigo-50" },
-              { id: "P24Group58_59", label: "58/59P24", bg: "bg-blue-50" },
-              { id: "R24Group6_7", label: "(6RRRtR)/7R24", bg: "bg-indigo-50" },
-              { id: "NsChshs", label: "8N5Ch5h5", bg: "bg-blue-50" },
-              { id: "dqqqt90", label: "90dqqqt", bg: "bg-indigo-50" },
-              { id: "fqfqfq91", label: "91fqfqfq", bg: "bg-blue-50" },
-              { id: "weatherRemark", label: "Weather Remarks", bg: "bg-indigo-50" },
-            ].map((field) => (
+            {Object.entries(t.raw("editDialog.fields")).map(([id, label]) => (
               <div
-                key={field.id}
-                className={`space-y-1 p-3 rounded-lg ${field.bg} border border-white shadow-sm`}
+                key={id}
+                className={`space-y-1 p-3 rounded-lg ${id.charCodeAt(0) % 2 === 0 ? "bg-blue-50" : "bg-indigo-50"
+                  } border border-white shadow-sm`}
               >
-                <Label htmlFor={field.id} className="text-sm font-medium text-gray-700">
-                  {field.label}
+                <Label htmlFor={id} className="text-sm font-medium text-gray-700">
+                  {label}
                 </Label>
                 <Input
-                  id={field.id}
-                  value={editFormData[field.id] || ""}
+                  id={id}
+                  value={editFormData[id] || ""}
                   onChange={handleEditInputChange}
                   className="w-full bg-white border-gray-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200"
                 />
@@ -939,7 +916,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
               onClick={() => setIsEditDialogOpen(false)}
               className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
             >
-              Cancel
+              {t("editDialog.cancel")}
             </Button>
             <Button
               onClick={handleSaveEdit}
@@ -949,10 +926,10 @@ const SynopticCodeTable = forwardRef((props, ref) => {
               {isSaving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  {t("editDialog.saving")}
                 </>
               ) : (
-                "Save Changes"
+                t("editDialog.saveChanges")
               )}
             </Button>
           </DialogFooter>
@@ -965,17 +942,20 @@ const SynopticCodeTable = forwardRef((props, ref) => {
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-red-600 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
-              Permission Denied
+              {t("permissionDialog.title")}
             </DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-slate-700">
-              You don't have permission to edit this record. This could be because:
+              {t("permissionDialog.description")}
             </p>
-            <ul className="mt-2 list-disc pl-5 text-sm text-slate-600 space-y-1">
-              <li>The record is too old to edit</li>
-              <li>The record belongs to a different station</li>
-              <li>You don't have the required role permissions</li>
+            <ul className="mt-2 list-disc pr-5 text-sm text-slate-600 space-y-1">
+              {Array.isArray(t("permissionDialog.reasons"))
+                ? t("permissionDialog.reasons").map((reason, i) => (
+                  <li key={i}>{reason}</li>
+                ))
+                : <li>{t("permissionDialog.reasons")}</li>
+              }
             </ul>
           </div>
           <DialogFooter>
@@ -983,7 +963,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
               onClick={() => setIsPermissionDeniedOpen(false)}
               className="bg-slate-200 text-slate-800 hover:bg-slate-300"
             >
-              Close
+              {t("permissionDialog.close")}
             </Button>
           </DialogFooter>
         </DialogContent>

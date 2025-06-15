@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect, useImperativeHandle, forwardRef } from "react"
 import { Button } from "@/components/ui/button"
 import {
@@ -30,7 +29,7 @@ import { toast } from "sonner"
 import { differenceInDays, parseISO, isValid, format } from "date-fns"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-
+import { useTranslations } from "next-intl"
 
 interface Station {
   id: string
@@ -70,6 +69,7 @@ const canEditRecord = (record: any, user: any): boolean => {
 }
 
 const DailySummaryTable = forwardRef((props, ref) => {
+  const t = useTranslations("DailySummaryTable")
   const [currentData, setCurrentData] = useState<any[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [refreshing, setRefreshing] = useState<boolean>(false)
@@ -101,30 +101,50 @@ const DailySummaryTable = forwardRef((props, ref) => {
   const [isPermissionDeniedOpen, setIsPermissionDeniedOpen] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
-  // First, create a validation map based on your measurements configuration
+  // Field validations
   const fieldValidations = {
-    avStationPressure: { length: 5 }, // hPa - must be exactly 5 digits
-    avSeaLevelPressure: { length: 5 }, // hPa - must be exactly 5 digits
-    avDryBulbTemperature: { length: 3 }, // °C - must be exactly 3 digits
-    avWetBulbTemperature: { length: 3 }, // °C - must be exactly 3 digits
-    maxTemperature: { length: 3 }, // °C - must be exactly 3 digits
-    minTemperature: { length: 3 }, // °C - must be exactly 3 digits
-    totalPrecipitation: { length: 3 }, // mm - must be exactly 3 digits
-    avDewPointTemperature: { length: 3 }, // °C - must be exactly 3 digits
-    avRelativeHumidity: { length: 3 }, // % - must be exactly 3 digits
-    windSpeed: { length: 3 }, // m/s - must be exactly 3 digits
-    windDirectionCode: { length: 2 }, // 16Pts - must be exactly 2 digits
-    maxWindSpeed: { length: 3 }, // m/s - must be exactly 3 digits
-    maxWindDirection: { length: 2 }, // 16Pts - must be exactly 2 digits
-    avTotalCloud: { length: 1 }, // octas - must be exactly 1 digit
-    lowestVisibility: { length: 3 }, // km - must be exactly 3 digits
-    totalRainDuration: { length: 4 }, // H-M (format HHMM) - must be exactly 4 digits
+    avStationPressure: { length: 5 },
+    avSeaLevelPressure: { length: 5 },
+    avDryBulbTemperature: { length: 3 },
+    avWetBulbTemperature: { length: 3 },
+    maxTemperature: { length: 3 },
+    minTemperature: { length: 3 },
+    totalPrecipitation: { length: 3 },
+    avDewPointTemperature: { length: 3 },
+    avRelativeHumidity: { length: 3 },
+    windSpeed: { length: 3 },
+    windDirectionCode: { length: 2 },
+    maxWindSpeed: { length: 3 },
+    maxWindDirection: { length: 2 },
+    avTotalCloud: { length: 1 },
+    lowestVisibility: { length: 3 },
+    totalRainDuration: { length: 4 },
   }
+
+  // Form fields configuration
+  const formFields = [
+    { id: "avStationPressure", bg: "bg-blue-50" },
+    { id: "avSeaLevelPressure", bg: "bg-indigo-50" },
+    { id: "avDryBulbTemperature", bg: "bg-blue-50" },
+    { id: "avWetBulbTemperature", bg: "bg-indigo-50" },
+    { id: "maxTemperature", bg: "bg-blue-50" },
+    { id: "minTemperature", bg: "bg-indigo-50" },
+    { id: "totalPrecipitation", bg: "bg-blue-50" },
+    { id: "avDewPointTemperature", bg: "bg-indigo-50" },
+    { id: "avRelativeHumidity", bg: "bg-blue-50" },
+    { id: "windSpeed", bg: "bg-indigo-50" },
+    { id: "windDirectionCode", bg: "bg-blue-50" },
+    { id: "maxWindSpeed", bg: "bg-indigo-50" },
+    { id: "maxWindDirection", bg: "bg-blue-50" },
+    { id: "avTotalCloud", bg: "bg-indigo-50" },
+    { id: "lowestVisibility", bg: "bg-blue-50" },
+    { id: "totalRainDuration", bg: "bg-indigo-50" },
+  ]
 
   // Expose the getData method via ref
   useImperativeHandle(ref, () => ({
     getData: () => {
-      return currentData.map((item) => ({
+      return currentData.map(item => ({
         ...item,
         dataType: headerInfo.dataType,
         stationNo: headerInfo.stationNo,
@@ -141,7 +161,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
         }`
       const res = await fetch(url)
       if (!res.ok) {
-        throw new Error("Failed to fetch daily summary data")
+        throw new Error(t("errors.fetchFailed"))
       }
       const data = await res.json()
 
@@ -166,7 +186,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
       }
     } catch (error) {
       console.error("Failed to fetch latest data:", error)
-      toast.error("Failed to fetch daily summary data")
+      toast.error(t("errors.fetchFailed"))
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -179,13 +199,13 @@ const DailySummaryTable = forwardRef((props, ref) => {
       try {
         const response = await fetch("/api/stations")
         if (!response.ok) {
-          throw new Error("Failed to fetch stations")
+          throw new Error(t("errors.stationsFetchFailed"))
         }
         const stationsResult = await response.json()
         setStations(stationsResult)
       } catch (error) {
         console.error("Error fetching stations:", error)
-        toast.error("Failed to fetch stations")
+        toast.error(t("errors.stationsFetchFailed"))
       }
     }
   }
@@ -259,7 +279,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
     const otherDate = type === "start" ? new Date(endDate) : new Date(startDate)
 
     if (isNaN(date.getTime())) {
-      setDateError("Invalid date format")
+      setDateError(t("errors.invalidDate"))
       return
     }
 
@@ -268,13 +288,13 @@ const DailySummaryTable = forwardRef((props, ref) => {
 
     if (type === "start") {
       if (date > otherDate) {
-        setDateError("Start date cannot be after end date")
+        setDateError(t("errors.startAfterEnd"))
         return
       }
       setStartDate(newDate)
     } else {
       if (date < otherDate) {
-        setDateError("End date cannot be before start date")
+        setDateError(t("errors.endBeforeStart"))
         return
       }
       setEndDate(newDate)
@@ -284,53 +304,10 @@ const DailySummaryTable = forwardRef((props, ref) => {
   // Get station name by ID
   const getStationNameById = (stationId: string): string => {
     const station = stations.find((s) => s.id === stationId)
-    return station ? station.name : stationId
+    return station ? station.name : t("unknownStation")
   }
 
-  // // Handle edit click
-  // const handleEditClick = (record: any) => {
-  //   if (user && canEditRecord(record, user)) {
-  //     setSelectedRecord(record)
-  //     setEditFormData(record)
-  //     setFieldErrors({}) // Clear any previous errors
-  //     setIsEditDialogOpen(true)
-  //   } else {
-  //     setIsPermissionDeniedOpen(true)
-  //   }
-  // }
-
-  // In your component, add this handler for input validation
-  // const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const { id, value } = e.target
-  //   const validation = fieldValidations[id as keyof typeof fieldValidations]
-
-  //   // Only allow numbers (no decimals, letters, or special characters)
-  //   const numericValue = value.replace(/[^0-9]/g, "")
-
-  //   // Enforce maximum length
-  //   const truncatedValue = numericValue.slice(0, validation.length)
-
-  //   // Validate the input and set appropriate error messages
-  //   let error = ""
-  //   if (truncatedValue.length === 0) {
-  //     error = `This field is required`
-  //   } else if (truncatedValue.length < validation.length) {
-  //     error = `Must be exactly ${validation.length} digits (currently ${truncatedValue.length})`
-  //   } else if (truncatedValue.length > validation.length) {
-  //     error = `Cannot exceed ${validation.length} digits`
-  //   }
-
-  //   setEditFormData((prev: any) => ({
-  //     ...prev,
-  //     [id]: truncatedValue,
-  //   }))
-
-  //   setFieldErrors((prev) => ({
-  //     ...prev,
-  //     [id]: error,
-  //   }))
-  // }
-
+  // Validate form fields
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {}
     let isValid = true
@@ -340,10 +317,13 @@ const DailySummaryTable = forwardRef((props, ref) => {
       const validation = fieldValidations[field.id as keyof typeof fieldValidations]
 
       if (value.length === 0) {
-        errors[field.id] = `This field is required`
+        errors[field.id] = t("editDialog.validation.required")
         isValid = false
       } else if (value.length !== validation.length) {
-        errors[field.id] = `Must be exactly ${validation.length} digits (currently ${value.length})`
+        errors[field.id] = t("editDialog.validation.exactLength", {
+          length: validation.length,
+          current: value.length
+        })
         isValid = false
       }
     })
@@ -352,32 +332,13 @@ const DailySummaryTable = forwardRef((props, ref) => {
     return isValid
   }
 
-  const formFields = [
-    { id: "avStationPressure", label: "Av. Station Pressure (hPa)", bg: "bg-blue-50", requiredLength: 5 },
-    { id: "avSeaLevelPressure", label: "Av. Sea-Level Pressure (hPa)", bg: "bg-indigo-50", requiredLength: 5 },
-    { id: "avDryBulbTemperature", label: "Av. Dry-Bulb Temperature (°C)", bg: "bg-blue-50", requiredLength: 3 },
-    { id: "avWetBulbTemperature", label: "Av. Wet Bulb Temperature (°C)", bg: "bg-indigo-50", requiredLength: 3 },
-    { id: "maxTemperature", label: "Max Temperature (°C)", bg: "bg-blue-50", requiredLength: 3 },
-    { id: "minTemperature", label: "Min Temperature (°C)", bg: "bg-indigo-50", requiredLength: 3 },
-    { id: "totalPrecipitation", label: "Total Precipitation (mm)", bg: "bg-blue-50", requiredLength: 3 },
-    { id: "avDewPointTemperature", label: "Av. Dew Point Temperature (°C)", bg: "bg-indigo-50", requiredLength: 3 },
-    { id: "avRelativeHumidity", label: "Av. Relative Humidity (%)", bg: "bg-blue-50", requiredLength: 3 },
-    { id: "windSpeed", label: "Wind Speed (m/s)", bg: "bg-indigo-50", requiredLength: 3 },
-    { id: "windDirectionCode", label: "Wind Direction (16Pts)", bg: "bg-blue-50", requiredLength: 2 },
-    { id: "maxWindSpeed", label: "Max Wind Speed (m/s)", bg: "bg-indigo-50", requiredLength: 3 },
-    { id: "maxWindDirection", label: "Max Wind Direction (16Pts)", bg: "bg-blue-50", requiredLength: 2 },
-    { id: "avTotalCloud", label: "Av. Total Cloud (oktas)", bg: "bg-indigo-50", requiredLength: 1 },
-    { id: "lowestVisibility", label: "Lowest Visibility (km)", bg: "bg-blue-50", requiredLength: 3 },
-    { id: "totalRainDuration", label: "Total Rain Duration (H-M)", bg: "bg-indigo-50", requiredLength: 4 },
-  ]
-
   // Save edited data
   const handleSaveEdit = async () => {
     if (!selectedRecord) return
 
     // Validate form before saving
     if (!validateForm()) {
-      toast.error("Please fix all validation errors before saving")
+      toast.error(t("errors.validationErrors"))
       return
     }
 
@@ -395,41 +356,33 @@ const DailySummaryTable = forwardRef((props, ref) => {
       })
 
       if (!response.ok) {
-        throw new Error("Failed to update record")
+        throw new Error(t("errors.updateFailed"))
       }
-
 
       // Update local state
       setCurrentData((prevData) =>
         prevData.map((item) => (item.id === selectedRecord.id ? { ...item, ...editFormData } : item)),
       )
 
-      toast.success("Record updated successfully")
+      toast.success(t("editDialog.saveChanges"))
       setIsEditDialogOpen(false)
       setFieldErrors({}) // Clear errors on successful save
     } catch (error) {
       console.error("Error updating record:", error)
-      toast.error(`Failed to update record: ${error.message}`)
+      toast.error(`${t("errors.updateFailed")}: ${error.message}`)
     } finally {
       setIsSaving(false)
     }
   }
 
   const formatValue = (value: any): string => {
-    // If value is null/undefined/empty, return dash
-    if (value === null || value === undefined || value === "") return "-";
-
-    // Convert to number if it's a string
-    const numValue = typeof value === 'string' ? parseFloat(value) : value;
-
-    // If it's a valid number, return it as integer (no decimals)
+    if (value === null || value === undefined || value === "") return "-"
+    const numValue = typeof value === 'string' ? parseFloat(value) : value
     if (!isNaN(numValue)) {
-      return Math.round(numValue).toString();
+      return Math.round(numValue).toString()
     }
-
-    // Otherwise return the original value (or dash if empty)
-    return value || "-";
-  };
+    return value || "-"
+  }
 
   // Function to export data as CSV
   const exportToCSV = () => {
@@ -477,13 +430,13 @@ const DailySummaryTable = forwardRef((props, ref) => {
   }
 
   return (
-    <div className="space-y-6 print:space-y-0">
+    <div className="space-y-6 print:space-y-0" dir="rtl">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-          <span className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-sm mr-3">
+          <span className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-sm ml-3">
             <LineChart size={20} />
           </span>
-          Daily Summary Data
+          {t("title")}
         </h2>
       </div>
 
@@ -509,7 +462,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
                 max={endDate}
                 className="text-xs sm:text-sm p-2 border border-slate-300 focus:ring-purple-500 focus:ring-2 rounded w-full"
               />
-              <span className="text-sm text-slate-600 whitespace-nowrap px-1">to</span>
+              <span className="text-sm text-slate-600 whitespace-nowrap px-1">{t("toDate")}</span>
               <input
                 type="date"
                 value={endDate}
@@ -543,7 +496,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
               disabled={!currentData || currentData.length === 0}
             >
               <Download className="h-4 w-4" />
-              <span className="whitespace-nowrap text-xs sm:text-sm">Export CSV</span>
+              <span className="whitespace-nowrap text-xs sm:text-sm">{t("exportCSV")}</span>
             </Button>
           )}
 
@@ -556,15 +509,15 @@ const DailySummaryTable = forwardRef((props, ref) => {
                   htmlFor="stationFilter"
                   className="whitespace-nowrap font-medium text-slate-700 text-xs md:text-sm"
                 >
-                  Station:
+                  {t("filter")}:
                 </Label>
               </div>
               <Select value={stationFilter} onValueChange={setStationFilter}>
                 <SelectTrigger className="w-full md:w-[180px] border-slate-300 focus:ring-purple-500 text-xs md:text-sm h-9">
-                  <SelectValue placeholder="All Stations" />
+                  <SelectValue placeholder={t("allStations")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Stations</SelectItem>
+                  <SelectItem value="all">{t("allStations")}</SelectItem>
                   {stations.map((station) => (
                     <SelectItem key={station.id} value={station.id}>
                       <span className="block truncate text-xs md:text-sm">
@@ -584,22 +537,22 @@ const DailySummaryTable = forwardRef((props, ref) => {
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
-          <span className="ml-3 text-lg text-gray-700">Loading daily summary data...</span>
+          <span className="ml-3 text-lg text-gray-700">{t("loading")}</span>
         </div>
       ) : !currentData || currentData.length === 0 ? (
         <div className="flex justify-center items-center h-64 bg-blue-50/50 rounded-lg border-2 border-dashed border-blue-200">
           <div className="text-center p-8">
             <LineChart className="mx-auto mb-5 text-blue-400" size={56} />
-            <h3 className="text-xl font-semibold text-gray-800 mb-3">No Data Available</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">{t("noData")}</h3>
             <p className="text-lg text-gray-600 mb-5">
-              There is no daily summary data available for the selected filters.
+              {t("noDataDescription")}
             </p>
             <Button
               variant="outline"
               className="bg-white text-blue-700 border-blue-300 hover:bg-blue-50 text-base"
               onClick={fetchLatestData}
             >
-              Try Again
+              {t("tryAgain")}
             </Button>
           </div>
         </div>
@@ -609,8 +562,8 @@ const DailySummaryTable = forwardRef((props, ref) => {
           <div className="mb-4 print:mb-2">
             <div className="text-center border-b-2 border-blue-200 bg-gradient-to-b from-blue-50 to-white py-6 print:py-3 rounded-t-lg">
               <div className="flex flex-wrap justify-center gap-10 print:gap-6 max-w-5xl mx-auto">
-                <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">DATA TYPE</div>
+                <div className="text-right">
+                  <div className="font-bold text-base mb-2 text-gray-600">{t("dataType")}</div>
                   <div className="flex">
                     {headerInfo.dataType.split("").map((char, i) => (
                       <div
@@ -623,8 +576,8 @@ const DailySummaryTable = forwardRef((props, ref) => {
                   </div>
                 </div>
 
-                <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">STATION NO.</div>
+                <div className="text-right">
+                  <div className="font-bold text-base mb-2 text-gray-600">{t("stationNo")}</div>
                   <div className="flex">
                     {headerInfo.stationNo.split("").map((char, i) => (
                       <div
@@ -637,8 +590,8 @@ const DailySummaryTable = forwardRef((props, ref) => {
                   </div>
                 </div>
 
-                <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">YEAR</div>
+                <div className="text-right">
+                  <div className="font-bold text-base mb-2 text-gray-600">{t("year")}</div>
                   <div className="flex">
                     {headerInfo.year.split("").map((char, i) => (
                       <div
@@ -651,8 +604,8 @@ const DailySummaryTable = forwardRef((props, ref) => {
                   </div>
                 </div>
 
-                <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">MONTH</div>
+                <div className="text-right">
+                  <div className="font-bold text-base mb-2 text-gray-600">{t("month")}</div>
                   <div className="flex">
                     {headerInfo.month.split("").map((char, i) => (
                       <div
@@ -665,8 +618,8 @@ const DailySummaryTable = forwardRef((props, ref) => {
                   </div>
                 </div>
 
-                <div className="text-left">
-                  <div className="font-bold text-base mb-2 text-gray-600">DAY</div>
+                <div className="text-right">
+                  <div className="font-bold text-base mb-2 text-gray-600">{t("day")}</div>
                   <div className="flex">
                     {headerInfo.day.split("").map((char, i) => (
                       <div
@@ -686,24 +639,24 @@ const DailySummaryTable = forwardRef((props, ref) => {
             <table className="w-full border-collapse min-w-[1800px] text-base text-gray-800">
               <thead className="bg-gradient-to-b from-blue-600 to-blue-700 text-sm font-bold uppercase text-center text-white print:bg-blue-700">
                 <tr>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Date</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Station</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Av. Station Pressure (hPa)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Av. Sea-Level Pressure (hPa)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Av. Dry-Bulb Temp (°C)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Av. Wet Bulb Temp (°C)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Max Temperature (°C)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Min Temperature (°C)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Total Precipitation (mm)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Av. Dew Point Temp (°C)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Av. Relative Humidity (%)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Wind Speed (m/s)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Wind Direction</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Max Wind Speed (m/s)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Max Wind Direction</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Av. Total Cloud (octas)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Lowest Visibility (km)</th>
-                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">Total Rain Duration (H-M)</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("date")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("station")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.avStationPressure")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.avSeaLevelPressure")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.avDryBulbTemperature")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.avWetBulbTemperature")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.maxTemperature")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.minTemperature")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.totalPrecipitation")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.avDewPointTemperature")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.avRelativeHumidity")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.windSpeed")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.windDirectionCode")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.maxWindSpeed")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.maxWindDirection")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.avTotalCloud")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.lowestVisibility")}</th>
+                  <th className="border border-blue-300 px-4 py-3 whitespace-nowrap">{t("editDialog.fields.totalRainDuration")}</th>
                 </tr>
               </thead>
 
@@ -774,7 +727,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
                 ) : (
                   <tr>
                     <td colSpan={19} className="text-center py-8 text-gray-500">
-                      No daily summary data available
+                      {t("noData")}
                     </td>
                   </tr>
                 )}
@@ -782,8 +735,8 @@ const DailySummaryTable = forwardRef((props, ref) => {
             </table>
 
             {/* Optional footer */}
-            <div className="text-right text-sm text-blue-600 mt-2 pr-4 pb-2 print:hidden">
-              Generated: {new Date().toLocaleString("en-GB", { timeZone: "Asia/Dhaka" })}
+            <div className="text-left text-sm text-blue-600 mt-2 pr-4 pb-2 print:hidden">
+              {t("generated")}: {new Date().toLocaleString("ar-EG", { timeZone: "Asia/Dhaka" })}
             </div>
           </div>
         </div>
@@ -794,7 +747,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4 text-sky-500" />
           <span className="text-sm text-slate-600">
-            Date Range:{" "}
+            {t("dateRange")}:{" "}
             <span className="font-semibold text-slate-800">
               {`${format(new Date(startDate), "MMM d")} - ${format(new Date(endDate), "MMM d, yyyy")}`}
             </span>
@@ -802,11 +755,11 @@ const DailySummaryTable = forwardRef((props, ref) => {
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="outline" className="bg-sky-100 text-sky-800 hover:bg-sky-200">
-            {currentData.length} record(s)
+            {currentData.length} {t("records")}
           </Badge>
           {stationFilter !== "all" && (
             <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
-              Station: {getStationNameById(stationFilter)}
+              {t("station")}: {getStationNameById(stationFilter)}
             </Badge>
           )}
         </div>
@@ -816,10 +769,12 @@ const DailySummaryTable = forwardRef((props, ref) => {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="w-[50vw] !max-w-[90vw] rounded-xl border-0 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 shadow-xl">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-indigo-800">Edit Daily Summary Data</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-indigo-800">{t("editDialog.title")}</DialogTitle>
             <DialogDescription className="text-slate-600">
-              Editing record from {selectedRecord?.ObservingTime?.station?.name || "Unknown Station"}{" "}
-              {selectedRecord?.createdAt ? format(new Date(selectedRecord.createdAt), "MMMM d, yyyy") : "Unknown Date"}
+              {t("editDialog.description", {
+                station: selectedRecord?.ObservingTime?.station?.name || t("unknownStation"),
+                date: selectedRecord?.createdAt ? format(new Date(selectedRecord.createdAt), "MMMM d, yyyy") : t("unknownDate")
+              })}
             </DialogDescription>
           </DialogHeader>
 
@@ -829,8 +784,6 @@ const DailySummaryTable = forwardRef((props, ref) => {
               const error = fieldErrors[field.id]
               const hasError = !!error
               const value = editFormData[field.id] || ""
-
-              // Ensure the value is always an integer (remove any decimal points)
               const displayValue = typeof value === 'number' ? Math.floor(value).toString() : value.replace(/\./g, '')
 
               return (
@@ -839,15 +792,13 @@ const DailySummaryTable = forwardRef((props, ref) => {
                   className={`space-y-1 p-3 rounded-lg ${field.bg} border ${hasError ? "border-red-300" : "border-white"} shadow-sm`}
                 >
                   <Label htmlFor={field.id} className="text-sm font-medium text-gray-700">
-                    {field.label}
+                    {t(`editDialog.fields.${field.id}`)}
                   </Label>
                   <Input
                     id={field.id}
                     value={displayValue}
                     onChange={(e) => {
-                      // Remove any non-digit characters and decimal points
                       const numericValue = e.target.value.replace(/[^0-9]/g, "")
-                      // Enforce maximum length
                       const truncatedValue = numericValue.slice(0, validation.length)
 
                       setEditFormData((prev: any) => ({
@@ -855,14 +806,18 @@ const DailySummaryTable = forwardRef((props, ref) => {
                         [field.id]: truncatedValue,
                       }))
 
-                      // Validate the input
                       let error = ""
                       if (truncatedValue.length === 0) {
-                        error = `This field is required`
+                        error = t("editDialog.validation.required")
                       } else if (truncatedValue.length < validation.length) {
-                        error = `Must be exactly ${validation.length} digits (currently ${truncatedValue.length})`
+                        error = t("editDialog.validation.exactLength", {
+                          length: validation.length,
+                          current: truncatedValue.length
+                        })
                       } else if (truncatedValue.length > validation.length) {
-                        error = `Cannot exceed ${validation.length} digits`
+                        error = t("editDialog.validation.maxLength", {
+                          length: validation.length
+                        })
                       }
 
                       setFieldErrors((prev) => ({
@@ -880,7 +835,10 @@ const DailySummaryTable = forwardRef((props, ref) => {
                     <div className="text-xs text-red-600 mt-1 font-medium">{error}</div>
                   ) : (
                     <div className="text-xs text-gray-500 mt-1">
-                      Required length: exactly {validation.length} digit{validation.length > 1 ? "s" : ""}
+                      {t("editDialog.validation.exactLength", {
+                        length: validation.length,
+                        current: 0
+                      }).replace("0", "")}
                     </div>
                   )}
                 </div>
@@ -894,7 +852,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
               onClick={() => setIsEditDialogOpen(false)}
               className="border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-gray-900"
             >
-              Cancel
+              {t("editDialog.cancel")}
             </Button>
             <Button
               onClick={handleSaveEdit}
@@ -904,10 +862,10 @@ const DailySummaryTable = forwardRef((props, ref) => {
               {isSaving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  {t("editDialog.saving")}
                 </>
               ) : (
-                "Save Changes"
+                t("editDialog.saveChanges")
               )}
             </Button>
           </DialogFooter>
@@ -920,15 +878,17 @@ const DailySummaryTable = forwardRef((props, ref) => {
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-red-600 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
-              Permission Denied
+              {t("permissionDialog.title")}
             </DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <p className="text-slate-700">You don't have permission to edit this record. This could be because:</p>
-            <ul className="mt-2 list-disc pl-5 text-sm text-slate-600 space-y-1">
-              <li>The record is too old to edit</li>
-              <li>The record belongs to a different station</li>
-              <li>You don't have the required role permissions</li>
+            <p className="text-slate-700">{t("permissionDialog.description")}</p>
+            <ul className="mt-2 list-disc pr-5 text-sm text-slate-600 space-y-1">
+              {t("permissionDialog.reasons")
+                .split("\n")
+                .map((reason, i) => (
+                  <li key={i}>{reason}</li>
+                ))}
             </ul>
           </div>
           <DialogFooter>
@@ -936,7 +896,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
               onClick={() => setIsPermissionDeniedOpen(false)}
               className="bg-slate-200 text-slate-800 hover:bg-slate-300"
             >
-              Close
+              {t("permissionDialog.close")}
             </Button>
           </DialogFooter>
         </DialogContent>

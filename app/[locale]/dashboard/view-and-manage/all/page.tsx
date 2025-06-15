@@ -11,10 +11,13 @@ import { Download } from "lucide-react"
 import { useSession } from "@/lib/auth-client"
 import dynamic from "next/dynamic"
 import DailySummaryTable from "../daily-summery/daily-summery"
+import { useTranslations } from "next-intl"
+import { toast } from "sonner"
 
 const CompactPDFExportButton = dynamic(() => import("../PdfExportComponent"), { ssr: false })
 
 export default function AllViewAndManagePage() {
+  const t = useTranslations("AllViewAndManagePage")
   const [activeTab, setActiveTab] = useState("first-card")
   const { data: session } = useSession()
 
@@ -24,125 +27,89 @@ export default function AllViewAndManagePage() {
   const dailySummeryRef = useRef<any>(null)
 
   const exportToExcel = () => {
-  const wb = XLSX.utils.book_new();
+    toast.promise(
+      new Promise((resolve, reject) => {
+        try {
+          const wb = XLSX.utils.book_new();
 
-  const firstCardData = firstCardRef.current?.getData?.() || [];
-  const secondCardData = secondCardRef.current?.getData?.() || [];
-  const synopticData = synopticRef.current?.getData?.() || [];
-  const dailySummaryData = dailySummeryRef.current?.getData?.() || [];
+          const firstCardData = firstCardRef.current?.getData?.() || [];
+          const secondCardData = secondCardRef.current?.getData?.() || [];
+          const synopticData = synopticRef.current?.getData?.() || [];
+          const dailySummaryData = dailySummeryRef.current?.getData?.() || [];
 
-  const excludedKeys = [
-    'id',
-    'stationId',
-    'stationCode',
-    'stationName',
-    'submittedAt',
-    'createdAt',
-    'updatedAt',
-    'tabActive',
-    'observingTime',
-    'observingTimeId',
-    'localTime',
-    'c2Indicator'
-  ];
+          const excludedKeys = [
+            'id',
+            'stationId',
+            'stationCode',
+            'stationName',
+            'submittedAt',
+            'createdAt',
+            'updatedAt',
+            'tabActive',
+            'observingTime',
+            'observingTimeId',
+            'localTime',
+            'c2Indicator'
+          ];
 
-  const cleanFirst = firstCardData.map(item => {
-    const cleaned = {};
-    Object.keys(item).forEach(key => {
-      if (!excludedKeys.includes(key)) {
-        cleaned[key] = item[key];
+          const cleanData = (data: any[]) => {
+            return data.map(item => {
+              const cleaned: Record<string, any> = {};
+              Object.keys(item).forEach(key => {
+                if (!excludedKeys.includes(key)) {
+                  cleaned[key] = item[key];
+                }
+              });
+              return cleaned;
+            });
+          };
+
+          const cleanFirst = cleanData(firstCardData);
+          const cleanSecond = cleanData(secondCardData);
+          const cleanSynoptic = cleanData(synopticData);
+          const cleanSummary = cleanData(dailySummaryData);
+
+          // Create worksheets
+          const firstSheet = XLSX.utils.json_to_sheet(cleanFirst);
+          const secondSheet = XLSX.utils.json_to_sheet(cleanSecond);
+          const synopticSheet = XLSX.utils.json_to_sheet(cleanSynoptic);
+          const summarySheet = XLSX.utils.json_to_sheet(cleanSummary);
+
+          // Add sheets to workbook
+          XLSX.utils.book_append_sheet(wb, firstSheet, t("tabs.firstCard"));
+          XLSX.utils.book_append_sheet(wb, secondSheet, t("tabs.secondCard"));
+          XLSX.utils.book_append_sheet(wb, synopticSheet, t("tabs.synopticCode"));
+          XLSX.utils.book_append_sheet(wb, summarySheet, t("tabs.dailySummary"));
+
+          // Export
+          XLSX.writeFile(wb, "Weather_Data_All_Tabs.xlsx");
+          resolve(true);
+        } catch (error) {
+          console.error("Export error:", error);
+          reject(error);
+        }
+      }),
+      {
+        loading: t("loading"),
+        success: () => t("success.exportSuccess"),
+        error: () => t("errors.exportFailed")
       }
-    });
-    return cleaned;
-  });
-
-  const cleanSecond = secondCardData.map(item => {
-    const cleaned = {};
-    Object.keys(item).forEach(key => {
-      if (!excludedKeys.includes(key)) {
-        cleaned[key] = item[key];
-      }
-    });
-    return cleaned;
-  });
-
-  const firstKeys = Object.keys(cleanFirst[0] || {});
-  const secondKeys = Object.keys(cleanSecond[0] || {});
-
-  const firstHeader = Array(firstKeys.length).fill("First Card");
-  const secondHeader = Array(secondKeys.length).fill("Second Card");
-
-  const fullHeaderRow = [...firstHeader, ...secondHeader];
-  const subHeaderRow = [...firstKeys, ...secondKeys];
-
-  const maxLength = Math.max(cleanFirst.length, cleanSecond.length);
-  const mergedRows = [];
-
-  for (let i = 0; i < maxLength; i++) {
-    const firstRow = cleanFirst[i] || {};
-    const secondRow = cleanSecond[i] || {};
-
-    mergedRows.push([
-      ...firstKeys.map(k => firstRow[k] || ""),
-      ...secondKeys.map(k => secondRow[k] || "")
-    ]);
-  }
-
-  const finalData = [fullHeaderRow, subHeaderRow, ...mergedRows];
-  const mergedSheet = XLSX.utils.aoa_to_sheet(finalData);
-
-  // Merge headers
-  mergedSheet["!merges"] = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: firstKeys.length - 1 } },
-    { s: { r: 0, c: firstKeys.length }, e: { r: 0, c: firstKeys.length + secondKeys.length - 1 } }
-  ];
-
-  // Add merged sheet
-  XLSX.utils.book_append_sheet(wb, mergedSheet, "First+Second Card");
-
-  // Synoptic
-  const cleanSynoptic = synopticData.map(item => {
-    const cleaned = {};
-    Object.keys(item).forEach(key => {
-      if (!excludedKeys.includes(key)) {
-        cleaned[key] = item[key];
-      }
-    });
-    return cleaned;
-  });
-  const synopticSheet = XLSX.utils.json_to_sheet(cleanSynoptic);
-  XLSX.utils.book_append_sheet(wb, synopticSheet, "Synoptic");
-
-  // Daily Summary
-  const cleanSummary = dailySummaryData.map(item => {
-    const cleaned = {};
-    Object.keys(item).forEach(key => {
-      if (!excludedKeys.includes(key)) {
-        cleaned[key] = item[key];
-      }
-    });
-    return cleaned;
-  });
-  const summarySheet = XLSX.utils.json_to_sheet(cleanSummary);
-  XLSX.utils.book_append_sheet(wb, summarySheet, "Daily Summary");
-
-  // Export
-  XLSX.writeFile(wb, "Weather_Data_All_Tabs.xlsx");
-};
+    );
+  };
 
   // Prepare station info for PDF
   const stationInfo = {
     stationId: session?.user?.station?.stationId || "41953",
-    stationName: session?.user?.station?.name || "Weather Station",
-    date: new Date().toLocaleDateString(),
+    stationName: session?.user?.station?.name || t("station"),
+    date: new Date().toLocaleDateString("ar-EG"),
   }
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6 min-h-screen">
+    <div className="p-3 sm:p-4 md:p-6 space-y-4 md:space-y-6 min-h-screen" dir="rtl">
       {/* Header Section - Responsive */}
       <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 break-words">
-          All View & Manage
+          {t("title")}
         </h1>
 
         {/* Export Buttons - Responsive Layout */}
@@ -154,7 +121,7 @@ export default function AllViewAndManagePage() {
               className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 w-1/2 sm:w-auto text-sm sm:text-base px-3 py-2"
             >
               <Download className="h-4 w-4 flex-shrink-0" />
-              <span className="truncate">Export All to Excel</span>
+              <span className="truncate">{t("exportExcel")}</span>
             </Button>
 
             {/* Compact PDF Export Button */}
@@ -180,25 +147,25 @@ export default function AllViewAndManagePage() {
               value="first-card" 
               className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
             >
-              First Card
+              {t("tabs.firstCard")}
             </TabsTrigger>
             <TabsTrigger 
               value="second-card"
               className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
             >
-              Second Card
+              {t("tabs.secondCard")}
             </TabsTrigger>
             <TabsTrigger 
               value="synoptic-code"
               className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
             >
-              Synoptic Code
+              {t("tabs.synopticCode")}
             </TabsTrigger>
             <TabsTrigger 
               value="daily-summery"
               className="whitespace-nowrap text-xs md:text-md sm:text-sm px-2 sm:px-3 py-4 sm:py-6 data-[state=active]:text-blue-500 data-[state=inactive]:text-white"
             >
-              Daily Summary
+              {t("tabs.dailySummary")}
             </TabsTrigger>
           </TabsList>
         </div>

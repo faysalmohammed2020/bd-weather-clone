@@ -115,6 +115,7 @@ const Sidebar = () => {
   };
 
   const t = useTranslations("sidebar");
+  const common = useTranslations("common");
 
   const sidebarLinks = [
   {
@@ -235,7 +236,7 @@ const Sidebar = () => {
       >
         <div className="flex items-center justify-between p-4 border-b border-sky-800 z-40 bg-sky-700">
           {(!isCollapsed || isMobileOpen) && (
-            <h2 className="text-lg font-bold whitespace-nowrap">BD Weather</h2>
+            <h2 className="text-lg font-bold whitespace-nowrap">{common("title")}</h2>
           )}
           <div className="flex items-center gap-2">
             <button

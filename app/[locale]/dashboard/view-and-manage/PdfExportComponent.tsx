@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { FileText } from "lucide-react"
 import moment from 'moment';
 import { useSession } from "@/lib/auth-client"
+import { useTranslations } from "next-intl"
 
 // Compact PDF Styles for single A3 page
 const styles = StyleSheet.create({
@@ -539,6 +540,7 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
     date: new Date().toLocaleDateString(),
   },
 }) => {
+  const t = useTranslations("AllViewAndManagePage");
   const [isGenerating, setIsGenerating] = React.useState(false)
 
   const generatePDFData = React.useCallback(() => {
@@ -573,12 +575,12 @@ export const CompactPDFExportButton: React.FC<CompactPDFExportButtonProps> = ({
           {loading || isGenerating ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              Generating PDF...
+              {t("loadingPDF")}
             </>
           ) : (
             <>
               <FileText className="h-4 w-full" />
-              Export All to PDF
+              {t("exportPDF")}
             </>
           )}
         </Button>

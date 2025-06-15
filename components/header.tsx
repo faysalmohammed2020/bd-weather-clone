@@ -6,11 +6,13 @@ import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslations } from "next-intl";
 
 export default function Header() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const t = useTranslations();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,7 +35,7 @@ export default function Header() {
       <div className="container flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Cloud className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">BD Weather</span>
+          <span className="text-xl font-bold">{t("common.title")}</span>
         </Link>
 
         {/* Desktop Navigation */}
