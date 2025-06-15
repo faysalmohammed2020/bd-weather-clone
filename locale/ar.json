@@ -1015,5 +1015,244 @@
       "exportSuccess": "تم تصدير البيانات بنجاح"
     },
     "loading": "جاري التحميل..."
+  },
+  "UserManagement": {
+    "userTable": {
+      "title": "إدارة المستخدمين",
+      "createUser": "إنشاء مستخدم",
+      "editUser": "تعديل المستخدم",
+      "createNewUser": "مستخدم جديد",
+      "columns": {
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "role": "الدور",
+        "station": "المحطة",
+        "joined": "تاريخ الانضمام",
+        "actions": "الإجراءات"
+      },
+      "actions": {
+        "edit": "تعديل",
+        "delete": "حذف"
+      },
+      "loading": "جاري التحميل...",
+      "noUsers": "لا يوجد مستخدمون",
+      "pagination": {
+        "showing": "عرض",
+        "to": "إلى",
+        "of": "من",
+        "users": "مستخدمين",
+        "previous": "السابق",
+        "next": "التالي"
+      },
+      "deleteDialog": {
+        "title": "تأكيد الحذف",
+        "message": "هل أنت متأكد أنك تريد حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.",
+        "cancel": "إلغاء",
+        "confirm": "حذف"
+      },
+      "roleChangeDialog": {
+        "title": "تأكيد تغيير الدور",
+        "message": "هل أنت متأكد أنك تريد تغيير دور هذا المستخدم من {originalRole} إلى {newRole}؟",
+        "warning": "تغيير أدوار المستخدمين يؤثر على صلاحياتهم ومستويات وصولهم في النظام.",
+        "cancel": "إلغاء",
+        "confirm": "تأكيد التغيير"
+      },
+      "createEditDialog": {
+        "createTitle": "إنشاء مستخدم جديد",
+        "editTitle": "تعديل المستخدم",
+        "fields": {
+          "name": "الاسم",
+          "email": "البريد الإلكتروني *",
+          "password": "كلمة المرور",
+          "newPassword": "كلمة مرور جديدة",
+          "role": "الدور *",
+          "stationName": "اسم المحطة",
+          "stationId": "معرف المحطة",
+          "securityCode": "كود الأمان",
+          "division": "القسم *",
+          "district": "المحافظة *",
+          "upazila": "المنطقة *"
+        },
+        "placeholders": {
+          "selectRole": "اختر دورًا",
+          "selectStation": "اختر محطة",
+          "selectDivision": "اختر قسمًا",
+          "selectDistrict": "اختر محافظة",
+          "selectUpazila": "اختر منطقة"
+        },
+        "passwordRequirements": "يجب أن تتكون من {minLength} أحرف على الأقل لدور {role}",
+        "buttons": {
+          "cancel": "إلغاء",
+          "create": "إنشاء مستخدم",
+          "update": "تحديث المستخدم",
+          "delete": "حذف المستخدم"
+        },
+        "errors": {
+          "fillAllFields": "يرجى ملء جميع الحقول المطلوبة",
+          "passwordLength": "يجب أن تتكون كلمة المرور من {minLength} أحرف على الأقل لدور {role}",
+          "superAdminEdit": "لا يمكن تعديل دور المدير العام",
+          "selfDelete": "لا يمكنك حذف حسابك الخاص",
+          "superAdminDelete": "لا يمكن حذف حسابات المدير العام"
+        }
+      },
+      "roles": {
+        "superAdmin": "مدير عام",
+        "stationAdmin": "مدير محطة",
+        "observer": "مراقب"
+      },
+      "buttons": {
+        "cancel": "إلغاء",
+        "create": "إنشاء مستخدم",
+        "update": "تحديث المستخدم",
+        "delete": "حذف المستخدم"
+      },
+      "errors": {
+        "fetchFailed": "فشل جلب البيانات",
+        "addFailed": "فشل إضافة المستخدم",
+        "updateFailed": "فشل تحديث المستخدم",
+        "deleteFailed": "فشل حذف المستخدم"
+      },
+      "success": {
+        "added": "تم إضافة المستخدم بنجاح",
+        "updated": "تم تحديث المستخدم بنجاح",
+        "deleted": "تم حذف المستخدم بنجاح"
+      }
+    },
+    "logsTable": {
+      "title": "سجلات النظام",
+      "columns": {
+        "time": "الوقت",
+        "actorName": "اسم المستخدم",
+        "actorEmail": "بريد المستخدم",
+        "actorRole": "دور المستخدم",
+        "targetUser": "المستخدم المستهدف",
+        "targetEmail": "البريد المستهدف",
+        "action": "الإجراء",
+        "actionText": "وصف الإجراء",
+        "module": "الوحدة",
+        "details": "التفاصيل"
+      },
+      "actions": {
+        "view": "عرض"
+      },
+      "actionTypes": {
+        "create": "إنشاء",
+        "update": "تحديث",
+        "delete": "حذف"
+      },
+      "detailsDialog": {
+        "title": "تفاصيل السجل",
+        "subtitle": "(التغييرات التي تم إجراؤها)"
+      },
+      "pagination": {
+        "page": "الصفحة",
+        "of": "من",
+        "showing": "عرض",
+        "to": "إلى",
+        "results": "نتيجة",
+        "previous": "السابق",
+        "next": "التالي"
+      }
+    }
+  },
+  "StationManagement": {
+    "title": "إدارة المحطات",
+    "searchPlaceholder": "ابحث عن المحطات بالاسم أو المعرف...",
+    "addStation": "إضافة محطة جديدة",
+    "noStations": "لا توجد محطات. أضف محطة جديدة للبدء.",
+    "deleteConfirmation": "هل أنت متأكد أنك تريد حذف هذه المحطة؟",
+    "form": {
+      "name": "الاسم",
+      "namePlaceholder": "اسم المحطة",
+      "stationId": "معرف المحطة",
+      "stationIdPlaceholder": "معرف المحطة",
+      "securityCode": "كود الأمان",
+      "securityCodePlaceholder": "كود الأمان",
+      "latitude": "خط العرض",
+      "latitudePlaceholder": "خط العرض (مثال: 23.6850)",
+      "longitude": "خط الطول",
+      "longitudePlaceholder": "خط الطول (مثال: 90.3563)"
+    },
+    "table": {
+      "name": "الاسم",
+      "stationId": "معرف المحطة",
+      "securityCode": "كود الأمان",
+      "location": "الموقع",
+      "actions": "الإجراءات"
+    },
+    "buttons": {
+      "save": "حفظ",
+      "cancel": "إلغاء",
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "errors": {
+      "requiredFields": "الاسم ومعرف المحطة وكود الأمان مطلوبة",
+      "fetchFailed": "فشل جلب بيانات المحطات",
+      "addFailed": "فشل إضافة المحطة",
+      "updateFailed": "فشل تحديث المحطة",
+      "deleteFailed": "فشل حذف المحطة"
+    },
+    "success": {
+      "added": "تمت إضافة المحطة بنجاح",
+      "updated": "تم تحديث المحطة بنجاح",
+      "deleted": "تم حذف المحطة بنجاح"
+    }
+  },
+  "Settings": {
+    "title": "إعدادات الحساب",
+    "security": "الأمان",
+    "twoFactor": {
+      "title": "المصادقة الثنائية",
+      "description": "أضف طبقة أمان إضافية لحسابك عن طريق طلب رمز التحقق",
+      "enable": {
+        "title": "تمكين المصادقة الثنائية",
+        "description": "أدخل كلمة المرور لتمكين المصادقة الثنائية",
+        "passwordLabel": "كلمة المرور",
+        "passwordPlaceholder": "أدخل كلمة المرور",
+        "continue": "متابعة",
+        "scanQR": "مسح رمز QR",
+        "scanDescription": "بعد مسح رمز QR، سيظهر تطبيق المصادقة رمزًا مكونًا من 6 أرقام",
+        "backupCodes": {
+          "title": "رموز النسخ الاحتياطي",
+          "description": "احفظ هذه الرموز في مكان آمن. يمكنك استخدامها لتسجيل الدخول إذا فقدت الوصول إلى تطبيق المصادقة الخاص بك"
+        },
+        "verify": {
+          "title": "تحقق من رمز المصادقة",
+          "description": "أدخل رمز الـ6 أرقام من تطبيق المصادقة الخاص بك",
+          "codeLabel": "رمز التحقق",
+          "codePlaceholder": "أدخل رمز الـ6 أرقام",
+          "verifyButton": "تحقق وتمكين"
+        }
+      },
+      "disable": {
+        "title": "تعطيل المصادقة الثنائية",
+        "description": "أدخل كلمة المرور لتعطيل المصادقة الثنائية. هذا سيجعل حسابك أقل أمانًا",
+        "passwordLabel": "كلمة المرور",
+        "passwordPlaceholder": "أدخل كلمة المرور",
+        "disableButton": "تعطيل المصادقة"
+      },
+      "errors": {
+        "passwordRequired": "كلمة المرور مطلوبة",
+        "codeRequired": "رمز التحقق مطلوب",
+        "generalError": "حدث خطأ",
+        "enableFailed": "فشل تمكين المصادقة الثنائية",
+        "disableFailed": "فشل تعطيل المصادقة الثنائية",
+        "verifyFailed": "فشل التحقق من الرمز"
+      },
+      "success": {
+        "enabled": "تم تمكين المصادقة الثنائية بنجاح!",
+        "disabled": "تم تعطيل المصادقة الثنائية بنجاح"
+      }
+    },
+    "buttons": {
+      "cancel": "إلغاء",
+      "back": "رجوع"
+    },
+    "loading": {
+      "processing": "جاري المعالجة...",
+      "verifying": "جاري التحقق...",
+      "disabling": "جاري التعطيل..."
+    }
   }
 }

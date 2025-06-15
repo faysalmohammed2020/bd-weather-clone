@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LogActionType } from "@/lib/log";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 export const LogsTable = ({
   logs: rawLogs,
@@ -34,6 +35,7 @@ export const LogsTable = ({
   
   const [selectedDetails, setSelectedDetails] = useState<JSON | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const t = useTranslations("UserManagement.logsTable");
   
   // Navigate to a specific page without resetting scroll position
   const goToPage = (page: number) => {
@@ -66,41 +68,41 @@ export const LogsTable = ({
   };
   return (
     <>
-      <h1 className="text-2xl font-bold mb-6">Logs</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("title")}</h1>
       <div className=" bg-white py-6 rounded-xl border shadow">
         <div className="overflow-auto">
           <table className="w-full">
             <thead className="border-b-2 border-slate-300 bg-slate-100">
               <tr>
                 <th className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                  Time
+                  {t("columns.time")}
                 </th>
                 <th className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                  Actor Name
+                  {t("columns.actorName")}
                 </th>
                 <th className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                  Actor Email
+                  {t("columns.actorEmail")}
                 </th>
                 <th className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                  Actor Role
+                  {t("columns.actorRole")}
                 </th>
                 <th className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                  Target User
+                  {t("columns.targetUser")}
                 </th>
                 <th className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                  Target Email
+                  {t("columns.targetEmail")}
                 </th>
                 <th className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                  Action
+                  {t("columns.action")}
                 </th>
                 <th className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                  Action Text
+                  {t("columns.actionText")}
                 </th>
                 <th className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                  Module
+                  {t("columns.module")}
                 </th>
                 <th className="p-3 text-lg font-medium whitespace-nowrap min-w-max-[250px] text-left">
-                  Details
+                  {t("columns.details")}
                 </th>
               </tr>
             </thead>
@@ -149,7 +151,7 @@ export const LogsTable = ({
                         className="hover:bg-slate-100"
                       >
                         <Eye className="h-5 w-5" />
-                        <span>View</span>
+                        <span>{t("actions.view")}</span>
                       </Button>
                     ) : null}
                   </td>
@@ -178,7 +180,7 @@ export const LogsTable = ({
                   disabled={currentPage === 1}
                   size="sm"
                 >
-                  Previous
+                  {t("pagination.previous")}
                 </Button>
 
                 {/* Page numbers */}
@@ -223,7 +225,7 @@ export const LogsTable = ({
                   disabled={currentPage >= Math.ceil(total / limit)}
                   size="sm"
                 >
-                  Next
+                  {t("pagination.next")}
                 </Button>
               </div>
             </div>
@@ -236,8 +238,8 @@ export const LogsTable = ({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              Log Details{" "}
-              <span className="text-slate-500 text-sm">(Changes made)</span>
+              {t("detailsDialog.title")}{" "}
+              <span className="text-slate-500 text-sm">{t("detailsDialog.subtitle")}</span>
             </DialogTitle>
           </DialogHeader>
           <div className="mt-4 max-h-[60vh] overflow-auto">

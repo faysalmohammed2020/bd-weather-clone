@@ -17,8 +17,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useTranslations } from "next-intl";
 
 const Settings = () => {
+  const t = useTranslations("Settings");
   const { data: session } = useSession();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [password, setPassword] = useState("");
@@ -38,10 +40,8 @@ const Settings = () => {
 
   const handleToggle2FA = async (checked: boolean) => {
     if (checked) {
-      // If turning on 2FA, open the password dialog
       setIsDialogOpen(true);
     } else {
-      // If turning off 2FA, open disable confirmation dialog
       setDisableDialogOpen(true);
     }
   };
@@ -49,7 +49,7 @@ const Settings = () => {
   const handleDisable2FA = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!disablePassword) {
-      setDisableError("Password is required");
+      setDisableError(t("twoFactor.errors.passwordRequired"));
       return;
     }
 
@@ -62,14 +62,14 @@ const Settings = () => {
       });
 
       if (error) {
-        setDisableError(error.message || "Failed to disable 2FA");
+        setDisableError(error.message || t("twoFactor.errors.disableFailed"));
       } else {
-        toast.success("Two-factor authentication disabled successfully");
+        toast.success(t("twoFactor.success.disabled"));
         setDisableDialogOpen(false);
         setDisablePassword("");
       }
     } catch (err: unknown) {
-      setDisableError(err instanceof Error ? err.message : "An error occurred");
+      setDisableError(err instanceof Error ? err.message : t("twoFactor.errors.generalError"));
     } finally {
       setIsDisableLoading(false);
     }
@@ -78,7 +78,7 @@ const Settings = () => {
   const handleInitiate2FA = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password) {
-      setError("Password is required");
+      setError(t("twoFactor.errors.passwordRequired"));
       return;
     }
 
@@ -91,16 +91,14 @@ const Settings = () => {
       });
 
       if (error) {
-        setError(error.message || "Failed to initiate 2FA setup");
+        setError(error.message || t("twoFactor.errors.enableFailed"));
       } else if (data) {
-        // Store the TOTP URI and backup codes
         setTotpUri(data.totpURI);
         setBackupCodes(data.backupCodes || []);
-        // Move to QR code scanning step
         setSetupStep("qrcode");
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : t("twoFactor.errors.generalError"));
     } finally {
       setIsLoading(false);
     }
@@ -109,7 +107,7 @@ const Settings = () => {
   const handleVerifyTotp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!verificationCode) {
-      setError("Verification code is required");
+      setError(t("twoFactor.errors.codeRequired"));
       return;
     }
 
@@ -122,40 +120,39 @@ const Settings = () => {
       });
 
       if (error) {
-        setError(error.message || "Failed to verify code");
+        setError(error.message || t("twoFactor.errors.verifyFailed"));
       } else {
-        toast.success("Two-factor authentication enabled successfully!");
+        toast.success(t("twoFactor.success.enabled"));
         setIsDialogOpen(false);
-        // Reset the setup state
         setSetupStep("password");
         setPassword("");
         setVerificationCode("");
         setTotpUri("");
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      setError(err instanceof Error ? err.message : t("twoFactor.errors.generalError"));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto" dir="rtl">
       <div className="flex items-center gap-2 mb-6">
         <SettingsIcon className="h-6 w-6" />
-        <h1 className="text-2xl font-bold">Account Settings</h1>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
       </div>
 
       <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Security</h2>
+        <h2 className="text-xl font-semibold mb-4">{t("security")}</h2>
 
         <div className="flex items-center justify-between py-4">
           <div className="flex items-start gap-3">
             <Shield className="h-5 w-5 mt-0.5 text-blue-600" />
             <div>
-              <h3 className="font-medium">Two-Factor Authentication</h3>
+              <h3 className="font-medium">{t("twoFactor.title")}</h3>
               <p className="text-sm text-gray-500">
-                Add an extra layer of security to your account by requiring a verification code
+                {t("twoFactor.description")}
               </p>
             </div>
           </div>
@@ -172,7 +169,6 @@ const Settings = () => {
         onOpenChange={(open) => {
           setIsDialogOpen(open);
           if (!open) {
-            // Reset state when dialog is closed
             setSetupStep("password");
             setPassword("");
             setVerificationCode("");
@@ -184,14 +180,14 @@ const Settings = () => {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {setupStep === "password" && "Enable Two-Factor Authentication"}
-              {setupStep === "qrcode" && "Scan QR Code"}
-              {setupStep === "verify" && "Verify Authentication Code"}
+              {setupStep === "password" && t("twoFactor.enable.title")}
+              {setupStep === "qrcode" && t("twoFactor.enable.scanQR")}
+              {setupStep === "verify" && t("twoFactor.enable.verify.title")}
             </DialogTitle>
             <DialogDescription>
-              {setupStep === "password" && "Enter your password to enable two-factor authentication."}
-              {setupStep === "qrcode" && "Scan this QR code with your authenticator app."}
-              {setupStep === "verify" && "Enter the 6-digit code from your authenticator app."}
+              {setupStep === "password" && t("twoFactor.enable.description")}
+              {setupStep === "qrcode" && t("twoFactor.enable.scanDescription")}
+              {setupStep === "verify" && t("twoFactor.enable.verify.description")}
             </DialogDescription>
           </DialogHeader>
 
@@ -199,11 +195,11 @@ const Settings = () => {
             <form onSubmit={handleInitiate2FA}>
               <div className="space-y-4 py-2">
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t("twoFactor.enable.passwordLabel")}</Label>
                   <Input
                     id="password"
                     type="password"
-                    placeholder="Enter your password"
+                    placeholder={t("twoFactor.enable.passwordPlaceholder")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
@@ -218,10 +214,10 @@ const Settings = () => {
                   onClick={() => setIsDialogOpen(false)}
                   disabled={isLoading}
                 >
-                  Cancel
+                  {t("buttons.cancel")}
                 </Button>
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Processing..." : "Continue"}
+                  {isLoading ? t("loading.processing") : t("twoFactor.enable.continue")}
                 </Button>
               </DialogFooter>
             </form>
@@ -238,13 +234,13 @@ const Settings = () => {
               </div>
               
               <p className="text-sm text-center text-gray-500">
-                After scanning the QR code, your authenticator app will display a 6-digit code.
+                {t("twoFactor.enable.scanDescription")}
               </p>
 
               {backupCodes.length > 0 && (
                 <div className="mt-4 p-3 bg-gray-50 rounded-md">
-                  <h4 className="text-sm font-medium mb-2">Backup Codes</h4>
-                  <p className="text-xs text-gray-500 mb-2">Save these backup codes in a secure place. You can use them to sign in if you lose access to your authenticator app.</p>
+                  <h4 className="text-sm font-medium mb-2">{t("twoFactor.enable.backupCodes.title")}</h4>
+                  <p className="text-xs text-gray-500 mb-2">{t("twoFactor.enable.backupCodes.description")}</p>
                   <div className="grid grid-cols-2 gap-2">
                     {backupCodes.map((code, index) => (
                       <div key={index} className="text-xs font-mono bg-white p-1 border rounded">{code}</div>
@@ -261,10 +257,10 @@ const Settings = () => {
                   variant="outline" 
                   onClick={() => setIsDialogOpen(false)}
                 >
-                  Cancel
+                  {t("buttons.cancel")}
                 </Button>
                 <Button onClick={() => setSetupStep("verify")}>
-                  Continue to Verification
+                  {t("twoFactor.enable.continue")}
                 </Button>
               </DialogFooter>
             </div>
@@ -274,10 +270,10 @@ const Settings = () => {
             <form onSubmit={handleVerifyTotp}>
               <div className="space-y-4 py-2">
                 <div className="space-y-2">
-                  <Label htmlFor="verificationCode">Verification Code</Label>
+                  <Label htmlFor="verificationCode">{t("twoFactor.enable.verify.codeLabel")}</Label>
                   <Input
                     id="verificationCode"
-                    placeholder="Enter 6-digit code"
+                    placeholder={t("twoFactor.enable.verify.codePlaceholder")}
                     value={verificationCode}
                     onChange={(e) => setVerificationCode(e.target.value)}
                     maxLength={6}
@@ -293,10 +289,10 @@ const Settings = () => {
                   onClick={() => setSetupStep("qrcode")}
                   disabled={isLoading}
                 >
-                  Back
+                  {t("buttons.back")}
                 </Button>
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Verifying..." : "Verify & Enable 2FA"}
+                  {isLoading ? t("loading.verifying") : t("twoFactor.enable.verify.verifyButton")}
                 </Button>
               </DialogFooter>
             </form>
@@ -317,20 +313,20 @@ const Settings = () => {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Disable Two-Factor Authentication</DialogTitle>
+            <DialogTitle>{t("twoFactor.disable.title")}</DialogTitle>
             <DialogDescription>
-              Enter your password to disable two-factor authentication. This will make your account less secure.
+              {t("twoFactor.disable.description")}
             </DialogDescription>
           </DialogHeader>
 
           <form onSubmit={handleDisable2FA}>
             <div className="space-y-4 py-2">
               <div className="space-y-2">
-                <Label htmlFor="disablePassword">Password</Label>
+                <Label htmlFor="disablePassword">{t("twoFactor.disable.passwordLabel")}</Label>
                 <Input
                   id="disablePassword"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t("twoFactor.disable.passwordPlaceholder")}
                   value={disablePassword}
                   onChange={(e) => setDisablePassword(e.target.value)}
                 />
@@ -345,10 +341,10 @@ const Settings = () => {
                 onClick={() => setDisableDialogOpen(false)}
                 disabled={isDisableLoading}
               >
-                Cancel
+                {t("buttons.cancel")}
               </Button>
               <Button type="submit" variant="destructive" disabled={isDisableLoading}>
-                {isDisableLoading ? "Disabling..." : "Disable 2FA"}
+                {isDisableLoading ? t("loading.disabling") : t("twoFactor.disable.disableButton")}
               </Button>
             </DialogFooter>
           </form>
