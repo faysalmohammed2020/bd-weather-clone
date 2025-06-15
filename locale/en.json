@@ -131,6 +131,12 @@
         "role3": "Research Analyst",
         "quote3": "The historical data analysis tools have been invaluable for our climate change research. We can now identify long-term trends with much greater precision."
       }
+    },
+
+    "ctaSection": {
+      "heading": "Unlock Smarter Weather Decisions",
+      "description": "Access our real-time weather dashboard tailored for every district in Bangladesh. Stay ahead with forecasts, alerts, and insights that matter.",
+      "getStartedbutton": "Get Started"
     }
   },
   "sidebar": {

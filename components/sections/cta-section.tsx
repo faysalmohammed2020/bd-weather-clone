@@ -4,8 +4,10 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 export default function CtaSection() {
+  const t = useTranslations('landingPage.ctaSection')
   return (
     <section className="relative w-full py-24 bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-800 dark:to-blue-800 text-white overflow-hidden">
       {/* Blurred Background Lights */}
@@ -45,12 +47,10 @@ export default function CtaSection() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl font-extrabold tracking-tight md:text-5xl">
-              Unlock Smarter Weather Decisions
+              {t('heading')}
             </h2>
             <p className="mt-4 max-w-xl text-white/90 text-lg md:text-xl leading-relaxed">
-              Access our real-time weather dashboard tailored for every district
-              in Bangladesh. Stay ahead with forecasts, alerts, and insights
-              that matter.
+              {t('description')}
             </p>
           </motion.div>
 
@@ -66,7 +66,7 @@ export default function CtaSection() {
                 size="lg"
                 className="bg-white text-cyan-700 hover:bg-blue-50 hover:text-blue-700 font-semibold px-8 py-6 text-base shadow-md hover:shadow-xl transition duration-300 group"
               >
-                Get Started
+                {t('getStartedbutton')}
                 <ArrowRight className="ml-3 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Button>
             </Link>
