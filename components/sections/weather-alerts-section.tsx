@@ -22,6 +22,7 @@ import {
   Bar,
   Legend,
 } from "recharts";
+import { useTranslations } from "next-intl";
 
 const alertData = [
   { name: "12AM", temp: 28, rainfall: 20, alerts: 2 },
@@ -69,6 +70,7 @@ export default function WeatherAlertsSection() {
     },
   };
 
+  const t = useTranslations('landingPage.weatherAlertsSection')
   return (
     <section className="relative w-full py-16 bg-gradient-to-r from-amber-50 to-red-50 dark:from-gray-900 dark:to-red-950/20 overflow-hidden">
       {/* Animated background elements */}
@@ -127,7 +129,7 @@ export default function WeatherAlertsSection() {
           >
             <motion.div variants={item}>
               <div className="inline-block rounded-lg bg-amber-200 dark:bg-amber-900/50 px-3 py-1 text-sm text-amber-700 dark:text-amber-300">
-                Weather Alerts
+                {t('title')}
               </div>
             </motion.div>
 
@@ -135,16 +137,14 @@ export default function WeatherAlertsSection() {
               className="text-3xl font-bold tracking-tighter md:text-4xl bg-clip-text text-transparent bg-gradient-to-r from-amber-700 to-red-700 dark:from-amber-400 dark:to-red-400"
               variants={item}
             >
-              Stay Ahead of Extreme Weather
+              {t('subtitle')}
             </motion.h2>
 
             <motion.p
               className="text-gray-700 dark:text-gray-300 md:text-lg"
               variants={item}
             >
-              Our advanced alert system keeps you informed about potential
-              weather hazards across Bangladesh, helping communities stay safe
-              and prepared.
+              {t('description')}
             </motion.p>
 
             <motion.ul className="space-y-6 mt-8" variants={container}>
@@ -158,11 +158,10 @@ export default function WeatherAlertsSection() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                    Cyclone Warnings
+                    {t('cycloneWarnings.title')}
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300">
-                    Early detection and tracking of cyclones with detailed
-                    impact forecasts and evacuation guidance.
+                   {t('cycloneWarnings.description')}
                   </p>
                 </div>
               </motion.li>
@@ -177,11 +176,10 @@ export default function WeatherAlertsSection() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                    Flood Alerts
+                    {t('floodAlerts.title')}
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300">
-                    Predictive flood monitoring with river level tracking and
-                    precipitation analysis for vulnerable regions.
+                    {t('floodAlerts.description')}
                   </p>
                 </div>
               </motion.li>
@@ -196,11 +194,10 @@ export default function WeatherAlertsSection() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100">
-                    Drought Monitoring
+                    {t('droughtMonitoring.title')}
                   </h3>
                   <p className="text-gray-700 dark:text-gray-300">
-                    Long-term precipitation analysis and soil moisture tracking
-                    to identify drought-prone areas.
+                    {t('droughtMonitoring.description')}
                   </p>
                 </div>
               </motion.li>
@@ -209,7 +206,7 @@ export default function WeatherAlertsSection() {
             <motion.div className="pt-6" variants={item}>
               <Link href="/features">
                 <Button className="bg-gradient-to-r from-amber-600 to-red-600 hover:from-amber-500 hover:to-red-500 text-white shadow-lg hover:shadow-amber-500/25 transition-all duration-300 group">
-                  Learn About Alert System
+                  {t('learnMore')}
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                 </Button>
               </Link>
@@ -236,7 +233,7 @@ export default function WeatherAlertsSection() {
                 }}
               >
                 <span className="h-2 w-2 rounded-full bg-white animate-pulse"></span>
-                <span className="font-medium">LIVE ALERTS</span>
+                <span className="font-medium">{t('liveAlerts')}</span>
               </motion.div>
             </div>
 
@@ -244,56 +241,56 @@ export default function WeatherAlertsSection() {
               <div className="flex justify-between items-center">
                 <div>
                   <h3 className="font-bold text-lg text-gray-800 dark:text-gray-100">
-                    Weather Alerts Dashboard
+                    {t('dashboardTitle')}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Real-time monitoring for Bangladesh
+                   {t('dashboardSubtitle')}
                   </p>
                 </div>
                 <button className="text-sm flex items-center text-amber-600 dark:text-amber-400 hover:underline">
-                  Details <ChevronRight className="h-4 w-4" />
+                 {t('details')} <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg">
                   <p className="text-xs text-amber-600 dark:text-amber-400">
-                    Active Alerts
+                   {t('activeAlerts.title')}
                   </p>
                   <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">
-                    14
+                  {t('activeAlerts.totals.total')}
                   </p>
                   <p className="text-xs text-amber-600 dark:text-amber-400">
-                    +2 today
+                    {t('activeAlerts.todayIncrease')}
                   </p>
                 </div>
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
                   <p className="text-xs text-blue-600 dark:text-blue-400">
-                    Flood Warnings
+                    {t('activeAlerts.floodWarnings')}
                   </p>
                   <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
-                    8
+                    {t('activeAlerts.totals.floods')}
                   </p>
                   <p className="text-xs text-blue-600 dark:text-blue-400">
-                    3 critical
+                    {t('activeAlerts.critical')}
                   </p>
                 </div>
                 <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
                   <p className="text-xs text-red-600 dark:text-red-400">
-                    Cyclone Watches
+                    {t('activeAlerts.cycloneWatches')}
                   </p>
                   <p className="text-2xl font-bold text-red-700 dark:text-red-300">
-                    2
+                    {t('activeAlerts.totals.cyclones')}
                   </p>
                   <p className="text-xs text-red-600 dark:text-red-400">
-                    1 warning
+                    {t('activeAlerts.warning')}
                   </p>
                 </div>
               </div>
 
               <div className="h-64">
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  24 Hour Weather Trends
+                  {t('weatherTrends24h')}
                 </h4>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart
@@ -376,7 +373,7 @@ export default function WeatherAlertsSection() {
 
               <div className="h-48">
                 <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Regional Alerts
+                 {t('regionalAlerts')}
                 </h4>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart

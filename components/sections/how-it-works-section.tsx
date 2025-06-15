@@ -314,7 +314,7 @@ const t = useTranslations('landingPage.howItWorks')
               className="relative overflow-hidden group bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-xl hover:shadow-blue-500/30 transition-all duration-300 px-8"
             >
               <span className="relative z-10 flex items-center">
-                Explore Dashboard
+                {t('exploreDashboard')}
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
               </span>
               <span className="absolute inset-0 bg-gradient-to-r from-blue-700 to-cyan-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>

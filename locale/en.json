@@ -70,7 +70,48 @@
       "step3Description": "Leverage actionable insights for agriculture, disaster preparedness, and operational planning.",
       "one": "1",
       "two": "2",
-      "three": "3"
+      "three": "3",
+      "exploreDashboard": "Explore Dashboard"
+    },
+    "weatherAlertsSection": {
+      "title": "Weather Alerts",
+      "subtitle": "Stay Ahead of Extreme Weather",
+      "description": "Our advanced alert system keeps you informed about potential weather hazards across Bangladesh, helping communities stay safe and prepared.",
+      "cycloneWarnings": {
+        "title": "Cyclone Warnings",
+        "description": "Early detection and tracking of cyclones with detailed impact forecasts and evacuation guidance."
+      },
+      "floodAlerts": {
+        "title": "Flood Alerts",
+        "description": "Predictive flood monitoring with river level tracking and precipitation analysis for vulnerable regions."
+      },
+      "droughtMonitoring": {
+        "title": "Drought Monitoring",
+        "description": "Long-term precipitation analysis and soil moisture tracking to identify drought-prone areas."
+      },
+      "learnMore": "Learn About Alert System",
+      "dashboardTitle": "Weather Alerts Dashboard",
+      "dashboardSubtitle": "Real-time monitoring for Bangladesh",
+      "liveAlerts": "LIVE ALERTS",
+      "details": "Details",
+      "regionalAlerts": "Regional Alerts",
+      "totalAlerts": "Total Alerts",
+      "floods": "Floods",
+      "cyclones": "Cyclones",
+      "weatherTrends24h":"24 Hour Weather Trends",
+      "activeAlerts": {
+        "title": "Active Alerts",
+        "floodWarnings": "Flood Warnings",
+        "cycloneWatches": "Cyclone Watches",
+        "todayIncrease": "+2 today",
+        "critical": "3 critical",
+        "warning": "1 warning",
+        "totals": {
+          "total": "14",
+          "floods": "8",
+          "cyclones": "2"
+        }
+      }
     }
   },
   "sidebar": {
