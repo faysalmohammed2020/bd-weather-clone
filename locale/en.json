@@ -137,6 +137,18 @@
       "heading": "Unlock Smarter Weather Decisions",
       "description": "Access our real-time weather dashboard tailored for every district in Bangladesh. Stay ahead with forecasts, alerts, and insights that matter.",
       "getStartedbutton": "Get Started"
+    },
+
+    "footerSection": {
+      "connectWithUs": "Connect With Us",
+      "quickLinks": "Quick Links",
+      "description": "BD Weather offers real-time, hyperlocal weather updates, visualizations, and forecasts to help you stay informed and prepared across all 64 districts of Bangladesh.",
+      "newsletterHeading": "Subscribe to our newsletter",
+      "subscribeButton": "Subscribe",
+      "copyright": "BD Weather. All rights reserved",
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service",
+      "yourEmail": "Your email"
     }
   },
   "sidebar": {
@@ -375,6 +387,7 @@
     "uvDescription": "Peak UV exposure levels today will reach {status} levels."
   },
   "common": {
+    "title": "Bangladesh Weather",
     "loading": "Loading...",
     "lastUpdated": "Last updated at",
     "refresh": "Refresh",
