@@ -64,7 +64,48 @@
       "step3Description": "農業、災害準備、運用計画のための実用的な洞察を活用します。",
       "one": "1",
       "two": "2",
-      "three": "3"
+      "three": "3",
+      "exploreDashboard": "ダッシュボードを探索"
+    },
+    "weatherAlertsSection": {
+      "title": "天気警報",
+      "subtitle": "悪天候の最新情報を入手",
+      "description": "私たちの高度な警報システムは、バングラデシュ全土の潜在的な気象リスクについて最新情報を提供し、コミュニティが安全で準備万端でいられるよう支援します。",
+      "cycloneWarnings": {
+        "title": "サイクロン警報",
+        "description": "詳細な影響予測と避難ガイダンスによるサイクロンの早期発見と追跡。"
+      },
+      "floodAlerts": {
+        "title": "洪水警報",
+        "description": "河川水位追跡と危険地域の降水分析による予測的洪水監視。"
+      },
+      "droughtMonitoring": {
+        "title": "干ばつ監視",
+        "description": "干ばつ傾向地域を特定するための長期降水分析と土壌水分追跡。"
+      },
+      "learnMore": "警報システムについて学ぶ",
+      "dashboardTitle": "天気警報ダッシュボード",
+      "dashboardSubtitle": "バングラデシュのライブ監視",
+      "liveAlerts": "ライブ警報",
+      "details": "詳細",
+      "regionalAlerts": "地域警報",
+      "totalAlerts": "総警報数",
+      "floods": "洪水",
+      "cyclones": "サイクロン",
+      "weatherTrends24h": "24時間天気傾向",
+      "activeAlerts": {
+        "title": "アクティブ警報",
+        "floodWarnings": "洪水警報",
+        "cycloneWatches": "サイクロン監視",
+        "todayIncrease": "今日+2",
+        "critical": "3件重要",
+        "warning": "1件警告",
+        "totals": {
+          "total": "14",
+          "floods": "8",
+          "cyclones": "2"
+        }
+      }
     }
   },
   "sidebar": {
@@ -303,9 +344,11 @@
     "uvDescription": "本日の最大UV露出レベルは{status}レベルに達します。"
   },
   "common": {
+    "title": "バングラデシュ天気",
     "loading": "読み込み中...",
     "lastUpdated": "最終更新",
     "refresh": "更新",
+    "logout": "ログアウト",
     "units": {
       "celsius": "°C",
       "fahrenheit": "°F",
@@ -315,7 +358,12 @@
       "visibility": "km",
       "precipitation": "mm",
       "uvIndex": "UV指数",
-      "degrees": "°"
+      "degrees": "°",
+      "n": "北",
+      "s": "南",
+      "e": "東",
+      "w": "西",
+      "mm": "ミリメートル"
     }
   },
   "secondCard": {
@@ -536,7 +584,9 @@
         "maxMinAsRead": "最高/最低読み取り値 (°C)",
         "dryCorrected": "乾球補正済み (°C)",
         "wetCorrected": "湿球補正済み (°C)",
-        "maxMinCorrected": "最高/最低補正済み (°C)"
+        "maxMinCorrected": "最高/最低補正済み (°C)",
+        "asRead": "読み取り値",
+        "corrected": "補正済み"
       },
       "dew": "露点温度 (°C)",
       "humidity": "相対湿度 (%)",
@@ -761,5 +811,169 @@
     "tooltipWarning": "第1カードと第2カードの一致する\nデータを再確認してください！ロジックがありません！",
     "manualOverride": "カードデータを使用して分析",
     "loading": "天気データを読み込み中..."
+  },
+  "SynopticCodeTable": {
+    "title": "総観コードデータ",
+    "noData": "利用可能なデータがありません",
+    "noDataDescription": "指定されたフィルターに対して利用可能な総観データがありません。",
+    "tryAgain": "再試行",
+    "dataType": "データタイプ",
+    "stationNo": "観測所番号",
+    "year": "年",
+    "month": "月",
+    "day": "日",
+    "time": "時刻",
+    "date": "日付",
+    "station": "観測所",
+    "weatherRemarks": "天気備考",
+    "action": "アクション",
+    "exportCSV": "CSV出力",
+    "allStations": "すべての観測所",
+    "filter": "フィルター",
+    "generated": "生成済み",
+    "editDialog": {
+      "title": "総観コードデータを編集",
+      "description": "{date}の{station}からのレコードを編集",
+      "cancel": "キャンセル",
+      "saveChanges": "変更を保存",
+      "saving": "保存中...",
+      "fields": {
+        "C1": "C1指標",
+        "Iliii": "観測所識別子",
+        "iRiXhvv": "iRiXhvv",
+        "Nddff": "Nddff",
+        "S1nTTT": "1SnTTT",
+        "S2nTddTddTdd": "2SnTdTdTd",
+        "P3PPP4PPPP": "3PPP/4PPP",
+        "RRRtR6": "6RRRtR",
+        "wwW1W2": "7wwW1W2",
+        "NhClCmCh": "8NhClCmCh",
+        "S2nTnTnTnInInInIn": "2SnTnTnTn/InInInIn",
+        "D56DLDMDH": "56DlDmDh",
+        "CD57DaEc": "57CDaEc",
+        "C2": "C2指標",
+        "GG": "GG",
+        "P24Group58_59": "58/59P24",
+        "R24Group6_7": "(6RRRtR)/7R24",
+        "NsChshs": "8N5Ch5h5",
+        "dqqqt90": "90dqqqt",
+        "fqfqfq91": "91fqfqfq",
+        "weatherRemark": "天気備考"
+      }
+    },
+    "permissionDialog": {
+      "title": "権限が拒否されました",
+      "description": "このレコードを編集する権限がありません。理由は以下の通りです:",
+      "reasons": [
+        "レコードが古すぎて編集できません",
+        "レコードが異なる観測所に属しています",
+        "必要な役割権限がありません"
+      ],
+      "close": "閉じる"
+    },
+    "errors": {
+      "fetchFailed": "総観データの取得に失敗しました",
+      "updateFailed": "レコードの更新に失敗しました",
+      "invalidDate": "無効な日付形式です",
+      "startAfterEnd": "開始日は終了日より後にできません",
+      "endBeforeStart": "終了日は開始日より前にできません",
+      "stationsFetchFailed": "観測所の取得に失敗しました"
+    },
+    "loading": "総観データを読み込み中...",
+    "toDate": "まで",
+    "unknownStation": "不明な観測所",
+    "unknownDate": "不明な日付"
+  },
+  "DailySummaryTable": {
+    "title": "日次サマリーデータ",
+    "noData": "利用可能なデータがありません",
+    "noDataDescription": "指定されたフィルターに対して利用可能な日次サマリーデータがありません。",
+    "tryAgain": "再試行",
+    "dataType": "データタイプ",
+    "stationNo": "観測所番号",
+    "year": "年",
+    "month": "月",
+    "day": "日",
+    "date": "日付",
+    "station": "観測所",
+    "exportCSV": "CSV出力",
+    "allStations": "すべての観測所",
+    "filter": "フィルター",
+    "generated": "生成済み",
+    "dateRange": "日付範囲",
+    "records": "レコード",
+    "editDialog": {
+      "title": "日次サマリーデータを編集",
+      "description": "{date}の{station}からのレコードを編集",
+      "cancel": "キャンセル",
+      "saveChanges": "変更を保存",
+      "saving": "保存中...",
+      "fields": {
+        "avStationPressure": "平均観測所気圧 (hPa)",
+        "avSeaLevelPressure": "平均海面気圧 (hPa)",
+        "avDryBulbTemperature": "平均乾球温度 (°C)",
+        "avWetBulbTemperature": "平均湿球温度 (°C)",
+        "maxTemperature": "最高気温 (°C)",
+        "minTemperature": "最低気温 (°C)",
+        "totalPrecipitation": "総降水量 (mm)",
+        "avDewPointTemperature": "平均露点温度 (°C)",
+        "avRelativeHumidity": "平均相対湿度 (%)",
+        "windSpeed": "風速 (m/s)",
+        "windDirectionCode": "風向 (16方位)",
+        "maxWindSpeed": "最大風速 (m/s)",
+        "maxWindDirection": "最大風速時の風向 (16方位)",
+        "avTotalCloud": "平均全雲量 (オクタ)",
+        "lowestVisibility": "最低視程 (km)",
+        "totalRainDuration": "総降雨時間 (時-分)"
+      },
+      "validation": {
+        "required": "このフィールドは必須です",
+        "exactLength": "正確に{length}桁である必要があります (現在{current}桁)",
+        "maxLength": "{length}桁を超えることはできません"
+      }
+    },
+    "permissionDialog": {
+      "title": "権限が拒否されました",
+      "description": "このレコードを編集する権限がありません。理由は以下の通りです:",
+      "reasons": [
+        "レコードが古すぎて編集できません",
+        "レコードが異なる観測所に属しています",
+        "必要な役割権限がありません"
+      ],
+      "close": "閉じる"
+    },
+    "errors": {
+      "fetchFailed": "日次データの取得に失敗しました",
+      "updateFailed": "レコードの更新に失敗しました",
+      "invalidDate": "無効な日付形式です",
+      "startAfterEnd": "開始日は終了日より後にできません",
+      "endBeforeStart": "終了日は開始日より前にできません",
+      "stationsFetchFailed": "観測所の取得に失敗しました",
+      "validationErrors": "保存前にすべての検証エラーを修正してください"
+    },
+    "loading": "日次データを読み込み中...",
+    "toDate": "まで",
+    "unknownStation": "不明な観測所",
+    "unknownDate": "不明な日付"
+  },
+  "AllViewAndManagePage": {
+    "title": "すべてのデータを表示・管理",
+    "exportExcel": "Excelにエクスポート",
+    "loadingPDF": "読み込み中...",
+    "exportPDF": "PDFにエクスポート",
+    "tabs": {
+      "firstCard": "第1カード",
+      "secondCard": "第2カード",
+      "synopticCode": "総観コード",
+      "dailySummary": "日次サマリー"
+    },
+    "errors": {
+      "exportFailed": "データのエクスポートに失敗しました",
+      "dataLoading": "データの読み込み中にエラーが発生しました"
+    },
+    "success": {
+      "exportSuccess": "データが正常にエクスポートされました"
+    },
+    "loading": "読み込み中..."
   }
 }
