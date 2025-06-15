@@ -466,6 +466,7 @@
     "observationTime": "اختر ساعة رصد صالحة"
   },
   "firstCardTable": {
+    "title": "طاولة البطاقة الأولى",
     "dateRange": "نطاق التاريخ",
     "recordCount": "{{count}} سجل(ات)",
     "station": "المحطة: {{stationName}}",
@@ -501,9 +502,12 @@
     },
     "headers": {
       "gg": "وقت الرصد (UTC)",
-      "ci": "المؤشر",
+      "ci": "المؤشر", 
       "date": "التاريخ",
       "station": "المحطة",
+      "dataType": "نوع البيانات",
+      "stationNo": "رقم المحطة",
+      "year": "سنة",
       "bar": {
         "group": "ضغط الجو",
         "thermo": "الترمومتر المرتبط (°م)",

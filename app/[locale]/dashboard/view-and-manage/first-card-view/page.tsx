@@ -3029,7 +3029,7 @@ const FirstCardTable = forwardRef(
               <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
                 <div className="flex flex-col items-center min-w-[100px]">
                   <Label className="text-xs sm:text-sm font-medium text-slate-900 mb-1 sm:mb-2 text-center">
-                    {t("header.dataType")}
+                    {t("headers.dataType")}
                   </Label>
                   <div className="flex gap-1">
                     {["S", "Y"].map((char, i) => (
@@ -3045,7 +3045,7 @@ const FirstCardTable = forwardRef(
 
                 <div className="flex flex-col items-center min-w-[100px]">
                   <div className="text-xs sm:text-sm font-bold uppercase text-slate-600 mb-1 sm:mb-2 text-center">
-                    {t("header.stationNo")}
+                    {t("headers.stationNo")}
                   </div>
                   <div className="flex h-8 sm:h-9 w-full min-w-[80px] sm:min-w-[100px] border border-slate-400 rounded-lg px-2 items-center justify-center bg-white text-xs sm:text-sm font-mono truncate">
                     {user?.station?.stationId || "N/A"}
@@ -3056,7 +3056,7 @@ const FirstCardTable = forwardRef(
               <div className="flex flex-wrap justify-center gap-3 sm:gap-6">
                 <div className="flex flex-col items-center min-w-[100px]">
                   <div className="text-xs sm:text-sm font-bold uppercase text-slate-600 mb-1 sm:mb-2 text-center">
-                    YEAR
+                  {t("headers.year")}
                   </div>
                   <div className="flex">
                     <div className="w-8 sm:w-10 h-8 sm:h-9 border border-slate-400 flex items-center justify-center p-1 font-mono rounded-l-md bg-white text-xs sm:text-sm">
@@ -3070,7 +3070,7 @@ const FirstCardTable = forwardRef(
 
                 <div className="flex flex-col items-center min-w-[120px] sm:min-w-[150px]">
                   <div className="text-xs sm:text-sm font-bold uppercase text-slate-600 mb-1 sm:mb-2 text-center">
-                    {t("header.stationName")}
+                    {t("headers.station")}
                   </div>
                   <div className="h-8 sm:h-9 w-full border border-slate-400 px-2 flex items-center justify-center font-mono rounded-md bg-white text-xs sm:text-sm text-center truncate">
                     {user?.station?.name || "N/A"}
