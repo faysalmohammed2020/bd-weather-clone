@@ -20,6 +20,7 @@ import {
   Eye,
   FileBarChart,
   X,
+  Leaf,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import {
@@ -118,90 +119,95 @@ const Sidebar = () => {
   const common = useTranslations("common");
 
   const sidebarLinks = [
-  {
-    href: "/dashboard",
-    icon: <LayoutDashboard className="w-5 h-5" />,
-    label: t("dashboard"),
-    roles: ["super_admin", "observer", "station_admin"],
-  },
-  {
-    icon: <PencilIcon className="w-5 h-5" />,
-    label: t("dataEntry"),
-    roles: ["observer", "station_admin", "super_admin"],
-    subMenu: [
-      {
-        icon: <CloudHail className="w-5 h-5" />,
-        href: "/dashboard/data-entry/first-card",
-        label: t('firstCard'), // Optional: translate if needed
-      },
-      {
-        icon: <Binoculars className="w-5 h-5" />,
-        href: "/dashboard/data-entry/second-card",
-        label: t("secondCard"),
-      },
-      {
-        icon: <Codesandbox className="w-5 h-5" />,
-        href: "/dashboard/data-entry/synoptic-code",
-        label: t("synopticCode"),
-      },
-      {
-        icon: <BarChart className="w-5 h-5" />,
-        href: "/dashboard/data-entry/daily-summery",
-        label: t("dailySummary"),
-      },
-    ],
-  },
-  {
-    icon: <Eye className="w-5 h-5" />,
-    label: t("viewManage"),
-    roles: ["observer", "station_admin", "super_admin"],
-    subMenu: [
-      {
-        icon: <CloudHail className="w-5 h-5" />,
-        href: "/dashboard/view-and-manage/first-card-view",
-        label: t('firstCard'),
-      },
-      {
-        icon: <Binoculars className="w-5 h-5" />,
-        href: "/dashboard/view-and-manage/second-card-view",
-        label: t("secondCard"),
-      },
-      {
-        icon: <Codesandbox className="w-5 h-5" />,
-        href: "/dashboard/view-and-manage/synoptic-code",
-        label:  t("synopticCode"),
-      },
-      {
-        icon: <BarChart className="w-5 h-5" />,
-        href: "/dashboard/view-and-manage/daily-summery",
-        label: t("dailySummary"),
-      },
-      {
-        icon: <FileBarChart className="w-5 h-5" />,
-        href: "/dashboard/view-and-manage/all",
-        label: t("viewAllExport"),
-      },
-    ],
-  },
-  {
-    href: "/dashboard/user",
-    icon: <Users className="w-5 h-5" />,
-    label: t("userManagement"),
-    roles: ["super_admin", "station_admin"],
-  },
-  {
-    href: "/dashboard/stations",
-    icon: <CloudFog className="w-5 h-5" />,
-    label: t("stationManagement"),
-    roles: ["super_admin"],
-  },
-  {
-    href: "/dashboard/settings",
-    icon: <Settings className="w-5 h-5" />,
-    label: t("settings"),
-    roles: ["super_admin"],
-  },
-];
+    {
+      href: "/dashboard",
+      icon: <LayoutDashboard className="w-5 h-5" />,
+      label: t("dashboard"),
+      roles: ["super_admin", "observer", "station_admin"],
+    },
+    {
+      icon: <PencilIcon className="w-5 h-5" />,
+      label: t("dataEntry"),
+      roles: ["observer", "station_admin", "super_admin"],
+      subMenu: [
+        {
+          icon: <CloudHail className="w-5 h-5" />,
+          href: "/dashboard/data-entry/first-card",
+          label: t("firstCard"), // Optional: translate if needed
+        },
+        {
+          icon: <Binoculars className="w-5 h-5" />,
+          href: "/dashboard/data-entry/second-card",
+          label: t("secondCard"),
+        },
+        {
+          icon: <Codesandbox className="w-5 h-5" />,
+          href: "/dashboard/data-entry/synoptic-code",
+          label: t("synopticCode"),
+        },
+        {
+          icon: <BarChart className="w-5 h-5" />,
+          href: "/dashboard/data-entry/daily-summery",
+          label: t("dailySummary"),
+        },
+        {
+          icon: <Leaf className="mr-2 h-5 w-5" />,
+          href: "/dashboard/data-entry/agroclimatological",
+          label: t("agroclimatological"),
+        },
+      ],
+    },
+    {
+      icon: <Eye className="w-5 h-5" />,
+      label: t("viewManage"),
+      roles: ["observer", "station_admin", "super_admin"],
+      subMenu: [
+        {
+          icon: <CloudHail className="w-5 h-5" />,
+          href: "/dashboard/view-and-manage/first-card-view",
+          label: t("firstCard"),
+        },
+        {
+          icon: <Binoculars className="w-5 h-5" />,
+          href: "/dashboard/view-and-manage/second-card-view",
+          label: t("secondCard"),
+        },
+        {
+          icon: <Codesandbox className="w-5 h-5" />,
+          href: "/dashboard/view-and-manage/synoptic-code",
+          label: t("synopticCode"),
+        },
+        {
+          icon: <BarChart className="w-5 h-5" />,
+          href: "/dashboard/view-and-manage/daily-summery",
+          label: t("dailySummary"),
+        },
+        {
+          icon: <FileBarChart className="w-5 h-5" />,
+          href: "/dashboard/view-and-manage/all",
+          label: t("viewAllExport"),
+        },
+      ],
+    },
+    {
+      href: "/dashboard/user",
+      icon: <Users className="w-5 h-5" />,
+      label: t("userManagement"),
+      roles: ["super_admin", "station_admin"],
+    },
+    {
+      href: "/dashboard/stations",
+      icon: <CloudFog className="w-5 h-5" />,
+      label: t("stationManagement"),
+      roles: ["super_admin"],
+    },
+    {
+      href: "/dashboard/settings",
+      icon: <Settings className="w-5 h-5" />,
+      label: t("settings"),
+      roles: ["super_admin"],
+    },
+  ];
 
   return (
     <>
@@ -236,7 +242,9 @@ const Sidebar = () => {
       >
         <div className="flex items-center justify-between p-4 border-b border-sky-800 z-40 bg-sky-700">
           {(!isCollapsed || isMobileOpen) && (
-            <h2 className="text-lg font-bold whitespace-nowrap">{common("title")}</h2>
+            <h2 className="text-lg font-bold whitespace-nowrap">
+              {common("title")}
+            </h2>
           )}
           <div className="flex items-center gap-2">
             <button
