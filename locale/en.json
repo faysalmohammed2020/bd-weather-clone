@@ -56,7 +56,23 @@
       "windDescription": "Wind speed and direction monitoring with safety alerts.",
       "regionalInsights": "Regional Insights",
       "regionalDescription": "Comparative weather analysis across Bangladesh regions.",
+      "exploreData": "Explore Data",
       "viewFullDashboard": "View full dashboard"
+    },
+    "howItWorks": {
+      "howItWorks": "How It Works",
+      "subtitle": "Advanced Weather Analytics Platform",
+      "description": "Our sophisticated dashboard provides comprehensive weather insights for Bangladesh with precision and clarity.",
+      "step1Title": "Select Location",
+      "step1Description": "Choose from 64 districts or any specific region in Bangladesh to access localized weather data.",
+      "interactiveBangladeshMap": "Interactive Bangladesh Map",
+      "step2Title": "Analyze Data",
+      "step2Description": "Explore real-time metrics, forecasts, and historical patterns through advanced visualizations.",
+      "step3Title": "Take Action",
+      "step3Description": "Leverage actionable insights for agriculture, disaster preparedness, and operational planning.",
+      "one": "1",
+      "two": "2",
+      "three": "3"
     }
   },
 

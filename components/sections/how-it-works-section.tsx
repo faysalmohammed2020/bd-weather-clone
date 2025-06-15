@@ -12,6 +12,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useTranslations } from "next-intl";
 
 const temperatureData = [
   { name: "Jan", temp: 18.5 },
@@ -61,7 +62,7 @@ export default function HowItWorksSection() {
       },
     },
   };
-
+const t = useTranslations('landingPage.howItWorks')
   return (
     <section className="relative w-full py-24 bg-gradient-to-b from-blue-50 to-blue-100 dark:from-blue-950/20 dark:to-blue-900/30 overflow-hidden">
       {/* Decorative elements */}
@@ -114,14 +115,13 @@ export default function HowItWorksSection() {
             transition={{ type: "spring", stiffness: 200 }}
             viewport={{ once: true }}
           >
-            How It Works
+          {t('howItWorks')}
           </motion.div>
           <h2 className="text-4xl font-bold tracking-tighter md:text-5xl/tight bg-clip-text text-transparent bg-gradient-to-r from-blue-700 to-cyan-700 dark:from-blue-400 dark:to-cyan-400">
-            Advanced Weather Analytics Platform
+            {t('subtitle')}
           </h2>
           <p className="max-w-[900px] text-gray-700 dark:text-gray-300 md:text-xl/relaxed lg:text-xl/relaxed">
-            Our sophisticated dashboard provides comprehensive weather insights
-            for Bangladesh with precision and clarity.
+            {t('description')}
           </p>
         </motion.div>
 
@@ -144,15 +144,14 @@ export default function HowItWorksSection() {
           >
             <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 shadow-inner border border-blue-200 dark:border-blue-800/50">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-800/30 dark:to-cyan-800/30 text-blue-600 dark:text-blue-400 text-4xl font-bold">
-                1
+               {t('one')}
               </div>
             </div>
             <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-              Select Location
+             {t('step1Title')}
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
-              Choose from 64 districts or any specific region in Bangladesh to
-              access localized weather data.
+             {t('step1Description')}
             </p>
 
             {/* Mini map visualization */}
@@ -166,7 +165,7 @@ export default function HowItWorksSection() {
                 </div>
               </div>
               <div className="absolute bottom-2 left-0 right-0 text-center text-xs text-blue-600 dark:text-blue-400 font-medium">
-                Interactive Bangladesh Map
+                {t('interactiveBangladeshMap')}
               </div>
             </div>
 
@@ -191,15 +190,14 @@ export default function HowItWorksSection() {
           >
             <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 shadow-inner border border-blue-200 dark:border-blue-800/50">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-800/30 dark:to-cyan-800/30 text-blue-600 dark:text-blue-400 text-4xl font-bold">
-                2
+               {t('two')}
               </div>
             </div>
             <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-              Analyze Data
+              {t('step2Title')}
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
-              Explore real-time metrics, forecasts, and historical patterns
-              through advanced visualizations.
+             {t('step2Description')}
             </p>
 
             {/* Mini weather chart */}
@@ -263,15 +261,14 @@ export default function HowItWorksSection() {
           >
             <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-blue-900/40 dark:to-cyan-900/40 shadow-inner border border-blue-200 dark:border-blue-800/50">
               <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-800/30 dark:to-cyan-800/30 text-blue-600 dark:text-blue-400 text-4xl font-bold">
-                3
+               {t('three')}
               </div>
             </div>
             <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-              Take Action
+              {t('step3Title')}
             </h3>
             <p className="text-gray-600 dark:text-gray-300">
-              Leverage actionable insights for agriculture, disaster
-              preparedness, and operational planning.
+             {t('step3Description')}
             </p>
 
             {/* Current weather metrics */}
