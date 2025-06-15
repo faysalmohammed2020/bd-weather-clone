@@ -136,6 +136,18 @@
       "heading": "天気についてより賢い判断を",
       "description": "バングラデシュの各地域に特化したリアルタイムの天気ダッシュボードを手に入れましょう。予報、警報、重要なインサイトを常に把握できます。",
       "getStartedbutton": "今すぐ始める"
+    },
+
+    "footerSection": {
+      "connectWithUs": "お問い合わせ",
+      "quickLinks": "クイックリンク",
+      "description": "BDウェザーは、バングラデシュの64地区すべてに対応したリアルタイムかつローカルな天気情報、ビジュアライゼーション、予報を提供し、あなたが常に情報を把握し準備を整えられるよう支援します。",
+      "newsletterHeading": "ニュースレターを購読する",
+      "subscribeButton": "購読する",
+      "copyright": "BDウェザー. 全著作権所有",
+      "privacyPolicy": "プライバシーポリシー",
+      "termsOfService": "利用規約",
+      "yourEmail": "メールアドレス"
     }
   },
   "sidebar": {

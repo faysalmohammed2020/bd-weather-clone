@@ -21,6 +21,7 @@ import {
   FiMapPin,
 } from "react-icons/fi";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface Station {
   id: string;
@@ -40,6 +41,7 @@ interface StationManagementProps {
 export function StationManagement({
   initialStations = [],
 }: StationManagementProps) {
+  const t = useTranslations("StationManagement");
   const [stations, setStations] = useState<Station[]>(initialStations);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,14 +49,13 @@ export function StationManagement({
     name: "",
     stationId: "",
     securityCode: "",
-    latitude: 23.685, // Default latitude (Bangladesh)
-    longitude: 90.3563, // Default longitude (Bangladesh)
+    latitude: 23.685,
+    longitude: 90.3563,
   });
   const [isAdding, setIsAdding] = useState(false);
   const [editData, setEditData] = useState<Partial<Station>>({});
   const [loading, setLoading] = useState(false);
 
-  // Load stations from API on component mount
   useEffect(() => {
     const fetchStations = async () => {
       setLoading(true);
@@ -65,22 +66,22 @@ export function StationManagement({
           setStations(data);
         } else {
           const errorData = await response.json();
-          toast.error(errorData.error || "Failed to fetch stations");
+          toast.error(errorData.error || t("errors.fetchFailed"));
         }
       } catch (error) {
         console.error("Failed to fetch stations:", error);
-        toast.error("Failed to fetch stations");
+        toast.error(t("errors.fetchFailed"));
       } finally {
         setLoading(false);
       }
     };
 
     fetchStations();
-  }, []);
+  }, [t]);
 
   const handleAddStation = async () => {
     if (!newStation.name || !newStation.stationId || !newStation.securityCode) {
-      toast.error("Name, Station ID, and Security Code are required");
+      toast.error(t("errors.requiredFields"));
       return;
     }
 
@@ -105,15 +106,15 @@ export function StationManagement({
           longitude: 90.3563,
         });
         setIsAdding(false);
-        toast.success("Station added successfully");
+        toast.success(t("success.added"));
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to add station");
+        throw new Error(errorData.error || t("errors.addFailed"));
       }
     } catch (error) {
       console.error("Error adding station:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to add station"
+        error instanceof Error ? error.message : t("errors.addFailed")
       );
     } finally {
       setLoading(false);
@@ -122,7 +123,7 @@ export function StationManagement({
 
   const handleUpdateStation = async () => {
     if (!editData.name || !editData.securityCode) {
-      toast.error("Name and Security Code are required");
+      toast.error(t("errors.requiredFields"));
       return;
     }
 
@@ -146,15 +147,15 @@ export function StationManagement({
           )
         );
         setEditingId(null);
-        toast.success("Station updated successfully");
+        toast.success(t("success.updated"));
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to update station");
+        throw new Error(errorData.error || t("errors.updateFailed"));
       }
     } catch (error) {
       console.error("Error updating station:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to update station"
+        error instanceof Error ? error.message : t("errors.updateFailed")
       );
     } finally {
       setLoading(false);
@@ -162,7 +163,7 @@ export function StationManagement({
   };
 
   const handleDeleteStation = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this station?")) return;
+    if (!confirm(t("deleteConfirmation"))) return;
 
     setLoading(true);
     try {
@@ -172,15 +173,15 @@ export function StationManagement({
 
       if (response.ok) {
         setStations(stations.filter((station) => station.id !== id));
-        toast.success("Station deleted successfully");
+        toast.success(t("success.deleted"));
       } else {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to delete station");
+        throw new Error(errorData.error || t("errors.deleteFailed"));
       }
     } catch (error) {
       console.error("Error deleting station:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to delete station"
+        error instanceof Error ? error.message : t("errors.deleteFailed")
       );
     } finally {
       setLoading(false);
@@ -198,70 +199,70 @@ export function StationManagement({
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm">
+    <div className="p-6 bg-white rounded-lg shadow-sm" dir="rtl">
       <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center mb-6">
-          <h2 className="text-xl sm:text-2xl font-bold">Station Management</h2>
-          <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:space-x-2 w-full sm:w-auto">
-              <Input
-                  type="text"
-                  placeholder="Search stations by name or ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full"
-              />
-              <Button
-                  onClick={() => setIsAdding(true)}
-                  disabled={isAdding || loading}
-                  className="bg-sky-600 hover:bg-sky-400 w-full sm:w-auto"
-              >
-                  <FiPlus className="mr-2" />
-                  <span className="whitespace-nowrap">Add New Station</span>
-              </Button>
-          </div>
+        <h2 className="text-xl sm:text-2xl font-bold">{t("title")}</h2>
+        <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:space-x-2 w-full sm:w-auto">
+          <Input
+            type="text"
+            placeholder={t("searchPlaceholder")}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full"
+          />
+          <Button
+            onClick={() => setIsAdding(true)}
+            disabled={isAdding || loading}
+            className="bg-sky-600 hover:bg-sky-400 w-full sm:w-auto"
+          >
+            <FiPlus className="ml-2" />
+            <span className="whitespace-nowrap">{t("addStation")}</span>
+          </Button>
+        </div>
       </div>
 
       {isAdding && (
         <div className="mb-6 p-4 border rounded-lg bg-gray-50">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium mb-1">Name*</label>
+              <label className="block text-sm font-medium mb-1">{t("form.name")}*</label>
               <Input
                 value={newStation.name || ""}
                 onChange={(e) =>
                   setNewStation({ ...newStation, name: e.target.value })
                 }
-                placeholder="Station name"
+                placeholder={t("form.namePlaceholder")}
                 required
               />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">
-                Station ID*
+                {t("form.stationId")}*
               </label>
               <Input
                 value={newStation.stationId || ""}
                 onChange={(e) =>
                   setNewStation({ ...newStation, stationId: e.target.value })
                 }
-                placeholder="Station ID"
+                placeholder={t("form.stationIdPlaceholder")}
                 required
               />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">
-                Security Code*
+                {t("form.securityCode")}*
               </label>
               <Input
                 value={newStation.securityCode || ""}
                 onChange={(e) =>
                   setNewStation({ ...newStation, securityCode: e.target.value })
                 }
-                placeholder="Security code"
+                placeholder={t("form.securityCodePlaceholder")}
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">Latitude</label>
+              <label className="block text-sm font-medium mb-1">{t("form.latitude")}</label>
               <Input
                 type="number"
                 step="0.0001"
@@ -272,12 +273,12 @@ export function StationManagement({
                     latitude: Number.parseFloat(e.target.value),
                   })
                 }
-                placeholder="Latitude (e.g., 23.6850)"
+                placeholder={t("form.latitudePlaceholder")}
               />
             </div>
             <div>
               <label className="block text-sm font-medium mb-1">
-                Longitude
+                {t("form.longitude")}
               </label>
               <Input
                 type="number"
@@ -289,22 +290,22 @@ export function StationManagement({
                     longitude: Number.parseFloat(e.target.value),
                   })
                 }
-                placeholder="Longitude (e.g., 90.3563)"
+                placeholder={t("form.longitudePlaceholder")}
               />
             </div>
           </div>
           <div className="flex gap-2">
             <Button onClick={handleAddStation} disabled={loading}>
-              <FiSave className="mr-2" />
-              Save
+              <FiSave className="ml-2" />
+              {t("buttons.save")}
             </Button>
             <Button
               variant="outline"
               onClick={() => setIsAdding(false)}
               disabled={loading}
             >
-              <FiX className="mr-2" />
-              Cancel
+              <FiX className="ml-2" />
+              {t("buttons.cancel")}
             </Button>
           </div>
         </div>
@@ -320,11 +321,11 @@ export function StationManagement({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Station ID</TableHead>
-              <TableHead>Security Code</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>{t("table.name")}</TableHead>
+              <TableHead>{t("table.stationId")}</TableHead>
+              <TableHead>{t("table.securityCode")}</TableHead>
+              <TableHead>{t("table.location")}</TableHead>
+              <TableHead>{t("table.actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -334,7 +335,7 @@ export function StationManagement({
                   colSpan={5}
                   className="text-center py-8 text-gray-500"
                 >
-                  No stations found. Add a new station to get started.
+                  {t("noStations")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -406,7 +407,7 @@ export function StationManagement({
                                 latitude: Number.parseFloat(e.target.value),
                               })
                             }
-                            placeholder="Latitude"
+                            placeholder={t("form.latitudePlaceholder")}
                             className="w-24"
                           />
                           <Input
@@ -419,13 +420,13 @@ export function StationManagement({
                                 longitude: Number.parseFloat(e.target.value),
                               })
                             }
-                            placeholder="Longitude"
+                            placeholder={t("form.longitudePlaceholder")}
                             className="w-24"
                           />
                         </div>
                       ) : (
                         <div className="flex items-center">
-                          <FiMapPin className="mr-1 text-gray-500" />
+                          <FiMapPin className="ml-1 text-gray-500" />
                           <span>
                             {station.latitude?.toFixed(4)},{" "}
                             {station.longitude?.toFixed(4)}
@@ -441,8 +442,8 @@ export function StationManagement({
                             onClick={handleUpdateStation}
                             disabled={loading}
                           >
-                            <FiCheck className="mr-1" />
-                            Save
+                            <FiCheck className="ml-1" />
+                            {t("buttons.save")}
                           </Button>
                           <Button
                             size="sm"
@@ -450,8 +451,8 @@ export function StationManagement({
                             onClick={cancelEditing}
                             disabled={loading}
                           >
-                            <FiX className="mr-1" />
-                            Cancel
+                            <FiX className="ml-1" />
+                            {t("buttons.cancel")}
                           </Button>
                         </div>
                       ) : (
@@ -462,8 +463,8 @@ export function StationManagement({
                             onClick={() => startEditing(station)}
                             disabled={loading || !!editingId}
                           >
-                            <FiEdit className="mr-1" />
-                            Edit
+                            <FiEdit className="ml-1" />
+                            {t("buttons.edit")}
                           </Button>
                           <Button
                             size="sm"
@@ -471,8 +472,8 @@ export function StationManagement({
                             onClick={() => handleDeleteStation(station.id)}
                             disabled={loading || !!editingId}
                           >
-                            <FiTrash2 className="mr-1" />
-                            Delete
+                            <FiTrash2 className="ml-1" />
+                            {t("buttons.delete")}
                           </Button>
                         </div>
                       )}

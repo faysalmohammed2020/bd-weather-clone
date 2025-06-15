@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface LogsPaginationProps {
   currentPage: number;
@@ -16,6 +17,7 @@ export const LogsPagination = ({
 }: LogsPaginationProps) => {
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations("UserManagement");
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
   // Navigate to a specific page
@@ -81,7 +83,7 @@ export const LogsPagination = ({
     <div className="flex justify-between items-center my-6 px-4">
       <div>
         <p className="text-sm text-gray-700">
-          Page <span className="font-medium">{currentPage}</span> of{' '}
+          {t("pagination.page")} <span className="font-medium">{currentPage}</span> {t("pagination.of")}{' '}
           <span className="font-medium">{totalPages}</span>
         </p>
       </div>
@@ -93,7 +95,7 @@ export const LogsPagination = ({
           disabled={currentPage === 1}
           size="sm"
         >
-          Previous
+          {t("pagination.previous")}
         </Button>
 
         {/* Page numbers */}
@@ -127,7 +129,7 @@ export const LogsPagination = ({
           disabled={currentPage >= totalPages}
           size="sm"
         >
-          Next
+          {t("pagination.next")}
         </Button>
       </div>
     </div>

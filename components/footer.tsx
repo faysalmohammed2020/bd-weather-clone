@@ -3,7 +3,8 @@ import { Cloud, Facebook, Twitter, Linkedin, Mail, Github } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export default function Footer() {
-  const common = useTranslations("common");
+  const footerLinks = useTranslations("landingPage");
+  const t = useTranslations('landingPage.footerSection')
   return (
     <footer className="w-full bg-gradient-to-b from-blue-50 to-white py-12">
       <div className="container px-4 md:px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -14,33 +15,31 @@ export default function Footer() {
               <Cloud className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-              {common("title")}
+              {footerLinks("brandName")}
             </span>
           </div>
           <p className="text-sm text-gray-600 max-w-xs leading-relaxed">
-            BD Weather offers real-time, hyperlocal weather updates,
-            visualizations, and forecasts to help you stay informed and prepared
-            across all 64 districts of Bangladesh.
+            {t('description')}
           </p>
         </div>
 
         {/* Column 2: Quick Links */}
         <div>
           <h3 className="text-sm font-semibold text-gray-800 mb-4 tracking-wide uppercase">
-            Quick Links
+            {t('quickLinks')}
           </h3>
           <nav className="flex flex-col gap-3">
-            <FooterLink href="/features" label="Features" />
-            <FooterLink href="/about" label="About Us" />
-            <FooterLink href="/data-sources" label="Data Sources" />
-            <FooterLink href="/contact" label="Contact" />
+            <FooterLink href="/features" label={footerLinks('features')} />
+            <FooterLink href="/about" label={footerLinks('about')} />
+            <FooterLink href="/data-sources" label={footerLinks('dataSources')} />
+            <FooterLink href="/contact" label={footerLinks('contact')} />
           </nav>
         </div>
 
         {/* Column 3: Social Media */}
         <div>
           <h3 className="text-sm font-semibold text-gray-800 mb-4 tracking-wide uppercase">
-            Connect With Us
+            {t('connectWithUs')}
           </h3>
           <div className="flex gap-4">
             <FooterIcon
@@ -75,15 +74,15 @@ export default function Footer() {
             />
           </div>
           <div className="mt-6">
-            <p className="text-xs text-gray-500 mb-2">Subscribe to our newsletter</p>
+            <p className="text-xs text-gray-500 mb-2">{t('newsletterHeading')}</p>
             <div className="flex">
               <input 
                 type="email" 
-                placeholder="Your email" 
+                placeholder={t('yourEmail')} 
                 className="px-3 py-2 text-sm border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-blue-500 w-full max-w-xs"
               />
               <button className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 text-sm rounded-r-md hover:from-blue-600 hover:to-cyan-600 transition-all duration-200">
-                Subscribe
+                {t('subscribeButton')}
               </button>
             </div>
           </div>
@@ -92,9 +91,9 @@ export default function Footer() {
 
       {/* Bottom Bar */}
       <div className="mt-12 pt-6 text-center text-xs text-gray-500 border-t border-gray-200">
-        © {new Date().getFullYear()} BD Weather. All rights reserved. | 
-        <Link href="/privacy" className="hover:text-blue-600 ml-1">Privacy Policy</Link> | 
-        <Link href="/terms" className="hover:text-blue-600 ml-1">Terms of Service</Link>
+        © {new Date().getFullYear()} {t('copyright')} | 
+        <Link href="/privacy" className="hover:text-blue-600 ml-1">{t('privacyPolicy')}</Link> | 
+        <Link href="/terms" className="hover:text-blue-600 ml-1">{t('termsOfService')}</Link>
       </div>
     </footer>
   );

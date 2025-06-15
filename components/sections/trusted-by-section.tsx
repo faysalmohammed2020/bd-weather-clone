@@ -4,14 +4,15 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 
 export default function TrustedBySection() {
-  const partners = [
-    "Bangladesh Met Dept",
-    "Ministry of Agriculture",
-    "Dhaka University",
-    "ICIMOD",
-    "World Bank",
-  ];
   const t = useTranslations("landingPage.trustedBySection");
+  // const partners = [
+  //   "Bangladesh Met Dept",
+  //   "Ministry of Agriculture",
+  //   "Dhaka University",
+  //   "ICIMOD",
+  //   "World Bank",
+  // ];
+  const partners = t.raw("partners") as string[];
 
   return (
     <section className="relative w-full pb-10 bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
@@ -34,7 +35,7 @@ export default function TrustedBySection() {
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-6 md:gap-10">
-            {partners.map((name, idx) => (
+            {partners.map((partner, idx) => (
               <motion.div
                 key={idx}
                 className="px-5 py-3 rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold text-sm shadow-sm border border-gray-200 dark:border-gray-700 transition-all"
@@ -46,7 +47,7 @@ export default function TrustedBySection() {
                 }}
                 transition={{ duration: 0.25 }}
               >
-                {name}
+               {partner}
               </motion.div>
             ))}
           </div>
