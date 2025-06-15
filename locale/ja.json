@@ -23,11 +23,11 @@
         "rainfall": "降雨量"
       },
       "cards": {
-        "tempValue": "28°C",
+        "tempValue": "摂氏二十八度",
         "tempLocation": "ダッカ",
-        "rainfallValue": "15mm",
-        "windValue": "12ノット",
-        "humidityValue": "65%"
+        "rainfallValue": "十五ミリメートル",
+        "windValue": "十二 ノット",
+        "humidityValue": "百分の六十五"
       }
     },
     "trustedBySection": {
@@ -62,9 +62,9 @@
       "step2Description": "高度な可視化を通じて、リアルタイムメトリクス、予報、過去のパターンを探索します。",
       "step3Title": "行動を起こす",
       "step3Description": "農業、災害準備、運用計画のための実用的な洞察を活用します。",
-      "one": "1",
-      "two": "2",
-      "three": "3",
+      "one": "一",
+      "two": "二",
+      "three": "三",
       "exploreDashboard": "ダッシュボードを探索"
     },
     "weatherAlertsSection": {
