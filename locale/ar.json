@@ -121,11 +121,9 @@
         "name1": "الدكتور رحمن",
         "role1": "عالم زراعة",
         "quote1": "لقد كان التنبؤ بهطول الأمطار مفيدًا للغاية في مساعدة المزارعين في منطقتنا على تخطيط جداول الزراعة والحصاد. الدقة مذهلة.",
-
         "name2": "فاطمة بيغم",
         "role2": "منسقة الاستجابة للطوارئ",
         "quote2": "كان نظام الإنذار المبكر للأعاصير بمثابة نقطة تحول لمجتمعاتنا الساحلية. لقد تمكنا من إجلاء الناس مبكرًا قبل وقوع الأحداث الجوية القاسية.",
-
         "name3": "محمد علي",
         "role3": "محلل أبحاث",
         "quote3": "لقد كانت أدوات تحليل البيانات التاريخية لا تقدر بثمن في أبحاثنا حول تغير المناخ. يمكننا الآن تحديد الاتجاهات طويلة الأجل بدقة أكبر بكثير."
@@ -269,6 +267,7 @@
     "currentWeather": "الطقس الحالي",
     "temperature": "درجة الحرارة",
     "feelsLike": "محسوسة كـ",
+    "risk": "الخطر",
     "dewPoint": "نقطة الندى",
     "humidity": "الرطوبة",
     "wind": "الرياح",
@@ -280,6 +279,8 @@
     "precipitation": "الهطول",
     "peakUV": "الذروة اليوم",
     "inNext24h": "خلال الـ 24 ساعة القادمة",
+    "lightRainExpected": "من المتوقع هطول أمطار خفيفة خلال الـ 24 ساعة القادمة.",
+    "noPrecipitationExpected": "لا يُتوقع هطول أمطار خلال الـ 24 ساعة القادمة.",
     "precipitationExpected": {
       "yes": "من المتوقع هطول أمطار خفيفة خلال الـ 24 ساعة القادمة.",
       "no": "لا يُتوقع هطول أمطار خلال الـ 24 ساعة القادمة."
@@ -310,27 +311,51 @@
     }
   },
   "DailySummaryChart": {
-    "fetchError": "فشل في جلب البيانات: {status}",
-    "unknownError": "حدث خطأ غير معروف",
-    "chartTitle": "بيانات {metric} اليومية",
-    "weatherData": "الطقس",
-    "7days": "٧ أيام",
-    "30days": "٣٠ يومًا",
-    "90days": "٩٠ يومًا",
-    "atStation": "في محطة {station}",
-    "chartDescription": "عرض بيانات {metric} لآخر {days}{station}",
-    "value": "القيمة",
-    "loading": "جاري تحميل بيانات الطقس...",
     "dashboardTitle": "لوحة بيانات الطقس",
+    "weatherData": "الطقس",
+    "chartTitle": "بيانات {metric} اليومية",
+    "chartDescription": "عرض بيانات {metric} لآخر {days}{station}",
+    "atStation": " في محطة {station}",
+    "loading": "جاري تحميل بيانات الطقس...",
+    "selectMetric": "اختر المقياس",
+    "timeRange": "النطاق الزمني",
+    "recordCount": "{count} سجل",
     "errorTitle": "خطأ في تحميل البيانات",
     "errorHeading": "فشل تحميل بيانات الطقس",
     "retry": "إعادة المحاولة",
     "noDataTitle": "لا توجد بيانات متاحة",
     "noDataHeading": "لا توجد بيانات للطقس",
     "noDataSuggestion": "حاول تعديل النطاق الزمني أو تحقق من وجود بيانات للفترة المحددة.",
-    "recordCount": "{count} سجل",
-    "selectMetric": "اختر المقياس",
-    "timeRange": "النطاق الزمني"
+    "dataTypes": {
+      "temperature": "درجة الحرارة",
+      "precipitation": "هطول الأمطار",
+      "wind": "سرعة الرياح",
+      "humidity": "الرطوبة",
+      "all": "جميع المقاييس"
+    },
+    "timeRanges": {
+      "7d": "آخر 7 أيام",
+      "30d": "آخر 30 يومًا",
+      "90d": "آخر 90 يومًا"
+    },
+    "metrics": {
+      "maxTemperature": "درجة الحرارة القصوى",
+      "minTemperature": "درجة الحرارة الدنيا",
+      "totalPrecipitation": "هطول الأمطار",
+      "windSpeed": "سرعة الرياح",
+      "avRelativeHumidity": "الرطوبة النسبية"
+    },
+    "units": {
+      "temperature": "°C",
+      "precipitation": "مم",
+      "windSpeed": "كم/س",
+      "humidity": "%",
+      "value": "القيمة"
+    },
+    "errors": {
+      "fetchError": "فشل في جلب البيانات: {status}",
+      "unknownError": "حدث خطأ غير معروف"
+    }
   },
   "weather": {
     "conditions": {
@@ -378,7 +403,9 @@
       "moderate": "متوسط",
       "high": "مرتفع",
       "veryHigh": "مرتفع جداً",
-      "extreme": "شديد"
+      "extreme": "شديد",
+      "peakToday": "الذروة اليوم",
+      "maxUvIndex": "أقصى مستويات"
     },
     "uvRisk": "خطر {status}",
     "uvDescription": "ستصل أقصى مستويات التعرض للأشعة فوق البنفسجية اليوم إلى مستوى {status}."

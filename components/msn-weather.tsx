@@ -849,10 +849,10 @@ const CloudCoverGauge = ({
   const cloudCount = Math.ceil((cloudCover / 100) * 6);
 
   const getCloudStatus = (cover: number) => {
-    if (cover > 75) return "Overcast";
-    if (cover > 50) return "Cloudy";
-    if (cover > 25) return "Partly Cloudy";
-    return "Clear";
+    if (cover > 75) return t("weather.cloudStatus.overcast");
+    if (cover > 50) return t("weather.cloudStatus.cloudy");
+    if (cover > 25) return t("weather.cloudStatus.partlyCloudy");
+    return t("weather.cloudStatus.clear");
   };
 
   const t = useTranslations();
@@ -1188,12 +1188,12 @@ const PrecipitationCard = ({
         <div className="mt-4 text-sm text-gray-600 text-center">
           <div className="font-medium">
             {next24h.toFixed(2)} { t("common.units.mm")}{" "}
-            <span className="text-gray-500">{t("common.units.mm")} {t("dashboard.next24h")}</span>
+            <span className="text-gray-500">{t("common.units.mm")} {t("dashboard.inNext24h")}</span>
           </div>
           <p className="text-xs mt-2 text-gray-500">
             {precipitation > 0
-              ? "Light rain expected in next 24 hours."
-              : "No precipitation expected in next 24 hours."}
+              ? t("dashboard.lightRainExpected")
+              : t("dashboard.noPrecipitationExpected")}
           </p>
         </div>
       </CardContent>
@@ -1522,7 +1522,7 @@ export default function ProfessionalWeatherDashboard({
                 </div>
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
                   <div className="text-2xl font-bold text-gray-600">
-                    {currentData.precipitation.toFixed(0)} mm
+                    {currentData.precipitation.toFixed(0)} {t("common.units.mm")}
                   </div>
                   <div className="text-xs text-gray-500 uppercase tracking-wide">
                     {t("dashboard.quickStats.precipitation")}
