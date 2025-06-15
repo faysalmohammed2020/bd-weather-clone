@@ -312,29 +312,6 @@
       "uvIndex": "UV Index"
     }
   },
-  "DailySummaryChart": {
-    "fetchError": "Failed to fetch data: {status}",
-    "unknownError": "An unknown error occurred",
-    "chartTitle": "Daily {metric} Data",
-    "weatherData": "Weather",
-    "7days": "7 days",
-    "30days": "30 days",
-    "90days": "90 days",
-    "atStation": "at {station} station",
-    "chartDescription": "Showing {metric} data for the last {days} days{station}",
-    "value": "Value",
-    "loading": "Loading weather data...",
-    "dashboardTitle": "Weather Data Dashboard",
-    "errorTitle": "Data Loading Error",
-    "errorHeading": "Failed to load weather data",
-    "retry": "Retry",
-    "noDataTitle": "No Data Available",
-    "noDataHeading": "No weather data found",
-    "noDataSuggestion": "Try adjusting the time range or check if data exists for the selected period.",
-    "recordCount": "{count} records",
-    "selectMetric": "Select Metric",
-    "timeRange": "Time Range"
-  },
   "weather": {
     "conditions": {
       "sunny": "Sunny",
@@ -830,6 +807,53 @@
     "noData": {
       "title": "No weather observations found",
       "subtitle": "Try selecting a different date or station"
+    }
+  },
+  "DailySummaryChart": {
+    "dashboardTitle": "Weather Dashboard",
+    "weatherData": "Weather Data",
+    "chartTitle": "Daily {metric} Data",
+    "chartDescription": "Showing {metric} data for the last {days}{station}",
+    "atStation": " at {station}",
+    "loading": "Loading weather data...",
+    "selectMetric": "Select Metric",
+    "timeRange": "Time Range",
+    "recordCount": "{count} records",
+    "errorTitle": "Error Loading Data",
+    "errorHeading": "Failed to load weather data",
+    "retry": "Retry",
+    "noData": "No weather data available",
+    "noDataHeading": "No Weather Data",
+    "noDataSuggestion": "Try adjusting the time range or check if data exists for the selected period.",
+    "dataTypes": {
+      "temperature": "Temperature",
+      "precipitation": "Precipitation",
+      "wind": "Wind Speed",
+      "humidity": "Humidity",
+      "all": "All Metrics"
+    },
+    "timeRanges": {
+      "7d": "Last 7 Days",
+      "30d": "Last 30 Days",
+      "90d": "Last 90 Days"
+    },
+    "metrics": {
+      "maxTemperature": "Max Temperature",
+      "minTemperature": "Min Temperature",
+      "totalPrecipitation": "Total Precipitation",
+      "windSpeed": "Wind Speed",
+      "avRelativeHumidity": "Average Relative Humidity"
+    },
+    "units": {
+      "temperature": "°C",
+      "precipitation": "mm",
+      "windSpeed": "km/h",
+      "humidity": "%",
+      "value": "Value"
+    },
+    "errors": {
+      "fetchError": "Failed to fetch data: {status}",
+      "unknownError": "An unknown error occurred"
     }
   },
   "synopticCode": {
