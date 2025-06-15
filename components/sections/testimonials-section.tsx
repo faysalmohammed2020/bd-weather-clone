@@ -2,8 +2,12 @@
 
 import { motion } from "framer-motion";
 import { Users, MapPin, BarChart3 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function TestimonialsSection() {
+  
+  const t = useTranslations('landingPage.testimonials')
+
   return (
     <section className="relative w-full py-16  bg-gradient-to-b from-white to-cyan-50 dark:from-gray-900 dark:to-cyan-950/20 overflow-hidden">
       {/* Decorative elements */}
@@ -21,13 +25,13 @@ export default function TestimonialsSection() {
           viewport={{ once: true }}
         >
           <div className="inline-block rounded-lg bg-cyan-100 dark:bg-cyan-900/30 px-3 py-1 text-sm text-cyan-600 dark:text-cyan-400">
-            Testimonials
+            {t('title')}
           </div>
           <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700 dark:from-cyan-400 dark:to-blue-400">
-            Trusted by Professionals Across Bangladesh
+            {t('subtitle')}
           </h2>
           <p className="max-w-[900px] text-gray-600 dark:text-gray-300 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-            See what our users have to say about our weather dashboard.
+            {t('description')}
           </p>
         </motion.div>
 
@@ -46,17 +50,15 @@ export default function TestimonialsSection() {
               </div>
               <div>
                 <h3 className="font-bold text-gray-800 dark:text-gray-100">
-                  Dr. Rahman
+                 {t('reviews.name1')}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Agricultural Scientist
+                  {t('reviews.role1')}
                 </p>
               </div>
             </div>
             <p className="text-gray-600 dark:text-gray-300 italic">
-              "The rainfall forecasting has been instrumental in helping farmers
-              in our region plan their planting and harvesting schedules. The
-              accuracy is impressive."
+              {t('reviews.quote1')}
             </p>
             <div className="flex text-amber-400">
               <svg className="h-5 w-5 fill-current" viewBox="0 0 20 20">
@@ -91,17 +93,15 @@ export default function TestimonialsSection() {
               </div>
               <div>
                 <h3 className="font-bold text-gray-800 dark:text-gray-100">
-                  Fatima Begum
+                  {t('reviews.name2')}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Emergency Response Coordinator
+                 {t('reviews.role2')}
                 </p>
               </div>
             </div>
             <p className="text-gray-600 dark:text-gray-300 italic">
-              "The early warning system for cyclones has been a game-changer for
-              our coastal communities. We've been able to evacuate people well
-              in advance of severe weather events."
+             {t('reviews.quote2')}
             </p>
             <div className="flex text-amber-400">
               <svg className="h-5 w-5 fill-current" viewBox="0 0 20 20">
@@ -136,17 +136,15 @@ export default function TestimonialsSection() {
               </div>
               <div>
                 <h3 className="font-bold text-gray-800 dark:text-gray-100">
-                  Mohammed Ali
+                 {t('reviews.name3')}
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Research Analyst
+                  {t('reviews.role3')}
                 </p>
               </div>
             </div>
             <p className="text-gray-600 dark:text-gray-300 italic">
-              "The historical data analysis tools have been invaluable for our
-              climate change research. We can now identify long-term trends with
-              much greater precision."
+             {t('reviews.quote3')}
             </p>
             <div className="flex text-amber-400">
               <svg className="h-5 w-5 fill-current" viewBox="0 0 20 20">
