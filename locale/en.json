@@ -4,15 +4,14 @@
     "features": "Features",
     "about": "About",
     "dataSources": "Data Sources",
-    "contact": "Contact",
+    "contact": "Contact Us",
     "signIn": "Sign In",
     "accessDashboard": "Access Dashboard",
-    "brandName": "BD Weather",
-
+    "brandName": "Bangladesh Weather",
     "heroSection": {
       "liveUpdate": "Live Weather Updates",
       "heading": "Bangladesh Weather Dashboard",
-      "description": "Professional weather monitoring and forecasting for Bangladesh. Get live data, forecasts, and historical trends through our interactive dashboard.",
+      "description": "Professional weather monitoring and forecasting for Bangladesh. Get real-time data, forecasts, and historical trends through our interactive dashboard.",
       "launchDashboard": "Launch Dashboard",
       "exploreFeatures": "Explore Features",
       "stats": {
@@ -26,20 +25,19 @@
       "cards": {
         "tempValue": "28°C",
         "tempLocation": "Dhaka",
-        "rainfallValue": "15 mm",
+        "rainfallValue": "15mm",
         "windValue": "12 knots",
         "humidityValue": "65%"
       }
     },
-
     "trustedBySection": {
       "label": "Trusted by",
-      "title": "Leading Institutions & Global Partners",
-      "description": "We proudly collaborate with esteemed organizations to deliver reliable and innovative weather solutions across Bangladesh and beyond.",
+      "title": "Leading Institutions and Global Partners",
+      "description": "We're proud to collaborate with prestigious organizations to deliver reliable and innovative weather solutions across Bangladesh and beyond.",
       "partners": [
-        "Bangladesh Met Dept",
+        "Bangladesh Meteorological Department",
         "Ministry of Agriculture",
-        "Dhaka University",
+        "University of Dhaka",
         "ICIMOD",
         "World Bank"
       ]
@@ -47,24 +45,24 @@
     "featuresSection": {
       "weatherIntelligence": "Weather Intelligence",
       "advancedMeteorologicalData": "Advanced Meteorological Data",
-      "description": "Precise weather analytics and forecasting tools for informed decision making across Bangladesh.",
+      "description": "Precise weather analytics and forecasting tools for informed decision-making across Bangladesh.",
       "temperatureAnalytics": "Temperature Analytics",
       "temperatureDescription": "Real-time and historical temperature data with interactive visualizations.",
       "rainfallPatterns": "Rainfall Patterns",
-      "rainfallDescription": "Precipitation analysis with regional comparisons and forecasts.",
+      "rainfallDescription": "Rainfall analysis with regional comparisons and future predictions.",
       "windConditions": "Wind Conditions",
-      "windDescription": "Wind speed and direction monitoring with safety alerts.",
+      "windDescription": "Monitor wind speed and direction with safety alerts.",
       "regionalInsights": "Regional Insights",
       "regionalDescription": "Comparative weather analysis across Bangladesh regions.",
       "exploreData": "Explore Data",
-      "viewFullDashboard": "View full dashboard"
+      "viewFullDashboard": "View Full Dashboard"
     },
     "howItWorks": {
       "howItWorks": "How It Works",
       "subtitle": "Advanced Weather Analytics Platform",
-      "description": "Our sophisticated dashboard provides comprehensive weather insights for Bangladesh with precision and clarity.",
+      "description": "Our advanced dashboard provides comprehensive insights into Bangladesh's weather with precision and clarity.",
       "step1Title": "Select Location",
-      "step1Description": "Choose from 64 districts or any specific region in Bangladesh to access localized weather data.",
+      "step1Description": "Choose from 64 districts or any specific area in Bangladesh to access localized weather data.",
       "interactiveBangladeshMap": "Interactive Bangladesh Map",
       "step2Title": "Analyze Data",
       "step2Description": "Explore real-time metrics, forecasts, and historical patterns through advanced visualizations.",
@@ -75,9 +73,98 @@
       "three": "3"
     }
   },
-
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "dataEntry": "Data Entry",
+    "viewManage": "View & Manage",
+    "userManagement": "User Management",
+    "stationManagement": "Station Management",
+    "settings": "Settings",
+    "firstCard": "First Card",
+    "secondCard": "Second Card",
+    "synopticCode": "Synoptic Code",
+    "dailySummary": "Daily Summary",
+    "viewAllExport": "View All & Export"
+  },
+  "firstCard": {
+    "title": "Coordinated Universal Time",
+    "observingTime": "Observing Time",
+    "barPressure": {
+      "title": "Barometric Pressure Measurements",
+      "cardIndicator": "First Card Indicator",
+      "attachedThermometer": "Attached Thermometer",
+      "barAsRead": "Barometer as Read (hPa)",
+      "correctedForIndex": "Corrected for Temperature and Gravity (hPa)",
+      "heightDiffCorrection": "Height Difference Correction (hPa)",
+      "stationLevelPressure": "Station Level Pressure (P.P.P.P hPa)",
+      "seaLevelReductionConstant": "Sea Level Reduction Constant",
+      "seaLevelPressure": "Sea Level Pressure (P.P.P.P hPa)",
+      "altimeterSetting": "Altimeter Setting (QNH)",
+      "twentyFourHourChange": "24-Hour Pressure Change"
+    },
+    "temperatureSection": {
+      "title": "Temperature",
+      "asRead": "As Read",
+      "corrected": "Corrected",
+      "dryBulb": "Dry Bulb Temperature (°C)",
+      "wetBulb": "Wet Bulb Temperature (°C)",
+      "maxMin": "Maximum/Minimum Temperature (°C)"
+    },
+    "dewPointHumidity": {
+      "title": "Dew Point and Humidity",
+      "dewPoint": "Dew Point Temperature (°C)",
+      "relativeHumidity": "Relative Humidity (%)"
+    },
+    "buttons": {
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "squallMeasurements": {
+      "title": "Squall Measurements",
+      "force": "Force (knots)",
+      "direction": "Direction (°)",
+      "time": "Time (Local Time)",
+      "selectTime": "-- Select Time (Local Time) --",
+      "squallMeasurementsSkipped": "Squall measurements skipped",
+      "fillMeasurements": "Fill in measurements"
+    },
+    "visibilityMeasurements": {
+      "title": "Visibility Measurements",
+      "horizontalVisibility": "Horizontal Visibility"
+    },
+    "miscMeteors": {
+      "title": "Miscellaneous Meteorological Phenomena Codes",
+      "inputLabel": "Miscellaneous Meteors (Code)"
+    },
+    "weatherConditions": {
+      "title": "Weather Conditions",
+      "pastWeatherW1": {
+        "label": "Past Weather (W1)",
+        "placeholder": "Enter past weather code (0-9)",
+        "description": "Weather code for the first part of the observation period"
+      },
+      "pastWeatherW2": {
+        "label": "Past Weather (W2)",
+        "placeholder": "Enter past weather code (0-9)",
+        "description": "Weather code for the second part of the observation period"
+      },
+      "presentWeatherWW": {
+        "label": "Present Weather (WW)",
+        "placeholder": "Enter present weather",
+        "description": "Present weather at time of observation"
+      }
+    },
+    "tabs": {
+      "pressure": "Barometric Pressure Measurements",
+      "temperature": "Temperature",
+      "squall": "Squall Measurements",
+      "VV": "Visibility Measurements",
+      "meteors": "Meteorological Phenomena",
+      "weather": "Weather Conditions"
+    }
+  },
   "signin": {
-    "title": "BD Weather",
+    "title": "Bangladesh Weather",
     "selectStation": "Select your weather station to continue.",
     "stationLabel": "Weather Station",
     "loadingStations": "Loading stations...",
@@ -91,584 +178,23 @@
     "email": "Enter your email address",
     "password": "Enter your password",
     "remember": "Remember me",
-    "forgotPassword": "Forgot password",
+    "forgotPassword": "Forgot password?",
     "signIn": "Sign In",
     "backToSecurity": "Back to Security Code",
-    "signingIn": "Signing in..."
-  },
-  "authErrors": {
-    "invalidCredentials": "Invalid email or password",
-    "noPermission": "You don't have permission to access this station with the selected role",
-    "securityCodeMismatch": "The security code doesn't match your account",
-    "stationMismatch": "Your account is not associated with this station",
-    "generic": "An error occurred during sign in",
-    "emptyStation": "Please select a station",
-    "emptySecurityCode": "Please enter the security code",
-    "emptyRole": "Please select a role",
-    "emptyCredentials": "Please enter both email and password",
-    "invalidStation": "Invalid station selection"
-  },
-  "signUpForm": {
-    "title": "Create Account",
-    "subtitle": "Join us today! It's quick and easy.",
-    "name": {
-      "label": "Name",
-      "placeholder": "Enter your name"
-    },
-    "station": {
-      "label": "Weather Station",
-      "placeholder": "Select your station",
-      "error": "Could not load stations. Please try again later."
-    },
-    "email": {
-      "label": "Email",
-      "placeholder": "Enter your email address"
-    },
-    "role": {
-      "label": "Role"
-    },
-    "password": {
-      "label": "Password",
-      "placeholder": "Enter your password",
-      "show": "Show",
-      "hide": "Hide"
-    },
-    "terms": {
-      "label": "I agree to the",
-      "link": "terms and conditions"
-    },
-    "button": {
-      "signUp": "Sign Up",
-      "creating": "Creating..."
-    },
-    "alreadyHaveAccount": "Already have an account?",
-    "signIn": "Sign In",
-    "toast": {
-      "success": "Registration successful"
-    }
-  },
-  "mapControls": {
-    "title": "Map Controls",
-    "stationLabel": "Stations",
-    "loading": "Loading...",
-    "noStations": "No stations",
-    "selectStation": "Select Station",
-    "error": "Failed to fetch stations"
-  },
-  "sidebar": {
-    "dashboard": "Dashboard",
-    "dataEntry": "Data Entry",
-    "viewManage": "View & Manage",
-    "userManagement": "User Management",
-    "stationManagement": "Station Management",
-    "settings": "Settings"
-  },
-  "firstCard": {
-    "title": "UTC Clock",
-    "observingTime": "Observing Time",
-    "barPressure": {
-      "title": "Barometric Pressure Measurements",
-      "cardIndicator": "First Card Indicator",
-      "attachedThermometer": "Attached Thermometer",
-      "barAsRead": "Bar as Read (hPa)",
-      "correctedForIndex": "Corrected for Temperature & Gravity (hPa)",
-      "heightDiffCorrection": "Height Difference Correction (hPa)",
-      "stationLevelPressure": "Station Level Pressure (P.P.P.P hPa)",
-      "seaLevelReductionConstant": "Sea Level Reduction Constant",
-      "seaLevelPressure": "Sea Level Pressure (P.P.P.P hPa)",
-      "altimeterSetting": "Altimeter Setting (QNH)",
-      "twentyFourHourChange": "24-Hour Pressure Change"
-    },
-    "temperatureSection": {
-      "title": "Temperature",
-      "asRead": "As Read",
-      "corrected": "Corrected",
-      "dryBulb": "Dry Bulb Thermometer (°C)",
-      "wetBulb": "Wet Bulb Thermometer (°C)",
-      "maxMin": "Maximum / Minimum Temperature (°C)"
-    },
-    "dewPointHumidity": {
-      "title": "Dew Point & Humidity",
-      "dewPoint": "Dew Point Temperature (°C)",
-      "relativeHumidity": "Relative Humidity (%)"
-    },
-    "buttons": {
-      "previous": "Previous",
-      "next": "Next"
-    },
-    "squallMeasurements": {
-      "title": "Squall Measurements",
-      "force": "Force (knots)",
-      "direction": "Direction (°)",
-      "time": "Time (local time)",
-      "selectTime": "-- Select Time (local time) --",
-      "squallMeasurementsSkipped": "Squall Measurements Skipped",
-      "fillMeasurements": "Enter Measurements"
-    },
-    "visibilityMeasurements": {
-      "title": "Visibility Measurements",
-      "horizontalVisibility": "Horizontal Visibility"
-    },
-    "miscMeteors": {
-      "title": "Miscellaneous Weather Phenomena Codes",
-      "inputLabel": "Miscellaneous Weather Phenomena (Code)"
-    },
-    "weatherConditions": {
-      "title": "Weather Conditions",
-      "pastWeatherW1": {
-        "label": "Past Weather (W1)",
-        "placeholder": "Enter past weather code (0–9)",
-        "description": "Weather code for the first part of the observation period"
-      },
-      "pastWeatherW2": {
-        "label": "Past Weather (W2)",
-        "placeholder": "Enter past weather code (0–9)",
-        "description": "Weather code for the second part of the observation period"
-      },
-      "presentWeatherWW": {
-        "label": "Present Weather (WW)",
-        "placeholder": "Enter present weather",
-        "description": "Weather at the time of observation"
-      }
-    }
-  },
-  "secondCard": {
-    "tabs": {
-      "cloud": "Cloud",
-      "n": "Total Cloud",
-      "significant-cloud": "Significant Cloud",
-      "rainfall": "Rainfall",
-      "wind": "Wind",
-      "observer": "Observer"
-    },
-    "buttons": {
-      "previous": "Previous",
-      "next": "Next",
-      "reset": "Reset",
-      "submit": "Submit Observation",
-      "submitting": "Submitting..."
-    },
-    "alerts": {
-      "fillRequired": "Please fill in all required fields correctly",
-      "completeTab": "You need to complete the current tab before proceeding",
-      "formCleared": "All form data has been cleared.",
-      "submissionFailed": "Failed to submit. Please try again."
-    },
-    "cloud": {
-      "title": "Cloud Observation",
-      "low": "Low Cloud",
-      "medium": "Medium Cloud",
-      "high": "High Cloud"
-    },
-    "totalCloud": {
-      "title": "Total Cloud Amount",
-      "label": "Total Cloud Amount (Octa)"
-    },
-    "significantCloud": {
-      "title": "Significant Cloud",
-      "layer1": "1st Layer",
-      "layer2": "2nd Layer",
-      "layer3": "3rd Layer",
-      "layer4": "4th Layer"
-    },
-    "rainfall": {
-      "title": "Rainfall Measurement (mm)",
-      "note": "📅 Please select the previous date from calendar for 00 UTC report submission.",
-      "timeStart": "Time of Start (HH:MM UTC)",
-      "timeEnd": "Time of Ending (HH:MM UTC)",
-      "sincePrevious": "Since Previous Observation (mm)",
-      "duringPrevious": "During Previous 6 Hours Rainfall (mm)",
-      "last24Hours": "Last 24 Hours Precipitation (mm)",
-      "intermittentRain": "Intermittent Rain? (বিরতিযুক্ত বৃষ্টি)",
-      "formatHint": "Format: HH:MM (e.g., 03:30, 06:15, 23:45)"
-    },
-    "wind": {
-      "title": "Wind Measurement",
-      "first": "First Anemometer",
-      "second": "Second Anemometer",
-      "speed": "Speed (KTS)",
-      "direction": "Direction (Degrees)",
-      "directionPlaceholder": "Wind direction 5° to 364° from code book"
-    },
-    "observer": {
-      "title": "Observer Information",
-      "initials": "Observer Initials",
-      "stationId": "Station ID"
-    },
-    "errors": {
-      "required": "This field is required",
-      "invalidTime": "Invalid time format. Use HH:MM"
-    },
-    "options": {
-      "cloudAmount": {
-        "0": "0 - No cloud",
-        "1": "1 - 1 octa or less",
-        "2": "2 - 2 octas",
-        "3": "3 - 3 octas",
-        "4": "4 - 4 octas",
-        "5": "5 - 5 octas",
-        "6": "6 - 6 octas",
-        "7": "7 - 7 octas",
-        "8": "8 - 8 octas",
-        "9": "9 - Sky obscured",
-        "/": "/ - Cannot be estimated"
-      },
-      "cloudForm": {
-        "0": "0 - No Sc, St, Cu or Cb",
-        "1": "1 - Cu (little vertical extent)",
-        "2": "2 - Cu (moderate/strong vertical)",
-        "3": "3 - Cb (no sharp outlines)",
-        "4": "4 - Sc from spreading Cu",
-        "5": "5 - Sc not from spreading Cu",
-        "6": "6 - St in continuous sheet",
-        "7": "7 - Stratus/Cu fractus (bad weather)",
-        "8": "8 - Cu and Sc different levels",
-        "9": "9 - Cb with fibrous top/anvil",
-        "/": "/ - Not visible"
-      },
-      "cloudDirection": {
-        "0": "0 - Stationary or no direction",
-        "1": "1 - From NE",
-        "2": "2 - From E",
-        "3": "3 - From SE",
-        "4": "4 - From S",
-        "5": "5 - From SW",
-        "6": "6 - From W",
-        "7": "7 - From NW",
-        "8": "8 - From N",
-        "9": "9 - Unknown direction"
-      },
-      "cloudHeight": {
-        "0": "0 - 0 to 50 m",
-        "1": "1 - 50 to 100 m",
-        "2": "2 - 100 to 200 m",
-        "3": "3 - 200 to 300 m",
-        "4": "4 - 300 to 600 m",
-        "5": "5 - 600 to 1000 m",
-        "6": "6 - 1000 to 1500 m",
-        "7": "7 - 1500 to 2000 m",
-        "8": "8 - 2000 to 2500 m",
-        "9": "9 - 2500+ m or no cloud",
-        "/": "/ - Unknown height"
-      },
-      "sigCloudForm": {
-        "0": "0 - Cirrus (Ci)",
-        "1": "1 - Cirrocumulus (Cc)",
-        "2": "2 - Cirrostratus (Cs)",
-        "3": "3 - Altocumulus (Ac)",
-        "4": "4 - Altostratus (As)",
-        "5": "5 - Nimbostratus (Ns)",
-        "6": "6 - Stratocumulus (Sc)",
-        "7": "7 - Stratus (St)",
-        "8": "8 - Cumulus (Cu)",
-        "9": "9 - Cumulonimbus (Cb)",
-        "/": "/ - Not visible"
-      }
-    }
-  },
-  "secondCardValidation": {
-    "required": "This field is required",
-    "invalidFormat": "Invalid format",
-    "invalidTime": "Time must be in HH:MM format (e.g., 06:30)",
-    "numberOnly": "Only numeric values are allowed",
-    "minValue": "Value must be at least {min}",
-    "maxValue": "Value must not exceed {max}",
-    "maxLength": "Maximum {max} digits allowed",
-    "selectOption": "Please select an option",
-    "invalidDirection": "Direction must be between 0° and 360°",
-    "windSpeed": "Speed must be a 3-digit number",
-    "anemometerCode": "Anemometer code must be 5 digits",
-    "observerInitials": "Observer initials are required",
-    "stationId": "Station ID is required",
-    "cloudAmount": "Select a valid cloud amount (0–8, 9, or /)",
-    "cloudHeight": "Select a valid cloud height code",
-    "cloudDirection": "Select a valid direction code",
-    "cloudForm": "Select a valid cloud form code",
-    "precipitationValue": "Enter a value between 1 and 989",
-    "intermittentRain": "Select whether rain was intermittent",
-    "observationTime": "Select a valid observation hour"
-  },
-  "firstCardTable": {
-    "dateRange": "Date Range",
-    "recordCount": "{{count}} record(s)",
-    "station": "Station: {{stationName}}",
-    "noDataTitle": "No first card data found",
-    "noDataSubtitle": "Try selecting a different date or station",
-    "loading": "Loading data...",
-    "stationId": "Station ID",
-    "stationName": "Station Name",
-    "year": "Year",
-    "dataType": "DATA TYPE",
-    "stationNo": "STATION NO",
-    "stationNameLabel": "STATION NAME",
-    "editTitle": "Edit First Card Data",
-    "editSubtitle": "Editing record from {{stationName}} ({{stationId}}) on {{date}}",
-    "cancel": "Cancel",
-    "saveChanges": "Save Changes",
-    "saving": "Saving...",
-    "tooltipEdit": "Edit this record",
-    "tooltipDenied": "You don't have permission to edit this record",
-    "permissionDenied": {
-      "title": "Permission Denied",
-      "description": "You don't have permission to edit this record. This could be because:",
-      "reasons": {
-        "tooOld": "The record is too old to edit",
-        "wrongStation": "The record belongs to a different station",
-        "noRole": "You don't have the required role permissions"
-      },
-      "close": "Close"
-    },
-    "filters": {
-      "stationLabel": "Station:",
-      "allStations": "All Stations"
-    },
-    "headers": {
-      "gg": "Time of Observation (UTC)",
-      "ci": "Indicator",
-      "date": "Date",
-      "station": "Station",
-      "bar": {
-        "group": "BAR PRESSURE",
-        "thermo": "Attached Thermometer (°C)",
-        "barRead": "Bar As Read (hPa)",
-        "index": "Corrected for Index",
-        "height": "Height Difference Correction (hPa)",
-        "qfe": "Station Level Pressure (QFE)",
-        "reduction": "Sea Level Reduction",
-        "qnh": "Sea Level Pressure (QNH)",
-        "afternoon": "Afternoon Reading",
-        "change": "24-Hour Change"
-      },
-      "temp": {
-        "group": "TEMPERATURE",
-        "dryAsRead": "Dry Bulb (°C)",
-        "wetAsRead": "Wet Bulb (°C)",
-        "maxMinAsRead": "MAX/MIN (°C)",
-        "dryCorrected": "Dry Bulb (°C)",
-        "wetCorrected": "Wet Bulb (°C)",
-        "maxMinCorrected": "MAX/MIN (°C)"
-      },
-      "dew": "Dew Point Temperature (°C)",
-      "humidity": "Relative Humidity (%)",
-      "squall": {
-        "group": "SQUALL",
-        "force": "Force (KTS)",
-        "direction": "Direction (dq)",
-        "time": "Time (q1)"
-      },
-      "visibility": "Horizontal Visibility (km)",
-      "misc": "Misc. Meteors (Code)",
-      "weather": {
-        "group": "WEATHER",
-        "pastW1": "Past W₁",
-        "pastW2": "Past W2",
-        "presentWW": "Present ww"
-      },
-      "actions": "Actions",
-      "edit": "Edit"
-    },
-    "fields": {
-      "subIndicator": "Indicator",
-      "alteredThermometer": "Attached Thermometer (°C)",
-      "barAsRead": "Bar As Read (hPa)",
-      "correctedForIndex": "Corrected for Index",
-      "heightDifference": "Height Difference Correction (hPa)",
-      "stationLevelPressure": "Station Level Pressure (QFE)",
-      "seaLevelReduction": "Sea Level Reduction",
-      "correctedSeaLevelPressure": "Sea Level Pressure (QNH)",
-      "afternoonReading": "Afternoon Reading",
-      "pressureChange24h": "24-Hour Pressure Change",
-      "dryBulbAsRead": "Dry Bulb As Read (°C)",
-      "wetBulbAsRead": "Wet Bulb As Read (°C)",
-      "maxMinTempAsRead": "MAX/MIN Temp As Read (°C)",
-      "dryBulbCorrected": "Dry Bulb Corrected (°C)",
-      "wetBulbCorrected": "Wet Bulb Corrected (°C)",
-      "maxMinTempCorrected": "MAX/MIN Temp Corrected (°C)",
-      "Td": "Dew Point Temperature (°C)",
-      "relativeHumidity": "Relative Humidity (%)",
-      "squallForce": "Squall Force (KTS)",
-      "squallDirection": "Squall Direction (°)",
-      "squallTime": "Squall Time",
-      "horizontalVisibility": "Horizontal Visibility (km)",
-      "miscMeteors": "Misc Meteors (Code)",
-      "pastWeatherW1": "Past Weather (W₁)",
-      "pastWeatherW2": "Past Weather (W₂)",
-      "presentWeatherWW": "Present Weather (ww)",
-      "c2Indicator": "C2 Indicator"
-    }
-  },
-  "secondCardTable": {
-    "title": "Weather Observation Data",
-    "filters": {
-      "station": "Station",
-      "allStations": "All Stations",
-      "dateRange": "Date Range",
-      "to": "to",
-      "stationId": "Station ID",
-      "selectStation": "Select Station"
-    },
-    "header": {
-      "dataType": "DATA TYPE",
-      "stationNo": "STATION NO",
-      "stationName": "STATION NAME",
-      "date": "DATE"
-    },
-    "table": {
-      "timeUtc": "Time of Observation (UTC)",
-      "obsDate": "Observation Date",
-      "stationId": "Station ID",
-      "totalCloud": "Amount (N)",
-      "lowCloud": {
-        "direction": "Direction",
-        "height": "Height (H)",
-        "form": "Form (CL)",
-        "amount": "Amount"
-      },
-      "mediumCloud": {
-        "direction": "Direction",
-        "height": "Height (H)",
-        "form": "Form (CM)",
-        "amount": "Amount"
-      },
-      "highCloud": {
-        "direction": "Direction",
-        "height": "Height (H)",
-        "form": "Form (CH)",
-        "amount": "Amount"
-      },
-      "significantCloud": {
-        "height1": "Height 1",
-        "form1": "Form 1",
-        "amount1": "Amount 1",
-        "height2": "Height 2",
-        "form2": "Form 2",
-        "amount2": "Amount 2",
-        "height3": "Height 3",
-        "form3": "Form 3",
-        "amount3": "Amount 3",
-        "height4": "Height 4",
-        "form4": "Form 4",
-        "amount4": "Amount 4"
-      },
-      "rainfall": {
-        "start": "Start Time",
-        "end": "End Time",
-        "sincePrev": "Since Previous",
-        "duringPrev": "During Previous",
-        "last24": "Last 24 Hours"
-      },
-      "wind": {
-        "anemo1": "1st Anemometer",
-        "anemo2": "2nd Anemometer",
-        "speed": "Speed",
-        "direction": "Direction"
-      },
-      "observer": "Observer Initial",
-      "actions": "Edit"
-    },
-    "states": {
-      "loading": "Loading data...",
-      "noData": "No weather observations found",
-      "tryDifferent": "Try selecting a different date or station"
-    },
-    "footer": {
-      "date": "Date",
-      "records": "{{count}} record(s)",
-      "station": "Station: {{station}}"
-    },
-    "editDialog": {
-      "title": "Edit Weather Observation",
-      "save": "Save Changes",
-      "cancel": "Cancel",
-      "saving": "Saving...",
-      "fields": {
-        "totalCloud": "Total Cloud Amount",
-        "rainfall": {
-          "start": "Rainfall Start Time",
-          "end": "Rainfall End Time",
-          "sincePrev": "Rainfall Since Previous",
-          "duringPrev": "Rainfall During Previous",
-          "last24": "Rainfall Last 24 Hours"
-        },
-        "wind": {
-          "anemo1": "First Anemometer",
-          "anemo2": "Second Anemometer",
-          "speed": "Wind Speed",
-          "direction": "Wind Direction"
-        },
-        "observerInitial": "Observer Initial",
-        "clouds": {
-          "low": {
-            "direction": "Low Cloud Direction",
-            "height": "Low Cloud Height",
-            "form": "Low Cloud Form",
-            "amount": "Low Cloud Amount"
-          },
-          "medium": {
-            "direction": "Medium Cloud Direction",
-            "height": "Medium Cloud Height",
-            "form": "Medium Cloud Form",
-            "amount": "Medium Cloud Amount"
-          },
-          "high": {
-            "direction": "High Cloud Direction",
-            "height": "High Cloud Height",
-            "form": "High Cloud Form",
-            "amount": "High Cloud Amount"
-          },
-          "significant": {
-            "layer1": {
-              "height": "Layer 1 Height",
-              "form": "Layer 1 Form",
-              "amount": "Layer 1 Amount"
-            }
-          }
-        }
-      }
-    }
-  },
-  "synopticCode": {
-    "title": "Synoptic Code Measurements",
-    "card1Title": "Measurements 1-11",
-    "card2Title": "Measurements 12-21",
-    "weatherRemarkTitle": "Weather Remark",
-    "weatherRemarkNone": "No remark available",
-    "submitButton": "Submit",
-    "messageToday": "Using today's weather data",
-    "messageRecent": "No data available for today, using most recent data",
-    "messageError": "Error loading weather data",
-    "errorPrefix": "Error:",
-    "tooltipWarning": "Please Double Check The Corresponding\nData In First & Second Card!.There is no logic!",
-    "manualOverride": "Analyze with card data",
-    "loading": "Loading weather data..."
-  },
-  "measurementLabels": {
-    "0": "C1",
-    "1": "Iliii",
-    "2": "iRiXhvv",
-    "3": "Nddff",
-    "4": "1SₙTTT",
-    "5": "2SₙTₑTₑTₑ",
-    "6": "3P.P.P.P / 4PPPP",
-    "7": "6RRRtᵣ",
-    "8": "7wwW₁W₂",
-    "9": "8NₕCₗCₘCₕ",
-    "10": "2SₙTₙTₙTₙ / 1SₙTₓTₓTₓ",
-    "11": "56DₗDₘDₕ",
-    "12": "57CDₐE꜀",
-    "14": "C2",
-    "15": "GG",
-    "16": "58P₂₄P₂₄P₂₄ / 59P₂₄P₂₄P₂₄",
-    "17": "(6RRRtᵣ)",
-    "18": "8NₛChₛhₛ",
-    "19": "90dqqqt",
-    "20": "91fᵩfᵩfᵩ"
+    "signingIn": "Signing in...",
+    "station": "Station",
+    "securityCodePlaceholder": "Enter security code",
+    "invalidSecurityCode": "Invalid security code. Please try again.",
+    "SelectRole": "Select Role",
+    "don'tHaveAccount": "Don't have an account?",
+    "createAccount": "Create Account",
+    "loginSuccessful": "Login successful"
   },
   "dashboard": {
     "currentWeather": "Current Weather",
     "temperature": "Temperature",
-    "feelsLike": "Feels like",
-    "dewPoint": "Dew point",
+    "feelsLike": "Feels Like",
+    "dewPoint": "Dew Point",
     "humidity": "Humidity",
     "wind": "Wind",
     "pressure": "Pressure",
@@ -678,10 +204,18 @@
     "cloudCover": "Cloud Cover",
     "precipitation": "Precipitation",
     "peakUV": "Peak Today",
-    "inNext24h": "in next 24h",
+    "inNext24h": "In Next 24h",
     "precipitationExpected": {
-      "yes": "Light rain expected in next 24 hours.",
-      "no": "No precipitation expected in next 24 hours."
+      "yes": "Light precipitation is expected in the next 24 hours.",
+      "no": "No precipitation is expected in the next 24 hours."
+    },
+    "mapControls": {
+      "title": "Map Controls",
+      "stationsLabel": "Weather Stations",
+      "loading": "Loading...",
+      "noStations": "No stations available",
+      "selectStation": "Select a station",
+      "error": "Error: {error}"
     },
     "statusBanner": {
       "title": "System Status",
@@ -699,6 +233,29 @@
       "visibility": "Visibility km",
       "uvIndex": "UV Index"
     }
+  },
+  "DailySummaryChart": {
+    "fetchError": "Failed to fetch data: {status}",
+    "unknownError": "An unknown error occurred",
+    "chartTitle": "Daily {metric} Data",
+    "weatherData": "Weather",
+    "7days": "7 days",
+    "30days": "30 days",
+    "90days": "90 days",
+    "atStation": "at {station} station",
+    "chartDescription": "Showing {metric} data for the last {days} days{station}",
+    "value": "Value",
+    "loading": "Loading weather data...",
+    "dashboardTitle": "Weather Data Dashboard",
+    "errorTitle": "Data Loading Error",
+    "errorHeading": "Failed to load weather data",
+    "retry": "Retry",
+    "noDataTitle": "No Data Available",
+    "noDataHeading": "No weather data found",
+    "noDataSuggestion": "Try adjusting the time range or check if data exists for the selected period.",
+    "recordCount": "{count} records",
+    "selectMetric": "Select Metric",
+    "timeRange": "Time Range"
   },
   "weather": {
     "conditions": {
@@ -735,11 +292,11 @@
       "poor": "Poor"
     },
     "precipitationStatus": {
-      "none": "No Precipitation",
-      "trace": "Trace Precipitation",
-      "light": "Light Rain",
-      "moderate": "Moderate Rain",
-      "heavy": "Heavy Rain"
+      "none": "No precipitation",
+      "trace": "Trace amounts",
+      "light": "Light rain",
+      "moderate": "Moderate rain",
+      "heavy": "Heavy rain"
     },
     "uvStatus": {
       "low": "Low",
@@ -748,174 +305,8 @@
       "veryHigh": "Very High",
       "extreme": "Extreme"
     },
-    "uvRisk": "{status} RISK",
-    "uvDescription": "Maximum UV exposure will reach {status} levels today."
-  },
-  "userTable": {
-    "title": "User Management",
-    "createUser": "+ Create User",
-    "editUser": "Edit User",
-    "createNewUser": "Create New User",
-    "updateUser": "Update User",
-    "form": {
-      "name": "Name",
-      "email": "Email",
-      "password": "Password",
-      "newPassword": "New Password",
-      "role": "Role",
-      "selectRole": "Select Role",
-      "stationName": "Station Name",
-      "stationId": "Station ID",
-      "stationCode": "Station Code (Security Code)",
-      "division": "Division",
-      "district": "District",
-      "upazila": "Upazila",
-      "selectDivision": "Select Division",
-      "selectDistrict": "Select District",
-      "selectUpazila": "Select Upazila",
-      "selectStation": "Select Station",
-      "loading": "Loading...",
-      "minCharacters": "Min {count} characters"
-    },
-    "validation": {
-      "selectRoleFirst": "Please select a role first",
-      "fillAllFields": "Please fill all required fields",
-      "passwordLength": "Password must be at least {count} characters for {role} role"
-    },
-    "toast": {
-      "createSuccess": "User created successfully",
-      "createFailed": "Failed to create user",
-      "updateSuccess": "User updated successfully",
-      "updateFailed": "Failed to update user",
-      "deleteSuccess": "User deleted successfully",
-      "deleteFailed": "Failed to delete user",
-      "cannotDeleteSelf": "You cannot delete your own account",
-      "cannotDeleteSuperAdmin": "Super admin accounts cannot be deleted",
-      "cannotModifySuperAdmin": "Super admin roles cannot be modified"
-    },
-    "table": {
-      "headers": {
-        "name": "Name",
-        "email": "Email",
-        "role": "Role",
-        "station": "Station",
-        "joined": "Joined",
-        "actions": "Actions"
-      },
-      "loading": "Loading...",
-      "noUsers": "No users found.",
-      "edit": "Edit",
-      "delete": "Delete"
-    },
-    "pagination": {
-      "showing": "Showing {from} to {to} of {total} users",
-      "previous": "Previous",
-      "next": "Next"
-    },
-    "dialogs": {
-      "delete": {
-        "title": "Confirm Deletion",
-        "description": "Are you sure you want to delete this user? This action cannot be undone.",
-        "cancel": "Cancel",
-        "confirm": "Delete"
-      },
-      "roleChange": {
-        "title": "Confirm Role Change",
-        "description": "Are you sure you want to change this user's role from {original} to {updated}?",
-        "warning": "Changing user roles affects their permissions and access levels in the system.",
-        "cancel": "Cancel",
-        "confirm": "Confirm Change"
-      }
-    }
-  },
-  "pagination": {
-    "page": "Page",
-    "of": "of",
-    "previous": "Previous",
-    "next": "Next"
-  },
-  "logsTable": {
-    "title": "Logs",
-    "headers": {
-      "time": "Time",
-      "actorName": "Actor Name",
-      "actorEmail": "Actor Email",
-      "actorRole": "Actor Role",
-      "targetUser": "Target User",
-      "targetEmail": "Target Email",
-      "action": "Action",
-      "actionText": "Action Text",
-      "module": "Module",
-      "details": "Details"
-    },
-    "viewButton": "View",
-    "pagination": {
-      "showing": "Showing",
-      "to": "to",
-      "of": "of",
-      "results": "results",
-      "previous": "Previous",
-      "next": "Next"
-    },
-    "dialog": {
-      "title": "Log Details",
-      "subtitle": "(Changes made)"
-    }
-  },
-  "settings": {
-    "title": "Account Settings",
-    "securitySectionTitle": "Security",
-    "twoFactor": {
-      "title": "Two-Factor Authentication",
-      "description": "Add an extra layer of security to your account by requiring a verification code",
-      "enable": {
-        "title": "Enable Two-Factor Authentication",
-        "description": "Enter your password to enable two-factor authentication.",
-        "passwordLabel": "Password",
-        "passwordPlaceholder": "Enter your password",
-        "buttonCancel": "Cancel",
-        "buttonContinue": "Continue",
-        "processing": "Processing..."
-      },
-      "qrcode": {
-        "title": "Scan QR Code",
-        "description": "Scan this QR code with your authenticator app.",
-        "instruction": "After scanning the QR code, your authenticator app will display a 6-digit code.",
-        "backupCodesTitle": "Backup Codes",
-        "backupCodesDescription": "Save these backup codes in a secure place. You can use them to sign in if you lose access to your authenticator app.",
-        "buttonCancel": "Cancel",
-        "buttonContinue": "Continue to Verification"
-      },
-      "verify": {
-        "title": "Verify Authentication Code",
-        "description": "Enter the 6-digit code from your authenticator app.",
-        "codeLabel": "Verification Code",
-        "codePlaceholder": "Enter 6-digit code",
-        "buttonBack": "Back",
-        "buttonVerify": "Verify & Enable 2FA",
-        "verifying": "Verifying..."
-      },
-      "disable": {
-        "title": "Disable Two-Factor Authentication",
-        "description": "Enter your password to disable two-factor authentication. This will make your account less secure.",
-        "passwordLabel": "Password",
-        "passwordPlaceholder": "Enter your password",
-        "buttonCancel": "Cancel",
-        "buttonDisable": "Disable 2FA",
-        "disabling": "Disabling..."
-      },
-      "errors": {
-        "passwordRequired": "Password is required",
-        "verificationRequired": "Verification code is required",
-        "initiateFailed": "Failed to initiate 2FA setup",
-        "verifyFailed": "Failed to verify code",
-        "disableFailed": "Failed to disable 2FA"
-      },
-      "success": {
-        "enabled": "Two-factor authentication enabled successfully!",
-        "disabled": "Two-factor authentication disabled successfully"
-      }
-    }
+    "uvRisk": "{status} Risk",
+    "uvDescription": "Peak UV exposure levels today will reach {status} levels."
   },
   "common": {
     "loading": "Loading...",
@@ -929,8 +320,452 @@
       "windSpeed": "m/s",
       "visibility": "km",
       "precipitation": "mm",
-      "uvIndex": "",
+      "uvIndex": "UV Index",
       "degrees": "°"
     }
+  },
+  "secondCard": {
+    "tabs": {
+      "cloud": "Clouds",
+      "n": "Total Cloud Amount",
+      "significant-cloud": "Significant Clouds",
+      "rainfall": "Rainfall",
+      "wind": "Wind",
+      "observer": "Observer"
+    },
+    "buttons": {
+      "previous": "Previous",
+      "next": "Next",
+      "reset": "Reset",
+      "submit": "Submit Observation",
+      "submitting": "Submitting..."
+    },
+    "alerts": {
+      "fillRequired": "Please fill all required fields correctly",
+      "completeTab": "Please complete the current tab before proceeding",
+      "formCleared": "All form data has been cleared.",
+      "submissionFailed": "Submission failed. Please try again."
+    },
+    "cloud": {
+      "title": "Cloud Observation",
+      "low": "Low Clouds",
+      "medium": "Medium Clouds",
+      "high": "High Clouds"
+    },
+    "totalCloud": {
+      "title": "Total Cloud Amount",
+      "label": "Total Cloud Amount (Oktas)"
+    },
+    "significantCloud": {
+      "title": "Significant Clouds",
+      "layer1": "Layer 1",
+      "layer2": "Layer 2",
+      "layer3": "Layer 3",
+      "layer4": "Layer 4"
+    },
+    "rainfall": {
+      "title": "Rainfall Measurement (mm)",
+      "note": "📅 Please select the previous date from the calendar for 00 UTC reporting.",
+      "timeStart": "Start Time (HH:MM UTC)",
+      "timeEnd": "End Time (HH:MM UTC)",
+      "sincePrevious": "Since Previous Observation (mm)",
+      "duringPrevious": "Rainfall during previous 6 hours (mm)",
+      "last24Hours": "Precipitation in last 24 hours (mm)",
+      "intermittentRain": "Was the rain intermittent?",
+      "formatHint": "Format: HH:MM (e.g., 03:30, 06:15, 23:45)"
+    },
+    "wind": {
+      "title": "Wind Measurement",
+      "first": "First Wind Measurement",
+      "second": "Second Wind Measurement",
+      "speed": "Speed (knots)",
+      "direction": "Direction (degrees)",
+      "directionPlaceholder": "Wind direction from 5° to 364° as per code manual"
+    },
+    "observer": {
+      "title": "Observer Information",
+      "initials": "Observer Initials",
+      "stationId": "Station ID"
+    },
+    "errors": {
+      "required": "This field is required",
+      "invalidTime": "Invalid time format. Use HH:MM"
+    },
+    "options": {
+      "cloudAmount": {
+        "0": "0 - No clouds",
+        "1": "1 - One okta or less",
+        "2": "2 - Two oktas",
+        "3": "3 - Three oktas",
+        "4": "4 - Four oktas",
+        "5": "5 - Five oktas",
+        "6": "6 - Six oktas",
+        "7": "7 - Seven oktas",
+        "8": "8 - Eight oktas",
+        "9": "9 - Sky obscured",
+        "/": "/ - Cannot be estimated"
+      },
+      "cloudForm": {
+        "0": "0 - No Sc, St, Cu or Cb",
+        "1": "1 - Cu (slight vertical development)",
+        "2": "2 - Cu (moderate/strong vertical development)",
+        "3": "3 - Cb (without sharp outline)",
+        "4": "4 - Sc formed by spreading Cu",
+        "5": "5 - Sc not formed by spreading Cu",
+        "6": "6 - St in continuous layer",
+        "7": "7 - Stratus/Cu fractus (bad weather)",
+        "8": "8 - Cu and Sc at different levels",
+        "9": "9 - Cb with fibrous/anvil top",
+        "/": "/ - Not visible"
+      },
+      "cloudDirection": {
+        "0": "0 - Stationary or no direction",
+        "1": "1 - From northeast",
+        "2": "2 - From east",
+        "3": "3 - From southeast",
+        "4": "4 - From south",
+        "5": "5 - From southwest",
+        "6": "6 - From west",
+        "7": "7 - From northwest",
+        "8": "8 - From north",
+        "9": "9 - Direction unknown"
+      },
+      "cloudHeight": {
+        "0": "0 - 0 to 50m",
+        "1": "1 - 50 to 100m",
+        "2": "2 - 100 to 200m",
+        "3": "3 - 200 to 300m",
+        "4": "4 - 300 to 600m",
+        "5": "5 - 600 to 1000m",
+        "6": "6 - 1000 to 1500m",
+        "7": "7 - 1500 to 2000m",
+        "8": "8 - 2000 to 2500m",
+        "9": "9 - 2500m or more, or no clouds",
+        "/": "/ - Height unknown"
+      },
+      "sigCloudForm": {
+        "0": "0 - Cirrus (Ci)",
+        "1": "1 - Cirrocumulus (Cc)",
+        "2": "2 - Cirrostratus (Cs)",
+        "3": "3 - Altocumulus (Ac)",
+        "4": "4 - Altostratus (As)",
+        "5": "5 - Nimbostratus (Ns)",
+        "6": "6 - Stratocumulus (Sc)",
+        "7": "7 - Stratus (St)",
+        "8": "8 - Cumulus (Cu)",
+        "9": "9 - Cumulonimbus (Cb)",
+        "/": "/ - Not visible"
+      }
+    }
+  },
+  "secondCardValidation": {
+    "required": "This field is required",
+    "invalidFormat": "Invalid format",
+    "invalidTime": "Time must be in HH:MM format (e.g., 06:30)",
+    "numberOnly": "Only numeric values are allowed",
+    "minValue": "Value must be at least {min}",
+    "maxValue": "Value must not exceed {max}",
+    "maxLength": "Maximum {max} digits allowed",
+    "selectOption": "Please select an option",
+    "invalidDirection": "Direction must be between 0° and 360°",
+    "windSpeed": "Wind speed must be 3 digits",
+    "anemometerCode": "Anemometer code must be 5 digits",
+    "observerInitials": "Observer initials are required",
+    "stationId": "Station ID is required",
+    "cloudAmount": "Please select a valid cloud amount (0–8, 9 or /)",
+    "cloudHeight": "Please select a valid cloud height code",
+    "cloudDirection": "Please select a valid direction code",
+    "cloudForm": "Please select a valid cloud form code",
+    "precipitationValue": "Enter a value between 1 and 989",
+    "intermittentRain": "Select whether rain was intermittent",
+    "observationTime": "Select a valid observation time"
+  },
+  "firstCardTable": {
+    "title": "First Card Table",
+    "dateRange": "Date Range",
+    "recordCount": "{{count}} record(s)",
+    "station": "Station: {{stationName}}",
+    "noDataTitle": "No First Card data found",
+    "noDataSubtitle": "Try selecting a different date or station",
+    "loading": "Loading data...",
+    "stationId": "Station ID",
+    "stationName": "Station Name",
+    "year": "Year",
+    "dataType": "Data Type",
+    "stationNo": "Station Number",
+    "stationNameLabel": "Station Name",
+    "editTitle": "Edit First Card Data",
+    "editSubtitle": "Editing record from {{stationName}} ({{stationId}}) on {{date}}",
+    "cancel": "Cancel",
+    "saveChanges": "Save Changes",
+    "saving": "Saving...",
+    "tooltipEdit": "Edit this record",
+    "tooltipDenied": "You don't have permission to edit this record",
+    "permissionDenied": {
+      "title": "Permission Denied",
+      "description": "You don't have permission to edit this record. This may be because:",
+      "reasons": {
+        "tooOld": "The record is too old to edit",
+        "wrongStation": "The record belongs to a different station",
+        "noRole": "You don't have the required role permissions"
+      },
+      "close": "Close"
+    },
+    "filters": {
+      "stationLabel": "Station:",
+      "allStations": "All Stations"
+    },
+    "headers": {
+      "gg": "Observation Time (UTC)",
+      "ci": "Indicator",
+      "date": "Date",
+      "station": "Station",
+      "dataType": "Data Type",
+      "stationNo": "Station Number",
+      "year": "Year",
+      "bar": {
+        "group": "Atmospheric Pressure",
+        "thermo": "Attached Thermometer (°C)",
+        "barRead": "Barometer as Read (hPa)",
+        "index": "Corrected for Index",
+        "height": "Height Difference Correction (hPa)",
+        "qfe": "Station Level Pressure (QFE)",
+        "reduction": "Sea Level Reduction",
+        "qnh": "Sea Level Pressure (QNH)",
+        "afternoon": "Afternoon Reading",
+        "change": "24-Hour Change"
+      },
+      "temp": {
+        "group": "Temperature",
+        "dryAsRead": "Dry Bulb as Read (°C)",
+        "wetAsRead": "Wet Bulb as Read (°C)",
+        "maxMinAsRead": "Max/Min as Read (°C)",
+        "dryCorrected": "Dry Bulb Corrected (°C)",
+        "wetCorrected": "Wet Bulb Corrected (°C)",
+        "maxMinCorrected": "Max/Min Corrected (°C)"
+      },
+      "dew": "Dew Point Temperature (°C)",
+      "humidity": "Relative Humidity (%)",
+      "squall": {
+        "group": "Squall",
+        "force": "Force (knots)",
+        "direction": "Direction (degrees)",
+        "time": "Time"
+      },
+      "visibility": "Horizontal Visibility (km)",
+      "misc": "Miscellaneous Meteors (code)",
+      "weather": {
+        "group": "Weather",
+        "pastW1": "Past Weather W₁",
+        "pastW2": "Past Weather W₂",
+        "presentWW": "Present Weather ww"
+      },
+      "actions": "Actions",
+      "edit": "Edit"
+    },
+    "fields": {
+      "subIndicator": "Indicator",
+      "alteredThermometer": "Attached Thermometer (°C)",
+      "barAsRead": "Barometer as Read (hPa)",
+      "correctedForIndex": "Corrected for Index",
+      "heightDifference": "Height Difference Correction (hPa)",
+      "stationLevelPressure": "Station Level Pressure (QFE)",
+      "seaLevelReduction": "Sea Level Reduction",
+      "correctedSeaLevelPressure": "Sea Level Pressure (QNH)",
+      "afternoonReading": "Afternoon Reading",
+      "pressureChange24h": "24-Hour Pressure Change",
+      "dryBulbAsRead": "Dry Bulb as Read (°C)",
+      "wetBulbAsRead": "Wet Bulb as Read (°C)",
+      "maxMinTempAsRead": "Max/Min Temperature as Read (°C)",
+      "dryBulbCorrected": "Dry Bulb Corrected (°C)",
+      "wetBulbCorrected": "Wet Bulb Corrected (°C)",
+      "maxMinTempCorrected": "Max/Min Temperature Corrected (°C)",
+      "Td": "Dew Point Temperature (°C)",
+      "relativeHumidity": "Relative Humidity (%)",
+      "squallForce": "Squall Force (knots)",
+      "squallDirection": "Squall Direction (°)",
+      "squallTime": "Squall Time",
+      "horizontalVisibility": "Horizontal Visibility (km)",
+      "miscMeteors": "Miscellaneous Meteors (code)",
+      "pastWeatherW1": "Past Weather (W₁)",
+      "pastWeatherW2": "Past Weather (W₂)",
+      "presentWeatherWW": "Present Weather (ww)",
+      "c2Indicator": "C2 Indicator"
+    }
+  },
+  "secondCardTable": {
+    "title": "Second Card Data Table",
+    "loading": "Loading data...",
+    "dateRange": {
+      "to": "to"
+    },
+    "filters": {
+      "station": "Station",
+      "allStations": "All Stations"
+    },
+    "actions": {
+      "exportCSV": "Export CSV",
+      "editRecord": "Edit this record",
+      "noPermission": "You don't have permission to edit this record",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes",
+      "close": "Close"
+    },
+    "form": {
+      "dataType": "Data Type",
+      "stationNo": "Station Number",
+      "year": "Year",
+      "station": "Station",
+      "fields": {
+        "totalCloudAmount": "Total Cloud Amount (1 digit)",
+        "lowCloudDirection": "Low Cloud Direction (1 digit)",
+        "lowCloudHeight": "Low Cloud Height (1 digit)",
+        "lowCloudForm": "Low Cloud Form (1 digit)",
+        "lowCloudAmount": "Low Cloud Amount (1 digit)",
+        "mediumCloudDirection": "Medium Cloud Direction (1 digit)",
+        "mediumCloudHeight": "Medium Cloud Height (1 digit)",
+        "mediumCloudForm": "Medium Cloud Form (1 digit)",
+        "mediumCloudAmount": "Medium Cloud Amount (1 digit)",
+        "highCloudDirection": "High Cloud Direction (1 digit)",
+        "highCloudHeight": "High Cloud Height (1 digit)",
+        "highCloudForm": "High Cloud Form (1 digit)",
+        "highCloudAmount": "High Cloud Amount (1 digit)",
+        "rainfallStartTime": "Rainfall Start Time",
+        "rainfallEndTime": "Rainfall End Time",
+        "rainfallSincePrevious": "Rainfall Since Previous (2 digits)",
+        "rainfallDuringPrevious": "Rainfall During Previous (4 digits)",
+        "rainfallLast24Hours": "Rainfall Last 24 Hours (2 digits)",
+        "windFirstAnemometer": "Wind First Anemometer (5 digits)",
+        "windSecondAnemometer": "Wind Second Anemometer (5 digits)",
+        "windSpeed": "Wind Speed (3 digits)",
+        "windDirection": "Wind Direction (3 digits)",
+        "observerInitial": "Observer Initials (Read Only)",
+        "layer1Height": "Layer 1 Height (2 digits)",
+        "layer1Form": "Layer 1 Form (1 digit)",
+        "layer1Amount": "Layer 1 Amount (1 digit)",
+        "layer2Height": "Layer 2 Height (2 digits)",
+        "layer2Form": "Layer 2 Form (1 digit)",
+        "layer2Amount": "Layer 2 Amount (1 digit)",
+        "layer3Height": "Layer 3 Height (2 digits)",
+        "layer3Form": "Layer 3 Form (1 digit)",
+        "layer3Amount": "Layer 3 Amount (1 digit)",
+        "layer4Height": "Layer 4 Height (2 digits)",
+        "layer4Form": "Layer 4 Form (1 digit)",
+        "layer4Amount": "Layer 4 Amount (1 digit)"
+      }
+    },
+    "table": {
+      "headers": {
+        "timeUTC": "Observation Time (UTC)",
+        "c2Indicator": "C2 Indicator",
+        "date": "Date",
+        "station": "Station",
+        "totalCloudAmount": "Total Cloud Amount (Oktas)",
+        "lowCloudDirection": "Low Cloud Direction",
+        "lowCloudHeight": "Low Cloud Height",
+        "lowCloudForm": "Low Cloud Form",
+        "lowCloudAmount": "Low Cloud Amount",
+        "mediumCloudDirection": "Medium Cloud Direction",
+        "mediumCloudHeight": "Medium Cloud Height",
+        "mediumCloudForm": "Medium Cloud Form",
+        "mediumCloudAmount": "Medium Cloud Amount",
+        "highCloudDirection": "High Cloud Direction",
+        "highCloudHeight": "High Cloud Height",
+        "highCloudForm": "High Cloud Form",
+        "highCloudAmount": "High Cloud Amount",
+        "layer1Height": "Layer 1 Height",
+        "layer1Form": "Layer 1 Form",
+        "layer1Amount": "Layer 1 Amount",
+        "layer2Height": "Layer 2 Height",
+        "layer2Form": "Layer 2 Form",
+        "layer2Amount": "Layer 2 Amount",
+        "layer3Height": "Layer 3 Height",
+        "layer3Form": "Layer 3 Form",
+        "layer3Amount": "Layer 3 Amount",
+        "layer4Height": "Layer 4 Height",
+        "layer4Form": "Layer 4 Form",
+        "layer4Amount": "Layer 4 Amount",
+        "rainfallStartTime": "Rainfall Start Time",
+        "rainfallEndTime": "Rainfall End Time",
+        "sincePrevious": "Since Previous",
+        "duringPrevious": "During Previous",
+        "last24Hours": "Last 24 Hours",
+        "windFirstAnemometer": "First Anemometer Reading",
+        "windSecondAnemometer": "Second Anemometer Reading",
+        "speedKTS": "Speed (knots)",
+        "windSpeed": "Wind Speed",
+        "windDirection": "Wind Direction",
+        "direction": "Direction",
+        "observerInitial": "Observer Initials",
+        "observer": "Observer",
+        "actions": "Actions",
+        "formCode": "Form (Code)",
+        "amountOcta": "Amount (Oktas)",
+        "directionCode": "Direction (Code)",
+        "heightOfBaseCode": "Height of Base (Code)",
+        "timeOfStart": "Time of Start",
+        "timeOfEnd": "Time of End",
+        "firstAnemometerReading": "First Anemometer Reading",
+        "secondAnemometerReading": "Second Anemometer Reading"
+      },
+      "sections": {
+        "cloud": "Clouds",
+        "significantCloud": "Significant Clouds",
+        "lowCloud": "Low",
+        "mediumCloud": "Medium",
+        "highCloud": "High",
+        "layer1": "Layer 1",
+        "layer2": "Layer 2",
+        "layer3": "Layer 3",
+        "layer4": "Layer 4",
+        "rainfall": "Rainfall",
+        "wind": "Wind"
+      }
+    },
+    "dialog": {
+      "editTitle": "Edit Weather Observation",
+      "editDescription": "Editing record from {station} on {date}",
+      "unknownStation": "Unknown Station",
+      "unknownDate": "Unknown Date",
+      "permissionDeniedTitle": "Permission Denied",
+      "permissionDeniedMessage": "You don't have permission to edit this record. This may be because:",
+      "permissionReasons": {
+        "tooOld": "The record is too old to edit",
+        "differentStation": "The record belongs to a different station",
+        "insufficientRole": "You don't have the required role permissions"
+      }
+    },
+    "messages": {
+      "updateSuccess": "Weather observation updated successfully",
+      "exportSuccess": "CSV export initiated"
+    },
+    "errors": {
+      "fetchFailed": "Failed to fetch weather observation data",
+      "updateFailed": "Failed to update weather observation",
+      "noDataToExport": "No weather observation data available to export",
+      "invalidDate": "Invalid date format",
+      "startDateAfterEnd": "Start date cannot be after end date",
+      "endDateBeforeStart": "End date cannot be before start date"
+    },
+    "noData": {
+      "title": "No weather observations found",
+      "subtitle": "Try selecting a different date or station"
+    }
+  },
+  "synopticCode": {
+    "title": "Synoptic Code Measurements",
+    "card1Title": "Measurements 1-11",
+    "card2Title": "Measurements 12-21",
+    "weatherRemarkTitle": "Weather Remark",
+    "weatherRemarkNone": "No remarks available",
+    "submitButton": "Submit",
+    "messageToday": "Using today's weather data",
+    "messageRecent": "No data for today, using most recent available data",
+    "messageError": "Error loading weather data",
+    "errorPrefix": "Error:",
+    "tooltipWarning": "Please double-check matching data\nin First and Second Card! No logic!",
+    "manualOverride": "Analyze using card data",
+    "loading": "Loading weather data..."
   }
 }
