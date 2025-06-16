@@ -533,6 +533,10 @@
     "intermittentRain": "Select whether rain was intermittent",
     "observationTime": "Select a valid observation time"
   },
+
+  "basicInformation":{
+  "basicinformation": "Basic Information"
+  },
   "firstCardTable": {
     "title": "First Card Table",
     "dateRange": "Date Range",
