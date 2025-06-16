@@ -158,22 +158,22 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
     rainfall: Yup.object({
       "since-previous": Yup.string()
         .required(t("errors.required"))
-        .matches(/^[1-9]\d{0,2}$/, t("errors.rainfall.invalidFormat"))
-        .test("is-valid-range", t("errors.rainfall.invalidRange"), (value) => {
+        .matches(/^[1-9]\d{0,2}$/, t2("errors.rainfall.invalidFormat"))
+        .test("is-valid-range", t2("errors.rainfall.invalidRange"), (value) => {
           const num = Number.parseInt(value || "0");
           return num >= 1 && num <= 989;
         }),
       "during-previous": Yup.string()
         .required(t("errors.required"))
-        .matches(/^[1-9]\d{0,2}$/, t("errors.rainfall.invalidFormat"))
-        .test("is-valid-range", t("errors.rainfall.invalidRange"), (value) => {
+        .matches(/^[1-9]\d{0,2}$/, t2("errors.rainfall.invalidFormat"))
+        .test("is-valid-range", t2("errors.rainfall.invalidRange"), (value) => {
           const num = Number.parseInt(value || "0");
           return num >= 1 && num <= 989;
         }),
       "last-24-hours": Yup.string()
         .required(t("errors.required"))
-        .matches(/^[1-9]\d{0,2}$/, t("errors.rainfall.invalidFormat"))
-        .test("is-valid-range", t("errors.rainfall.invalidRange"), (value) => {
+        .matches(/^[1-9]\d{0,2}$/, t2("errors.rainfall.invalidFormat"))
+        .test("is-valid-range", t2("errors.rainfall.invalidRange"), (value) => {
           const num = Number.parseInt(value || "0");
           return num >= 1 && num <= 989;
         }),
@@ -184,17 +184,17 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const windSchema = Yup.object({
     wind: Yup.object({
       "first-anemometer": Yup.string()
-        .required(t("errors.required"))
-        .matches(/^\d{5}$/, t("errors.wind.anemometer")),
+        .required(t2("errors.required"))
+        .matches(/^\d{5}$/, t2("errors.wind.anemometer")),
       "second-anemometer": Yup.string()
-        .required(t("errors.required"))
-        .matches(/^\d{5}$/, t("errors.wind.anemometer")),
+        .required(t2("errors.required"))
+        .matches(/^\d{5}$/, t2("errors.wind.anemometer")),
       speed: Yup.string()
-        .required(t("errors.required"))
-        .matches(/^\d{3}$/, t("errors.wind.speed")),
+        .required(t2("errors.required"))
+        .matches(/^\d{3}$/, t2("errors.wind.speed")),
       "wind-direction": Yup.string()
-        .required(t("errors.required"))
-        .test("is-valid-direction", t("errors.wind.direction"), (value) => {
+        .required(t2("errors.required"))
+        .test("is-valid-direction", t2("errors.wind.direction"), (value) => {
           if (!value) return false;
           if (value === "00") return true;
           const num = Number(value);
@@ -207,21 +207,21 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const cloudSchema = Yup.object({
     clouds: Yup.object({
       low: Yup.object({
-        form: Yup.string().required(t("errors.required")),
-        amount: Yup.string().required(t("errors.required")),
-        height: Yup.string().required(t("errors.required")),
-        direction: Yup.string().required(t("errors.required")),
+        form: Yup.string().required(t2("errors.required")),
+        amount: Yup.string().required(t2("errors.required")),
+        height: Yup.string().required(t2("errors.required")),
+        direction: Yup.string().required(t2("errors.required")),
       }),
       medium: Yup.object({
-        form: Yup.string().required(t("errors.required")),
-        amount: Yup.string().required(t("errors.required")),
-        height: Yup.string().required(t("errors.required")),
-        direction: Yup.string().required(t("errors.required")),
+        form: Yup.string().required(t2("errors.required")),
+        amount: Yup.string().required(t2("errors.required")),
+        height: Yup.string().required(t2("errors.required")),
+        direction: Yup.string().required(t2("errors.required")),
       }),
       high: Yup.object({
-        form: Yup.string().required(t("errors.required")),
-        amount: Yup.string().required(t("errors.required")),
-        direction: Yup.string().required(t("errors.required")),
+        form: Yup.string().required(t2("errors.required")),
+        amount: Yup.string().required(t2("errors.required")),
+        direction: Yup.string().required(t2("errors.required")),
       }),
     }),
   });
@@ -229,7 +229,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   // Total cloud validation schema
   const totalCloudSchema = Yup.object({
     totalCloud: Yup.object({
-      "total-cloud-amount": Yup.string().required(t("errors.required")),
+      "total-cloud-amount": Yup.string().required(t2("errors.required")),
     }),
   });
 
@@ -237,26 +237,26 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const significantCloudSchema = Yup.object({
     significantClouds: Yup.object({
       layer1: Yup.object({
-        form: Yup.string().required(t("errors.required")),
-        amount: Yup.string().required(t("errors.required")),
+        form: Yup.string().required(t2("errors.required")),
+        amount: Yup.string().required(t2("errors.required")),
         height: Yup.string()
-          .required(t("errors.required"))
-          .matches(/^[0-9]+$/, t("errors.cloud.numbersOnly")),
+          .required(t2("errors.required"))
+          .matches(/^[0-9]+$/, t2("errors.cloud.numbersOnly")),
       }),
       layer2: Yup.object({
         form: Yup.string(),
         amount: Yup.string(),
-        height: Yup.string().matches(/^[0-9]*$/, t("errors.cloud.numbersOnly")),
+        height: Yup.string().matches(/^[0-9]*$/, t2("errors.cloud.numbersOnly")),
       }),
       layer3: Yup.object({
         form: Yup.string(),
         amount: Yup.string(),
-        height: Yup.string().matches(/^[0-9]*$/, t("errors.cloud.numbersOnly")),
+        height: Yup.string().matches(/^[0-9]*$/, t2("errors.cloud.numbersOnly")),
       }),
       layer4: Yup.object({
         form: Yup.string(),
         amount: Yup.string(),
-        height: Yup.string().matches(/^[0-9]*$/, t("errors.cloud.numbersOnly")),
+        height: Yup.string().matches(/^[0-9]*$/, t2("errors.cloud.numbersOnly")),
       }),
     }),
   });
@@ -264,8 +264,8 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   // Observer validation schema
   const observerSchema = Yup.object({
     observer: Yup.object({
-      "observer-initial": Yup.string().required(t("errors.required")),
-      "observation-time": Yup.string().required(t("errors.required")),
+      "observer-initial": Yup.string().required(t2("errors.required")),
+      "observation-time": Yup.string().required(t2("errors.required")),
     }),
   });
 
@@ -988,7 +988,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                 id="time-start"
                                 name="time-start"
                                 type="text"
-                                placeholder="set this ( HH:MM 00:00 )"
+                                placeholder={t("rainfall.setThis")}
                                 step="60"
                                 value={formik.values.rainfall["time-start"] || ""}
                                 onChange={handleInputChange}
@@ -1019,7 +1019,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                 id="time-end"
                                 name="time-end"
                                 type="text"
-                                placeholder="set this ( HH:MM 00:00 )"
+                                placeholder={t("rainfall.setThis")}
                                 step="60"
                                 value={formik.values.rainfall["time-end"] || ""}
                                 onChange={handleInputChange}
@@ -1142,7 +1142,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             <Input
                               id="first-anemometer"
                               name="first-anemometer"
-                              placeholder="Enter 5 Digit"
+                              placeholder={t("wind.placeholder")}
                               value={formik.values.wind?.["first-anemometer"] || ""}
                               onChange={handleInputChange}
                               className={cn(
@@ -1166,7 +1166,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             <Input
                               id="second-anemometer"
                               name="second-anemometer"
-                              placeholder="Enter 5 Digit"
+                              placeholder={t("wind.placeholder")}
                               value={formik.values.wind?.["second-anemometer"] || ""}
                               onChange={handleInputChange}
                               className={cn(
@@ -1190,7 +1190,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             <Input
                               id="speed"
                               name="speed"
-                              placeholder="Enter 3 Digit"
+                              placeholder={t("wind.placeholder3")}
                               value={formik.values.wind?.["speed"] || ""}
                               onChange={handleInputChange}
                               className={cn(
