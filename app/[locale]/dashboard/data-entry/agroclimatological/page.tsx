@@ -1,10 +1,11 @@
 import React from "react";
-import { AgroclimatologicalForm } from "./agroclimatological-form";
+import { AgroclimatologicalFormComplete } from "./agroclimatological-form";
 
 const AgroclimatologicalPage = () => {
     return (
         <main>
-            <AgroclimatologicalForm />
+            {/* <AgroclimatologicalForm /> */}
+            <AgroclimatologicalFormComplete/>
         </main>
     );
 };
