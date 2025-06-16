@@ -231,12 +231,12 @@
       }
     },
     "tabs": {
-      "pressure": "Barometric Pressure Measurements",
+      "pressure": "pressure",
       "temperature": "Temperature",
-      "squall": "Squall Measurements",
-      "visibility": "Visibility Measurements",
-      "meteors": "Meteorological Phenomena",
-      "weather": "Weather Conditions"
+      "squall": "Squall",
+      "visibility": "Visibility",
+      "meteors": "Meteors Code",
+      "weather": "Weather"
     }
   },
   "signin": {
