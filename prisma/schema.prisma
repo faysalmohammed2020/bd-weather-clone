@@ -39,6 +39,7 @@ model users {
   ObservingTime ObservingTime[]
   actorUser     logs[]          @relation("ActorUser")
   targetUser    logs[]          @relation("TargetUser")
+  agroclimatologicalData AgroclimatologicalData[] // Added relation field
 }
 
 model sessions {
@@ -322,4 +323,66 @@ model SynopticCode {
   updatedAt DateTime @updatedAt
 
   ObservingTime ObservingTime @relation(fields: [observingTimeId], references: [id], onDelete: Restrict)
+}
+
+
+model AgroclimatologicalData {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Station Information
+  stationName String
+  latitude    Float
+  longitude   Float
+  elevation   Float
+  year        Int
+  month       Int
+
+  // Solar & Sunshine Data
+  solarRadiation Float?
+  sunShineHour   Float?
+
+  // Air Temperature Data
+  airTempDry05m  Float?
+  airTempWet05m  Float?
+  airTempDry12m  Float?
+  airTempWet12m  Float?
+  airTempDry22m  Float?
+  airTempWet22m  Float?
+
+  // Temperature Summary
+  minTemp      Float?
+  maxTemp      Float?
+  meanTemp     Float?
+  grassMinTemp Float?
+
+  // Soil Temperature Data
+  soilTemp5cm  Float?
+  soilTemp10cm Float?
+  soilTemp20cm Float?
+  soilTemp30cm Float?
+  soilTemp50cm Float?
+
+  // Soil Moisture Data
+  soilMoisture0to20cm  Float?
+  soilMoisture20to50cm Float?
+
+  // Humidity & Evaporation Data
+  panWaterEvap     Float?
+  relativeHumidity Float?
+  evaporation      Float?
+  dewPoint         Float?
+
+  // Weather Measurements
+  windSpeed Float?
+  duration  Float?
+  rainfall  Float?
+
+  // User who submitted the data
+  userId String?
+  user   users? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([stationName, year, month])
+  @@map("agroclimatological_data")
 }
