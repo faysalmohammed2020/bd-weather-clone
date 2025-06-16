@@ -157,7 +157,8 @@
     "secondCard": "Second Card",
     "synopticCode": "Synoptic Code",
     "dailySummary": "Daily Summary",
-    "viewAllExport": "View All & Export"
+    "viewAllExport": "View All & Export",
+    "agroclimatological" : "Agroclimatological"
   },
   "firstCard": {
     "title": "Coordinated Universal Time",
@@ -882,5 +883,409 @@
     "tooltipWarning": "Please double-check matching data\nin First and Second Card! No logic!",
     "manualOverride": "Analyze using card data",
     "loading": "Loading weather data..."
+  },
+  "SynopticCodeTable": {
+    "title": "Synoptic Code Data",
+    "noData": "No data available",
+    "noDataDescription": "No weather data available for the selected filters.",
+    "tryAgain": "Try again",
+    "dataType": "Data Type",
+    "stationNo": "Station Number",
+    "year": "Year",
+    "month": "Month",
+    "day": "Day",
+    "time": "Time",
+    "date": "Date",
+    "station": "Station",
+    "weatherRemarks": "Weather Remarks",
+    "action": "Action",
+    "exportCSV": "Export CSV",
+    "allStations": "All Stations",
+    "filter": "Filter",
+    "generated": "Generated",
+    "editDialog": {
+      "title": "Edit Synoptic Code Data",
+      "description": "Edit record from {station} on {date}",
+      "cancel": "Cancel",
+      "saveChanges": "Save Changes",
+      "saving": "Saving...",
+      "fields": {
+        "C1": "C1 Indicator",
+        "Iliii": "Station ID",
+        "iRiXhvv": "iRiXhvv",
+        "Nddff": "Nddff",
+        "S1nTTT": "1SnTTT",
+        "S2nTddTddTdd": "2SnTdTdTd",
+        "P3PPP4PPPP": "3PPP/4PPP",
+        "RRRtR6": "6RRRtR",
+        "wwW1W2": "7wwW1W2",
+        "NhClCmCh": "8NhClCmCh",
+        "S2nTnTnTnInInInIn": "2SnTnTnTn/InInInIn",
+        "D56DLDMDH": "56DlDmDh",
+        "CD57DaEc": "57CDaEc",
+        "C2": "C2 Indicator",
+        "GG": "GG",
+        "P24Group58_59": "58/59P24",
+        "R24Group6_7": "(6RRRtR)/7R24",
+        "NsChshs": "8N5Ch5h5",
+        "dqqqt90": "90dqqqt",
+        "fqfqfq91": "91fqfqfq",
+        "weatherRemark": "Weather Remarks"
+      }
+    },
+    "permissionDialog": {
+      "title": "Permission Denied",
+      "description": "You don't have permission to edit this record. This might be because:",
+      "reasons": [
+        "The record is too old to edit",
+        "The record belongs to a different station",
+        "You don't have the required role permissions"
+      ],
+      "close": "Close"
+    },
+    "errors": {
+      "fetchFailed": "Failed to fetch weather data",
+      "updateFailed": "Failed to update record",
+      "invalidDate": "Invalid date format",
+      "startAfterEnd": "Start date cannot be after end date",
+      "endBeforeStart": "End date cannot be before start date",
+      "stationsFetchFailed": "Failed to fetch stations"
+    },
+    "loading": "Loading weather data...",
+    "toDate": "To",
+    "unknownStation": "Unknown station",
+    "unknownDate": "Unknown date"
+  },
+  "DailySummaryTable": {
+    "title": "Daily Summary Data",
+    "noData": "No data available",
+    "noDataDescription": "No daily summary data available for the selected filters.",
+    "tryAgain": "Try again",
+    "dataType": "Data Type",
+    "stationNo": "Station Number",
+    "year": "Year",
+    "month": "Month",
+    "day": "Day",
+    "date": "Date",
+    "station": "Station",
+    "exportCSV": "Export CSV",
+    "allStations": "All Stations",
+    "filter": "Filter",
+    "generated": "Generated",
+    "dateRange": "Date Range",
+    "records": "Record",
+    "editDialog": {
+      "title": "Edit Daily Summary Data",
+      "description": "Edit record from {station} on {date}",
+      "cancel": "Cancel",
+      "saveChanges": "Save Changes",
+      "saving": "Saving...",
+      "fields": {
+        "avStationPressure": "Average Station Pressure (hPa)",
+        "avSeaLevelPressure": "Average Sea Level Pressure (hPa)",
+        "avDryBulbTemperature": "Average Dry Bulb Temperature (°C)",
+        "avWetBulbTemperature": "Average Wet Bulb Temperature (°C)",
+        "maxTemperature": "Maximum Temperature (°C)",
+        "minTemperature": "Minimum Temperature (°C)",
+        "totalPrecipitation": "Total Precipitation (mm)",
+        "avDewPointTemperature": "Average Dew Point Temperature (°C)",
+        "avRelativeHumidity": "Average Relative Humidity (%)",
+        "windSpeed": "Wind Speed (m/s)",
+        "windDirectionCode": "Wind Direction (16-point)",
+        "maxWindSpeed": "Maximum Wind Speed (m/s)",
+        "maxWindDirection": "Maximum Wind Direction (16-point)",
+        "avTotalCloud": "Average Total Cloud Cover (oktas)",
+        "lowestVisibility": "Lowest Visibility (km)",
+        "totalRainDuration": "Total Rain Duration (h-m)"
+      },
+      "validation": {
+        "required": "This field is required",
+        "exactLength": "Must be exactly {length} digits (currently {current})",
+        "maxLength": "Cannot exceed {length} digits"
+      }
+    },
+    "permissionDialog": {
+      "title": "Permission Denied",
+      "description": "You don't have permission to edit this record. This might be because:",
+      "reasons": [
+        "The record is too old to edit",
+        "The record belongs to a different station",
+        "You don't have the required role permissions"
+      ],
+      "close": "Close"
+    },
+    "errors": {
+      "fetchFailed": "Failed to fetch daily data",
+      "updateFailed": "Failed to update record",
+      "invalidDate": "Invalid date format",
+      "startAfterEnd": "Start date cannot be after end date",
+      "endBeforeStart": "End date cannot be before start date",
+      "stationsFetchFailed": "Failed to fetch stations",
+      "validationErrors": "Please correct all validation errors before saving"
+    },
+    "loading": "Loading daily data...",
+    "toDate": "To",
+    "unknownStation": "Unknown station",
+    "unknownDate": "Unknown date"
+  },
+  "AllViewAndManagePage": {
+    "title": "View and Manage All Data",
+    "exportExcel": "Export to Excel",
+    "loadingPDF": "Loading...",
+    "exportPDF": "Export to PDF",
+    "tabs": {
+      "firstCard": "First Card",
+      "secondCard": "Second Card",
+      "synopticCode": "Synoptic Code",
+      "dailySummary": "Daily Summary"
+    },
+    "errors": {
+      "exportFailed": "Data export failed",
+      "dataLoading": "An error occurred while loading data"
+    },
+    "success": {
+      "exportSuccess": "Data exported successfully"
+    },
+    "loading": "Loading..."
+  },
+  "UserManagement": {
+    "userTable": {
+      "title": "User Management",
+      "createUser": "Create User",
+      "editUser": "Edit User",
+      "createNewUser": "New User",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role",
+        "station": "Station",
+        "joined": "Join Date",
+        "actions": "Actions"
+      },
+      "actions": {
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "loading": "Loading...",
+      "noUsers": "No users found",
+      "pagination": {
+        "showing": "Showing",
+        "to": "to",
+        "of": "of",
+        "users": "users",
+        "previous": "Previous",
+        "next": "Next"
+      },
+      "deleteDialog": {
+        "title": "Confirm Deletion",
+        "message": "Are you sure you want to delete this user? This action cannot be undone.",
+        "cancel": "Cancel",
+        "confirm": "Delete"
+      },
+      "roleChangeDialog": {
+        "title": "Confirm Role Change",
+        "message": "Are you sure you want to change this user's role from {originalRole} to {newRole}?",
+        "warning": "Changing user roles affects their permissions and access levels in the system.",
+        "cancel": "Cancel",
+        "confirm": "Confirm Change"
+      },
+      "createEditDialog": {
+        "createTitle": "Create New User",
+        "editTitle": "Edit User",
+        "fields": {
+          "name": "Name",
+          "email": "Email *",
+          "password": "Password",
+          "newPassword": "New Password",
+          "role": "Role *",
+          "stationName": "Station Name",
+          "stationId": "Station ID",
+          "securityCode": "Security Code",
+          "division": "Division *",
+          "district": "District *",
+          "upazila": "Upazila *"
+        },
+        "placeholders": {
+          "selectRole": "Select a role",
+          "selectStation": "Select a station",
+          "selectDivision": "Select a division",
+          "selectDistrict": "Select a district",
+          "selectUpazila": "Select an upazila"
+        },
+        "passwordRequirements": "Must be at least {minLength} characters long for {role} role",
+        "buttons": {
+          "cancel": "Cancel",
+          "create": "Create User",
+          "update": "Update User",
+          "delete": "Delete User"
+        },
+        "errors": {
+          "fillAllFields": "Please fill all required fields",
+          "passwordLength": "Password must be at least {minLength} characters long for {role} role",
+          "superAdminEdit": "Super Admin role cannot be modified",
+          "selfDelete": "You cannot delete your own account",
+          "superAdminDelete": "Super Admin accounts cannot be deleted"
+        }
+      },
+      "roles": {
+        "superAdmin": "Super Admin",
+        "stationAdmin": "Station Admin",
+        "observer": "Observer"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "create": "Create User",
+        "update": "Update User",
+        "delete": "Delete User"
+      },
+      "errors": {
+        "fetchFailed": "Failed to fetch data",
+        "addFailed": "Failed to add user",
+        "updateFailed": "Failed to update user",
+        "deleteFailed": "Failed to delete user"
+      },
+      "success": {
+        "added": "User added successfully",
+        "updated": "User updated successfully",
+        "deleted": "User deleted successfully"
+      }
+    },
+    "logsTable": {
+      "title": "System Logs",
+      "columns": {
+        "time": "Time",
+        "actorName": "User Name",
+        "actorEmail": "User Email",
+        "actorRole": "User Role",
+        "targetUser": "Target User",
+        "targetEmail": "Target Email",
+        "action": "Action",
+        "actionText": "Action Description",
+        "module": "Module",
+        "details": "Details"
+      },
+      "actions": {
+        "view": "View"
+      },
+      "actionTypes": {
+        "create": "Create",
+        "update": "Update",
+        "delete": "Delete"
+      },
+      "detailsDialog": {
+        "title": "Log Details",
+        "subtitle": "(Changes Made)"
+      },
+      "pagination": {
+        "page": "Page",
+        "of": "of",
+        "showing": "Showing",
+        "to": "to",
+        "results": "results",
+        "previous": "Previous",
+        "next": "Next"
+      }
+    }
+  },
+  "StationManagement": {
+    "title": "Station Management",
+    "searchPlaceholder": "Search stations by name or ID...",
+    "addStation": "Add New Station",
+    "noStations": "No stations found. Add a new station to begin.",
+    "deleteConfirmation": "Are you sure you want to delete this station?",
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Station Name",
+      "stationId": "Station ID",
+      "stationIdPlaceholder": "Station ID",
+      "securityCode": "Security Code",
+      "securityCodePlaceholder": "Security Code",
+      "latitude": "Latitude",
+      "latitudePlaceholder": "Latitude (e.g., 23.6850)",
+      "longitude": "Longitude",
+      "longitudePlaceholder": "Longitude (e.g., 90.3563)"
+    },
+    "table": {
+      "name": "Name",
+      "stationId": "Station ID",
+      "securityCode": "Security Code",
+      "location": "Location",
+      "actions": "Actions"
+    },
+    "buttons": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "errors": {
+      "requiredFields": "Name, Station ID, and Security Code are required",
+      "fetchFailed": "Failed to fetch station data",
+      "addFailed": "Failed to add station",
+      "updateFailed": "Failed to update station",
+      "deleteFailed": "Failed to delete station"
+    },
+    "success": {
+      "added": "Station added successfully",
+      "updated": "Station updated successfully",
+      "deleted": "Station deleted successfully"
+    }
+  },
+  "Settings": {
+    "title": "Account Settings",
+    "security": "Security",
+    "twoFactor": {
+      "title": "Two-Factor Authentication",
+      "description": "Add an extra layer of security to your account by requiring a verification code",
+      "enable": {
+        "title": "Enable Two-Factor Authentication",
+        "description": "Enter your password to enable two-factor authentication",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Enter your password",
+        "continue": "Continue",
+        "scanQR": "Scan QR Code",
+        "scanDescription": "After scanning the QR code, your authenticator app will display a 6-digit code",
+        "backupCodes": {
+          "title": "Backup Codes",
+          "description": "Save these codes in a secure place. You can use them to log in if you lose access to your authenticator app"
+        },
+        "verify": {
+          "title": "Verify Authentication Code",
+          "description": "Enter the 6-digit code from your authenticator app",
+          "codeLabel": "Verification Code",
+          "codePlaceholder": "Enter the 6-digit code",
+          "verifyButton": "Verify and Enable"
+        }
+      },
+      "disable": {
+        "title": "Disable Two-Factor Authentication",
+        "description": "Enter your password to disable two-factor authentication. This will make your account less secure",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Enter your password",
+        "disableButton": "Disable Authentication"
+      },
+      "errors": {
+        "passwordRequired": "Password is required",
+        "codeRequired": "Verification code is required",
+        "generalError": "An error occurred",
+        "enableFailed": "Failed to enable two-factor authentication",
+        "disableFailed": "Failed to disable two-factor authentication",
+        "verifyFailed": "Failed to verify code"
+      },
+      "success": {
+        "enabled": "Two-factor authentication enabled successfully!",
+        "disabled": "Two-factor authentication disabled successfully"
+      }
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "back": "Back"
+    },
+    "loading": {
+      "processing": "Processing...",
+      "verifying": "Verifying...",
+      "disabling": "Disabling..."
+    }
   }
+  
 }

@@ -157,7 +157,8 @@
     "secondCard": "البطاقة الثانية",
     "synopticCode": "الرمز التلخيصي",
     "dailySummary": "الملخص اليومي",
-    "viewAllExport": "عرض الكل وتصدير"
+    "viewAllExport": "عرض الكل وتصدير",
+    "agroclimatological" : "مناخي زراعي"
   },
   "firstCard": {
     "title": "ساعة التوقيت العالمي",
