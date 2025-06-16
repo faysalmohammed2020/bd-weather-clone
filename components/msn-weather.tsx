@@ -1178,7 +1178,7 @@ const PrecipitationCard = ({
 
         <div className="text-center mt-4 space-y-1">
           <div className="text-3xl font-bold text-gray-800">
-            {precipitation.toFixed(2)} {t("common.units.mm")}
+            {precipitation.toFixed(2)} {t("common.units.precipitation")}
           </div>
           <Badge variant="secondary" className="text-xs">
             {getPrecipitationStatus(precipitation)}
@@ -1187,8 +1187,8 @@ const PrecipitationCard = ({
 
         <div className="mt-4 text-sm text-gray-600 text-center">
           <div className="font-medium">
-            {next24h.toFixed(2)} { t("common.units.mm")}{" "}
-            <span className="text-gray-500">{t("common.units.mm")} {t("dashboard.inNext24h")}</span>
+            {next24h.toFixed(2)} { t("common.units.precipitation")}{" "}
+            <span className="text-gray-500">{t("common.units.precipitation")} {t("dashboard.inNext24h")}</span>
           </div>
           <p className="text-xs mt-2 text-gray-500">
             {precipitation > 0
@@ -1522,7 +1522,7 @@ export default function ProfessionalWeatherDashboard({
                 </div>
                 <div className="text-center p-3 bg-gray-50 rounded-lg">
                   <div className="text-2xl font-bold text-gray-600">
-                    {currentData.precipitation.toFixed(0)} {t("common.units.mm")}
+                    {currentData.precipitation.toFixed(0)} {t("common.units.precipitation")}
                   </div>
                   <div className="text-xs text-gray-500 uppercase tracking-wide">
                     {t("dashboard.quickStats.precipitation")}

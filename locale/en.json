@@ -269,6 +269,7 @@
     "currentWeather": "Current Weather",
     "temperature": "Temperature",
     "feelsLike": "Feels Like",
+    "risk": "Risk",
     "dewPoint": "Dew Point",
     "humidity": "Humidity",
     "wind": "Wind",
@@ -280,6 +281,7 @@
     "precipitation": "Precipitation",
     "peakUV": "Peak Today",
     "inNext24h": "In Next 24h",
+    "lightRainExpected": "Light Rain Expected",
     "precipitationExpected": {
       "yes": "Light precipitation is expected in the next 24 hours.",
       "no": "No precipitation is expected in the next 24 hours."
@@ -355,7 +357,9 @@
       "moderate": "Moderate",
       "high": "High",
       "veryHigh": "Very High",
-      "extreme": "Extreme"
+      "extreme": "Extreme",
+      "peakToday": "Peak Today",
+      "maxUvIndex": "Maximum UV Index"
     },
     "uvRisk": "{status} Risk",
     "uvDescription": "Peak UV exposure levels today will reach {status} levels."
@@ -365,6 +369,7 @@
     "loading": "Loading...",
     "lastUpdated": "Last updated at",
     "refresh": "Refresh",
+    "logout": "Log Out",
     "units": {
       "celsius": "°C",
       "fahrenheit": "°F",
@@ -374,7 +379,11 @@
       "visibility": "km",
       "precipitation": "mm",
       "uvIndex": "UV Index",
-      "degrees": "°"
+      "degrees": "°",
+      "n": "North",
+      "s": "South",
+      "e": "East",
+      "w": "West"
     }
   },
   "secondCard": {
@@ -533,6 +542,9 @@
     "intermittentRain": "Select whether rain was intermittent",
     "observationTime": "Select a valid observation time"
   },
+  "basicInformation": {
+    "basicinformation": "Basic Information"
+  },
   "firstCardTable": {
     "title": "First Card Table",
     "dateRange": "Date Range",
@@ -546,7 +558,7 @@
     "year": "Year",
     "month": "Month",
     "day": "Day",
-    "basicInformation":"Basic Information",
+    "basicInformation": "Basic Information",
     "dataType": "Data Type",
     "stationNo": "Station Number",
     "stationNameLabel": "Station Name",
