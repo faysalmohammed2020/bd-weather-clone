@@ -207,9 +207,7 @@
     },
     "buttons": {
       "previous": "السابق",
-      "next": "التالي",
-      "reset": "إعادة تعيين",
-      "submit": "إرسال"
+      "next": "التالي"
     },
     "squallMeasurements": {
       "title": "قياسات العاصفة المفاجئة",
@@ -250,7 +248,7 @@
       "pressure": "قياسات ضغط البار",
       "temperature": "درجة الحرارة",
       "squall": "قياسات العاصفة",
-      "visibility": "قياسات الرؤية",
+      "VV": "قياسات الرؤية",
       "meteors": "الظواهر الجوية",
       "weather": "الظروف الجوية"
     }
@@ -275,6 +273,7 @@
     "fields": {
       "rainfall": {
         "sincePrevious": "القياس منذ الملاحظة السابقة",
+        "placeholder": "أدخل القيمة (1-989)",
         "duringPrevious": "خلال الـ6 ساعات السابقة",
         "last24Hours": "هطول الأمطار خلال 24 ساعة الماضية"
       },
@@ -668,10 +667,6 @@
     "intermittentRain": "حدد ما إذا كانت الأمطار متقطعة",
     "observationTime": "اختر ساعة رصد صالحة"
   },
-  
-  "basicInformation":{
-  "basicinformation": "معلومات أساسية"
-  },
   "firstCardTable": {
     "title": "طاولة البطاقة الأولى",
     "dateRange": "نطاق التاريخ",
@@ -683,8 +678,6 @@
     "stationId": "معرّف المحطة",
     "stationName": "اسم المحطة",
     "year": "السنة",
-    "month": "الشهر",
-    "day": "اليوم",
     "dataType": "نوع البيانات",
     "stationNo": "رقم المحطة",
     "stationNameLabel": "اسم المحطة",
