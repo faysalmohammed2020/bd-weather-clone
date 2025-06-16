@@ -113,7 +113,6 @@
         }
       }
     },
-
     "testimonials": {
       "title": "Testimonials",
       "subtitle": "Trusted by Professionals Across Bangladesh",
@@ -122,23 +121,19 @@
         "name1": "Dr. Rahman",
         "role1": "Agricultural Scientist",
         "quote1": "The rainfall forecasting has been instrumental in helping farmers in our region plan their planting and harvesting schedules. The accuracy is impressive.",
-
         "name2": "Fatima Begum",
         "role2": "Emergency Response Coordinator",
         "quote2": "The early warning system for cyclones has been a game-changer for our coastal communities. We've been able to evacuate people well in advance of severe weather events.",
-
         "name3": "Mohammed Ali",
         "role3": "Research Analyst",
         "quote3": "The historical data analysis tools have been invaluable for our climate change research. We can now identify long-term trends with much greater precision."
       }
     },
-
     "ctaSection": {
       "heading": "Unlock Smarter Weather Decisions",
       "description": "Access our real-time weather dashboard tailored for every district in Bangladesh. Stay ahead with forecasts, alerts, and insights that matter.",
       "getStartedbutton": "Get Started"
     },
-
     "footerSection": {
       "connectWithUs": "Connect With Us",
       "quickLinks": "Quick Links",
@@ -195,7 +190,9 @@
     },
     "buttons": {
       "previous": "Previous",
-      "next": "Next"
+      "next": "Next",
+      "reset": "Reset",
+      "submit": "Submit"
     },
     "squallMeasurements": {
       "title": "Squall Measurements",
@@ -236,7 +233,7 @@
       "pressure": "Barometric Pressure Measurements",
       "temperature": "Temperature",
       "squall": "Squall Measurements",
-      "VV": "Visibility Measurements",
+      "visibility": "Visibility Measurements",
       "meteors": "Meteorological Phenomena",
       "weather": "Weather Conditions"
     }
@@ -547,6 +544,9 @@
     "stationId": "Station ID",
     "stationName": "Station Name",
     "year": "Year",
+    "month": "Month",
+    "day": "Day",
+    "basicInformation":"Basic Information",
     "dataType": "Data Type",
     "stationNo": "Station Number",
     "stationNameLabel": "Station Name",

@@ -56,13 +56,14 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   });
 
   const { data: session } = useSession();
-  const t = useTranslations('firstCard')
+  const t = useTranslations('firstCard');
+  const tabs = useTranslations('firstCard.tabs')
   // Tab order for navigation
   const tabOrder = [
     "pressure",
     "temperature",
     "squall",
-    "V.V",
+    "visibility",
     "meteors",
     "weather",
   ];
@@ -84,7 +85,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       card: "bg-gradient-to-br from-amber-50 to-white border-l-4 border-amber-200 shadow-sm",
       icon: <Wind className="size-5 mr-2" />,
     },
-    "V.V": {
+    visibility: {
       tab: "border border-orange-500 px-4 py-3 !bg-orange-50 text-orange-800 hover:opacity-90 shadow-sm shadow-orange-500/50",
       card: "bg-gradient-to-br from-orange-50 to-white border-l-4 border-orange-200 shadow-sm",
       icon: <Eye className="size-5 mr-2" />,
@@ -171,7 +172,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
           (touched.squallDirection && errors.squallDirection) ||
           (touched.squallTime && errors.squallTime)
         );
-      case "V.V":
+      case "visibility":
         return !(touched.horizontalVisibility && errors.horizontalVisibility);
       case "weather":
         return !(
@@ -207,7 +208,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
           fieldsToValidate = ["squallForce", "squallDirection", "squallTime"];
         }
         break;
-      case "V.V":
+      case "visibility":
         fieldsToValidate = ["horizontalVisibility"];
         break;
       case "weather":
@@ -877,7 +878,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                       <div className="flex items-center justify-center gap-1">
                         {style.icon}
                         <span className="hidden sm:inline">
-                          {key === "V.V" ? "VV" : key}
+                          {tabs(key)}
                         </span>
                       </div>
                     </TabsTrigger>
@@ -1465,11 +1466,11 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                 {/* VV Tab */}
                 <TabsContent
-                  value="V.V"
+                  value="visibility"
                   className="mt-6 transition-all duration-500"
                 >
                   <Card
-                    className={cn("overflow-hidden", tabStyles["V.V"].card)}
+                    className={cn("overflow-hidden", tabStyles["visibility"].card)}
                   >
                     <div className="p-4 bg-gradient-to-r from-orange-200 to-orange-300 text-orange-800">
                       <h3 className="text-lg font-semibold flex items-center">

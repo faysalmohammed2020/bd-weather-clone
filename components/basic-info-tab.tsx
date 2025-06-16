@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { useSession } from "@/lib/auth-client"
+import { useTranslations } from "next-intl"
 
 interface BasicInfoTabProps {
   onFieldChange?: (name: string, value: string) => void
@@ -111,7 +112,9 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
 
     handleChange(fieldName, newValue, index, refs)
   }
-
+  
+  const t = useTranslations('firstCardTable')
+  const bi = useTranslations('basicInformation')
   return (
     <div className="space-y-4 mb-6">
       <h2 className="text-lg font-semibold text-slate-700 flex items-center">
@@ -133,7 +136,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
             <path d="M4 4h6v6H4z" />
           </svg>
         </span>
-        Basic Information
+       {bi('basicinformation')}
       </h2>
 
       <Card className=" bg-blue-50 rounded-xl border border-blue-200 ">
@@ -142,7 +145,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
             {/* Data Type */}
             <div className="flex flex-col">
               <Label htmlFor="dataType" className="text-sm font-medium text-blue-500 mb-2">
-                DATA TYPE
+                {t('dataType')}
               </Label>
               <div className="flex gap-1">
                 {dataTypeRefs.map((ref, i) => (
@@ -162,7 +165,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
 
             <div className="flex flex-col">
               <Label htmlFor="stationNo" className="text-sm font-medium text-blue-500 mb-2">
-                STATION NO.
+                {t('stationNo')}
               </Label>
               <div className="flex gap-1">
                 {stationNoRefs.map((ref, i) => (
@@ -183,7 +186,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
             {/* Station Name */}
             <div className="flex flex-col flex-1">
               <Label htmlFor="stationName" className="text-sm font-medium text-blue-500 mb-2">
-                STATION NAME
+                {t('stationNameLabel')}
               </Label>
               <Input
                 id="stationName"
@@ -196,7 +199,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
 
             <div className="flex flex-col">
               <Label htmlFor="year" className="text-sm font-medium text-blue-500 mb-2">
-                YEAR
+                {t('year')}
               </Label>
               <div className="flex gap-1">
                 {yearRefs.map((ref, i) => (
@@ -217,7 +220,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
             {/* Month */}
             <div className="flex flex-col">
               <Label htmlFor="month" className="text-sm font-medium text-blue-500 mb-2">
-                MONTH
+                {t('month')}
               </Label>
               <div className="flex gap-1">
                 {monthRefs.map((ref, i) => (
@@ -238,7 +241,7 @@ export default function BasicInfoTab({ onFieldChange }: BasicInfoTabProps) {
             {/* Day */}
             <div className="flex flex-col">
               <Label htmlFor="day" className="text-sm font-medium text-blue-500 mb-2">
-                DAY
+               {t('day')}
               </Label>
               <div className="flex gap-1">
                 {dayRefs.map((ref, i) => (
