@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import type React from "react";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
+import type React from "react"
+import { useState, useEffect } from "react"
+import { toast } from "sonner"
 import {
   CloudIcon,
   CloudRainIcon,
@@ -13,33 +13,23 @@ import {
   AlertCircle,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useSession } from "@/lib/auth-client";
-import { useWeatherObservationForm } from "@/stores/useWeatherObservationForm";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { useFormik } from "formik";
-// import * as Yup from "yup";
+} from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useSession } from "@/lib/auth-client"
+import { useWeatherObservationForm } from "@/stores/useWeatherObservationForm"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { useFormik } from "formik"
+import { useTranslations } from "next-intl"
 
-import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
-import { useHour } from "@/contexts/hourContext";
-import HourSelector from "@/components/hour-selector";
-import { TimeInfo } from "@/lib/data-type";
+import { cn } from "@/lib/utils"
+import { AnimatePresence, motion } from "framer-motion"
+import { useHour } from "@/contexts/hourContext"
+import HourSelector from "@/components/hour-selector"
+import type { TimeInfo } from "@/lib/data-type"
 
 // Import validation schemas from separate file
 import { validationSchema } from "@/validations/second-card-validation"
@@ -48,90 +38,85 @@ import { validationSchema } from "@/validations/second-card-validation"
 type WeatherObservationFormData = {
   clouds: {
     low: {
-      form?: string;
-      amount?: string;
-      height?: string;
-      direction?: string;
-    };
+      form?: string
+      amount?: string
+      height?: string
+      direction?: string
+    }
     medium: {
-      form?: string;
-      amount?: string;
-      height?: string;
-      direction?: string;
-    };
+      form?: string
+      amount?: string
+      height?: string
+      direction?: string
+    }
     high: {
-      form?: string;
-      amount?: string;
-      height?: string;
-      direction?: string;
-    };
-  };
+      form?: string
+      amount?: string
+      height?: string
+      direction?: string
+    }
+  }
   totalCloud: {
-    "total-cloud-amount"?: string;
-  };
+    "total-cloud-amount"?: string
+  }
   significantClouds: {
     layer1: {
-      form?: string;
-      amount?: string;
-      height?: string;
-    };
+      form?: string
+      amount?: string
+      height?: string
+    }
     layer2: {
-      form?: string;
-      amount?: string;
-      height?: string;
-    };
+      form?: string
+      amount?: string
+      height?: string
+    }
     layer3: {
-      form?: string;
-      amount?: string;
-      height?: string;
-    };
+      form?: string
+      amount?: string
+      height?: string
+    }
     layer4: {
-      form?: string;
-      amount?: string;
-      height?: string;
-    };
-  };
+      form?: string
+      amount?: string
+      height?: string
+    }
+  }
   rainfall: {
-    "time-start"?: string;
-    "time-end"?: string;
-    "since-previous"?: string;
-    "during-previous"?: string;
-    "last-24-hours"?: string;
-    isIntermittentRain?: boolean; // ← এখানে অবশ্যই যোগ করুন
-  };
+    "time-start"?: string
+    "time-end"?: string
+    "since-previous"?: string
+    "during-previous"?: string
+    "last-24-hours"?: string
+    isIntermittentRain?: boolean
+  }
   wind: {
-    "first-anemometer"?: string;
-    "second-anemometer"?: string;
-    speed?: string;
-    "wind-direction"?: string;
-  };
+    "first-anemometer"?: string
+    "second-anemometer"?: string
+    speed?: string
+    "wind-direction"?: string
+  }
   observer: {
-    "observer-initial"?: string;
-    "observation-time"?: string;
-  };
+    "observer-initial"?: string
+    "observation-time"?: string
+  }
   metadata: {
-    stationId?: string;
-    submittedAt?: string;
-  };
-};
+    stationId?: string
+    submittedAt?: string
+  }
+}
 
 export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState("cloud");
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 6; // cloud, n, significant-cloud, rainfall, wind, observer
-  const { data: session } = useSession();
+  const t = useTranslations("secondCard")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [activeTab, setActiveTab] = useState("cloud")
+  const [currentStep, setCurrentStep] = useState(1)
+  const totalSteps = 6 // cloud, n, significant-cloud, rainfall, wind, observer
+  const { data: session } = useSession()
 
-  const {
-    isHourSelected,
-    secondCardError,
-    selectedHour,
-    isLoading,
-    resetStates,
-  } = useHour();
+  const { isHourSelected, secondCardError, selectedHour, isLoading, resetStates } = useHour()
 
   // Get the persistent form store
-  const { formData, updateFields, resetForm } = useWeatherObservationForm();
+  const { formData, updateFields, resetForm } = useWeatherObservationForm()
 
   // Tab styles with gradients and more vibrant colors
   const tabStyles = {
@@ -165,7 +150,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       card: "bg-gradient-to-br from-orange-50 to-white border-l-4 border-orange-200 shadow-sm",
       icon: <User className="size-5 mr-2" />,
     },
-  };
+  }
 
   // Initialize Formik
   const formik = useFormik<WeatherObservationFormData>({
@@ -192,10 +177,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       wind: formData?.wind || {},
       observer: {
         "observer-initial": session?.user?.name || "",
-        "observation-time": new Date()
-          .getUTCHours()
-          .toString()
-          .padStart(2, "0"),
+        "observation-time": new Date().getUTCHours().toString().padStart(2, "0"),
         ...formData?.observer,
       },
       metadata: {
@@ -205,12 +187,12 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
     },
     validationSchema: validationSchema,
     onSubmit: handleSubmit,
-  });
+  })
 
   // Function to check if a tab is valid
   const isTabValid = (tabName: string) => {
-    const errors = formik.errors;
-    const touched = formik.touched;
+    const errors = formik.errors
+    const touched = formik.touched
 
     switch (tabName) {
       case "cloud":
@@ -218,52 +200,37 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
           (touched.clouds?.low && errors.clouds?.low) ||
           (touched.clouds?.medium && errors.clouds?.medium) ||
           (touched.clouds?.high && errors.clouds?.high)
-        );
+        )
       case "n":
-        return !(
-          touched.totalCloud?.["total-cloud-amount"] &&
-          errors.totalCloud?.["total-cloud-amount"]
-        );
+        return !(touched.totalCloud?.["total-cloud-amount"] && errors.totalCloud?.["total-cloud-amount"])
       case "significant-cloud":
-        return !(
-          touched.significantClouds?.layer1 && errors.significantClouds?.layer1
-        );
+        return !(touched.significantClouds?.layer1 && errors.significantClouds?.layer1)
       case "rainfall":
         return !(
-          (
-            (touched.rainfall?.["since-previous"] &&
-              errors.rainfall?.["since-previous"]) ||
-            (touched.rainfall?.["during-previous"] &&
-              errors.rainfall?.["during-previous"]) ||
-            (touched.rainfall?.["last-24-hours"] &&
-              errors.rainfall?.["last-24-hours"])
-          )
-        );
+          (touched.rainfall?.["since-previous"] && errors.rainfall?.["since-previous"]) ||
+          (touched.rainfall?.["during-previous"] && errors.rainfall?.["during-previous"]) ||
+          (touched.rainfall?.["last-24-hours"] && errors.rainfall?.["last-24-hours"])
+        )
       case "wind":
         return !(
-          (touched.wind?.["first-anemometer"] &&
-            errors.wind?.["first-anemometer"]) ||
-          (touched.wind?.["second-anemometer"] &&
-            errors.wind?.["second-anemometer"]) ||
+          (touched.wind?.["first-anemometer"] && errors.wind?.["first-anemometer"]) ||
+          (touched.wind?.["second-anemometer"] && errors.wind?.["second-anemometer"]) ||
           (touched.wind?.speed && errors.wind?.speed) ||
           (touched.wind?.["wind-direction"] && errors.wind?.["wind-direction"])
-        );
+        )
       case "observer":
         return !(
-          (touched.observer?.["observer-initial"] &&
-            errors.observer?.["observer-initial"]) ||
-          (touched.observer?.["observation-time"] &&
-            errors.observer?.["observation-time"])
-        );
+          (touched.observer?.["observer-initial"] && errors.observer?.["observer-initial"]) ||
+          (touched.observer?.["observation-time"] && errors.observer?.["observation-time"])
+        )
       default:
-        return true;
+        return true
     }
-  };
+  }
 
   // Function to validate current tab before proceeding
-  // Update the validateTab function to validate all fields in the tab
   const validateTab = (tabName: string) => {
-    let fieldsToValidate: string[] = [];
+    let fieldsToValidate: string[] = []
 
     switch (tabName) {
       case "cloud":
@@ -280,11 +247,11 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
           "clouds.high.amount",
           "clouds.high.height",
           "clouds.high.direction",
-        ];
-        break;
+        ]
+        break
       case "n":
-        fieldsToValidate = ["totalCloud.total-cloud-amount"];
-        break;
+        fieldsToValidate = ["totalCloud.total-cloud-amount"]
+        break
       case "significant-cloud":
         fieldsToValidate = [
           "significantClouds.layer1.form",
@@ -293,42 +260,28 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
           "significantClouds.layer2.height",
           "significantClouds.layer3.height",
           "significantClouds.layer4.height",
-        ];
-        break;
+        ]
+        break
       case "rainfall":
-        fieldsToValidate = [
-          // "rainfall.time-start",
-          // "rainfall.time-end",
-          "rainfall.since-previous",
-          "rainfall.during-previous",
-          "rainfall.last-24-hours",
-        ];
-        break;
+        fieldsToValidate = ["rainfall.since-previous", "rainfall.during-previous", "rainfall.last-24-hours"]
+        break
       case "wind":
-        fieldsToValidate = [
-          "wind.first-anemometer",
-          "wind.second-anemometer",
-          "wind.speed",
-          "wind.wind-direction",
-        ];
-        break;
+        fieldsToValidate = ["wind.first-anemometer", "wind.second-anemometer", "wind.speed", "wind.wind-direction"]
+        break
       case "observer":
-        fieldsToValidate = [
-          "observer.observer-initial",
-          "observer.observation-time",
-        ];
-        break;
+        fieldsToValidate = ["observer.observer-initial", "observer.observation-time"]
+        break
     }
 
     // Touch all fields in the current tab to trigger validation
-    const touchedFields = {};
+    const touchedFields = {}
     fieldsToValidate.forEach((field) => {
-      const fieldParts = field.split(".");
+      const fieldParts = field.split(".")
       if (fieldParts.length === 2) {
         touchedFields[fieldParts[0]] = {
           ...formik.touched[fieldParts[0]],
           [fieldParts[1]]: true,
-        };
+        }
       } else if (fieldParts.length === 3) {
         touchedFields[fieldParts[0]] = {
           ...formik.touched[fieldParts[0]],
@@ -336,134 +289,121 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
             ...formik.touched[fieldParts[0]]?.[fieldParts[1]],
             [fieldParts[2]]: true,
           },
-        };
+        }
       }
-    });
+    })
 
-    formik.setTouched({ ...formik.touched, ...touchedFields }, true);
+    formik.setTouched({ ...formik.touched, ...touchedFields }, true)
 
     // Check if there are any errors in the validated fields
     return !fieldsToValidate.some((field) => {
-      const fieldParts = field.split(".");
+      const fieldParts = field.split(".")
       if (fieldParts.length === 2) {
-        return formik.errors[fieldParts[0]]?.[fieldParts[1]];
+        return formik.errors[fieldParts[0]]?.[fieldParts[1]]
       } else if (fieldParts.length === 3) {
-        return formik.errors[fieldParts[0]]?.[fieldParts[1]]?.[fieldParts[2]];
+        return formik.errors[fieldParts[0]]?.[fieldParts[1]]?.[fieldParts[2]]
       }
-      return false;
-    });
-  };
+      return false
+    })
+  }
 
   // Initialize session-specific values when session is available
   useEffect(() => {
     if (session?.user) {
-      formik.setFieldValue(
-        "observer.observer-initial",
-        session.user.name || ""
-      );
-      formik.setFieldValue(
-        "metadata.stationId",
-        session.user.station?.stationId || ""
-      );
+      formik.setFieldValue("observer.observer-initial", session.user.name || "")
+      formik.setFieldValue("metadata.stationId", session.user.station?.stationId || "")
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]);
+  }, [session])
 
   // Set observation time on initial load (only runs once)
   useEffect(() => {
     if (!formik.values.observer["observation-time"]) {
-      const utcHour = new Date().getUTCHours().toString().padStart(2, "0");
-      formik.setFieldValue("observer.observation-time", utcHour);
+      const utcHour = new Date().getUTCHours().toString().padStart(2, "0")
+      formik.setFieldValue("observer.observation-time", utcHour)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
   // Sync formik values with the store
   useEffect(() => {
-    updateFields(formik.values);
+    updateFields(formik.values)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formik.values]);
+  }, [formik.values])
 
   // Update the handleNext function to validate the current tab before proceeding
   const handleNext = () => {
     // Validate current tab before proceeding
     if (validateTab(activeTab)) {
-      const nextStep = Math.min(currentStep + 1, totalSteps);
-      setCurrentStep(nextStep);
-      setActiveTab(getTabForStep(nextStep));
+      const nextStep = Math.min(currentStep + 1, totalSteps)
+      setCurrentStep(nextStep)
+      setActiveTab(getTabForStep(nextStep))
     } else {
-      toast.error("Please fill in all required fields correctly", {
-        description: "You need to complete the current tab before proceeding",
-      });
+      toast.error(t("alerts.fillRequired"), {
+        description: t("alerts.completeTab"),
+      })
     }
-  };
+  }
 
   const handlePrevious = () => {
-    const prevStep = Math.max(currentStep - 1, 1);
-    setCurrentStep(prevStep);
-    setActiveTab(getTabForStep(prevStep));
-  };
+    const prevStep = Math.max(currentStep - 1, 1)
+    setCurrentStep(prevStep)
+    setActiveTab(getTabForStep(prevStep))
+  }
 
   const getTabForStep = (step: number) => {
-    const steps = [
-      "cloud",
-      "n",
-      "significant-cloud",
-      "rainfall",
-      "wind",
-      "observer",
-    ];
-    return steps[step - 1] || "cloud";
-  };
+    const steps = ["cloud", "n", "significant-cloud", "rainfall", "wind", "observer"]
+    return steps[step - 1] || "cloud"
+  }
 
   // Handle input changes and update the form data state
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
+    const { name, value } = e.target
+
     // Guard clause for undefined or null name
     if (!name) {
-      console.warn('Input element has no name attribute');
-      return;
+      console.warn("Input element has no name attribute")
+      return
     }
-    
+
     // Update the form field value
     if (name.startsWith("rainfall-")) {
-      const field = name.replace("rainfall-", "");
-      formik.setFieldValue(`rainfall.${field}`, value);
+      const field = name.replace("rainfall-", "")
+      formik.setFieldValue(`rainfall.${field}`, value)
     } else if (
       name === "first-anemometer" ||
       name === "second-anemometer" ||
       name === "speed" ||
       name === "wind-direction"
     ) {
-      formik.setFieldValue(`wind.${name}`, value);
+      formik.setFieldValue(`wind.${name}`, value)
     }
-    
+
     // Mark the field as touched
-    formik.setFieldTouched(name, true, true);
+    formik.setFieldTouched(name, true, true)
 
     // Update the appropriate section of the form data based on the input name
     if (name.startsWith("low-cloud-")) {
-      const field = name.replace("low-cloud-", "");
-      formik.setFieldValue(`clouds.low.${field}`, value);
+      const field = name.replace("low-cloud-", "")
+      formik.setFieldValue(`clouds.low.${field}`, value)
     } else if (name.startsWith("medium-cloud-")) {
-      const field = name.replace("medium-cloud-", "");
-      formik.setFieldValue(`clouds.medium.${field}`, value);
+      const field = name.replace("medium-cloud-", "")
+      formik.setFieldValue(`clouds.medium.${field}`, value)
     } else if (name.startsWith("high-cloud-")) {
-      const field = name.replace("high-cloud-", "");
-      formik.setFieldValue(`clouds.high.${field}`, value);
+      const field = name.replace("high-cloud-", "")
+      formik.setFieldValue(`clouds.high.${field}`, value)
     } else if (name.startsWith("sig-cloud-layer1-")) {
-      const field = name.replace("sig-cloud-layer1-", "");
-      formik.setFieldValue(`significantClouds.layer1.${field}`, value);
+      const field = name.replace("sig-cloud-layer1-", "")
+      formik.setFieldValue(`significantClouds.layer1.${field}`, value)
     } else if (name.startsWith("sig-cloud-layer2-")) {
-      const field = name.replace("sig-cloud-layer2-", "");
-      formik.setFieldValue(`significantClouds.layer2.${field}`, value);
+      const field = name.replace("sig-cloud-layer2-", "")
+      formik.setFieldValue(`significantClouds.layer2.${field}`, value)
     } else if (name.startsWith("sig-cloud-layer3-")) {
-      const field = name.replace("sig-cloud-layer3-", "");
-      formik.setFieldValue(`significantClouds.layer3.${field}`, value);
+      const field = name.replace("sig-cloud-layer3-", "")
+      formik.setFieldValue(`significantClouds.layer3.${field}`, value)
     } else if (name.startsWith("sig-cloud-layer4-")) {
-      const field = name.replace("sig-cloud-layer4-", "");
-      formik.setFieldValue(`significantClouds.layer4.${field}`, value);
+      const field = name.replace("sig-cloud-layer4-", "")
+      formik.setFieldValue(`significantClouds.layer4.${field}`, value)
     } else if (
       name.startsWith("rainfall-") ||
       name === "date-start" ||
@@ -475,60 +415,57 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       name === "last-24-hours" ||
       name === "isIntermittentRain"
     ) {
-      const field = name.startsWith("rainfall-")
-        ? name.replace("rainfall-", "")
-        : name;
+      const field = name.startsWith("rainfall-") ? name.replace("rainfall-", "") : name
 
-      formik.setFieldValue(`rainfall.${field}`, value);
+      formik.setFieldValue(`rainfall.${field}`, value)
     } else if (
       name === "first-anemometer" ||
       name === "second-anemometer" ||
       name === "speed" ||
       name === "wind-direction"
     ) {
-      formik.setFieldValue(`wind.${name}`, value);
-      // formik.setFieldTouched(`wind.${name}`, true, true);
+      formik.setFieldValue(`wind.${name}`, value)
     } else if (name === "observer-initial") {
-      formik.setFieldValue("observer.observer-initial", value);
+      formik.setFieldValue("observer.observer-initial", value)
     }
-  };
+  }
 
   // Handle select changes for dropdown fields
   const handleSelectChange = (name: string, value: string) => {
     if (name.startsWith("low-cloud-")) {
-      const field = name.replace("low-cloud-", "");
-      formik.setFieldValue(`clouds.low.${field}`, value);
+      const field = name.replace("low-cloud-", "")
+      formik.setFieldValue(`clouds.low.${field}`, value)
     } else if (name.startsWith("medium-cloud-")) {
-      const field = name.replace("medium-cloud-", "");
-      formik.setFieldValue(`clouds.medium.${field}`, value);
+      const field = name.replace("medium-cloud-", "")
+      formik.setFieldValue(`clouds.medium.${field}`, value)
     } else if (name === "observation-time") {
-      formik.setFieldValue("observer.observation-time", value);
+      formik.setFieldValue("observer.observation-time", value)
     } else if (name.startsWith("high-cloud-")) {
-      const field = name.replace("high-cloud-", "");
-      formik.setFieldValue(`clouds.high.${field}`, value);
+      const field = name.replace("high-cloud-", "")
+      formik.setFieldValue(`clouds.high.${field}`, value)
     } else if (name.startsWith("layer1-")) {
-      const field = name.replace("layer1-", "");
-      formik.setFieldValue(`significantClouds.layer1.${field}`, value);
+      const field = name.replace("layer1-", "")
+      formik.setFieldValue(`significantClouds.layer1.${field}`, value)
     } else if (name.startsWith("layer2-")) {
-      const field = name.replace("layer2-", "");
-      formik.setFieldValue(`significantClouds.layer2.${field}`, value);
+      const field = name.replace("layer2-", "")
+      formik.setFieldValue(`significantClouds.layer2.${field}`, value)
     } else if (name.startsWith("layer3-")) {
-      const field = name.replace("layer3-", "");
-      formik.setFieldValue(`significantClouds.layer3.${field}`, value);
+      const field = name.replace("layer3-", "")
+      formik.setFieldValue(`significantClouds.layer3.${field}`, value)
     } else if (name.startsWith("layer4-")) {
-      const field = name.replace("layer4-", "");
-      formik.setFieldValue(`significantClouds.layer4.${field}`, value);
+      const field = name.replace("layer4-", "")
+      formik.setFieldValue(`significantClouds.layer4.${field}`, value)
     } else if (name === "total-cloud-amount") {
-      formik.setFieldValue("totalCloud.total-cloud-amount", value);
+      formik.setFieldValue("totalCloud.total-cloud-amount", value)
     } else if (
       name.startsWith("time-") ||
       name.startsWith("since-") ||
       name.startsWith("during-") ||
       name.startsWith("last-")
     ) {
-      formik.setFieldValue(`rainfall.${name}`, value);
+      formik.setFieldValue(`rainfall.${name}`, value)
     }
-  };
+  }
 
   // Reset form function
   const handleReset = () => {
@@ -550,32 +487,29 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       wind: {},
       observer: {
         "observer-initial": session?.user?.name || "",
-        "observation-time": new Date()
-          .getUTCHours()
-          .toString()
-          .padStart(2, "0"),
+        "observation-time": new Date().getUTCHours().toString().padStart(2, "0"),
       },
       metadata: {
         stationId: session?.user?.station?.stationId || "",
       },
-    };
+    }
 
-    formik.resetForm({ values: resetValues });
-    resetForm();
+    formik.resetForm({ values: resetValues })
+    resetForm()
 
     // Show toast notification
-    toast.info("All form data has been cleared.");
+    toast.info(t("alerts.formCleared"))
 
     // Reset to first tab
-    setCurrentStep(1);
-    setActiveTab("cloud");
-  };
+    setCurrentStep(1)
+    setActiveTab("cloud")
+  }
 
   async function handleSubmit(values: WeatherObservationFormData) {
     // Prevent duplicate submissions
-    if (isSubmitting) return;
+    if (isSubmitting) return
 
-    setIsSubmitting(true);
+    setIsSubmitting(true)
 
     try {
       const submissionData = {
@@ -586,7 +520,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
           submittedAt: new Date().toISOString(),
           stationId: session?.user?.station?.id || "",
         },
-      };
+      }
 
       const response = await fetch("/api/save-observation", {
         method: "POST",
@@ -595,46 +529,44 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
         },
         credentials: "include",
         body: JSON.stringify(submissionData),
-      });
+      })
 
-      const data = await response.json();
+      const data = await response.json()
 
       if (data.error) {
-        toast.error(data.message);
-        return;
+        toast.error(data.message)
+        return
       }
 
       toast.success(data.message, {
         description: `Entry #${data.dataCount} saved`,
-      });
+      })
 
-      resetForm();
-      formik.resetForm();
-      resetStates();
-      setCurrentStep(1);
-      setActiveTab("cloud");
-      updateFields({});
+      resetForm()
+      formik.resetForm()
+      resetStates()
+      setCurrentStep(1)
+      setActiveTab("cloud")
+      updateFields({})
     } catch (error) {
-      console.error("Submission error:", error);
-      toast.error("Failed to submit. Please try again.");
+      console.error("Submission error:", error)
+      toast.error(t("alerts.submissionFailed"))
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
   // Helper function to render error message
   const renderErrorMessage = (fieldPath: string) => {
-    const fieldParts = fieldPath.split(".");
-    let error = null;
+    const fieldParts = fieldPath.split(".")
+    let error = null
 
     if (fieldParts.length === 2) {
-      error =
-        formik.touched[fieldParts[0]]?.[fieldParts[1]] &&
-        formik.errors[fieldParts[0]]?.[fieldParts[1]];
+      error = formik.touched[fieldParts[0]]?.[fieldParts[1]] && formik.errors[fieldParts[0]]?.[fieldParts[1]]
     } else if (fieldParts.length === 3) {
       error =
         formik.touched[fieldParts[0]]?.[fieldParts[1]]?.[fieldParts[2]] &&
-        formik.errors[fieldParts[0]]?.[fieldParts[1]]?.[fieldParts[2]];
+        formik.errors[fieldParts[0]]?.[fieldParts[1]]?.[fieldParts[2]]
     }
 
     return error ? (
@@ -642,39 +574,18 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
         <AlertCircle className="h-4 w-4 mr-1 mt-0.5 flex-shrink-0" />
         <span>{error}</span>
       </div>
-    ) : null;
-  };
-
-  const cloudAmountOptions = [
-    { value: "0", label: "0 - No cloud" },
-    { value: "1", label: "1 - 1 octa or less (1/10 or less but not zero)" },
-    { value: "2", label: "2 - 2 octas (2/10 to 3/10)" },
-    { value: "3", label: "3 - 3 octas (4/10)" },
-    { value: "4", label: "4 - 4 octas (5/10)" },
-    { value: "5", label: "5 - 5 octas (6/10)" },
-    { value: "6", label: "6 - 6 octas (7/10 to 8/10)" },
-    { value: "7", label: "7 - 7 octas (9/10 or more but not 10/10)" },
-    { value: "8", label: "8 - 8 octas (10/10)" },
-    {
-      value: "9",
-      label: "9 - sky obscured or cloud amount cannot be estimated.",
-    },
-    {
-      value: "/",
-      label: "/ - Key obscured or cloud amount cannot be estimated",
-    },
-  ];
+    ) : null
+  }
 
   // Prevent form submission on Enter key and other unwanted submissions
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
-      e.preventDefault();
+      e.preventDefault()
     }
-  };
+  }
 
   // Check if current tab is the last one
-  // const isLastTab = currentStep === totalSteps;
-  const isFirstTab = currentStep === 1;
+  const isFirstTab = currentStep === 1
 
   // Update the Tabs component to prevent direct tab navigation when current tab is invalid
   return (
@@ -706,24 +617,16 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
               <Tabs
                 value={activeTab}
                 onValueChange={(value) => {
-                  const currentTabIndex =
-                    Object.keys(tabStyles).indexOf(activeTab);
-                  const newTabIndex = Object.keys(tabStyles).indexOf(value);
+                  const currentTabIndex = Object.keys(tabStyles).indexOf(activeTab)
+                  const newTabIndex = Object.keys(tabStyles).indexOf(value)
 
-                  if (
-                    newTabIndex <= currentTabIndex ||
-                    validateTab(activeTab)
-                  ) {
-                    setActiveTab(value);
-                    setCurrentStep(newTabIndex + 1);
+                  if (newTabIndex <= currentTabIndex || validateTab(activeTab)) {
+                    setActiveTab(value)
+                    setCurrentStep(newTabIndex + 1)
                   } else {
-                    toast.error(
-                      "Please fill in all required fields correctly",
-                      {
-                        description:
-                          "You need to complete the current tab before proceeding",
-                      }
-                    );
+                    toast.error(t("alerts.fillRequired"), {
+                      description: t("alerts.completeTab"),
+                    })
                   }
                 }}
                 className="w-full"
@@ -734,20 +637,14 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                     <TabsTrigger
                       key={key}
                       value={key}
-                      className={cn(
-                        "border border-gray-300 text-xs sm:text-sm",
-                        {
-                          [style.tab]: activeTab === key,
-                          "!border-red-500 !text-red-700":
-                            !isTabValid(key) && formik.submitCount > 0,
-                        }
-                      )}
+                      className={cn("border border-gray-300 text-xs sm:text-sm", {
+                        [style.tab]: activeTab === key,
+                        "!border-red-500 !text-red-700": !isTabValid(key) && formik.submitCount > 0,
+                      })}
                     >
                       <div className="flex items-center justify-center gap-1">
                         {style.icon}
-                        <span className="hidden sm:inline">
-                          {key === "n" ? "Total Cloud" : key}
-                        </span>
+                        <span className="hidden sm:inline">{t(`tabs.${key}`)}</span>
                       </div>
                     </TabsTrigger>
                   ))}
@@ -755,53 +652,44 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
                 <div className="p-4 sm:p-6">
                   {/* CLOUD Tab */}
-                  <TabsContent
-                    value="cloud"
-                    className="mt-4 sm:mt-6 transition-all duration-500"
-                  >
-                    <Card
-                      className={cn("overflow-hidden", tabStyles.cloud.card)}
-                    >
+                  <TabsContent value="cloud" className="mt-4 sm:mt-6 transition-all duration-500">
+                    <Card className={cn("overflow-hidden", tabStyles.cloud.card)}>
                       <div className="p-3 sm:p-4 bg-gradient-to-r from-blue-200 to-blue-300 text-blue-800">
                         <h3 className="text-base sm:text-lg font-semibold flex items-center">
-                          <CloudIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />{" "}
-                          Cloud Observation
+                          <CloudIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> {t("cloud.title")}
                         </h3>
                       </div>
                       <CardContent className="pt-4 sm:pt-6">
                         <div className="space-y-6 sm:space-y-8">
                           <CloudLevelSection
-                            title="Low Cloud"
+                            title={t("cloud.low")}
                             prefix="low-cloud"
                             color="blue"
                             data={formik.values.clouds.low}
                             onChange={handleInputChange}
                             onSelectChange={handleSelectChange}
-                            renderError={(field) =>
-                              renderErrorMessage(`clouds.low.${field}`)
-                            }
+                            renderError={(field) => renderErrorMessage(`clouds.low.${field}`)}
+                            t={t}
                           />
                           <CloudLevelSection
-                            title="Medium Cloud"
+                            title={t("cloud.medium")}
                             prefix="medium-cloud"
                             color="purple"
                             data={formik.values.clouds.medium}
                             onChange={handleInputChange}
                             onSelectChange={handleSelectChange}
-                            renderError={(field) =>
-                              renderErrorMessage(`clouds.medium.${field}`)
-                            }
+                            renderError={(field) => renderErrorMessage(`clouds.medium.${field}`)}
+                            t={t}
                           />
                           <CloudLevelSection
-                            title="High Cloud"
+                            title={t("cloud.high")}
                             prefix="high-cloud"
                             color="cyan"
                             data={formik.values.clouds.high}
                             onChange={handleInputChange}
                             onSelectChange={handleSelectChange}
-                            renderError={(field) =>
-                              renderErrorMessage(`clouds.high.${field}`)
-                            }
+                            renderError={(field) => renderErrorMessage(`clouds.high.${field}`)}
+                            t={t}
                           />
                         </div>
                       </CardContent>
@@ -813,31 +701,25 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           disabled={isFirstTab}
                           className="text-xs sm:text-sm"
                         >
-                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
-                          Previous
+                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" /> {t("buttons.previous")}
                         </Button>
                         <Button
                           type="button"
                           onClick={handleNext}
                           className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
                         >
-                          Next{" "}
-                          <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                          {t("buttons.next")} <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </CardFooter>
                     </Card>
                   </TabsContent>
 
                   {/* TOTAL CLOUD Tab */}
-                  <TabsContent
-                    value="n"
-                    className="mt-4 sm:mt-6 transition-all duration-500"
-                  >
+                  <TabsContent value="n" className="mt-4 sm:mt-6 transition-all duration-500">
                     <Card className={cn("overflow-hidden", tabStyles.n.card)}>
                       <div className="p-3 sm:p-4 bg-gradient-to-r from-yellow-200 to-yellow-300 text-yellow-800">
                         <h3 className="text-base sm:text-lg font-semibold flex items-center">
-                          <Sun className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Total
-                          Cloud Amount
+                          <Sun className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> {t("totalCloud.title")}
                         </h3>
                       </div>
                       <CardContent className="pt-4 sm:pt-6">
@@ -845,23 +727,15 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           <SelectField
                             id="total-cloud-amount"
                             name="total-cloud-amount"
-                            label="Total Cloud Amount (Octa)"
+                            label={t("totalCloud.label")}
                             accent="yellow"
-                            value={
-                              formik.values.totalCloud["total-cloud-amount"] ||
-                              ""
-                            }
-                            onValueChange={(value) =>
-                              handleSelectChange("total-cloud-amount", value)
-                            }
-                            options={cloudAmountOptions.map((opt) => opt.value)}
-                            optionLabels={cloudAmountOptions.map(
-                              (opt) => opt.label
-                            )}
-                            error={renderErrorMessage(
-                              "totalCloud.total-cloud-amount"
-                            )}
+                            value={formik.values.totalCloud["total-cloud-amount"] || ""}
+                            onValueChange={(value) => handleSelectChange("total-cloud-amount", value)}
+                            options={Object.keys(t.raw("options.cloudAmount"))}
+                            optionLabels={Object.values(t.raw("options.cloudAmount"))}
+                            error={renderErrorMessage("totalCloud.total-cloud-amount")}
                             required
+                            t={t}
                           />
                         </div>
                       </CardContent>
@@ -873,87 +747,64 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           disabled={isFirstTab}
                           className="text-xs sm:text-sm"
                         >
-                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
-                          Previous
+                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" /> {t("buttons.previous")}
                         </Button>
                         <Button
                           type="button"
                           onClick={handleNext}
                           className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
                         >
-                          Next{" "}
-                          <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                          {t("buttons.next")} <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </CardFooter>
                     </Card>
                   </TabsContent>
 
                   {/* SIGNIFICANT CLOUD Tab */}
-                  <TabsContent
-                    value="significant-cloud"
-                    className="mt-4 sm:mt-6 transition-all duration-500"
-                  >
-                    <Card
-                      className={cn(
-                        "overflow-hidden",
-                        tabStyles["significant-cloud"].card
-                      )}
-                    >
+                  <TabsContent value="significant-cloud" className="mt-4 sm:mt-6 transition-all duration-500">
+                    <Card className={cn("overflow-hidden", tabStyles["significant-cloud"].card)}>
                       <div className="p-3 sm:p-4 bg-gradient-to-r from-purple-200 to-purple-300 text-purple-800">
                         <h3 className="text-base sm:text-lg font-semibold flex items-center">
-                          <CloudIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />{" "}
-                          Significant Cloud
+                          <CloudIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> {t("significantCloud.title")}
                         </h3>
                       </div>
                       <CardContent className="pt-4 sm:pt-6">
                         <div className="space-y-6 sm:space-y-8">
                           <SignificantCloudSection
-                            title="1st Layer"
+                            title={t("significantCloud.layer1")}
                             prefix="layer1"
                             color="purple"
                             data={formik.values.significantClouds.layer1}
                             onSelectChange={handleSelectChange}
-                            renderError={(field) =>
-                              renderErrorMessage(
-                                `significantClouds.layer1.${field}`
-                              )
-                            }
+                            renderError={(field) => renderErrorMessage(`significantClouds.layer1.${field}`)}
+                            t={t}
                           />
                           <SignificantCloudSection
-                            title="2nd Layer"
+                            title={t("significantCloud.layer2")}
                             prefix="layer2"
                             color="fuchsia"
                             data={formik.values.significantClouds.layer2}
                             onSelectChange={handleSelectChange}
-                            renderError={(field) =>
-                              renderErrorMessage(
-                                `significantClouds.layer2.${field}`
-                              )
-                            }
+                            renderError={(field) => renderErrorMessage(`significantClouds.layer2.${field}`)}
+                            t={t}
                           />
                           <SignificantCloudSection
-                            title="3rd Layer"
+                            title={t("significantCloud.layer3")}
                             prefix="layer3"
                             color="violet"
                             data={formik.values.significantClouds.layer3}
                             onSelectChange={handleSelectChange}
-                            renderError={(field) =>
-                              renderErrorMessage(
-                                `significantClouds.layer3.${field}`
-                              )
-                            }
+                            renderError={(field) => renderErrorMessage(`significantClouds.layer3.${field}`)}
+                            t={t}
                           />
                           <SignificantCloudSection
-                            title="4th Layer"
+                            title={t("significantCloud.layer4")}
                             prefix="layer4"
                             color="indigo"
                             data={formik.values.significantClouds.layer4}
                             onSelectChange={handleSelectChange}
-                            renderError={(field) =>
-                              renderErrorMessage(
-                                `significantClouds.layer4.${field}`
-                              )
-                            }
+                            renderError={(field) => renderErrorMessage(`significantClouds.layer4.${field}`)}
+                            t={t}
                           />
                         </div>
                       </CardContent>
@@ -965,66 +816,41 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           disabled={isFirstTab}
                           className="text-xs sm:text-sm"
                         >
-                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
-                          Previous
+                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" /> {t("buttons.previous")}
                         </Button>
                         <Button
                           type="button"
                           onClick={handleNext}
                           className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
                         >
-                          Next{" "}
-                          <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                          {t("buttons.next")} <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </CardFooter>
                     </Card>
                   </TabsContent>
 
                   {/* RAINFALL Tab */}
-                  <TabsContent
-                    value="rainfall"
-                    className="mt-4 sm:mt-6 transition-all duration-500"
-                  >
-                    <Card
-                      className={cn("overflow-hidden", tabStyles.rainfall.card)}
-                    >
+                  <TabsContent value="rainfall" className="mt-4 sm:mt-6 transition-all duration-500">
+                    <Card className={cn("overflow-hidden", tabStyles.rainfall.card)}>
                       <div className="p-3 sm:p-4 bg-gradient-to-r from-cyan-200 to-cyan-300 text-cyan-800">
                         <h3 className="text-base sm:text-lg font-semibold flex items-center">
-                          <CloudRainIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />{" "}
-                          Rainfall Measurement (mm)
+                          <CloudRainIcon className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> {t("rainfall.title")}
                         </h3>
                       </div>
 
                       <CardContent className="pt-4 sm:pt-6">
-                        <p className="mb-3 text-xs sm:text-sm text-yellow-800">
-                          📅 Please select the{" "}
-                          <span className="font-medium underline">
-                            previous date from calender
-                          </span>{" "}
-                          for
-                          <span className="text-blue-700 font-semibold">
-                            {" "}
-                            00 UTC{" "}
-                          </span>{" "}
-                          report submission.
-                        </p>
+                        <p className="mb-3 text-xs sm:text-sm text-yellow-800">{t("rainfall.note")}</p>
                         <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
                           <div className="grid gap-2">
-                            <Label
-                              htmlFor="time-start"
-                              className="font-medium text-gray-700 text-xs sm:text-sm"
-                            >
-                              Time of Start (HH:MM UTC){" "}
-                              <span className="text-red-500">*</span>
+                            <Label htmlFor="time-start" className="font-medium text-gray-700 text-xs sm:text-sm">
+                              {t("rainfall.timeStart")} <span className="text-red-500">*</span>
                             </Label>
                             <div className="grid grid-cols-2 gap-2">
                               <Input
                                 id="date-start"
                                 name="date-start"
                                 type="date"
-                                value={
-                                  formik.values.rainfall["date-start"] || ""
-                                }
+                                value={formik.values.rainfall["date-start"] || ""}
                                 onChange={handleInputChange}
                                 className="text-xs sm:text-sm"
                                 required
@@ -1035,9 +861,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                                 type="text"
                                 placeholder="set this ( HH:MM 00:00 )"
                                 step="60"
-                                value={
-                                  formik.values.rainfall["time-start"] || ""
-                                }
+                                value={formik.values.rainfall["time-start"] || ""}
                                 onChange={handleInputChange}
                                 className="text-xs sm:text-sm"
                                 required
@@ -1045,18 +869,12 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             </div>
 
                             {renderErrorMessage("rainfall.time-start")}
-                            <p className="text-xs text-gray-500 mt-1">
-                              Format: HH:MM (e.g., 03:30, 06:15, 23:45)
-                            </p>
+                            <p className="text-xs text-gray-500 mt-1">{t("rainfall.formatHint")}</p>
                           </div>
 
                           <div className="grid gap-2">
-                            <Label
-                              htmlFor="time-end"
-                              className="font-medium text-gray-700 text-xs sm:text-sm"
-                            >
-                              Time of Ending (HH:MM UTC){" "}
-                              <span className="text-red-500">*</span>
+                            <Label htmlFor="time-end" className="font-medium text-gray-700 text-xs sm:text-sm">
+                              {t("rainfall.timeEnd")} <span className="text-red-500">*</span>
                             </Label>
                             <div className="grid grid-cols-2 gap-2">
                               <Input
@@ -1082,15 +900,13 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             </div>
 
                             {renderErrorMessage("rainfall.time-end")}
-                            <p className="text-xs text-gray-500 mt-1">
-                              Format: HH:MM (e.g., 03:30, 06:15, 23:45)
-                            </p>
+                            <p className="text-xs text-gray-500 mt-1">{t("rainfall.formatHint")}</p>
                           </div>
 
                           <InputField
                             id="since-previous"
                             name="since-previous"
-                            label="Since Previous Observation (mm)"
+                            label={t("rainfall.sincePrevious")}
                             placeholder="Enter value (1-989)"
                             accent="cyan"
                             value={formik.values.rainfall["since-previous"] || ""}
@@ -1101,12 +917,13 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             maxLength={3}
                             min={1}
                             max={989}
+                            t={t}
                           />
 
                           <InputField
                             id="during-previous"
                             name="during-previous"
-                            label="During Previous 6 Hours Rainfall (mm)"
+                            label={t("rainfall.duringPrevious")}
                             placeholder="Enter value (1-989)"
                             accent="cyan"
                             value={formik.values.rainfall["during-previous"] || ""}
@@ -1117,12 +934,13 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             maxLength={3}
                             min={1}
                             max={989}
+                            t={t}
                           />
 
                           <InputField
                             id="last-24-hours"
                             name="last-24-hours"
-                            label="Last 24 Hours Precipitation (mm)"
+                            label={t("rainfall.last24Hours")}
                             placeholder="Enter value (1-989)"
                             accent="cyan"
                             value={formik.values.rainfall["last-24-hours"] || ""}
@@ -1133,6 +951,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             maxLength={3}
                             min={1}
                             max={989}
+                            t={t}
                           />
 
                           <div className="md:col-span-2 flex items-center gap-2 mt-2 sm:mt-4">
@@ -1140,15 +959,9 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               id="is-intermittent-rain"
                               name="isIntermittentRain"
                               type="checkbox"
-                              checked={
-                                formik.values.rainfall?.isIntermittentRain ||
-                                false
-                              }
+                              checked={formik.values.rainfall?.isIntermittentRain || false}
                               onChange={(e) => {
-                                formik.setFieldValue(
-                                  "rainfall.isIntermittentRain",
-                                  e.target.checked
-                                );
+                                formik.setFieldValue("rainfall.isIntermittentRain", e.target.checked)
                               }}
                               className="h-4 w-4 sm:h-5 sm:w-5 text-cyan-600 border-gray-300 rounded focus:ring-cyan-500"
                             />
@@ -1156,7 +969,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               htmlFor="is-intermittent-rain"
                               className="font-medium text-cyan-800 text-xs sm:text-sm"
                             >
-                              Intermittent Rain? (বিরতিযুক্ত বৃষ্টি)
+                              {t("rainfall.intermittentRain")}
                             </Label>
                           </div>
                         </div>
@@ -1169,59 +982,45 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           disabled={isFirstTab}
                           className="text-xs sm:text-sm"
                         >
-                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
-                          Previous
+                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" /> {t("buttons.previous")}
                         </Button>
                         <Button
                           type="button"
                           onClick={handleNext}
                           className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
                         >
-                          Next{" "}
-                          <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                          {t("buttons.next")} <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </CardFooter>
                     </Card>
                   </TabsContent>
 
                   {/* WIND Tab */}
-                  <TabsContent
-                    value="wind"
-                    className="mt-4 sm:mt-6 transition-all duration-500"
-                  >
-                    <Card
-                      className={cn("overflow-hidden", tabStyles.wind.card)}
-                    >
+                  <TabsContent value="wind" className="mt-4 sm:mt-6 transition-all duration-500">
+                    <Card className={cn("overflow-hidden", tabStyles.wind.card)}>
                       <div className="p-3 sm:p-4 bg-gradient-to-r from-green-200 to-green-300 text-green-800">
                         <h3 className="text-base sm:text-lg font-semibold flex items-center">
-                          <Wind className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> Wind
-                          Measurement
+                          <Wind className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> {t("wind.title")}
                         </h3>
                       </div>
                       <CardContent className="pt-4 sm:pt-6">
                         <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
                           <div className="grid gap-2">
-                            <Label
-                              htmlFor="first-anemometer"
-                              className="font-medium text-gray-700 text-xs sm:text-sm"
-                            >
-                              First Anenometer
+                            <Label htmlFor="first-anemometer" className="font-medium text-gray-700 text-xs sm:text-sm">
+                              {t("wind.first")}
                               <span className="text-red-500">*</span>
                             </Label>
                             <Input
                               id="first-anemometer"
                               name="first-anemometer"
                               placeholder="Enter 5 Digit"
-                              value={
-                                formik.values.wind?.["first-anemometer"] || ""
-                              }
+                              value={formik.values.wind?.["first-anemometer"] || ""}
                               onChange={handleInputChange}
                               className={cn(
                                 "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3 text-xs sm:text-sm",
                                 {
-                                  "border-red-500":
-                                    formik.errors.wind?.["first-anemometer"],
-                                }
+                                  "border-red-500": formik.errors.wind?.["first-anemometer"],
+                                },
                               )}
                               required
                             />
@@ -1231,27 +1030,21 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           </div>
 
                           <div className="grid gap-2">
-                            <Label
-                              htmlFor="second-anemometer"
-                              className="font-medium text-gray-700 text-xs sm:text-sm"
-                            >
-                              Second Anenometer
+                            <Label htmlFor="second-anemometer" className="font-medium text-gray-700 text-xs sm:text-sm">
+                              {t("wind.second")}
                               <span className="text-red-500">*</span>
                             </Label>
                             <Input
                               id="second-anemometer"
                               name="second-anemometer"
                               placeholder="Enter 5 Digit"
-                              value={
-                                formik.values.wind?.["second-anemometer"] || ""
-                              }
+                              value={formik.values.wind?.["second-anemometer"] || ""}
                               onChange={handleInputChange}
                               className={cn(
                                 "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3 text-xs sm:text-sm",
                                 {
-                                  "border-red-500":
-                                    formik.errors.wind?.["second-anemometer"],
-                                }
+                                  "border-red-500": formik.errors.wind?.["second-anemometer"],
+                                },
                               )}
                               required
                             />
@@ -1261,11 +1054,8 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           </div>
 
                           <div className="grid gap-2">
-                            <Label
-                              htmlFor="speed"
-                              className="font-medium text-gray-700 text-xs sm:text-sm"
-                            >
-                              Speed (KTS)
+                            <Label htmlFor="speed" className="font-medium text-gray-700 text-xs sm:text-sm">
+                              {t("wind.speed")}
                               <span className="text-red-500">*</span>
                             </Label>
                             <Input
@@ -1277,9 +1067,8 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               className={cn(
                                 "border-2 border-cyan-300 bg-cyan-50 focus:border-cyan-500 focus:ring-cyan-500/30 rounded-lg py-2 px-3 text-xs sm:text-sm",
                                 {
-                                  "border-red-500":
-                                    formik.errors.wind?.["speed"],
-                                }
+                                  "border-red-500": formik.errors.wind?.["speed"],
+                                },
                               )}
                               required
                             />
@@ -1289,12 +1078,8 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           </div>
 
                           <div className="grid gap-2">
-                            <Label
-                              htmlFor="wind-direction"
-                              className="font-medium text-gray-700 text-xs sm:text-sm"
-                            >
-                              Direction (Degrees){" "}
-                              <span className="text-red-500">*</span>
+                            <Label htmlFor="wind-direction" className="font-medium text-gray-700 text-xs sm:text-sm">
+                              {t("wind.direction")} <span className="text-red-500">*</span>
                             </Label>
                             <Input
                               id="wind-direction"
@@ -1307,12 +1092,10 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                               className={cn(
                                 "border-2 border-green-300 bg-green-50 focus:border-green-500 focus:ring-green-500/30 rounded-lg py-2 px-3 text-xs sm:text-sm",
                                 {
-                                  "border-red-500": renderErrorMessage(
-                                    "wind.wind-direction"
-                                  ),
-                                }
+                                  "border-red-500": renderErrorMessage("wind.wind-direction"),
+                                },
                               )}
-                              placeholder="wind direction 5 degree to 364 degree from code book"
+                              placeholder={t("wind.directionPlaceholder")}
                               required
                               inputMode="numeric"
                             />
@@ -1328,33 +1111,25 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           disabled={isFirstTab}
                           className="text-xs sm:text-sm"
                         >
-                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
-                          Previous
+                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" /> {t("buttons.previous")}
                         </Button>
                         <Button
                           type="button"
                           onClick={handleNext}
                           className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
                         >
-                          Next{" "}
-                          <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                          {t("buttons.next")} <ChevronRight className="ml-1 sm:ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </CardFooter>
                     </Card>
                   </TabsContent>
 
                   {/* OBSERVER Tab */}
-                  <TabsContent
-                    value="observer"
-                    className="mt-4 sm:mt-6 transition-all duration-500"
-                  >
-                    <Card
-                      className={cn("overflow-hidden", tabStyles.observer.card)}
-                    >
+                  <TabsContent value="observer" className="mt-4 sm:mt-6 transition-all duration-500">
+                    <Card className={cn("overflow-hidden", tabStyles.observer.card)}>
                       <div className="p-3 sm:p-4 bg-gradient-to-r from-orange-200 to-orange-300 text-orange-800">
                         <h3 className="text-base sm:text-lg font-semibold flex items-center">
-                          <User className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />{" "}
-                          Observer Information
+                          <User className="mr-2 h-4 w-4 sm:h-5 sm:w-5" /> {t("observer.title")}
                         </h3>
                       </div>
                       <CardContent className="pt-4 sm:pt-6">
@@ -1362,25 +1137,23 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           <InputField
                             id="observer-initial"
                             name="observer-initial"
-                            label="Observer Initials"
+                            label={t("observer.initials")}
                             accent="orange"
-                            value={
-                              formik.values.observer["observer-initial"] || ""
-                            }
+                            value={formik.values.observer["observer-initial"] || ""}
                             onChange={handleInputChange}
                             required
-                            error={renderErrorMessage(
-                              "observer.observer-initial"
-                            )}
+                            error={renderErrorMessage("observer.observer-initial")}
+                            t={t}
                           />
                           <InputField
                             id="station-id"
                             name="station-id"
-                            label="Station ID"
+                            label={t("observer.stationId")}
                             accent="orange"
                             value={session?.user?.station?.stationId || ""}
                             onChange={handleInputChange}
                             disabled
+                            t={t}
                           />
                         </div>
                       </CardContent>
@@ -1392,8 +1165,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                           disabled={isFirstTab}
                           className="text-xs sm:text-sm w-full sm:w-auto flex justify-center items-center"
                         >
-                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />{" "}
-                          Previous
+                          <ChevronLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" /> {t("buttons.previous")}
                         </Button>
 
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
@@ -1403,7 +1175,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             className="border-slate-600 hover:bg-slate-100 transition-all duration-300 text-xs sm:text-sm w-full sm:w-auto"
                             onClick={handleReset}
                           >
-                            Reset
+                            {t("buttons.reset")}
                           </Button>
 
                           <Button
@@ -1414,12 +1186,12 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             {isSubmitting ? (
                               <>
                                 <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2 animate-spin" />
-                                Submitting...
+                                {t("buttons.submitting")}
                               </>
                             ) : (
                               <>
                                 <CloudIcon className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
-                                Submit Observation
+                                {t("buttons.submit")}
                               </>
                             )}
                           </Button>
@@ -1434,35 +1206,10 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
         )}
       </AnimatePresence>
     </>
-  );
+  )
 }
 
 // Reusable Components
-// function SectionCard({
-//   title,
-//   icon,
-//   children,
-//   className = "",
-// }: {
-//   title: string;
-//   icon: React.ReactNode;
-//   children: React.ReactNode;
-//   className?: string;
-// }) {
-//   return (
-//     <Card className={`border-2 ${className} shadow-sm`}>
-//       <CardHeader className="pb-4">
-//         <CardTitle className="flex items-center gap-3 text-xl">
-//           {icon}
-//           {title}
-//         </CardTitle>
-//       </CardHeader>
-//       <CardContent>{children}</CardContent>
-//     </Card>
-//   );
-// }
-
-// Update the InputField component to support disabled state and error display
 
 function InputField({
   id,
@@ -1480,22 +1227,24 @@ function InputField({
   maxLength,
   min,
   max,
+  t,
 }: {
-  id: string;
-  name: string;
-  label: string;
-  type?: string;
-  accent?: string;
-  value: string;
-  disabled?: boolean;
-  required?: boolean;
-  placeholder?: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  error?: React.ReactNode;
-  numeric?: boolean;
-  maxLength?: number;
-  min?: number;
-  max?: number;
+  id: string
+  name: string
+  label: string
+  type?: string
+  accent?: string
+  value: string
+  disabled?: boolean
+  required?: boolean
+  placeholder?: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  error?: React.ReactNode
+  numeric?: boolean
+  maxLength?: number
+  min?: number
+  max?: number
+  t: any
 }) {
   const focusClasses: Record<string, string> = {
     blue: "focus:ring-blue-500 focus:border-blue-500",
@@ -1507,48 +1256,47 @@ function InputField({
     fuchsia: "focus:ring-fuchsia-500 focus:border-fuchsia-500",
     violet: "focus:ring-violet-500 focus:border-violet-500",
     indigo: "focus:ring-indigo-500 focus:border-indigo-500",
-  };
+  }
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value;
+    let value = e.target.value
 
     // For numeric fields, validate immediately
     if (numeric) {
       // Only allow numbers and empty string
-      if (value !== '' && !/^\d*$/.test(value)) {
-        return; // Don't update if not a number
+      if (value !== "" && !/^\d*$/.test(value)) {
+        return // Don't update if not a number
       }
 
       // Enforce max length
       if (maxLength && value.length > maxLength) {
-        value = value.slice(0, maxLength);
+        value = value.slice(0, maxLength)
       }
 
       // Enforce min/max if provided
-      if (value !== '') {
-        const numValue = parseInt(value, 10);
+      if (value !== "") {
+        const numValue = Number.parseInt(value, 10)
         if (min !== undefined && numValue < min) {
-          value = min.toString();
+          value = min.toString()
         }
         if (max !== undefined && numValue > max) {
-          value = max.toString();
+          value = max.toString()
         }
       }
-
     }
-    
+
     // Create a new event with the updated value
     const newEvent = {
       ...e,
       target: {
         ...e.target,
         value: value,
-        name: e.target.name // Ensure name is preserved
-      }
-    };
+        name: e.target.name, // Ensure name is preserved
+      },
+    }
 
-    onChange(newEvent);
-  };
+    onChange(newEvent)
+  }
 
   return (
     <div className="grid gap-2">
@@ -1561,13 +1309,10 @@ function InputField({
         type={numeric ? "number" : type}
         value={value}
         onChange={handleInput}
-        className={cn(
-          `${focusClasses[accent]} border-gray-300 rounded-lg py-2 px-3`,
-          {
-            "bg-gray-100 cursor-not-allowed": disabled,
-            "border-red-500": error,
-          }
-        )}
+        className={cn(`${focusClasses[accent]} border-gray-300 rounded-lg py-2 px-3`, {
+          "bg-gray-100 cursor-not-allowed": disabled,
+          "border-red-500": error,
+        })}
         disabled={disabled}
         required={required}
         placeholder={placeholder}
@@ -1578,7 +1323,7 @@ function InputField({
       />
       {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
     </div>
-  );
+  )
 }
 
 function SelectField({
@@ -1592,36 +1337,31 @@ function SelectField({
   optionLabels,
   error,
   required = false,
+  t,
 }: {
-  id: string;
-  name: string;
-  label: string;
-  accent?: string;
-  value: string;
-  onValueChange: (value: string) => void;
-  options: string[];
-  optionLabels?: string[];
-  error?: React.ReactNode;
-  required?: boolean;
+  id: string
+  name: string
+  label: string
+  accent?: string
+  value: string
+  onValueChange: (value: string) => void
+  options: string[]
+  optionLabels?: string[]
+  error?: React.ReactNode
+  required?: boolean
+  t: any
 }) {
   const accentColors: Record<string, string> = {
     blue: "border-blue-200 bg-blue-50/50 focus-within:ring-blue-500 focus-within:border-blue-500",
-    yellow:
-      "border-yellow-200 bg-yellow-50/50 focus-within:ring-yellow-500 focus-within:border-yellow-500",
-    purple:
-      "border-purple-200 bg-purple-50/50 focus-within:ring-purple-500 focus-within:border-purple-500",
+    yellow: "border-yellow-200 bg-yellow-50/50 focus-within:ring-yellow-500 focus-within:border-yellow-500",
+    purple: "border-purple-200 bg-purple-50/50 focus-within:ring-purple-500 focus-within:border-purple-500",
     cyan: "border-cyan-200 bg-cyan-50/50 focus-within:ring-cyan-500 focus-within:border-cyan-500",
-    green:
-      "border-green-200 bg-green-50/50 focus-within:ring-green-500 focus-within:border-green-500",
-    orange:
-      "border-orange-200 bg-orange-50/50 focus-within:ring-orange-500 focus-within:border-orange-500",
-    fuchsia:
-      "border-fuchsia-200 bg-fuchsia-50/50 focus-within:ring-fuchsia-500 focus-within:border-fuchsia-500",
-    violet:
-      "border-violet-200 bg-violet-50/50 focus-within:ring-violet-500 focus-within:border-violet-500",
-    indigo:
-      "border-indigo-200 bg-indigo-50/50 focus-within:ring-indigo-500 focus-within:border-indigo-500",
-  };
+    green: "border-green-200 bg-green-50/50 focus-within:ring-green-500 focus-within:border-green-500",
+    orange: "border-orange-200 bg-orange-50/50 focus-within:ring-orange-500 focus-within:border-orange-500",
+    fuchsia: "border-fuchsia-200 bg-fuchsia-50/50 focus-within:ring-fuchsia-500 focus-within:border-fuchsia-500",
+    violet: "border-violet-200 bg-violet-50/50 focus-within:ring-violet-500 focus-within:border-violet-500",
+    indigo: "border-indigo-200 bg-indigo-50/50 focus-within:ring-indigo-500 focus-within:border-indigo-500",
+  }
 
   return (
     <div className="grid gap-2 w-full">
@@ -1635,10 +1375,10 @@ function SelectField({
             `w-full border-2 ${accentColors[accent]} rounded-lg py-2.5 px-4 transition-all duration-200 shadow-sm hover:bg-white focus:shadow-md`,
             {
               "border-red-500": error,
-            }
+            },
           )}
         >
-          <SelectValue placeholder="Select..." className="text-gray-600" />
+          <SelectValue placeholder={t("errors.required")} className="text-gray-600" />
         </SelectTrigger>
         <SelectContent className="max-h-80 overflow-y-auto rounded-lg border-2 border-gray-200 shadow-lg">
           {options.map((option, index) => (
@@ -1654,7 +1394,7 @@ function SelectField({
       </Select>
       {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
     </div>
-  );
+  )
 }
 
 function CloudLevelSection({
@@ -1664,140 +1404,81 @@ function CloudLevelSection({
   data,
   onSelectChange,
   renderError,
+  t,
 }: {
-  title: string;
-  prefix: string;
-  color?: string;
-  data: Record<string, string>;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSelectChange: (name: string, value: string) => void;
-  renderError: (field: string) => React.ReactNode;
+  title: string
+  prefix: string
+  color?: string
+  data: Record<string, string>
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onSelectChange: (name: string, value: string) => void
+  renderError: (field: string) => React.ReactNode
+  t: any
 }) {
-  const cloudFormOptions = [
-    { value: "0", label: "0 - No Sc, St, Cu or Cb" },
-    { value: "1", label: "1 - Cu with little vertical extent" },
-    { value: "2", label: "2 - Cu of moderate/strong vertical extent" },
-    { value: "3", label: "3 - Cb lacking sharp outlines" },
-    { value: "4", label: "4 - Sc formed from spreading Cu" },
-    { value: "5", label: "5 - Sc not from spreading Cu" },
-    { value: "6", label: "6 - St in continuous sheet or ragged shreds" },
-    { value: "7", label: "7 - Stratus fractus or Cu fractus of bad weather" },
-    { value: "8", label: "8 - Cu and Sc at different levels" },
-    { value: "9", label: "9 - Cb with fibrous upper part/anvil" },
-    { value: "/", label: "/ - Not visible" },
-  ];
-
-  const cloudDirectionOptions = [
-    { value: "0", label: "0 - Stationary or no direction" },
-    { value: "1", label: "1 - Cloud coming from NE" },
-    { value: "2", label: "2 - Cloud coming from E" },
-    { value: "3", label: "3 - Cloud coming from SE" },
-    { value: "4", label: "4 - Cloud coming from S" },
-    { value: "5", label: "5 - Cloud coming from SW" },
-    { value: "6", label: "6 - Cloud coming from W" },
-    { value: "7", label: "7 - Cloud coming from NW" },
-    { value: "8", label: "8 - Cloud coming from N" },
-    { value: "9", label: "9 - No definite direction or direction unknown" },
-  ];
-
-  const cloudHeightOptions = [
-    { value: "0", label: "0 - 0 to 50 m" },
-    { value: "1", label: "1 - 50 to 100 m" },
-    { value: "2", label: "2 - 100 to 200 m" },
-    { value: "3", label: "3 - 200 to 300 m" },
-    { value: "4", label: "4 - 300 to 600 m" },
-    { value: "5", label: "5 - 600 to 1000 m" },
-    { value: "6", label: "6 - 1000 to 1500 m" },
-    { value: "7", label: "7 - 1500 to 2000 m" },
-    { value: "8", label: "8 - 2000 to 2500 m" },
-    { value: "9", label: "9 - 2500 m or more or no cloud" },
-    { value: "/", label: "/ - Height of base of cloud not known" },
-  ];
-
-  const cloudAmountOptions = [
-    { value: "0", label: "0 - No cloud" },
-    { value: "1", label: "1 - 1 octa or less (1/10 or less but not zero)" },
-    { value: "2", label: "2 - 2 octas (2/10 to 3/10)" },
-    { value: "3", label: "3 - 3 octas (4/10)" },
-    { value: "4", label: "4 - 4 octas (5/10)" },
-    { value: "5", label: "5 - 5 octas (6/10)" },
-    { value: "6", label: "6 - 6 octas (7/10 to 8/10)" },
-    { value: "7", label: "7 - 7 octas (9/10 or more but not 10/10)" },
-    { value: "8", label: "8 - 8 octas (10/10)" },
-    {
-      value: "9",
-      label: "9 - sky obscured or cloud amount cannot be estimated.",
-    },
-    {
-      value: "/",
-      label: "/ - Key obscured or cloud amount cannot be estimated",
-    },
-  ];
-
   return (
     <div className="bg-gradient-to-r from-white to-gray-50 p-4 rounded-lg border border-gray-200">
-      <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>
-        {title}
-      </h3>
+      <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>{title}</h3>
       <div className="grid gap-4 md:grid-cols-2">
         <SelectField
           id={`${prefix}-form`}
           name={`${prefix}-form`}
-          label="Form (Code)"
+          label={t("SelectField.form")}
           accent={color}
           value={data["form"] || ""}
           onValueChange={(value) => onSelectChange(`${prefix}-form`, value)}
-          options={cloudFormOptions.map((opt) => opt.value)}
-          optionLabels={cloudFormOptions.map((opt) => opt.label)}
+          options={Object.keys(t.raw("options.cloudForm"))}
+          optionLabels={Object.values(t.raw("options.cloudForm"))}
           error={renderError("form")}
           required
+          t={t}
         />
 
         <SelectField
           id={`${prefix}-amount`}
           name={`${prefix}-amount`}
-          label="Amount (Octa)"
+          label={t("SelectField.amount")}
           accent={color}
           value={data["amount"] || ""}
           onValueChange={(value) => onSelectChange(`${prefix}-amount`, value)}
-          options={cloudAmountOptions.map((opt) => opt.value)}
-          optionLabels={cloudAmountOptions.map((opt) => opt.label)}
+          options={Object.keys(t.raw("options.cloudAmount"))}
+          optionLabels={Object.values(t.raw("options.cloudAmount"))}
           error={renderError("amount")}
           required
+          t={t}
         />
 
         {prefix !== "high-cloud" && (
           <SelectField
             id={`${prefix}-height`}
             name={`${prefix}-height`}
-            label="Height of Base (Code)"
+            label={t("SelectField.height")}
             accent={color}
             value={data["height"] || ""}
             onValueChange={(value) => onSelectChange(`${prefix}-height`, value)}
-            options={cloudHeightOptions.map((opt) => opt.value)}
-            optionLabels={cloudHeightOptions.map((opt) => opt.label)}
+            options={Object.keys(t.raw("options.cloudHeight"))}
+            optionLabels={Object.values(t.raw("options.cloudHeight"))}
             error={renderError("height")}
             required
+            t={t}
           />
         )}
 
         <SelectField
           id={`${prefix}-direction`}
           name={`${prefix}-direction`}
-          label="Direction (Code)"
+          label={t("SelectField.direction")}
           accent={color}
           value={data["direction"] || ""}
-          onValueChange={(value) =>
-            onSelectChange(`${prefix}-direction`, value)
-          }
-          options={cloudDirectionOptions.map((opt) => opt.value)}
-          optionLabels={cloudDirectionOptions.map((opt) => opt.label)}
+          onValueChange={(value) => onSelectChange(`${prefix}-direction`, value)}
+          options={Object.keys(t.raw("options.cloudDirection"))}
+          optionLabels={Object.values(t.raw("options.cloudDirection"))}
           error={renderError("direction")}
           required
+          t={t}
         />
       </div>
     </div>
-  );
+  )
 }
 
 function SignificantCloudSection({
@@ -1807,92 +1488,65 @@ function SignificantCloudSection({
   data,
   onSelectChange,
   renderError,
+  t,
 }: {
-  title: string;
-  prefix: string;
-  color?: string;
-  data: Record<string, string>;
-  onSelectChange: (name: string, value: string) => void;
-  renderError: (field: string) => React.ReactNode;
+  title: string
+  prefix: string
+  color?: string
+  data: Record<string, string>
+  onSelectChange: (name: string, value: string) => void
+  renderError: (field: string) => React.ReactNode
+  t: any
 }) {
   // Generate height options from 0 to 99
-  const heightOptions = Array.from({ length: 100 }, (_, i) => i.toString().padStart(2, '0'));
-
-  const cloudFormOptions = [
-    { value: "0", label: "0 - Cirrus (Ci)" },
-    { value: "1", label: "1 - Cirrocumulus (Cc)" },
-    { value: "2", label: "2 - Cirrostratus (Cs)" },
-    { value: "3", label: "3 - Altocumulus (Ac)" },
-    { value: "4", label: "4 - Altostratus (As)" },
-    { value: "5", label: "5 - Nimbostratus (Ns)" },
-    { value: "6", label: "6 - Stratocumulus (Sc)" },
-    { value: "7", label: "7 - Stratus (St)" },
-    { value: "8", label: "8 - Cumulus (Cu)" },
-    { value: "9", label: "9 - Cumulonimbus (Cb)" },
-    { value: "/", label: "/ - Clouds not visible (darkness, fog, etc.)" },
-  ];
-
-  const SigcloudAmountOptions = [
-    { value: "0", label: "0 - No cloud" },
-    { value: "1", label: "1 - 1 octa or less (1/10 or less but not zero)" },
-    { value: "2", label: "2 - 2 octas (2/10 to 3/10)" },
-    { value: "3", label: "3 - 3 octas (4/10)" },
-    { value: "4", label: "4 - 4 octas (5/10)" },
-    { value: "5", label: "5 - 5 octas (6/10)" },
-    { value: "6", label: "6 - 6 octas (7/10 to 8/10)" },
-    { value: "7", label: "7 - 7 octas (9/10 or more but not 10/10)" },
-    { value: "8", label: "8 - 8 octas (10/10)" },
-    {
-      value: "/",
-      label: "/ - Key obscured or cloud amount cannot be estimated",
-    },
-  ];
+  const heightOptions = Array.from({ length: 100 }, (_, i) => i.toString().padStart(2, "0"))
 
   // Determine if this is the first layer (required) or other layers (optional)
-  const isRequired = prefix === "layer1";
+  const isRequired = prefix === "layer1"
 
   return (
     <div className="bg-gradient-to-r from-white to-gray-50 p-4 rounded-lg border border-gray-200">
-      <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>
-        {title}
-      </h3>
+      <h3 className={`text-lg font-semibold mb-4 text-${color}-600`}>{title}</h3>
       <div className="grid gap-4 md:grid-cols-2">
         <SelectField
           id={`${prefix}-form`}
           name={`${prefix}-form`}
-          label="Form (Code)"
+          label={t("SelectField.form")}
           accent={color}
           value={data["form"] || ""}
           onValueChange={(value) => onSelectChange(`${prefix}-form`, value)}
-          options={cloudFormOptions.map((opt) => opt.value)}
-          optionLabels={cloudFormOptions.map((opt) => opt.label)}
+          options={Object.keys(t.raw("options.sigCloudForm"))}
+          optionLabels={Object.values(t.raw("options.sigCloudForm"))}
           error={renderError("form")}
           required={isRequired}
+          t={t}
         />
         <SelectField
           id={`${prefix}-amount`}
           name={`${prefix}-amount`}
-          label="Amount (Octa)"
+          label={t("SelectField.amount")}
           accent={color}
           value={data["amount"] || ""}
           onValueChange={(value) => onSelectChange(`${prefix}-amount`, value)}
-          options={SigcloudAmountOptions.map((opt) => opt.value)}
-          optionLabels={SigcloudAmountOptions.map((opt) => opt.label)}
+          options={Object.keys(t.raw("options.cloudAmount"))}
+          optionLabels={Object.values(t.raw("options.cloudAmount"))}
           error={renderError("amount")}
           required={isRequired}
+          t={t}
         />
         <SelectField
           id={`${prefix}-height`}
           name={`${prefix}-height`}
-          label="Height of Base (Code)"
+          label={t("SelectField.height")}
           accent={color}
           value={data["height"] || ""}
           onValueChange={(value) => onSelectChange(`${prefix}-height`, value)}
           options={heightOptions}
           error={renderError("height")}
           required={isRequired}
+          t={t}
         />
       </div>
     </div>
-  );
+  )
 }

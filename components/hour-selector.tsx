@@ -11,6 +11,7 @@ import {
 import { Circle, CircleCheck, Clock } from "lucide-react";
 import { cn, utcToHour } from "@/lib/utils";
 import { TimeInfo } from "@/lib/data-type";
+import { useTranslations } from "next-intl";
 
 
 
@@ -29,6 +30,8 @@ const HourSelector = ({
     isLoading,
     clearError,
   } = useHour();
+
+  const t = useTranslations("HourSelector");
 
   // Function to check if a specific hour exists in timeInfo
   const hasTimeEntry = (hour: string) => {
@@ -60,7 +63,7 @@ const HourSelector = ({
       <div className="flex-col flex gap-4 justify-center items-center">
         <label className="flex items-center text-lg font-bold text-blue-500">
           <Clock className="size-5 mr-2" />
-          <span>UTC HOUR</span>
+          <span>{t("utcHour")}</span>
         </label>
         <Select
           onValueChange={handleHourChange}
@@ -76,7 +79,7 @@ const HourSelector = ({
             )}
           >
             <SelectValue
-              placeholder={isLoading ? "Loading..." : "Observing Time"}
+              placeholder={isLoading ? t("loading") : t("observingTime")}
             />
           </SelectTrigger>
           <SelectContent>
@@ -87,7 +90,7 @@ const HourSelector = ({
                 <Circle className="size-5 stroke-1.5 text-slate-200" />
               )}
               00&nbsp;
-              <span className="text-muted-foreground text-sm">(12:00 AM)</span>
+              <span className="text-muted-foreground text-sm">({t("TimeLine.00")})</span>
             </SelectItem>
             <SelectItem value="03" className="text-lg">
               {hasTimeEntry("03") ? (
@@ -96,7 +99,7 @@ const HourSelector = ({
                 <Circle className="size-5 stroke-1.5 text-slate-200" />
               )}
               03&nbsp;
-              <span className="text-muted-foreground text-sm">(3:00 AM)</span>
+              <span className="text-muted-foreground text-sm">({t("TimeLine.03")})</span>
             </SelectItem>
             <SelectItem value="06" className="text-lg">
               {hasTimeEntry("06") ? (
@@ -105,7 +108,7 @@ const HourSelector = ({
                 <Circle className="size-5 stroke-1.5 text-slate-200" />
               )}
               06&nbsp;
-              <span className="text-muted-foreground text-sm">(6:00 AM)</span>
+              <span className="text-muted-foreground text-sm">({t("TimeLine.06")})</span>
             </SelectItem>
             <SelectItem value="09" className="text-lg">
               {hasTimeEntry("09") ? (
@@ -114,7 +117,7 @@ const HourSelector = ({
                 <Circle className="size-5 stroke-1.5 text-slate-200" />
               )}
               09&nbsp;
-              <span className="text-muted-foreground text-sm">(9:00 AM)</span>
+              <span className="text-muted-foreground text-sm">({t("TimeLine.09")})</span>
             </SelectItem>
             <SelectItem value="12" className="text-lg">
               {hasTimeEntry("12") ? (
@@ -123,7 +126,7 @@ const HourSelector = ({
                 <Circle className="size-5 stroke-1.5 text-slate-200" />
               )}
               12&nbsp;
-              <span className="text-muted-foreground text-sm">(12:00 PM)</span>
+              <span className="text-muted-foreground text-sm">({t("TimeLine.12")})</span>
             </SelectItem>
             <SelectItem value="15" className="text-lg">
               {hasTimeEntry("15") ? (
@@ -132,7 +135,7 @@ const HourSelector = ({
                 <Circle className="size-5 stroke-1.5 text-slate-200" />
               )}
               15&nbsp;
-              <span className="text-muted-foreground text-sm">(3:00 PM)</span>
+              <span className="text-muted-foreground text-sm">({t("TimeLine.15")})</span>
             </SelectItem>
             <SelectItem value="18" className="text-lg">
               {hasTimeEntry("18") ? (
@@ -141,7 +144,7 @@ const HourSelector = ({
                 <Circle className="size-5 stroke-1.5 text-slate-200" />
               )}
               18&nbsp;
-              <span className="text-muted-foreground text-sm">(6:00 PM)</span>
+              <span className="text-muted-foreground text-sm">({t("TimeLine.18")})</span>
             </SelectItem>
             <SelectItem value="21" className="text-lg">
               {hasTimeEntry("21") ? (
@@ -150,7 +153,7 @@ const HourSelector = ({
                 <Circle className="size-5 stroke-1.5 text-slate-200" />
               )}
               21&nbsp;
-              <span className="text-muted-foreground text-sm">(9:00 PM)</span>
+              <span className="text-muted-foreground text-sm">({t("TimeLine.21")})</span>
             </SelectItem>
           </SelectContent>
         </Select>
