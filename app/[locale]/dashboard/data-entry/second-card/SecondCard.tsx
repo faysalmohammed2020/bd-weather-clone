@@ -24,15 +24,13 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { useFormik } from "formik"
 import { useTranslations } from "next-intl"
+import * as Yup from "yup"
 
 import { cn } from "@/lib/utils"
 import { AnimatePresence, motion } from "framer-motion"
 import { useHour } from "@/contexts/hourContext"
 import HourSelector from "@/components/hour-selector"
 import type { TimeInfo } from "@/lib/data-type"
-
-// Import validation schemas from separate file
-import { validationSchema } from "@/validations/second-card-validation"
 
 // Define the form data type
 type WeatherObservationFormData = {
@@ -107,6 +105,7 @@ type WeatherObservationFormData = {
 
 export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const t = useTranslations("secondCard")
+  const t2 = useTranslations("Validation")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState("cloud")
   const [currentStep, setCurrentStep] = useState(1)
@@ -151,6 +150,136 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
       icon: <User className="size-5 mr-2" />,
     },
   }
+
+  //validation schema
+
+  // Rainfall validation schema
+  const rainfallSchema = Yup.object({
+    rainfall: Yup.object({
+      "since-previous": Yup.string()
+        .required(t("errors.required"))
+        .matches(/^[1-9]\d{0,2}$/, t("errors.rainfall.invalidFormat"))
+        .test("is-valid-range", t("errors.rainfall.invalidRange"), (value) => {
+          const num = Number.parseInt(value || "0");
+          return num >= 1 && num <= 989;
+        }),
+      "during-previous": Yup.string()
+        .required(t("errors.required"))
+        .matches(/^[1-9]\d{0,2}$/, t("errors.rainfall.invalidFormat"))
+        .test("is-valid-range", t("errors.rainfall.invalidRange"), (value) => {
+          const num = Number.parseInt(value || "0");
+          return num >= 1 && num <= 989;
+        }),
+      "last-24-hours": Yup.string()
+        .required(t("errors.required"))
+        .matches(/^[1-9]\d{0,2}$/, t("errors.rainfall.invalidFormat"))
+        .test("is-valid-range", t("errors.rainfall.invalidRange"), (value) => {
+          const num = Number.parseInt(value || "0");
+          return num >= 1 && num <= 989;
+        }),
+    }),
+  });
+
+  // Wind validation schema
+  const windSchema = Yup.object({
+    wind: Yup.object({
+      "first-anemometer": Yup.string()
+        .required(t("errors.required"))
+        .matches(/^\d{5}$/, t("errors.wind.anemometer")),
+      "second-anemometer": Yup.string()
+        .required(t("errors.required"))
+        .matches(/^\d{5}$/, t("errors.wind.anemometer")),
+      speed: Yup.string()
+        .required(t("errors.required"))
+        .matches(/^\d{3}$/, t("errors.wind.speed")),
+      "wind-direction": Yup.string()
+        .required(t("errors.required"))
+        .test("is-valid-direction", t("errors.wind.direction"), (value) => {
+          if (!value) return false;
+          if (value === "00") return true;
+          const num = Number(value);
+          return Number.isInteger(num) && num >= 5 && num <= 360;
+        }),
+    }),
+  });
+
+  // Cloud validation schema
+  const cloudSchema = Yup.object({
+    clouds: Yup.object({
+      low: Yup.object({
+        form: Yup.string().required(t("errors.required")),
+        amount: Yup.string().required(t("errors.required")),
+        height: Yup.string().required(t("errors.required")),
+        direction: Yup.string().required(t("errors.required")),
+      }),
+      medium: Yup.object({
+        form: Yup.string().required(t("errors.required")),
+        amount: Yup.string().required(t("errors.required")),
+        height: Yup.string().required(t("errors.required")),
+        direction: Yup.string().required(t("errors.required")),
+      }),
+      high: Yup.object({
+        form: Yup.string().required(t("errors.required")),
+        amount: Yup.string().required(t("errors.required")),
+        direction: Yup.string().required(t("errors.required")),
+      }),
+    }),
+  });
+
+  // Total cloud validation schema
+  const totalCloudSchema = Yup.object({
+    totalCloud: Yup.object({
+      "total-cloud-amount": Yup.string().required(t("errors.required")),
+    }),
+  });
+
+  // Significant cloud validation schema
+  const significantCloudSchema = Yup.object({
+    significantClouds: Yup.object({
+      layer1: Yup.object({
+        form: Yup.string().required(t("errors.required")),
+        amount: Yup.string().required(t("errors.required")),
+        height: Yup.string()
+          .required(t("errors.required"))
+          .matches(/^[0-9]+$/, t("errors.cloud.numbersOnly")),
+      }),
+      layer2: Yup.object({
+        form: Yup.string(),
+        amount: Yup.string(),
+        height: Yup.string().matches(/^[0-9]*$/, t("errors.cloud.numbersOnly")),
+      }),
+      layer3: Yup.object({
+        form: Yup.string(),
+        amount: Yup.string(),
+        height: Yup.string().matches(/^[0-9]*$/, t("errors.cloud.numbersOnly")),
+      }),
+      layer4: Yup.object({
+        form: Yup.string(),
+        amount: Yup.string(),
+        height: Yup.string().matches(/^[0-9]*$/, t("errors.cloud.numbersOnly")),
+      }),
+    }),
+  });
+
+  // Observer validation schema
+  const observerSchema = Yup.object({
+    observer: Yup.object({
+      "observer-initial": Yup.string().required(t("errors.required")),
+      "observation-time": Yup.string().required(t("errors.required")),
+    }),
+  });
+
+  // Combined schema for the entire form
+  const validationSchema = Yup.object({
+    ...cloudSchema.fields,
+    ...totalCloudSchema.fields,
+    ...significantCloudSchema.fields,
+    ...rainfallSchema.fields,
+    ...windSchema.fields,
+    ...observerSchema.fields,
+  })
+
+  ///////////////////////////////////////////////////
 
   // Initialize Formik
   const formik = useFormik<WeatherObservationFormData>({
@@ -907,7 +1036,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             id="since-previous"
                             name="since-previous"
                             label={t("rainfall.sincePrevious")}
-                            placeholder="Enter value (1-989)"
+                            placeholder={t("rainfall.placeholder")}
                             accent="cyan"
                             value={formik.values.rainfall["since-previous"] || ""}
                             onChange={handleInputChange}
@@ -924,7 +1053,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             id="during-previous"
                             name="during-previous"
                             label={t("rainfall.duringPrevious")}
-                            placeholder="Enter value (1-989)"
+                            placeholder={t("rainfall.placeholder")}
                             accent="cyan"
                             value={formik.values.rainfall["during-previous"] || ""}
                             onChange={handleInputChange}
@@ -941,7 +1070,7 @@ export default function SecondCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                             id="last-24-hours"
                             name="last-24-hours"
                             label={t("rainfall.last24Hours")}
-                            placeholder="Enter value (1-989)"
+                            placeholder={t("rainfall.placeholder")}
                             accent="cyan"
                             value={formik.values.rainfall["last-24-hours"] || ""}
                             onChange={handleInputChange}
