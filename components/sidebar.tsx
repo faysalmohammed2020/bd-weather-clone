@@ -21,6 +21,8 @@ import {
   FileBarChart,
   X,
   Leaf,
+  BarChart2,
+  Monitor,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import {
@@ -183,11 +185,34 @@ const Sidebar = () => {
           label: t("dailySummary"),
         },
         {
+          icon: <Leaf className="mr-2 h-5 w-5" />,
+          href: "/dashboard/view-and-manage/agroclimatological-data-table",
+          label: "Agroclimatological",
+        },
+        {
           icon: <FileBarChart className="w-5 h-5" />,
           href: "/dashboard/view-and-manage/all",
           label: t("viewAllExport"),
         },
       ],
+    },
+    {
+      href: "/dashboard/upper-air-analyzer",
+      icon: <BarChart2 className="w-5 h-5" />,
+      label: "Upper Air Analyzer",
+      roles: ["super_admin", "observer", "station_admin"],
+    },
+    {
+      href: "/dashboard/radio-sond-analyzer",
+      icon: <BarChart2 className="w-5 h-5" />,
+      label: "Radio Sond Analyzer",
+      roles: ["super_admin"],
+    },
+    {
+      href: "/dashboard/netcdf-visualizer",
+      icon: <Monitor className="w-5 h-5" />,
+      label: "NetCDF Visualizer",
+      roles: ["super_admin", "observer", "station_admin"],
     },
     {
       href: "/dashboard/user",

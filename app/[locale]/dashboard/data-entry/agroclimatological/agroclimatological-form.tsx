@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,18 +13,19 @@ import { toast } from "sonner"
 import { useFormik } from "formik"
 import { motion } from "framer-motion"
 import * as Yup from "yup"
+import { useSession } from "@/lib/auth-client"
 
-// Enhanced validation schema with all fields
-const validationSchema = Yup.object({
-  stationInfo: Yup.object({
-    stationName: Yup.string().required("Station name is required"),
-    latitude: Yup.number().min(-90).max(90).required("Latitude is required"),
-    longitude: Yup.number().min(-180).max(180).required("Longitude is required"),
-    elevation: Yup.number().min(0).required("Elevation is required"),
-    year: Yup.number().min(1900).max(2100).required("Year is required"),
-    month: Yup.number().min(1).max(12).required("Month is required"),
-  }),
-})
+// // Enhanced validation schema with all fields
+// const validationSchema = Yup.object({
+//   stationInfo: Yup.object({
+//     stationName: Yup.string().required("Station name is required"),
+//     latitude: Yup.number().min(-90).max(90).required("Latitude is required"),
+//     longitude: Yup.number().min(-180).max(180).required("Longitude is required"),
+//     elevation: Yup.number().min(0).required("Elevation is required"),
+//     year: Yup.number().min(1900).max(2100).required("Year is required"),
+//     month: Yup.number().min(1).max(12).required("Month is required"),
+//   }),
+// })
 
 export interface AgroclimatologicalFormData {
   stationInfo: {
@@ -32,8 +33,8 @@ export interface AgroclimatologicalFormData {
     latitude: string
     longitude: string
     elevation: string
-    year: number
-    month: number
+    date: string
+    utcHour: 0 | 12
   }
   solarRadiation: string
   sunShineHour: string
@@ -70,9 +71,86 @@ export interface AgroclimatologicalFormData {
   userId?: string
 }
 
-export function AgroclimatologicalFormComplete() {
+export function AgroclimatologicalForm() {
   const [activeTab, setActiveTab] = useState("station")
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { data: session } = useSession()
+
+  useEffect(() => {
+    if (session?.user?.station) {
+      formik.setFieldValue("stationInfo.stationName", session.user.station.name)
+      formik.setFieldValue("stationInfo.latitude", session.user.station.latitude.toString())
+      formik.setFieldValue("stationInfo.longitude", session.user.station.longitude.toString())
+    }
+  }, [session])
+
+
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        // Fetch sunshine data (working)
+        const sunshineResponse = await fetch("/api/sunshine");
+        if (sunshineResponse.ok) {
+          const sunshineData = await sunshineResponse.json();
+          if (sunshineData.length > 0) {
+            const latestSunshine = sunshineData[0];
+            formik.setFieldValue("sunShineHour", latestSunshine.total?.toString() || "");
+          }
+        }
+
+        // Fetch soil moisture data - improved error handling
+        const soilResponse = await fetch("/api/soil-moisture");
+        if (soilResponse.ok) {
+          const { data: soilData } = await soilResponse.json(); // extract .data
+
+          if (Array.isArray(soilData) && soilData.length > 0) {
+            const validEntries = soilData.filter(
+              (entry) => typeof entry.depth === "number" && typeof entry.Sm === "number"
+            );
+
+            if (validEntries.length > 0) {
+              const depthMap = new Map<number, number>();
+              validEntries.forEach((entry) => depthMap.set(entry.depth, entry.Sm));
+
+              const calculateAverage = (depths: number[]) => {
+                const values = depths
+                  .map((d) => depthMap.get(d))
+                  .filter((v): v is number => v !== undefined);
+
+                return values.length > 0
+                  ? (values.reduce((sum, val) => sum + val, 0) / values.length).toFixed(2)
+                  : "";
+              };
+
+              const avg0to20 = calculateAverage([5, 10, 20]);
+              const avg20to50 = calculateAverage([20, 30, 50]);
+
+              if (avg0to20) formik.setFieldValue("soilMoisture.depth0to20cm", avg0to20);
+              if (avg20to50) formik.setFieldValue("soilMoisture.depth20to50cm", avg20to50);
+            }
+          }
+        }
+
+        const rainfallResponse = await fetch("/api/save-observation");
+        if (rainfallResponse.ok) {
+          const rainfallJson = await rainfallResponse.json();
+
+          const latestObservation = rainfallJson?.data?.[0];
+          const weatherObs = latestObservation?.WeatherObservation?.[0];
+
+          if (weatherObs?.rainfallLast24Hours) {
+            formik.setFieldValue("rainfall", weatherObs.rainfallLast24Hours.toString());
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching auto-fill data:", error);
+        toast.error("Failed to load some auto-fill data");
+      }
+    };
+
+    fetchAllData();
+  }, []);
 
   // Enhanced tab order with new sections
   const tabOrder = ["station", "solar", "temperature", "soil", "humidity", "weather", "summary"]
@@ -131,15 +209,19 @@ export function AgroclimatologicalFormComplete() {
   }
 
   // Initialize Formik with simplified structure - no dailyData array
-   const formik = useFormik<AgroclimatologicalFormData>({
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth() + 1;
+
+  const formik = useFormik<AgroclimatologicalFormData>({
     initialValues: {
       stationInfo: {
         stationName: "",
         latitude: "",
         longitude: "",
         elevation: "",
-        year: new Date().getFullYear(),
-        month: new Date().getMonth() + 1,
+        date: new Date().toISOString().split("T")[0], // Default to today
+        utcHour: 0,
       },
       // Direct fields instead of dailyData array
       solarRadiation: "",
@@ -175,42 +257,70 @@ export function AgroclimatologicalFormComplete() {
       duration: "",
       rainfall: "",
     },
-    validationSchema: validationSchema,
     onSubmit: handleSubmit,
   })
   const handleTabChange = (tabName: string) => {
     setActiveTab(tabName)
   }
 
-   async function handleSubmit(values: AgroclimatologicalFormData) {
-    if (isSubmitting) return
-    setIsSubmitting(true)
+  async function handleSubmit(values: AgroclimatologicalFormData) {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    console.log("Submitting values:", values);
 
     try {
+      // Create a date object from year and month (first day of the month)
+      const dateParts = values.stationInfo.date.split("-").map(Number)
+      const [year, month, day] = dateParts
+
+      const utcTime = new Date(Date.UTC(year, month - 1, day, values.stationInfo.utcHour))
+      const dateOnly = new Date(Date.UTC(year, month - 1, day))
+
+      const submissionData = {
+        ...values,
+        stationInfo: {
+          ...values.stationInfo,
+          elevation: parseFloat(values.stationInfo.elevation) || 0,
+        },
+        utcTime,
+        date: dateOnly,
+        userId: session?.user?.id,
+        stationId: session?.user?.station?.id,
+      }
+
       const response = await fetch("/api/agroclimatological-data", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
-      })
+        body: JSON.stringify(submissionData),
+      });
 
-      const result = await response.json()
-
-      if (result.success) {
-        toast.success(result.message)
-        formik.resetForm()
-        setActiveTab("station")
-      } else {
-        toast.error(result.message)
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to submit data");
       }
+
+      const result = await response.json();
+      console.log("Result:", result);
+
+      if (!result.success) {
+        throw new Error(result.message || "Server returned unsuccessful response");
+      }
+
+      toast.success(result.message || "Data submitted successfully!");
+      formik.resetForm();
+      setActiveTab("station");
     } catch (error) {
-      console.error("Submission error:", error)
-      toast.error("An unexpected error occurred. Please try again.")
+      console.error("Submission error:", error);
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
+
+
   const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     if (!/^\d*\.?\d*$/.test(value)) return
@@ -234,17 +344,6 @@ export function AgroclimatologicalFormComplete() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 p-4">
       <div className="container mx-auto max-w-7xl">
-        <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full mb-4 shadow-lg">
-            <BarChart3 className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            Bangladesh Meteorological Department
-          </h1>
-          <p className="text-lg text-slate-600 font-medium">Comprehensive Agroclimatological Data Entry System</p>
-          <div className="w-24 h-1 bg-gradient-to-r from-violet-500 to-purple-600 mx-auto mt-4 rounded-full"></div>
-        </div>
-
         <motion.form
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -330,12 +429,14 @@ export function AgroclimatologicalFormComplete() {
                     <Input
                       id="stationName"
                       name="stationInfo.stationName"
-                      value={formik.values.stationInfo.stationName}
+                      value={session?.user?.station?.name}
                       onChange={formik.handleChange}
-                      className="border-2 border-slate-200 h-12 rounded-xl"
+                      className="border border-slate-300 h-12 rounded-xl font-semibold"
                       placeholder="Enter station name"
+                      readOnly
                     />
                   </div>
+
                   <div className="space-y-3">
                     <Label htmlFor="latitude" className="text-slate-700 font-semibold">
                       Latitude (°) *
@@ -345,10 +446,11 @@ export function AgroclimatologicalFormComplete() {
                       name="stationInfo.latitude"
                       type="number"
                       step="0.0001"
-                      value={formik.values.stationInfo.latitude}
+                      value={session?.user.station?.latitude}
                       onChange={formik.handleChange}
-                      className="border-2 border-slate-200 h-12 rounded-xl"
+                      className="border border-slate-300 h-12 rounded-xl font-semibold"
                       placeholder="e.g., 23.7104"
+                      readOnly
                     />
                   </div>
                   <div className="space-y-3">
@@ -360,10 +462,11 @@ export function AgroclimatologicalFormComplete() {
                       name="stationInfo.longitude"
                       type="number"
                       step="0.0001"
-                      value={formik.values.stationInfo.longitude}
+                      value={session?.user.station?.longitude}
                       onChange={formik.handleChange}
-                      className="border-2 border-slate-200 h-12 rounded-xl"
+                      className="border border-slate-300 h-12 rounded-xl font-semibold"
                       placeholder="e.g., 90.4074"
+                      readOnly
                     />
                   </div>
                   <div className="space-y-3">
@@ -377,37 +480,41 @@ export function AgroclimatologicalFormComplete() {
                       step="0.01"
                       value={formik.values.stationInfo.elevation}
                       onChange={formik.handleChange}
-                      className="border-2 border-slate-200 h-12 rounded-xl"
+                      className="border border-slate-300 h-12 rounded-xl font-semibold"
                       placeholder="e.g., 21.95"
                     />
                   </div>
                   <div className="space-y-3">
-                    <Label htmlFor="year" className="text-slate-700 font-semibold">
-                      Year
+                    <Label htmlFor="date" className="text-slate-700 font-semibold">
+                      Observation Date *
                     </Label>
                     <Input
-                      id="year"
-                      name="stationInfo.year"
-                      type="number"
-                      value={formik.values.stationInfo.year}
+                      id="date"
+                      name="stationInfo.date"
+                      type="date"
+                      value={formik.values.stationInfo.date}
                       onChange={formik.handleChange}
-                      className="border-2 border-slate-200 h-12 rounded-xl"
+                      className="border border-slate-300 h-12 rounded-xl font-semibold"
+                      required
                     />
                   </div>
+
                   <div className="space-y-3">
-                    <Label htmlFor="month" className="text-slate-700 font-semibold">
-                      Month
+                    <Label htmlFor="utcHour" className="text-slate-700 font-semibold">
+                      UTC Hour *
                     </Label>
-                    <Input
-                      id="month"
-                      name="stationInfo.month"
-                      type="number"
-                      min="1"
-                      max="12"
-                      value={formik.values.stationInfo.month}
+                    <select
+                      id="utcHour"
+                      name="stationInfo.utcHour"
+                      value={formik.values.stationInfo.utcHour}
                       onChange={formik.handleChange}
-                      className="border-2 border-slate-200 h-12 rounded-xl"
-                    />
+                      className="border border-slate-300 h-12 rounded-xl font-semibold px-3"
+                      required
+                    >
+                      <option value="">Select UTC</option>
+                      <option value={0}>00 UTC</option>
+                      <option value={12}>12 UTC</option>
+                    </select>
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-end px-8 pb-8">
@@ -440,13 +547,13 @@ export function AgroclimatologicalFormComplete() {
                         step="0.1"
                         value={formik.values.solarRadiation}
                         onChange={handleNumericInput}
-                        className="border-2 border-slate-200 h-12 rounded-xl"
+                        className="border border-slate-300 h-12 rounded-xl"
                         placeholder="Enter solar radiation"
                       />
                     </div>
 
                     <div className="space-y-3 p-4 bg-yellow-50/50 rounded-xl border border-yellow-200">
-                      <Label className="text-slate-700 font-semibold">Sun Shine Hour</Label>
+                      <Label className="text-slate-700 font-semibold">Sun Shine Hour (Auto-filled)</Label>
                       <Input
                         name="sunShineHour"
                         type="number"
@@ -454,7 +561,7 @@ export function AgroclimatologicalFormComplete() {
                         max="24"
                         value={formik.values.sunShineHour}
                         onChange={handleNumericInput}
-                        className="border-2 border-slate-200 h-12 rounded-xl"
+                        className="border border-slate-300 h-12 rounded-xl"
                         placeholder="Enter sunshine hours"
                       />
                     </div>
@@ -521,7 +628,7 @@ export function AgroclimatologicalFormComplete() {
                                   ""
                                 }
                                 onChange={handleNumericInput}
-                                className="border-2 border-slate-200 h-10 rounded-lg"
+                                className="border border-slate-300 h-10 rounded-lg"
                               />
                             </div>
                             <div className="space-y-2">
@@ -535,7 +642,7 @@ export function AgroclimatologicalFormComplete() {
                                   ""
                                 }
                                 onChange={handleNumericInput}
-                                className="border-2 border-slate-200 h-10 rounded-lg"
+                                className="border border-slate-300 h-10 rounded-lg"
                               />
                             </div>
                           </div>
@@ -555,7 +662,7 @@ export function AgroclimatologicalFormComplete() {
                             step="0.1"
                             value={formik.values.minTemp}
                             onChange={handleNumericInput}
-                            className="border-2 border-slate-200 h-10 rounded-lg"
+                            className="border border-slate-300 h-10 rounded-lg"
                           />
                         </div>
                         <div className="space-y-2">
@@ -566,7 +673,7 @@ export function AgroclimatologicalFormComplete() {
                             step="0.1"
                             value={formik.values.maxTemp}
                             onChange={handleNumericInput}
-                            className="border-2 border-slate-200 h-10 rounded-lg"
+                            className="border border-slate-300 h-10 rounded-lg"
                           />
                         </div>
                         <div className="space-y-2">
@@ -577,7 +684,7 @@ export function AgroclimatologicalFormComplete() {
                             step="0.1"
                             value={formik.values.grassMinTemp}
                             onChange={handleNumericInput}
-                            className="border-2 border-slate-200 h-10 rounded-lg"
+                            className="border border-slate-300 h-10 rounded-lg"
                           />
                         </div>
                       </div>
@@ -632,7 +739,7 @@ export function AgroclimatologicalFormComplete() {
                                 formik.values.soilTemperature[key as keyof typeof formik.values.soilTemperature] || ""
                               }
                               onChange={handleNumericInput}
-                              className="border-2 border-slate-200 h-10 rounded-lg"
+                              className="border border-slate-300 h-10 rounded-lg"
                             />
                           </div>
                         ))}
@@ -641,7 +748,7 @@ export function AgroclimatologicalFormComplete() {
 
                     {/* Soil Moisture */}
                     <div className="p-6 bg-teal-50/50 rounded-xl border border-teal-200">
-                      <h4 className="font-bold text-teal-700 text-lg mb-4">Soil Moisture % Between</h4>
+                      <h4 className="font-bold text-teal-700 text-lg mb-4">Soil Moisture % Between (Auto-filled)</h4>
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
                           <Label className="text-slate-700 font-semibold">0-20 Cm</Label>
@@ -652,7 +759,7 @@ export function AgroclimatologicalFormComplete() {
                             max="100"
                             value={formik.values.soilMoisture.depth0to20cm}
                             onChange={handleNumericInput}
-                            className="border-2 border-slate-200 h-10 rounded-lg"
+                            className="border border-slate-300 h-10 rounded-lg"
                             placeholder="0-100%"
                           />
                         </div>
@@ -665,7 +772,7 @@ export function AgroclimatologicalFormComplete() {
                             max="100"
                             value={formik.values.soilMoisture.depth20to50cm}
                             onChange={handleNumericInput}
-                            className="border-2 border-slate-200 h-10 rounded-lg"
+                            className="border border-slate-300 h-10 rounded-lg"
                             placeholder="0-100%"
                           />
                         </div>
@@ -706,7 +813,7 @@ export function AgroclimatologicalFormComplete() {
                         step="0.1"
                         value={formik.values.panWaterEvap}
                         onChange={handleNumericInput}
-                        className="border-2 border-slate-200 h-10 rounded-lg"
+                        className="border border-slate-300 h-10 rounded-lg"
                       />
                     </div>
 
@@ -718,7 +825,7 @@ export function AgroclimatologicalFormComplete() {
                         step="0.1"
                         value={formik.values.evaporation}
                         onChange={handleNumericInput}
-                        className="border-2 border-slate-200 h-10 rounded-lg"
+                        className="border border-slate-300 h-10 rounded-lg"
                       />
                     </div>
 
@@ -730,7 +837,7 @@ export function AgroclimatologicalFormComplete() {
                         step="0.1"
                         value={formik.values.dewPoint}
                         onChange={handleNumericInput}
-                        className="border-2 border-slate-200 h-10 rounded-lg"
+                        className="border border-slate-300 h-10 rounded-lg"
                       />
                     </div>
                   </div>
@@ -768,19 +875,19 @@ export function AgroclimatologicalFormComplete() {
                         step="0.1"
                         value={formik.values.windSpeed}
                         onChange={handleNumericInput}
-                        className="border-2 border-slate-200 h-10 rounded-lg"
+                        className="border border-slate-300 h-10 rounded-lg"
                       />
                     </div>
 
                     <div className="space-y-3 p-4 bg-blue-50/50 rounded-xl border border-blue-200">
                       <Label className="text-slate-700 font-semibold">Dew Amount (mm)</Label>
                       <Input
-                        name="rainfall"
+                        name="dewPoint"
                         type="number"
                         step="0.1"
-                        value={formik.values.rainfall}
+                        value={formik.values.dewPoint}
                         onChange={handleNumericInput}
-                        className="border-2 border-slate-200 h-10 rounded-lg"
+                        className="border border-slate-300 h-10 rounded-lg"
                       />
                     </div>
 
@@ -793,7 +900,7 @@ export function AgroclimatologicalFormComplete() {
                         max="24"
                         value={formik.values.duration}
                         onChange={handleNumericInput}
-                        className="border-2 border-slate-200 h-10 rounded-lg"
+                        className="border border-slate-300 h-10 rounded-lg"
                       />
                     </div>
 
@@ -805,7 +912,7 @@ export function AgroclimatologicalFormComplete() {
                         step="0.1"
                         value={formik.values.rainfall}
                         onChange={handleNumericInput}
-                        className="border-2 border-slate-200 h-10 rounded-lg"
+                        className="border border-slate-300 h-10 rounded-lg"
                       />
                     </div>
                   </div>
@@ -844,7 +951,7 @@ export function AgroclimatologicalFormComplete() {
                     <div className="p-6 border-2 border-green-200 rounded-xl bg-gradient-to-br from-green-50 to-lime-50">
                       <h4 className="font-bold text-sm text-green-600 mb-2">Period</h4>
                       <p className="text-lg font-bold text-green-800">
-                        {formik.values.stationInfo.month}/{formik.values.stationInfo.year}
+                        {new Date(formik.values.stationInfo.date).toLocaleString('default', { month: 'long' })} {formik.values.stationInfo.date}
                       </p>
                     </div>
                     <div className="p-6 border-2 border-blue-200 rounded-xl bg-gradient-to-br from-blue-50 to-sky-50">
@@ -941,10 +1048,10 @@ export function AgroclimatologicalFormComplete() {
                     </Button>
                     <Button
                       type="submit"
-                      className="bg-gradient-to-r from-green-500 to-lime-500 hover:from-green-600 hover:to-lime-600 text-white px-8 py-3 rounded-xl font-semibold"
                       disabled={isSubmitting}
+                      className="bg-gradient-to-r from-green-500 to-lime-500 hover:from-green-600 hover:to-lime-600 text-white px-8 py-3 rounded-xl font-semibold"
                     >
-                      {isSubmitting ? "Submitting..." : "Submit Complete Data"}
+                      {isSubmitting ? "Submitting..." : "Submit Data"}
                     </Button>
                   </div>
                 </CardFooter>

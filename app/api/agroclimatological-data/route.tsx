@@ -1,194 +1,219 @@
-import prisma from "@/lib/prisma"
-import { type NextRequest, NextResponse } from "next/server"
+// File: /app/api/agroclimatological-data/route.ts
+import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma'
+import { getSession } from '@/lib/getSession'
+import { AgroclimatologicalFormData } from '@/app/[locale]/dashboard/data-entry/agroclimatological/agroclimatological-form'
 
-export interface AgroclimatologicalFormData {
-  stationInfo: {
-    stationName: string
-    latitude: string
-    longitude: string
-    elevation: string
-    year: number
-    month: number
-  }
-  solarRadiation: string
-  sunShineHour: string
-  airTemperature: {
-    dry05m: string
-    wet05m: string
-    dry12m: string
-    wet12m: string
-    dry22m: string
-    wet22m: string
-  }
-  minTemp: string
-  maxTemp: string
-  meanTemp: string
-  grassMinTemp: string
-  soilTemperature: {
-    depth5cm: string
-    depth10cm: string
-    depth20cm: string
-    depth30cm: string
-    depth50cm: string
-  }
-  panWaterEvap: string
-  relativeHumidity: string
-  evaporation: string
-  soilMoisture: {
-    depth0to20cm: string
-    depth20to50cm: string
-  }
-  dewPoint: string
-  windSpeed: string
-  duration: string
-  rainfall: string
-  userId?: string // Optional user ID for tracking who submitted
+export const dynamic = 'force-dynamic'
+
+// Helper function to safely parse numeric values
+function parseNumber(value: any): number | null {
+  if (value === null || value === undefined || value === '') return null
+  const num = Number(value)
+  return isNaN(num) ? null : num
 }
 
-// Helper function to safely parse float values
-function parseFloatSafe(value: any): number | null {
-  if (value === null || value === undefined) return null;
-  const str = String(value).trim();
-  if (str === "") return null;
+export async function POST(request: Request) {
+  const session = await getSession()
+  
+  // Authentication check
+  if (!session?.user) {
+    return NextResponse.json(
+      { success: false, message: 'Unauthorized: Please log in to submit data' },
+      { status: 401 }
+    )
+  }
 
-  const parsed = Number.parseFloat(str);
-  return isNaN(parsed) ? null : parsed;
-}
+  // Validate request content type
+  const contentType = request.headers.get('content-type')
+  if (!contentType?.includes('application/json')) {
+    return NextResponse.json(
+      { success: false, message: 'Invalid content type. Expected application/json' },
+      { status: 400 }
+    )
+  }
 
-
-export async function POST(request: NextRequest) {
   try {
     const data: AgroclimatologicalFormData = await request.json()
+    console.log('Received submission data:', JSON.stringify(data, null, 2))
 
-    // Validate required fields
-    if (!data.stationInfo?.stationName) {
-      return NextResponse.json({ success: false, message: "Station name is required" }, { status: 400 })
+    // Prepare data for database insertion
+    const dbData = {
+      // Station Information
+      elevation: parseNumber(data.stationInfo.elevation) ?? 0,
+      date: new Date(data.stationInfo.date),
+      utcTime: new Date(),
+
+      // Solar & Sunshine Data
+      solarRadiation: parseNumber(data.solarRadiation),
+      sunShineHour: parseNumber(data.sunShineHour),
+
+      // Air Temperature Data
+      airTempDry05m: parseNumber(data.airTemperature.dry05m),
+      airTempWet05m: parseNumber(data.airTemperature.wet05m),
+      airTempDry12m: parseNumber(data.airTemperature.dry12m),
+      airTempWet12m: parseNumber(data.airTemperature.wet12m),
+      airTempDry22m: parseNumber(data.airTemperature.dry22m),
+      airTempWet22m: parseNumber(data.airTemperature.wet22m),
+
+      // Temperature Summary
+      minTemp: parseNumber(data.minTemp),
+      maxTemp: parseNumber(data.maxTemp),
+      meanTemp: parseNumber(data.meanTemp),
+      grassMinTemp: parseNumber(data.grassMinTemp),
+
+      // Soil Temperature Data
+      soilTemp5cm: parseNumber(data.soilTemperature.depth5cm),
+      soilTemp10cm: parseNumber(data.soilTemperature.depth10cm),
+      soilTemp20cm: parseNumber(data.soilTemperature.depth20cm),
+      soilTemp30cm: parseNumber(data.soilTemperature.depth30cm),
+      soilTemp50cm: parseNumber(data.soilTemperature.depth50cm),
+
+      // Soil Moisture Data
+      soilMoisture0to20cm: parseNumber(data.soilMoisture.depth0to20cm),
+      soilMoisture20to50cm: parseNumber(data.soilMoisture.depth20to50cm),
+
+      // Humidity & Evaporation Data
+      panWaterEvap: parseNumber(data.panWaterEvap),
+      relativeHumidity: parseNumber(data.relativeHumidity),
+      evaporation: parseNumber(data.evaporation),
+      dewPoint: parseNumber(data.dewPoint),
+
+      // Weather Measurements
+      windSpeed: parseNumber(data.windSpeed),
+      duration: parseNumber(data.duration),
+      rainfall: parseNumber(data.rainfall),
+
+      // User and Station tracking
+      userId: session.user.id,
+      stationId: session.user.station?.id,  
     }
 
-    if (!data.stationInfo?.latitude || !data.stationInfo?.longitude) {
-      return NextResponse.json({ success: false, message: "Latitude and longitude are required" }, { status: 400 })
-    }
+    console.log('Processed data for database:', JSON.stringify(dbData, null, 2))
 
     // Create the database entry
     const result = await prisma.agroclimatologicalData.create({
       data: {
-        // Station Information
-        stationName: data.stationInfo.stationName,
-        latitude: parseFloatSafe(data.stationInfo.latitude) || 0,
-        longitude: parseFloatSafe(data.stationInfo.longitude) || 0,
-        elevation: parseFloatSafe(data.stationInfo.elevation) || 0,
-        year: data.stationInfo.year,
-        month: data.stationInfo.month,
-
-        // Solar & Sunshine Data
-        solarRadiation: parseFloatSafe(data.solarRadiation),
-        sunShineHour: parseFloatSafe(data.sunShineHour),
-
-        // Air Temperature Data
-        airTempDry05m: parseFloatSafe(data.airTemperature.dry05m),
-        airTempWet05m: parseFloatSafe(data.airTemperature.wet05m),
-        airTempDry12m: parseFloatSafe(data.airTemperature.dry12m),
-        airTempWet12m: parseFloatSafe(data.airTemperature.wet12m),
-        airTempDry22m: parseFloatSafe(data.airTemperature.dry22m),
-        airTempWet22m: parseFloatSafe(data.airTemperature.wet22m),
-
-        // Temperature Summary
-        minTemp: parseFloatSafe(data.minTemp),
-        maxTemp: parseFloatSafe(data.maxTemp),
-        meanTemp: parseFloatSafe(data.meanTemp),
-        grassMinTemp: parseFloatSafe(data.grassMinTemp),
-
-        // Soil Temperature Data
-        soilTemp5cm: parseFloatSafe(data.soilTemperature.depth5cm),
-        soilTemp10cm: parseFloatSafe(data.soilTemperature.depth10cm),
-        soilTemp20cm: parseFloatSafe(data.soilTemperature.depth20cm),
-        soilTemp30cm: parseFloatSafe(data.soilTemperature.depth30cm),
-        soilTemp50cm: parseFloatSafe(data.soilTemperature.depth50cm),
-
-        // Soil Moisture Data
-        soilMoisture0to20cm: parseFloatSafe(data.soilMoisture.depth0to20cm),
-        soilMoisture20to50cm: parseFloatSafe(data.soilMoisture.depth20to50cm),
-
-        // Humidity & Evaporation Data
-        panWaterEvap: parseFloatSafe(data.panWaterEvap),
-        relativeHumidity: parseFloatSafe(data.relativeHumidity),
-        evaporation: parseFloatSafe(data.evaporation),
-        dewPoint: parseFloatSafe(data.dewPoint),
-
-        // Weather Measurements
-        windSpeed: parseFloatSafe(data.windSpeed),
-        duration: parseFloatSafe(data.duration),
-        rainfall: parseFloatSafe(data.rainfall),
-
-        // User tracking (optional)
-        userId: data.userId || null,
+        ...dbData,
+        stationId: session.user.station?.id!,  // Now guaranteed to be a string
       },
-    })
+    });
+
+    console.log('Database insertion successful:', result)
 
     return NextResponse.json({
       success: true,
-      message: "Agroclimatological data submitted successfully!",
+      message: 'Agroclimatological data submitted successfully!',
       data: {
         id: result.id,
-        stationName: result.stationName,
-        year: result.year,
-        month: result.month,
+        stationId: result.stationId,
+        date: result.date,
         createdAt: result.createdAt,
       },
     })
-  } catch (error) {
-    console.error("Database submission error:", error)
 
-    // Handle unique constraint violation
-    if (error instanceof Error && error.message.includes("Unique constraint")) {
+  } catch (error: any) {
+    console.error('Error submitting agroclimatological data:', error)
+
+    // Handle Prisma errors
+    if (error.code === 'P2002') {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Data for this station, year, and month already exists. Please update the existing record or choose different parameters.",
+          message: 'Data for this station and time period already exists. Please update instead.',
         },
-        { status: 409 },
+        { status: 409 }
       )
     }
 
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 400 }
+      )
+    }
+
+    // Handle database connection errors
+    if (error.code === 'P1001') {
+      return NextResponse.json(
+        { success: false, message: 'Database connection error. Please try again later.' },
+        { status: 500 }
+      )
+    }
+
+    // Generic error response
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to submit data to database. Please try again.",
+        message: 'An unexpected error occurred while processing your request',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: Request) {
+  const session = await getSession()
+
+  if (!session?.user) {
+    return NextResponse.json(
+      { success: false, message: 'Unauthorized: Please log in to access data' },
+      { status: 401 }
+    )
+  }
+
   try {
     const { searchParams } = new URL(request.url)
-    const stationName = searchParams.get("stationName")
-    const year = searchParams.get("year")
-    const month = searchParams.get("month")
-    const limit = Number.parseInt(searchParams.get("limit") || "50")
-    const offset = Number.parseInt(searchParams.get("offset") || "0")
+    const startDate = searchParams.get('startDate')
+    const endDate = searchParams.get('endDate')
+    const stationId = searchParams.get('stationId')
+    const limit = Math.min(Number(searchParams.get('limit')) || 50, 100)
+    const offset = Number(searchParams.get('offset')) || 0
 
     const where: any = {}
 
-    if (stationName) where.stationName = { contains: stationName, mode: "insensitive" }
-    if (year) where.year = Number.parseInt(year)
-    if (month) where.month = Number.parseInt(month)
+    // Date filter (inclusive range)
+    if (startDate && endDate) {
+      const start = new Date(startDate)
+      start.setHours(0, 0, 0, 0)
+
+      const end = new Date(endDate)
+      end.setHours(23, 59, 59, 999)
+
+      where.date = {
+        gte: start,
+        lte: end,
+      }
+    }
+
+    // Station filter
+    if (stationId && stationId !== 'all') {
+      where.stationId = stationId
+    } else {
+      // fallback to user's station if not super admin
+      if (session.user.role !== 'super_admin') {
+        where.stationId = session.user.station?.id
+      }
+    }
+
+    // User-level access control (non-super-admin sees only own or own-station data)
+    if (session.user.role !== 'super_admin') {
+      where.OR = [
+        { userId: session.user.id },
+        { stationId: session.user.station?.id },
+      ]
+    }
 
     const [data, total] = await Promise.all([
       prisma.agroclimatologicalData.findMany({
         where,
         include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
-          },
+          user: { select: { id: true, name: true, email: true } },
+          station: { select: { id: true, name: true } },
         },
-        orderBy: [{ year: "desc" }, { month: "desc" }, { stationName: "asc" }],
+        orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
         take: limit,
         skip: offset,
       }),
@@ -205,15 +230,90 @@ export async function GET(request: NextRequest) {
         hasMore: offset + limit < total,
       },
     })
-  } catch (error) {
-    console.error("Database fetch error:", error)
+
+  } catch (error: any) {
+    console.error('Error fetching agroclimatological data:', error)
     return NextResponse.json(
       {
         success: false,
-        message: "Failed to fetch data from database.",
-        data: [],
+        message: 'Failed to fetch data',
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }
+
+
+// export async function GET(request: Request) {
+//   const session = await getSession()
+  
+//   // Authentication check
+//   if (!session?.user) {
+//     return NextResponse.json(
+//       { success: false, message: 'Unauthorized: Please log in to access data' },
+//       { status: 401 }
+//     )
+//   }
+
+//   try {
+//     const { searchParams } = new URL(request.url)
+//     const stationName = searchParams.get('stationName')
+//     const year = searchParams.get('year')
+//     const month = searchParams.get('month')
+//     const limit = Math.min(Number(searchParams.get('limit')) || 50, 100)
+//     const offset = Number(searchParams.get('offset')) || 0
+
+//     const where: any = {
+//       OR: [
+//         { userId: session.user.id }, // User's own data
+//         { stationId: session.user.station?.id }, // Data from user's station
+//       ],
+//     }
+
+//     // Add filters if provided
+//     if (stationName) where.stationName = { contains: stationName, mode: 'insensitive' }
+//     if (year && month) {
+//       const start = new Date(Number(year), Number(month) - 1, 1)
+//       const end = new Date(Number(year), Number(month), 1)
+//       where.date = { gte: start, lt: end }
+//     }
+
+//     // Fetch data with pagination
+//     const [data, total] = await Promise.all([
+//       prisma.agroclimatologicalData.findMany({
+//         where,
+//         include: {
+//           user: { select: { id: true, name: true, email: true } },
+//           station: { select: { id: true, name: true } },
+//         },
+//         orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
+//         take: limit,
+//         skip: offset,
+//       }),
+//       prisma.agroclimatologicalData.count({ where }),
+//     ])
+
+//     return NextResponse.json({
+//       success: true,
+//       data,
+//       pagination: {
+//         total,
+//         limit,
+//         offset,
+//         hasMore: offset + limit < total,
+//       },
+//     })
+
+//   } catch (error: any) {
+//     console.error('Error fetching agroclimatological data:', error)
+//     return NextResponse.json(
+//       {
+//         success: false,
+//         message: 'Failed to fetch data',
+//         error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+//       },
+//       { status: 500 }
+//     )
+//   }
+// }
