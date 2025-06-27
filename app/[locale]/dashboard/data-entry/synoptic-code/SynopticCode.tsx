@@ -17,6 +17,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AlertTriangle } from "lucide-react";
+import { useTranslations } from 'next-intl';
+
 
 const measurements = [
   { id: 0, label: "C1", range: "16" },

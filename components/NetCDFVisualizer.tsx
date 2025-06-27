@@ -19,17 +19,18 @@ import {
   Box,
 } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useTranslations } from 'next-intl';
 
 import type { Data, Layout, PlotData } from "plotly.js";
 import { NetCDFReader } from "netcdfjs";
 import { saveAs } from 'file-saver';
+
 // Dynamic imports for heavy visualization libraries
 const Plot = dynamic(() => import("react-plotly.js"), {
   ssr: false,
-
   loading: () => (
     <div className="flex items-center justify-center h-96">
-      Loading visualization...
+      {useTranslations('netCdf').rich('visualization.loading')}
     </div>
   ),
 });
@@ -50,6 +51,7 @@ interface NCData {
 }
 
 export default function NetCDFVisualizer() {
+  const t = useTranslations('netCdf');
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [ncData, setNcData] = useState<NCData | null>(null);
@@ -120,7 +122,7 @@ export default function NetCDFVisualizer() {
       }
     } catch (error) {
       console.error("Error processing file:", error);
-      setError("Failed to process NetCDF file. Please check the file format.");
+      setError(t('error.fileProcessing'));
     } finally {
       setIsProcessing(false);
     }
@@ -444,10 +446,10 @@ export default function NetCDFVisualizer() {
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="mb-8 bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-xl shadow-lg backdrop-blur-sm bg-opacity-20">
         <h1 className="text-3xl font-bold mb-2 text-white">
-          NetCDF Visualizer
+          {t('title')}
         </h1>
         <p className="text-white/90">
-          Upload and visualize NetCDF files with interactive charts and plots
+          {t('description')}
         </p>
       </div>
 
@@ -456,14 +458,14 @@ export default function NetCDFVisualizer() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-black">
             <Upload className="h-5 w-5" />
-            File Upload
+            {t('fileUpload.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="file-upload" className="text-gray-800/80">
-                Select NetCDF File (.nc)
+                {t('fileUpload.label')}
               </Label>
               <Input
                 id="file-upload"
@@ -482,7 +484,7 @@ export default function NetCDFVisualizer() {
               disabled={!file || isProcessing}
               className="w-full sm:w-auto bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white shadow-lg hover:shadow-indigo-500/20"
             >
-              {isProcessing ? "Processing..." : "Load and Visualize"}
+              {isProcessing ? t('fileUpload.processing') : t('fileUpload.button')}
             </Button>
           </form>
         </CardContent>
@@ -493,7 +495,7 @@ export default function NetCDFVisualizer() {
           <div>
             <Card className="backdrop-blur-sm bg-white/10 border border-white/20 mt-4 mb-4">
               <CardHeader>
-                <CardTitle className="text-black">Export Data</CardTitle>
+                <CardTitle className="text-black">{t('export.title')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-3 gap-4">
@@ -503,7 +505,7 @@ export default function NetCDFVisualizer() {
                     className="flex items-center gap-2 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white"
                   >
                     <FileText className="h-4 w-4" />
-                    Export to CSV
+                    {t('export.csv')}
                   </Button>
                   <Button
                     onClick={exportToTXT}
@@ -511,7 +513,7 @@ export default function NetCDFVisualizer() {
                     className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
                   >
                     <FileText className="h-4 w-4" />
-                    Export to TXT
+                    {t('export.txt')}
                   </Button>
                   <Button
                     onClick={exportToJSON}
@@ -519,7 +521,7 @@ export default function NetCDFVisualizer() {
                     className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white"
                   >
                     <FileText className="h-4 w-4" />
-                    Export to JSON
+                    {t('export.json')}
                   </Button>
                 </div>
               </CardContent>
@@ -533,7 +535,7 @@ export default function NetCDFVisualizer() {
               <Card className="backdrop-blur-sm bg-white/10 border border-white/20 h-full overflow-y-auto">
                 <CardHeader>
                   <CardTitle className="text-white bg-gradient-to-r from-indigo-500 to-purple-500 p-2 rounded-lg">
-                    Variables
+                    {t('variables.title')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -574,14 +576,14 @@ export default function NetCDFVisualizer() {
                     className="flex items-center gap-2 data-[state=active]:bg-indigo-500 data-[state=active]:text-white data-[state=active]:border-indigo-400"
                   >
                     <Activity className="h-4 w-4" />
-                    Visualization
+                    {t('visualization.title')}
                   </TabsTrigger>
                   <TabsTrigger
                     value="metadata"
                     className="flex items-center gap-2 data-[state=active]:bg-indigo-500 data-[state=active]:text-white data-[state=active]:border-indigo-400"
                   >
                     <FileText className="h-4 w-4" />
-                    Metadata
+                    {t('metadata.title')}
                   </TabsTrigger>
                 </TabsList>
 
@@ -590,7 +592,7 @@ export default function NetCDFVisualizer() {
                   <Card className="backdrop-blur-sm bg-white/10 border border-white/20">
                     <CardContent>
                       <div className="space-y-4">
-                        <Label className="text-black/80">Plot Type</Label>
+                        <Label className="text-black/80">{t('visualization.plotTypes.title')}</Label>
                         <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
                           <Button
                             variant={
@@ -600,7 +602,7 @@ export default function NetCDFVisualizer() {
                             className={`flex flex-col items-center hover:bg-indigo-600 hover:text-white hover:border-indigo-400 justify-center h-20 gap-1 ${plotType === "line" ? "bg-indigo-500 border-indigo-400" : "bg-white border-white"}`}
                           >
                             <LineChart className="h-5 w-5" />
-                            <span className="text-sm">Line</span>
+                            <span className="text-sm">{t('visualization.plotTypes.line')}</span>
                           </Button>
                           <Button
                             variant={
@@ -610,7 +612,7 @@ export default function NetCDFVisualizer() {
                             className={`flex flex-col items-center hover:bg-indigo-600 hover:text-white hover:border-indigo-400 justify-center h-20 gap-1 ${plotType === "scatter" ? "bg-indigo-500 border-indigo-400" : "bg-white border-white"}`}
                           >
                             <ScatterChart className="h-5 w-5" />
-                            <span className="text-sm">Scatter</span>
+                            <span className="text-sm">{t('visualization.plotTypes.scatter')}</span>
                           </Button>
                           <Button
                             variant={
@@ -620,7 +622,7 @@ export default function NetCDFVisualizer() {
                             className={`flex flex-col items-center hover:bg-indigo-600 hover:text-white hover:border-indigo-400 justify-center h-20 gap-1 ${plotType === "histogram" ? "bg-indigo-500 border-indigo-400" : "bg-white border-white"}`}
                           >
                             <Gauge className="h-5 w-5" />
-                            <span className="text-sm">Histogram</span>
+                            <span className="text-sm">{t('visualization.plotTypes.histogram')}</span>
                           </Button>
                           <Button
                             variant={
@@ -630,7 +632,7 @@ export default function NetCDFVisualizer() {
                             className={`flex flex-col items-center hover:bg-indigo-600 hover:border-indigo-400 hover:text-white justify-center h-20 gap-1 ${plotType === "heatmap" ? "bg-indigo-500 border-indigo-400" : "bg-white border-white"}`}
                           >
                             <Map className="h-5 w-5" />
-                            <span className="text-sm">Heatmap</span>
+                            <span className="text-sm">{t('visualization.plotTypes.heatmap')}</span>
                           </Button>
                           <Button
                             variant={
@@ -640,7 +642,7 @@ export default function NetCDFVisualizer() {
                             className={`flex flex-col items-center hover:bg-indigo-600 hover:border-indigo-400 hover:text-white justify-center h-20 gap-1 ${plotType === "contour" ? "bg-indigo-500 border-indigo-400" : "bg-white border-white"}`}
                           >
                             <BoxSelect className="h-5 w-5" />
-                            <span className="text-sm">Contour</span>
+                            <span className="text-sm">{t('visualization.plotTypes.contour')}</span>
                           </Button>
                           <Button
                             variant={
@@ -650,7 +652,7 @@ export default function NetCDFVisualizer() {
                             className={`flex flex-col items-center hover:bg-indigo-600 hover:border-indigo-400 hover:text-white justify-center h-20 gap-1 ${plotType === "surface" ? "bg-indigo-500 border-indigo-400" : "bg-white border-white"}`}
                           >
                             <Box className="h-5 w-5" />
-                            <span className="text-sm">3D Surface</span>
+                            <span className="text-sm">{t('visualization.plotTypes.surface')}</span>
                           </Button>
                         </div>
                       </div>
@@ -665,7 +667,7 @@ export default function NetCDFVisualizer() {
                         <CardTitle className="text-black">
                           {selectedVariable
                             ? `${selectedVariable} - ${plotType}`
-                            : "Select a variable to visualize"}
+                            : t('visualization.selectVariable')}
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
@@ -673,8 +675,7 @@ export default function NetCDFVisualizer() {
                           renderVisualization()
                         ) : (
                           <div className="flex items-center justify-center h-96 text-black/70">
-                            Select a variable and plot type to begin
-                            visualization
+                            {t('visualization.selectVariable')}
                           </div>
                         )}
                       </CardContent>
@@ -685,13 +686,13 @@ export default function NetCDFVisualizer() {
                   <Card className="backdrop-blur-sm bg-white/10 border-2 border-gradient-to-r from-indigo-500 to-purple-500/20">
                     <CardHeader>
                       <CardTitle className="text-black">
-                        File Metadata
+                        {t('metadata.title')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div>
                         <h4 className="font-semibold mb-2 text-black/80">
-                          Dimensions
+                          {t('metadata.dimensions')}
                         </h4>
                         <div className="bg-white/5 p-3 rounded-md border border-white/10">
                           <pre className="text-sm text-black/90">
@@ -706,7 +707,7 @@ export default function NetCDFVisualizer() {
 
                       <div>
                         <h4 className="font-semibold mb-2 text-black/80">
-                          Global Attributes
+                          {t('metadata.globalAttributes')}
                         </h4>
                         <div className="bg-white/5 p-3 rounded-md max-h-64 overflow-y-auto border border-white/10">
                           <pre className="text-sm text-black/90">
@@ -722,7 +723,7 @@ export default function NetCDFVisualizer() {
                       {selectedVariable && (
                         <div>
                           <h4 className="font-semibold mb-2 text-black/80">
-                            Variable Attributes: {selectedVariable}
+                            {t('metadata.variableAttributes')}: {selectedVariable}
                           </h4>
                           <div className="bg-white/5 p-3 rounded-md max-h-64 overflow-y-auto border border-white/10">
                             <pre className="text-sm text-black/90">

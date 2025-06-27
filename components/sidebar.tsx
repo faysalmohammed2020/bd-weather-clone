@@ -187,7 +187,7 @@ const Sidebar = () => {
         {
           icon: <Leaf className="mr-2 h-5 w-5" />,
           href: "/dashboard/view-and-manage/agroclimatological-data-table",
-          label: "Agroclimatological",
+          label: t("agroclimatological"),
         },
         {
           icon: <FileBarChart className="w-5 h-5" />,
@@ -199,19 +199,19 @@ const Sidebar = () => {
     {
       href: "/dashboard/upper-air-analyzer",
       icon: <BarChart2 className="w-5 h-5" />,
-      label: "Upper Air Analyzer",
+      label: t("upperAirAnalyzer"),
       roles: ["super_admin", "observer", "station_admin"],
     },
     {
       href: "/dashboard/radio-sond-analyzer",
       icon: <BarChart2 className="w-5 h-5" />,
-      label: "Radio Sond Analyzer",
+      label: t("radioSondAnalyzer"),
       roles: ["super_admin"],
     },
     {
       href: "/dashboard/netcdf-visualizer",
       icon: <Monitor className="w-5 h-5" />,
-      label: "NetCDF Visualizer",
+      label: t("netcdfVisualizer"),
       roles: ["super_admin", "observer", "station_admin"],
     },
     {

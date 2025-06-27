@@ -158,7 +158,25 @@
     "synopticCode": "Synoptic Code",
     "dailySummary": "Daily Summary",
     "viewAllExport": "View All & Export",
-    "agroclimatological" : "Agroclimatological"
+    "agroclimatological": "Agroclimatological",
+    "upperAirAnalyzer": "Upper Air Analyzer",
+    "radioSondAnalyzer": "Radio Sond Analyzer",
+    "netcdfVisualizer": "NetCDF Visualizer"
+  },
+  "HourSelector": {
+    "utcHour": "UTC Hour",
+    "loading": "Loading",
+    "observingTime": "Observing Time",
+    "TimeLine": {
+      "00": "12:00 AM",
+      "03": "03:00 AM",
+      "06": "06:00 AM",
+      "09": "09:00 AM",
+      "12": "12:00 PM",
+      "15": "03:00 PM",
+      "18": "06:00 PM",
+      "21": "09:00 PM"
+    }
   },
   "firstCard": {
     "title": "Coordinated Universal Time",
@@ -237,6 +255,60 @@
       "visibility": "Visibility",
       "meteors": "Meteors Code",
       "weather": "Weather"
+    }
+  },
+  "Validation": {
+    "errors": {
+      "required": "This field is required",
+      "invalidNumber": "Must be a valid number",
+      "rainfall": {
+        "invalidFormat": "Must be a 1–3 digit number between 1 and 989",
+        "invalidRange": "Value must be between 1 and 989"
+      },
+      "wind": {
+        "anemometer": "Must be a 5-digit number (e.g. 10123)",
+        "speed": "Must be a 3-digit number (e.g. 025, 100)",
+        "direction": "Wind direction must be between 5 and 360 degrees"
+      },
+      "cloud": {
+        "numbersOnly": "Please enter numbers only"
+      }
+    },
+    "fields": {
+      "rainfall": {
+        "sincePrevious": "Measurement since previous observation",
+        "duringPrevious": "During the previous 6 hours",
+        "last24Hours": "Rainfall during the last 24 hours"
+      },
+      "wind": {
+        "firstAnemometer": "First anemometer reading",
+        "secondAnemometer": "Second anemometer reading",
+        "speed": "Wind speed",
+        "direction": "Wind direction"
+      },
+      "cloud": {
+        "low": {
+          "form": "Low cloud form",
+          "amount": "Low cloud amount",
+          "height": "Low cloud height",
+          "direction": "Low cloud direction"
+        },
+        "medium": {
+          "form": "Medium cloud form",
+          "amount": "Medium cloud amount",
+          "height": "Medium cloud height",
+          "direction": "Medium cloud direction"
+        },
+        "high": {
+          "form": "High cloud form",
+          "amount": "High cloud amount",
+          "direction": "High cloud direction"
+        }
+      },
+      "observer": {
+        "initial": "Observer's initials",
+        "time": "Observing time"
+      }
     }
   },
   "signin": {
@@ -388,6 +460,12 @@
     }
   },
   "secondCard": {
+    "SelectField": {
+      "form": "Form (Code)",
+      "amount": "Amount (Octa)",
+      "height": "Height (m)",
+      "direction": "Direction (°)"
+    },
     "tabs": {
       "cloud": "Clouds",
       "n": "Total Cloud Amount",
@@ -428,14 +506,16 @@
     },
     "rainfall": {
       "title": "Rainfall Measurement (mm)",
-      "note": "📅 Please select the previous date from the calendar for 00 UTC reporting.",
+      "note": "📅 Please select the previous date from the calendar for the 00 UTC report.",
       "timeStart": "Start Time (HH:MM UTC)",
       "timeEnd": "End Time (HH:MM UTC)",
       "sincePrevious": "Since Previous Observation (mm)",
-      "duringPrevious": "Rainfall during previous 6 hours (mm)",
-      "last24Hours": "Precipitation in last 24 hours (mm)",
+      "duringPrevious": "Rainfall During Previous 6 Hours (mm)",
+      "last24Hours": "Rainfall in the Last 24 Hours (mm)",
       "intermittentRain": "Was the rain intermittent?",
-      "formatHint": "Format: HH:MM (e.g., 03:30, 06:15, 23:45)"
+      "placeholder": "Enter a value (1–989)",
+      "setThis": "Set this (HH:MM 00:00)",
+      "formatHint": "Format: Hour:Minute (e.g. 03:30, 06:15, 23:45)"
     },
     "wind": {
       "title": "Wind Measurement",
@@ -443,6 +523,8 @@
       "second": "Second Wind Measurement",
       "speed": "Speed (knots)",
       "direction": "Direction (degrees)",
+      "placeholder": "Enter 5 digits",
+      "placeholder3": "Enter 3 digits",
       "directionPlaceholder": "Wind direction from 5° to 364° as per code manual"
     },
     "observer": {
@@ -1286,6 +1368,207 @@
       "verifying": "Verifying...",
       "disabling": "Disabling..."
     }
+  },
+  "RadiosondeAnalyzer": {
+    "title": "Radiosonde Data Analyzer",
+    "subtitle": "Advanced meteorological data decoder for TTAA/TTBB upper air soundings with multi-format file support",
+    "datainput": "Data Input",
+    "fileupload": "File Upload",
+    "dropfiles": "Drop files here or click to browse",
+    "filesupport": "Supports TX1, C5V, P10: free up to 100M each",
+    "manualinput": "Manual Input",
+    "ttaatadata": "TTAA Data (Required)",
+    "ttbbdata": "TTBB Data (Optional)",
+    "exampledata": "TTAA 51231 63888 99996 97893 37806 96857 ///// ///// 9368...\nTTBB 51238 63888 99996 97893 32995 86818 32996...",
+    "analyzabutton": "Analyze Data",
+    "processingfiles": "Processing files...",
+    "supportsfiles": "Supports TXT, CSV, PDF files up to 10MB each",
+    "uploadedfiles": "Uploaded Files:",
+    "day " : "Day",
+    "stationinfo": "Station Info",
+    "surfacepressure": "Surface Pressure",
+    "surfacewind": "Surface Wind",
+    "humidity": "Humidity",
+    "mandatorylevels": "Mandatory Pressure Levels",
+    "standardlevels": "Standard isobaric levels (1000mb to 100mb)",
+    "pressuremb": "Pressure (mb)",
+    "heightm": "Height (m)",
+    "temperaturec": "Temperature (°C)",
+    "dewpointc": "Dewpoint (°C)",
+    "winddir": "Wind Dir (°)",
+    "windspeed": "Wind Speed (kt)",
+    "showinglevels": "Showing {count} mandatory levels (≥100 mb pressure)",
+    "filteredlevels": "{count} levels below 100 mb filtered out",
+    "tropopauselevel": "Tropopause Level",
+    "tropopausedesc": "Boundary between troposphere and stratosphere",
+    "maxwindlevel": "Maximum Wind Level",
+    "maxwinddesc": "Strongest wind observed in the atmospheric sounding",
+    "significantlevels": "Significant Pressure Levels",
+    "significantdesc": "Levels with significant temperature, humidity, and wind changes",
+    "nottbbdata": "No TTBB data provided",
+    "uploadttbb": "Upload a file containing TTBB data or enter it manually",
+    "temperaturedata": "Temperature & Humidity Levels",
+    "winddata": "Wind Data Levels",
+    "depression": "Depression (°C)",
+    "datasource": "Data Source",
+    "significant": "Significant",
+    "surface": "Surface",
+    "cardinaldir": "Cardinal Direction",
+    "maxspeed": "Max speed",
+    "avgspeed": "Avg speed",
+    "decodingdetails": "Decoding Details",
+    "clusterformat": "Cluster Format",
+    "thermaldata": "Thermal Data",
+    "windinfo": "Wind Information",
+    "speed": "Speed",
+    "direction": "Direction",
+    "altitude": "Altitude",
+    "format": "Format",
+    "notropopause": "No tropopause data available",
+    "looktropopause": "Look for 88PmPmPm format in TTAA data",
+    "nomaxwind": "No maximum wind data available",
+    "lookmaxwind": "Look for 77PmPmPm dddff format in TTAA data",
+    "tephigram": "Tephigram",
+    "temperature": "Temperature",
+    "dewpointdepression": "Dew Point Depression",
+    "group": "Group ",
+    "maxwindindicator": "Max Wind Indicator",
+    "pressurelevel": "Pressure Level",
+    "temperaturelevels": "Temperature Levels ",
+    "dewpointlevels": "Dew Point Levels ",
+    "surfaceincluded": "Surface Included ",
+    "yes": "Yes",
+    "windlevels": "Wind Levels",
+    "pressure" : "Pressure",
+    "dewpoint" : "Dew Point",
+    "summary" : "Summary "
+  },
+  "tephigram" : {
+    "noData": {
+      "title": "No Atmospheric Data Available",
+      "description": "Please analyze TTAA/TTBB radiosonde data first"
+    },
+    "header": {
+      "title": "Professional Tephigram Analysis",
+      "description": "Advanced Atmospheric Sounding Analysis • Day {date} • {time}:00 UTC",
+      "badges": {
+        "station": "Station {station}",
+        "mandatoryLevels": "{count} Mandatory Levels",
+        "significantLevels": "{count} Significant Levels",
+        "tropopause": "Tropopause Detected",
+        "maxWind": "Maximum Wind Level"
+      },
+      "buttons": {
+        "export": "Export",
+        "maximize": "Maximize"
+      }
+    },
+    "tabs": {
+      "isobars": "Isobars",
+      "isotherms": "Isotherms",
+      "dryAdiabats": "Dry Adiabats",
+      "satAdiabats": "Sat Adiabats",
+      "hmrLines": "HMR Lines",
+      "tempProfile": "Temp Profile",
+      "dewpointProfile": "Dewpoint",
+      "windBarbs": "Wind Barbs",
+      "tropopause": "Tropopause",
+      "maxWind": "Max Wind",
+      "complete": "Complete"
+    },
+    "charts": {
+      "isobars": {
+        "title": "Isobars - Constant Pressure Lines",
+        "description": "Horizontal lines representing standard atmospheric pressure levels from 1000 hPa (surface) to 100 hPa (stratosphere). These lines form the foundation of upper-air analysis and help identify pressure systems and atmospheric layers."
+      },
+      "isotherms": {
+        "title": "Isotherms - Constant Temperature Lines",
+        "description": "Vertical lines showing constant temperature values across all pressure levels. The 0°C isotherm is highlighted as it marks the freezing level, critical for aviation and precipitation type forecasting."
+      },
+      "dryAdiabats": {
+        "title": "Dry Adiabats - Constant Potential Temperature",
+        "description": "Curved lines showing how unsaturated air parcels change temperature as they rise or sink. These lines represent constant potential temperature (θ) and are essential for analyzing atmospheric stability and convective processes."
+      },
+      "satAdiabats": {
+        "title": "Saturated Adiabats - Moist Air Parcels",
+        "description": "Curved lines showing temperature changes for saturated rising air parcels. These represent constant wet-bulb potential temperature (θw) and are crucial for analyzing precipitation processes and thunderstorm development."
+      },
+      "hmrLines": {
+        "title": "Humidity Mixing Ratio Lines",
+        "description": "Lines showing constant water vapor content (grams of water vapor per kilogram of dry air). These help determine moisture content at different levels and are essential for cloud formation analysis."
+      },
+      "tempProfile": {
+        "title": "Environmental Lapse Rate - Temperature Profile",
+        "description": "The actual temperature measurements from radiosonde data plotted against pressure levels. This profile shows the environmental lapse rate and is fundamental for stability analysis and weather forecasting."
+      },
+      "dewpointProfile": {
+        "title": "Dew Point Profile - Moisture Content",
+        "description": "Dew point temperature profile showing atmospheric moisture distribution with altitude. The gap between temperature and dew point profiles indicates relative humidity and potential for cloud formation."
+      },
+      "windBarbs": {
+        "title": "Wind Barbs - Direction and Speed",
+        "description": "Wind direction and speed at each pressure level displayed using standard meteorological wind barbs. Flags represent 50 knots, full barbs represent 10 knots, and half barbs represent 5 knots."
+      },
+      "tropopause": {
+        "title": "Tropopause Layer - Atmospheric Boundary",
+        "description": "The boundary between the troposphere and stratosphere, identified from the 88PtPtPt group in the radiosonde data. This level marks where temperature stops decreasing with height and is crucial for aviation and climate studies."
+      },
+      "maxWind": {
+        "title": "Maximum Wind Level",
+        "description": "The pressure level with the strongest wind speed in the sounding, identified from the 77PmPmPm group. This level is important for aviation planning and understanding jet stream characteristics."
+      },
+      "complete": {
+        "title": "Complete Atmospheric Sounding Analysis",
+        "description": "Comprehensive view combining all meteorological elements: temperature and dew point profiles, pressure levels, wind data, tropopause boundary, and maximum wind level. This professional visualization enables detailed atmospheric stability analysis and weather forecasting.",
+        "legend": {
+          "temperature": "Temperature",
+          "dewPoint": "Dew Point",
+          "tropopause": "Tropopause",
+          "maxWind": "Max Wind"
+        }
+      }
+    }
+  },
+  "netCdf" : {
+    "title": "NetCDF Visualizer",
+    "description": "Upload and visualize NetCDF files with interactive charts and plots",
+    "fileUpload": {
+      "title": "File Upload",
+      "label": "Select NetCDF File (.nc)",
+      "button": "Load and Visualize",
+      "processing": "Processing..."
+    },
+    "error": {
+      "fileProcessing": "Failed to process NetCDF file. Please check the file format."
+    },
+    "variables": {
+      "title": "Variables"
+    },
+    "visualization": {
+      "title": "Visualization",
+      "selectVariable": "Select a variable to visualize",
+      "plotTypes": {
+        "title" : "NetCDF VisuaLization",
+        "line": "Line",
+        "scatter": "Scatter",
+        "histogram": "Histogram",
+        "heatmap": "Heatmap",
+        "contour": "Contour",
+        "surface": "3D Surface"
+      },
+      "loading": "Loading visualization..."
+    },
+    "metadata": {
+      "title": "Metadata",
+      "dimensions": "Dimensions",
+      "globalAttributes": "Global Attributes",
+      "variableAttributes": "Variable Attributes"
+    },
+    "export": {
+      "title": "Export Data",
+      "csv": "Export to CSV",
+      "txt": "Export to TXT",
+      "json": "Export to JSON"
+    }
   }
-  
 }

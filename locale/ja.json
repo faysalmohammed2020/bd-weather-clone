@@ -121,23 +121,19 @@
         "name1": "ラフマン博士",
         "role1": "農業科学者",
         "quote1": "降雨予測は、地域の農家が作付けと収穫のスケジュールを立てるうえで非常に役立っています。正確さには驚かされます。",
-
         "name2": "ファティマ・ベグム",
         "role2": "緊急対応コーディネーター",
         "quote2": "サイクロンの早期警戒システムは、私たちの沿岸地域のコミュニティにとって画期的でした。過酷な気象イベントの前に、早期に避難させることができました。",
-
         "name3": "モハンマド・アリ",
         "role3": "リサーチアナリスト",
         "quote3": "過去の気象データ分析ツールは、気候変動研究において非常に貴重です。今では長期的な傾向をはるかに正確に特定できます。"
       }
     },
-
     "ctaSection": {
       "heading": "天気についてより賢い判断を",
       "description": "バングラデシュの各地域に特化したリアルタイムの天気ダッシュボードを手に入れましょう。予報、警報、重要なインサイトを常に把握できます。",
       "getStartedbutton": "今すぐ始める"
     },
-
     "footerSection": {
       "connectWithUs": "お問い合わせ",
       "quickLinks": "クイックリンク",
@@ -161,7 +157,29 @@
     "secondCard": "第2カード",
     "synopticCode": "総観コード",
     "dailySummary": "日次サマリー",
-    "viewAllExport": "すべて表示・エクスポート"
+    "viewAllExport": "すべて表示・エクスポート",
+    "agroclimatological": "農業気候学的",
+    "upperAirAnalyzer": "上空気象解析ツール",
+    "radioSondAnalyzer": "ラジオゾンド解析ツール",
+    "netcdfVisualizer": "NetCDFビジュアライザー"
+  },
+  "HourSelector": {
+    "utcHour": "UTC時間",
+    "loading": "読み込み中",
+    "observingTime": "観測時間",
+    "TimeLine": {
+      "00": "午前12時",
+      "03": "午前3時",
+      "06": "午前6時",
+      "09": "午前9時",
+      "12": "正午12時",
+      "15": "午後3時",
+      "18": "午後6時",
+      "21": "午後9時"
+    }
+  },
+  "basicInformation": {
+    "basicinformation": "基本情報"
   },
   "firstCard": {
     "title": "協定世界時",
@@ -194,7 +212,9 @@
     },
     "buttons": {
       "previous": "前へ",
-      "next": "次へ"
+      "next": "次へ",
+      "reset": "リセット",
+      "submit": "送信"
     },
     "squallMeasurements": {
       "title": "スコール測定",
@@ -237,7 +257,62 @@
       "squall": "スコール測定",
       "VV": "視程測定",
       "meteors": "気象現象",
-      "weather": "天気状況"
+      "weather": "天気状況",
+      "visibility": "視程"
+    }
+  },
+  "Validation": {
+    "errors": {
+      "required": "この項目は必須です",
+      "invalidNumber": "有効な数字を入力してください",
+      "rainfall": {
+        "invalidFormat": "1～989の範囲内の1～3桁の数字で入力してください",
+        "invalidRange": "値は1から989の間でなければなりません"
+      },
+      "wind": {
+        "anemometer": "5桁の数字で入力してください（例：10123）",
+        "speed": "3桁の数字で入力してください（例：025、100）",
+        "direction": "風向は5～360度の範囲でなければなりません"
+      },
+      "cloud": {
+        "numbersOnly": "数字のみを入力してください"
+      }
+    },
+    "fields": {
+      "rainfall": {
+        "sincePrevious": "前回の観測以降の降水量",
+        "duringPrevious": "直前6時間の降水量",
+        "last24Hours": "過去24時間の降水量"
+      },
+      "wind": {
+        "firstAnemometer": "第一風速計の読み取り値",
+        "secondAnemometer": "第二風速計の読み取り値",
+        "speed": "風速",
+        "direction": "風向"
+      },
+      "cloud": {
+        "low": {
+          "form": "低層雲の形",
+          "amount": "低層雲の量",
+          "height": "低層雲の高度",
+          "direction": "低層雲の方向"
+        },
+        "medium": {
+          "form": "中層雲の形",
+          "amount": "中層雲の量",
+          "height": "中層雲の高度",
+          "direction": "中層雲の方向"
+        },
+        "high": {
+          "form": "高層雲の形",
+          "amount": "高層雲の量",
+          "direction": "高層雲の方向"
+        }
+      },
+      "observer": {
+        "initial": "観測者のイニシャル",
+        "time": "観測時刻"
+      }
     }
   },
   "signin": {
@@ -277,11 +352,13 @@
     "pressure": "気圧",
     "visibility": "視程",
     "uvIndex": "UV指数",
+    "risk": "リスク",
     "airQuality": "大気質",
     "cloudCover": "雲量",
     "precipitation": "降水量",
     "peakUV": "本日のピーク",
     "inNext24h": "今後24時間",
+    "lightRainExpected": "小雨の予報",
     "precipitationExpected": {
       "yes": "今後24時間で軽い降雨が予想されます。",
       "no": "今後24時間で降雨は予想されません。"
@@ -316,6 +393,7 @@
     "unknownError": "不明なエラーが発生しました",
     "chartTitle": "日次{metric}データ",
     "weatherData": "天気",
+    "dataType": "データ種別",
     "7days": "7日間",
     "30days": "30日間",
     "90days": "90日間",
@@ -330,6 +408,36 @@
     "noDataTitle": "利用可能なデータがありません",
     "noDataHeading": "天気データがありません",
     "noDataSuggestion": "時間範囲を調整するか、指定期間のデータが存在するか確認してください。",
+    "dataTypes": {
+      "temperature": "気温",
+      "precipitation": "降水量",
+      "wind": "風速",
+      "humidity": "湿度",
+      "all": "すべての指標"
+    },
+    "timeRanges": {
+      "7d": "過去7日間",
+      "30d": "過去30日間",
+      "90d": "過去90日間"
+    },
+    "metrics": {
+      "maxTemperature": "最高気温",
+      "minTemperature": "最低気温",
+      "totalPrecipitation": "降水量",
+      "windSpeed": "風速",
+      "avRelativeHumidity": "相対湿度"
+    },
+    "units": {
+      "temperature": "°C",
+      "precipitation": "mm",
+      "windSpeed": "km/h",
+      "humidity": "%",
+      "value": "値"
+    },
+    "errors": {
+      "fetchError": "データの取得に失敗しました: {status}",
+      "unknownError": "不明なエラーが発生しました"
+    },
     "recordCount": "{count}件のレコード",
     "selectMetric": "指標を選択",
     "timeRange": "時間範囲"
@@ -380,7 +488,9 @@
       "moderate": "中程度",
       "high": "高い",
       "veryHigh": "非常に高い",
-      "extreme": "極端"
+      "extreme": "極端",
+      "peakToday": "本日のピーク",
+      "maxUvIndex": "最大UV指数"
     },
     "uvRisk": "{status}リスク",
     "uvDescription": "本日の最大UV露出レベルは{status}レベルに達します。"
@@ -409,6 +519,12 @@
     }
   },
   "secondCard": {
+    "SelectField": {
+      "form": "形（コード）",
+      "amount": "量（オクタ）",
+      "height": "高度（m）",
+      "direction": "方向（°）"
+    },
     "tabs": {
       "cloud": "雲",
       "n": "総雲量",
@@ -448,21 +564,25 @@
       "layer4": "第4層"
     },
     "rainfall": {
-      "title": "降雨測定 (mm)",
-      "note": "📅 00UTC報告のため、カレンダーから前日を選択してください。",
-      "timeStart": "開始時刻 (時:分 UTC)",
-      "timeEnd": "終了時刻 (時:分 UTC)",
-      "sincePrevious": "前回観測以降 (mm)",
-      "duringPrevious": "過去6時間の降雨量 (mm)",
-      "last24Hours": "過去24時間の降水量 (mm)",
+      "title": "降水量の測定（mm）",
+      "note": "📅 00 UTCの報告用にカレンダーから前日の日付を選択してください。",
+      "timeStart": "開始時刻（時:分 UTC）",
+      "timeEnd": "終了時刻（時:分 UTC）",
+      "sincePrevious": "前回観測以降の降水量（mm）",
+      "duringPrevious": "直前の6時間の降水量（mm）",
+      "last24Hours": "過去24時間の降水量（mm）",
       "intermittentRain": "雨は断続的でしたか？",
-      "formatHint": "形式: 時:分 (例: 03:30、06:15、23:45)"
+      "placeholder": "値を入力（1～989）",
+      "setThis": "この時間を設定（HH:MM 00:00）",
+      "formatHint": "形式：時:分（例：03:30、06:15、23:45）"
     },
     "wind": {
       "title": "風の測定",
       "first": "第1風速計",
       "second": "第2風速計",
       "speed": "風速 (ノット)",
+      "placeholder": "5桁の数字を入力してください",
+      "placeholder3": "3桁の数字を入力してください",
       "direction": "方向 (度)",
       "directionPlaceholder": "コード手引きに従い5°から364°の風向"
     },
@@ -575,6 +695,8 @@
     "stationId": "観測所ID",
     "stationName": "観測所名",
     "year": "年",
+    "month": "月",
+    "day": "日",
     "dataType": "データタイプ",
     "stationNo": "観測所番号",
     "stationNameLabel": "観測所名",
@@ -1017,5 +1139,446 @@
       "exportSuccess": "データが正常にエクスポートされました"
     },
     "loading": "読み込み中..."
+  },
+  "UserManagement": {
+    "userTable": {
+      "title": "ユーザー管理",
+      "createUser": "ユーザー作成",
+      "editUser": "ユーザー編集",
+      "createNewUser": "新規ユーザー",
+      "columns": {
+        "name": "名前",
+        "email": "メールアドレス",
+        "role": "役割",
+        "station": "ステーション",
+        "joined": "参加日",
+        "actions": "操作"
+      },
+      "actions": {
+        "edit": "編集",
+        "delete": "削除"
+      },
+      "loading": "読み込み中...",
+      "noUsers": "ユーザーが見つかりません",
+      "pagination": {
+        "showing": "表示中",
+        "to": "から",
+        "of": "/",
+        "users": "件",
+        "previous": "前へ",
+        "next": "次へ"
+      },
+      "deleteDialog": {
+        "title": "削除の確認",
+        "message": "このユーザーを削除してもよろしいですか？この操作は元に戻せません。",
+        "cancel": "キャンセル",
+        "confirm": "削除"
+      },
+      "roleChangeDialog": {
+        "title": "役割変更の確認",
+        "message": "ユーザーの役割を{originalRole}から{newRole}に変更してもよろしいですか？",
+        "warning": "ユーザーの役割を変更すると、システム内の権限とアクセスレベルに影響します。",
+        "cancel": "キャンセル",
+        "confirm": "変更を確定"
+      },
+      "createEditDialog": {
+        "createTitle": "新規ユーザー作成",
+        "editTitle": "ユーザー編集",
+        "fields": {
+          "name": "名前",
+          "email": "メールアドレス *",
+          "password": "パスワード",
+          "newPassword": "新しいパスワード",
+          "role": "役割 *",
+          "stationName": "ステーション名",
+          "stationId": "ステーションID",
+          "securityCode": "セキュリティコード",
+          "division": "ディビジョン *",
+          "district": "ディストリクト *",
+          "upazila": "ウパジラ *"
+        },
+        "placeholders": {
+          "selectRole": "役割を選択",
+          "selectStation": "ステーションを選択",
+          "selectDivision": "ディビジョンを選択",
+          "selectDistrict": "ディストリクトを選択",
+          "selectUpazila": "ウパジラを選択"
+        },
+        "passwordRequirements": "{role}役割には最低{minLength}文字以上のパスワードが必要です",
+        "buttons": {
+          "cancel": "キャンセル",
+          "create": "ユーザー作成",
+          "update": "ユーザー更新",
+          "delete": "ユーザー削除"
+        },
+        "errors": {
+          "fillAllFields": "必須項目をすべて入力してください",
+          "passwordLength": "{role}役割には最低{minLength}文字以上のパスワードが必要です",
+          "superAdminEdit": "スーパーアドミン役割は変更できません",
+          "selfDelete": "自身のアカウントは削除できません",
+          "superAdminDelete": "スーパーアドミンアカウントは削除できません"
+        }
+      },
+      "roles": {
+        "superAdmin": "スーパーアドミン",
+        "stationAdmin": "ステーションアドミン",
+        "observer": "オブザーバー"
+      },
+      "buttons": {
+        "cancel": "キャンセル",
+        "create": "ユーザー作成",
+        "update": "ユーザー更新",
+        "delete": "ユーザー削除"
+      },
+      "errors": {
+        "fetchFailed": "データの取得に失敗しました",
+        "addFailed": "ユーザーの追加に失敗しました",
+        "updateFailed": "ユーザーの更新に失敗しました",
+        "deleteFailed": "ユーザーの削除に失敗しました"
+      },
+      "success": {
+        "added": "ユーザーが正常に追加されました",
+        "updated": "ユーザーが正常に更新されました",
+        "deleted": "ユーザーが正常に削除されました"
+      }
+    },
+    "logsTable": {
+      "title": "システムログ",
+      "columns": {
+        "time": "時間",
+        "actorName": "ユーザー名",
+        "actorEmail": "ユーザーメール",
+        "actorRole": "ユーザー役割",
+        "targetUser": "対象ユーザー",
+        "targetEmail": "対象メール",
+        "action": "アクション",
+        "actionText": "アクション説明",
+        "module": "モジュール",
+        "details": "詳細"
+      },
+      "actions": {
+        "view": "表示"
+      },
+      "actionTypes": {
+        "create": "作成",
+        "update": "更新",
+        "delete": "削除"
+      },
+      "detailsDialog": {
+        "title": "ログ詳細",
+        "subtitle": "(変更内容)"
+      },
+      "pagination": {
+        "page": "ページ",
+        "of": "/",
+        "showing": "表示中",
+        "to": "から",
+        "results": "件",
+        "previous": "前へ",
+        "next": "次へ"
+      }
+    }
+  },
+  "StationManagement": {
+    "title": "ステーション管理",
+    "searchPlaceholder": "ステーション名またはIDで検索...",
+    "addStation": "新規ステーション追加",
+    "noStations": "ステーションが見つかりません。新しいステーションを追加してください。",
+    "deleteConfirmation": "このステーションを削除してもよろしいですか？",
+    "form": {
+      "name": "名前",
+      "namePlaceholder": "ステーション名",
+      "stationId": "ステーションID",
+      "stationIdPlaceholder": "ステーションID",
+      "securityCode": "セキュリティコード",
+      "securityCodePlaceholder": "セキュリティコード",
+      "latitude": "緯度",
+      "latitudePlaceholder": "緯度 (例: 23.6850)",
+      "longitude": "経度",
+      "longitudePlaceholder": "経度 (例: 90.3563)"
+    },
+    "table": {
+      "name": "名前",
+      "stationId": "ステーションID",
+      "securityCode": "セキュリティコード",
+      "location": "位置情報",
+      "actions": "操作"
+    },
+    "buttons": {
+      "save": "保存",
+      "cancel": "キャンセル",
+      "edit": "編集",
+      "delete": "削除"
+    },
+    "errors": {
+      "requiredFields": "名前、ステーションID、セキュリティコードは必須です",
+      "fetchFailed": "ステーションデータの取得に失敗しました",
+      "addFailed": "ステーションの追加に失敗しました",
+      "updateFailed": "ステーションの更新に失敗しました",
+      "deleteFailed": "ステーションの削除に失敗しました"
+    },
+    "success": {
+      "added": "ステーションが正常に追加されました",
+      "updated": "ステーションが正常に更新されました",
+      "deleted": "ステーションが正常に削除されました"
+    }
+  },
+  "Settings": {
+    "title": "アカウント設定",
+    "security": "セキュリティ",
+    "twoFactor": {
+      "title": "二段階認証",
+      "description": "確認コードを要求することでアカウントのセキュリティを強化します",
+      "enable": {
+        "title": "二段階認証を有効化",
+        "description": "二段階認証を有効にするにはパスワードを入力してください",
+        "passwordLabel": "パスワード",
+        "passwordPlaceholder": "パスワードを入力",
+        "continue": "続ける",
+        "scanQR": "QRコードをスキャン",
+        "scanDescription": "QRコードをスキャンすると、認証アプリに6桁のコードが表示されます",
+        "backupCodes": {
+          "title": "バックアップコード",
+          "description": "これらのコードを安全な場所に保存してください。認証アプリにアクセスできなくなった場合、これらのコードでログインできます"
+        },
+        "verify": {
+          "title": "認証コードの確認",
+          "description": "認証アプリの6桁コードを入力してください",
+          "codeLabel": "確認コード",
+          "codePlaceholder": "6桁のコードを入力",
+          "verifyButton": "確認して有効化"
+        }
+      },
+      "disable": {
+        "title": "二段階認証を無効化",
+        "description": "二段階認証を無効にするにはパスワードを入力してください。これによりアカウントの安全性が低下します",
+        "passwordLabel": "パスワード",
+        "passwordPlaceholder": "パスワードを入力",
+        "disableButton": "認証を無効化"
+      },
+      "errors": {
+        "passwordRequired": "パスワードは必須です",
+        "codeRequired": "確認コードは必須です",
+        "generalError": "エラーが発生しました",
+        "enableFailed": "二段階認証の有効化に失敗しました",
+        "disableFailed": "二段階認証の無効化に失敗しました",
+        "verifyFailed": "コードの確認に失敗しました"
+      },
+      "success": {
+        "enabled": "二段階認証が正常に有効化されました！",
+        "disabled": "二段階認証が正常に無効化されました"
+      }
+    },
+    "buttons": {
+      "cancel": "キャンセル",
+      "back": "戻る"
+    },
+    "loading": {
+      "processing": "処理中...",
+      "verifying": "確認中...",
+      "disabling": "無効化中..."
+    }
+  },
+  "RadiosondeAnalyzer": {
+    "title": "ラジオゾンデデータ解析ツール",
+    "subtitle": "TTAA/TTBB高層観測データの高度な気象データデコーダー（複数ファイル形式対応）",
+    "datainput": "データ入力",
+    "fileupload": "ファイルアップロード",
+    "dropfiles": "ファイルをドロップするかクリックして選択",
+    "filesupport": "TX1、C5V、P10形式対応：各ファイル100MBまで無料",
+    "manualinput": "手動入力",
+    "ttaatadata": "TTAAデータ（必須）",
+    "ttbbdata": "TTBBデータ（任意）",
+    "exampledata": "TTAA 51231 63888 99996 97893 37806 96857 ///// ///// 9368...\nTTBB 51238 63888 99996 97893 32995 86818 32996...",
+    "analyzabutton": "データ解析",
+    "processingfiles": "ファイル処理中...",
+    "supportsfiles": "TXT、CSV、PDFファイル対応（各10MBまで）",
+    "uploadedfiles": "アップロード済みファイル:",
+    "day": "日",
+    "stationinfo": "観測点情報",
+    "surfacepressure": "地上気圧",
+    "surfacewind": "地上風",
+    "humidity": "湿度",
+    "mandatorylevels": "必須気圧面",
+    "standardlevels": "標準等圧面（1000hPaから100hPa）",
+    "pressuremb": "気圧（hPa）",
+    "heightm": "高度（m）",
+    "temperaturec": "気温（℃）",
+    "dewpointc": "露点温度（℃）",
+    "winddir": "風向（°）",
+    "windspeed": "風速（kt）",
+    "showinglevels": "{count}個の必須気圧面を表示中（≥100 hPa）",
+    "filteredlevels": "100hPa未満の{count}レベルを除外",
+    "tropopauselevel": "対流圏界面レベル",
+    "tropopausedesc": "対流圏と成層圏の境界層",
+    "maxwindlevel": "最大風速レベル",
+    "maxwinddesc": "高層観測で観測された最大風速",
+    "significantlevels": "有意気圧面",
+    "significantdesc": "気温・湿度・風の有意な変化があるレベル",
+    "nottbbdata": "TTBBデータがありません",
+    "uploadttbb": "TTBBデータを含むファイルをアップロードするか手動で入力してください",
+    "temperaturedata": "気温・湿度レベル",
+    "winddata": "風データレベル",
+    "depression": "デプレッション（℃）",
+    "datasource": "データソース",
+    "significant": "有意",
+    "surface": "地上",
+    "cardinaldir": "方位",
+    "maxspeed": "最大風速",
+    "avgspeed": "平均風速",
+    "decodingdetails": "デコード詳細",
+    "clusterformat": "クラスター形式",
+    "thermaldata": "熱データ",
+    "windinfo": "風情報",
+    "speed": "風速",
+    "direction": "風向",
+    "altitude": "高度",
+    "format": "形式",
+    "notropopause": "対流圏界面データなし",
+    "looktropopause": "TTAAデータで88PmPmPm形式を確認",
+    "nomaxwind": "最大風速データなし",
+    "lookmaxwind": "TTAAデータで77PmPmPm dddff形式を確認",
+    "tephigram": "テフィグラム",
+    "temperature": "温度",
+    "dewpointdepression": "露点降下",
+    "group": "グループ ",
+    "maxwindindicator": "最大風速インジケーター",
+    "pressurelevel": "気圧レベル",
+    "temperaturelevels": "温度レベル ",
+    "dewpointlevels": "露点レベル ",
+    "surfaceincluded": "地表含む ",
+    "yes": "はい",
+    "windlevels": "風レベル",
+    "pressure": "気圧",
+    "dewpoint": "露点",
+    "summary": "要約"
+  },
+  "tephigram": {
+    "noData": {
+      "title": "大気データが利用できません",
+      "description": "まずTTAA/TTBBラジオゾンデデータを分析してください"
+    },
+    "header": {
+      "title": "プロフェッショナルテフィグラム分析",
+      "description": "高度な高層観測分析 • 日付 {date} • {time}:00 UTC",
+      "badges": {
+        "station": "観測所 {station}",
+        "mandatoryLevels": "{count} 必須レベル",
+        "significantLevels": "{count} 有意レベル",
+        "tropopause": "対流圏界面検出",
+        "maxWind": "最大風速レベル"
+      },
+      "buttons": {
+        "export": "エクスポート",
+        "maximize": "最大化"
+      }
+    },
+    "tabs": {
+      "isobars": "等圧線",
+      "isotherms": "等温線",
+      "dryAdiabats": "乾燥断熱線",
+      "satAdiabats": "湿潤断熱線",
+      "hmrLines": "混合比線",
+      "tempProfile": "温度プロファイル",
+      "dewpointProfile": "露点",
+      "windBarbs": "風向風速記号",
+      "tropopause": "対流圏界面",
+      "maxWind": "最大風速",
+      "complete": "完全"
+    },
+    "charts": {
+      "isobars": {
+        "title": "等圧線 - 一定気圧線",
+        "description": "1000hPa（地表）から100hPa（成層圏）までの標準的な気圧レベルを表す水平線。これらの線は高層分析の基礎を形成し、気圧システムと大気層の識別に役立ちます。"
+      },
+      "isotherms": {
+        "title": "等温線 - 一定温度線",
+        "description": "すべての気圧レベルにわたる一定温度値を示す垂直線。0°Cの等温線は凍結レベルを示し、航空や降水タイプの予測に重要です。"
+      },
+      "dryAdiabats": {
+        "title": "乾燥断熱線 - 一定温位",
+        "description": "不飽和の空気塊が上昇または下降する際の温度変化を示す曲線。これらの線は一定温位（θ）を表し、大気の安定度と対流過程の分析に不可欠です。"
+      },
+      "satAdiabats": {
+        "title": "湿潤断熱線 - 湿潤空気塊",
+        "description": "飽和した上昇気流の温度変化を示す曲線。これらは一定湿球温位（θw）を表し、降水過程と雷雨の発達分析に重要です。"
+      },
+      "hmrLines": {
+        "title": "混合比線",
+        "description": "一定の水蒸気量（乾燥空気1kgあたりの水蒸気グラム数）を示す線。これらの線は異なる高度での水分量を決定し、雲の形成分析に不可欠です。"
+      },
+      "tempProfile": {
+        "title": "環境減率 - 温度プロファイル",
+        "description": "ラジオゾンデデータからの実際の温度測定値を気圧レベルに対してプロットしたもの。このプロファイルは環境減率を示し、安定度分析と天気予報の基礎となります。"
+      },
+      "dewpointProfile": {
+        "title": "露点プロファイル - 水分含有量",
+        "description": "高度に対する大気中の水分分布を示す露点温度プロファイル。温度と露点プロファイルの間隔は相対湿度と雲形成の可能性を示します。"
+      },
+      "windBarbs": {
+        "title": "風向風速記号 - 方向と速度",
+        "description": "各気圧レベルでの風向と風速を標準的な気象風向風速記号で表示。旗は50ノット、長い線は10ノット、短い線は5ノットを表します。"
+      },
+      "tropopause": {
+        "title": "対流圏界面 - 大気境界",
+        "description": "対流圏と成層圏の境界で、ラジオゾンデデータの88PtPtPtグループから識別されます。このレベルは温度が高度とともに低下しなくなる場所を示し、航空や気候研究に重要です。"
+      },
+      "maxWind": {
+        "title": "最大風速レベル",
+        "description": "観測データ中の最大風速を持つ気圧レベルで、77PmPmPmグループから識別されます。このレベルは航空計画とジェット気流の特性理解に重要です。"
+      },
+      "complete": {
+        "title": "完全な高層観測分析",
+        "description": "すべての気象要素を組み合わせた包括的なビュー：温度と露点プロファイル、気圧レベル、風データ、対流圏界面、最大風速レベル。このプロフェッショナルな可視化により、詳細な大気安定度分析と天気予報が可能になります。",
+        "legend": {
+          "temperature": "温度",
+          "dewPoint": "露点",
+          "tropopause": "対流圏界面",
+          "maxWind": "最大風速"
+        }
+      }
+    }
+  },
+  "netCdf":{
+    "title": "NetCDF ビジュアライザー",
+    "description": "NetCDFファイルをアップロードしてインタラクティブなチャートやプロットで可視化",
+    "fileUpload": {
+      "title": "ファイルアップロード",
+      "label": "NetCDFファイルを選択 (.nc)",
+      "button": "読み込んで可視化",
+      "processing": "処理中..."
+    },
+    "error": {
+      "fileProcessing": "NetCDFファイルの処理に失敗しました。ファイル形式を確認してください。"
+    },
+    "variables": {
+      "title": "変数"
+    },
+    "visualization": {
+      "title": "可視化",
+      "selectVariable": "可視化する変数を選択",
+      "plotTypes": {
+        "title": "NetCDF 可視化",
+        "line": "折れ線",
+        "scatter": "散布図",
+        "histogram": "ヒストグラム",
+        "heatmap": "ヒートマップ",
+        "contour": "等高線",
+        "surface": "3Dサーフェス"
+      },
+      "loading": "可視化を読み込み中..."
+    },
+    "metadata": {
+      "title": "メタデータ",
+      "dimensions": "次元",
+      "globalAttributes": "グローバル属性",
+      "variableAttributes": "変数属性"
+    },
+    "export": {
+      "title": "データのエクスポート",
+      "csv": "CSVでエクスポート",
+      "txt": "TXTでエクスポート",
+      "json": "JSONでエクスポート"
+    }
   }
 }

@@ -1,10 +1,7 @@
-
-
-
 "use client";
 
 import type React from "react";
-import Tephigram from "@/components/Tephigram"; // adjust path as needed
+import Tephigram from "@/components/Tephigram";
 import { useState, useCallback } from "react";
 import {
   Card,
@@ -31,6 +28,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useTranslations } from "next-intl";
 
 interface DecodedLevel {
   pressure: number;
@@ -68,6 +66,7 @@ interface DecodedData {
 }
 
 export default function RadiosondeAnalyzer() {
+  const t = useTranslations("RadiosondeAnalyzer");
   const [ttaaData, setTtaaData] = useState("");
   const [ttbbData, setTtbbData] = useState("");
   const [decodedData, setDecodedData] = useState<DecodedData | null>(null);
@@ -89,15 +88,11 @@ export default function RadiosondeAnalyzer() {
         reject(new Error(`Failed to read file: ${file.name}`));
       };
 
-      // Handle different file types
       if (file.type === "application/pdf") {
-        // For PDF files, we'll read as text (basic implementation)
-        // In a real application, you'd use a PDF parsing library
         reader.readAsText(file);
       } else if (file.type === "text/csv" || file.name.endsWith(".csv")) {
         reader.readAsText(file);
       } else {
-        // Default to text reading for .txt and other text files
         reader.readAsText(file);
       }
     });
@@ -122,13 +117,10 @@ export default function RadiosondeAnalyzer() {
           try {
             const content = await processFile(file);
 
-            // Parse content based on file type
             if (file.type === "text/csv" || file.name.endsWith(".csv")) {
-              // For CSV files, assume data is in rows
               const lines = content.split("\n").filter((line) => line.trim());
               combinedContent += lines.join(" ") + "\n";
             } else {
-              // For text files, use content as-is
               combinedContent += content + "\n";
             }
           } catch (error) {
@@ -139,7 +131,6 @@ export default function RadiosondeAnalyzer() {
           }
         }
 
-        // Try to separate TTAA and TTBB data automatically
         const lines = combinedContent.split("\n").filter((line) => line.trim());
         let ttaaContent = "";
         let ttbbContent = "";
@@ -157,7 +148,6 @@ export default function RadiosondeAnalyzer() {
           } else if (currentSection === "TTBB") {
             ttbbContent += line + "\n";
           } else {
-            // If no section identified, assume TTAA
             ttaaContent += line + "\n";
           }
         }
@@ -197,7 +187,7 @@ export default function RadiosondeAnalyzer() {
     [handleFileUpload]
   );
 
-  // Height conversion based on pressure level (following the official table)
+  // Height conversion based on pressure level
   const convertHeightByPressure = (
     heightCode: string,
     pressureLevel: number
@@ -207,21 +197,15 @@ export default function RadiosondeAnalyzer() {
     const height = Number.parseInt(heightCode);
     if (isNaN(height)) return null;
 
-    // Height conversion table
     if (pressureLevel > 850) {
-      // Values above 850 mb - As read
       return height;
     } else if (pressureLevel === 850) {
-      // 850 mb level - Add a 1 to the front of the height value (1hhh)
       return 1000 + height;
     } else if (pressureLevel === 700) {
-      // 700 mb level - Add a 2 to the front of the height value (2hhh)
       return 2000 + height;
     } else if (pressureLevel >= 300 && pressureLevel <= 500) {
-      // For values between 500 and 300 mb - Add a 0 to the end of the height value (hhh0)
       return height * 10;
     } else if (pressureLevel >= 100 && pressureLevel <= 250) {
-      // For values between 250 and 100 mb - Add a 1 to the front and a 0 to the end (1hhh0)
       return 10000 + height * 10;
     }
 
@@ -238,7 +222,6 @@ export default function RadiosondeAnalyzer() {
     const lastDigit = temp % 10;
     const tempValue = Math.floor(temp / 10);
 
-    // If last digit is even, temperature is positive; if odd, negative
     return lastDigit % 2 === 0 ? tempValue / 10 : -tempValue / 10;
   };
 
@@ -250,9 +233,9 @@ export default function RadiosondeAnalyzer() {
     if (isNaN(dd)) return null;
 
     if (dd <= 50) {
-      return dd / 10; // Units and tenths
+      return dd / 10;
     } else {
-      return dd - 50; // Subtract 50 for values > 5.0°C
+      return dd - 50;
     }
   };
 
@@ -271,7 +254,6 @@ export default function RadiosondeAnalyzer() {
       return { direction: null, speed: null };
     }
 
-    // Handle high wind speeds (>100 knots)
     let actualDirection = direction;
     let actualSpeed = speed;
 
@@ -281,7 +263,7 @@ export default function RadiosondeAnalyzer() {
     }
 
     return {
-      direction: actualDirection * 10, // Convert to degrees
+      direction: actualDirection * 10,
       speed: actualSpeed,
     };
   };
@@ -295,29 +277,25 @@ export default function RadiosondeAnalyzer() {
       return { mandatoryLevels: [] };
     }
 
-    // Parse header - TTAA YYGGI IIiii
-    const header = parts[1]; // YYGGI
-    const station = parts[2]; // IIiii
+    const header = parts[1];
+    const station = parts[2];
 
-    const date = Number.parseInt(header.substring(0, 2)) - 50; // YY minus 50
-    const time = Number.parseInt(header.substring(2, 4)); // GG
+    const date = Number.parseInt(header.substring(0, 2)) - 50;
+    const time = Number.parseInt(header.substring(2, 4));
 
-    // Enhanced decoding functions based on the correct format
     const decodeCluster = (
       pphhhCode: string,
       tttaddCode: string,
       dddffCode: string
     ) => {
-      // Step 1: PPhhh → Pressure level and geopotential height
       const pp = Number.parseInt(pphhhCode.substring(0, 2));
       const hhh = Number.parseInt(pphhhCode.substring(2, 5));
 
       let pressure = 0;
       let height = null;
 
-      // Determine pressure level from PP code
       if (pp === 99)
-        pressure = 1000; // Surface (special case)
+        pressure = 1000;
       else if (pp === 0) pressure = 1000;
       else if (pp === 92) pressure = 925;
       else if (pp === 85) pressure = 850;
@@ -330,17 +308,15 @@ export default function RadiosondeAnalyzer() {
       else if (pp === 15) pressure = 150;
       else if (pp === 10) pressure = 100;
       else if (pp === 88)
-        pressure = Number.parseInt(pphhhCode.substring(2, 5)); // Tropopause
+        pressure = Number.parseInt(pphhhCode.substring(2, 5));
       else if (pp === 77)
-        pressure = Number.parseInt(pphhhCode.substring(2, 5)); // Max wind
+        pressure = Number.parseInt(pphhhCode.substring(2, 5));
       else pressure = pp * 10;
 
-      // Calculate height using the proper conversion table
       if (!isNaN(hhh)) {
         height = convertHeightByPressure(hhh.toString(), pressure);
       }
 
-      // Step 2: TTTaDD → Temperature and dew point
       let temperature = null;
       let dewpointDepression = null;
       let dewpoint = null;
@@ -350,15 +326,12 @@ export default function RadiosondeAnalyzer() {
         const dd = Number.parseInt(tttaddCode.substring(3, 5));
 
         if (!isNaN(ttt)) {
-          // Temperature calculation: TTT = temperature in tenths
           const tempValue = ttt / 10;
-          // If LAST digit is even, temperature is positive; if odd, negative
           const lastDigit = ttt % 10;
           temperature = lastDigit % 2 === 0 ? tempValue : -tempValue;
         }
 
         if (!isNaN(dd)) {
-          // Use the proper dewpoint depression decoding function
           dewpointDepression = decodeDewpointDepression(
             dd.toString().padStart(2, "0")
           );
@@ -368,7 +341,6 @@ export default function RadiosondeAnalyzer() {
         }
       }
 
-      // Step 3: dddff → Wind direction and wind speed (CORRECTED FORMAT)
       let windDirection = null;
       let windSpeed = null;
 
@@ -377,11 +349,11 @@ export default function RadiosondeAnalyzer() {
         const ff = Number.parseInt(dddffCode.substring(3, 5));
 
         if (!isNaN(ddd)) {
-          windDirection = ddd; // Already in degrees
+          windDirection = ddd;
         }
 
         if (!isNaN(ff)) {
-          windSpeed = ff; // Direct value in knots
+          windSpeed = ff;
         }
       }
 
@@ -396,23 +368,19 @@ export default function RadiosondeAnalyzer() {
       };
     };
 
-    // Parse surface data first (special format)
-    let surfacePressure = 996; // Default
+    let surfacePressure = 996;
     let surfaceTemperature = 0;
     let surfaceDewpointDepression = 0;
     let surfaceWindDirection = 0;
     let surfaceWindSpeed = 0;
 
     if (parts.length >= 6) {
-      // Surface data: 99PoPoPo ToToTaoDoDo dododofofo
-      const surfacePressureCode = parts[3]; // 99PoPoPo
-      const surfaceTempCode = parts[4]; // ToToTaoDoDo
-      const surfaceWindCode = parts[5]; // dododofofo
+      const surfacePressureCode = parts[3];
+      const surfaceTempCode = parts[4];
+      const surfaceWindCode = parts[5];
 
-      // Extract surface pressure
       surfacePressure = Number.parseInt(surfacePressureCode.substring(2));
 
-      // Extract surface temperature and dewpoint depression
       if (surfaceTempCode && surfaceTempCode !== "/////") {
         const surfaceTempValue = Number.parseInt(
           surfaceTempCode.substring(0, 3)
@@ -421,7 +389,6 @@ export default function RadiosondeAnalyzer() {
 
         if (!isNaN(surfaceTempValue)) {
           const tempInTenths = surfaceTempValue / 10;
-          // Check if last digit is even (positive) or odd (negative)
           const lastDigit = surfaceTempValue % 10;
           surfaceTemperature =
             lastDigit % 2 === 0 ? tempInTenths : -tempInTenths;
@@ -432,7 +399,6 @@ export default function RadiosondeAnalyzer() {
         }
       }
 
-      // Extract surface wind
       if (surfaceWindCode && surfaceWindCode !== "/////") {
         const windDir = Number.parseInt(surfaceWindCode.substring(0, 3));
         const windSpd = Number.parseInt(surfaceWindCode.substring(3, 5));
@@ -442,21 +408,16 @@ export default function RadiosondeAnalyzer() {
       }
     }
 
-    // Parse mandatory levels starting from index 6
     const mandatoryLevels: DecodedLevel[] = [];
     let tropopause = null;
     let maxWind = null;
 
-    // Process clusters in groups of 3, starting after surface data
-    // Special handling for maximum wind (77) which uses 2 groups instead of 3
     for (let i = 6; i < parts.length; i++) {
       const pphhhCode = parts[i];
 
       if (!pphhhCode) break;
 
-      // Check for special groups first
       if (pphhhCode.startsWith("88")) {
-        // Tropopause data - uses 3 groups
         if (i + 2 >= parts.length) break;
         const tttaddCode = parts[i + 1];
         const dddffCode = parts[i + 2];
@@ -469,17 +430,14 @@ export default function RadiosondeAnalyzer() {
           windDirection: decoded.windDirection || 0,
           windSpeed: decoded.windSpeed || 0,
         };
-        i += 2; // Skip the next 2 groups
+        i += 2;
       } else if (pphhhCode.startsWith("77")) {
-        // Maximum wind data - uses 2 groups: PPhhh dddff
         if (i + 1 >= parts.length) break;
         const dddffCode = parts[i + 1];
 
-        // Decode pressure from PPhhh (77 + 3 digits)
         const pressureCode = pphhhCode.substring(2, 5);
         const pressure = Number.parseInt(pressureCode);
 
-        // Decode wind from dddff
         let windDirection = null;
         let windSpeed = null;
 
@@ -496,19 +454,17 @@ export default function RadiosondeAnalyzer() {
           windDirection: windDirection || 0,
           windSpeed: windSpeed || 0,
         };
-        i += 1; // Skip the next group
+        i += 1;
       } else if (pphhhCode.startsWith("31")) {
-        // Supplemental data - skip
         break;
       } else {
-        // Regular mandatory level - uses 3 groups
         if (i + 2 >= parts.length) break;
         const tttaddCode = parts[i + 1];
         const dddffCode = parts[i + 2];
 
         const decoded = decodeCluster(pphhhCode, tttaddCode, dddffCode);
         mandatoryLevels.push(decoded);
-        i += 2; // Skip the next 2 groups
+        i += 2;
       }
     }
 
@@ -535,15 +491,12 @@ export default function RadiosondeAnalyzer() {
       return { significantLevels };
     }
 
-    // Parse header - TTBB DDGGI IIiii
-    const header = parts[1]; // DDGGI
-    const station = parts[2]; // IIiii
+    const header = parts[1];
+    const station = parts[2];
 
-    // Extract day and time
-    const day = Number.parseInt(header.substring(0, 2)) - 50; // DD minus 50
-    const time = Number.parseInt(header.substring(2, 4)); // GG
+    const day = Number.parseInt(header.substring(0, 2)) - 50;
+    const time = Number.parseInt(header.substring(2, 4));
 
-    // Find surface pressure (00PPP format)
     let surfacePressureIndex = -1;
     for (let i = 3; i < parts.length; i++) {
       if (parts[i].startsWith("00") && parts[i].length === 5) {
@@ -560,7 +513,6 @@ export default function RadiosondeAnalyzer() {
       parts[surfacePressureIndex].substring(2)
     );
 
-    // Decode surface temperature and dewpoint (next group after surface pressure)
     if (surfacePressureIndex + 1 < parts.length) {
       const surfaceTempCode = parts[surfacePressureIndex + 1];
       if (surfaceTempCode && surfaceTempCode.length === 5) {
@@ -574,7 +526,6 @@ export default function RadiosondeAnalyzer() {
         let surfaceDewpointDepression = null;
 
         if (!isNaN(tempValue)) {
-          // Temperature: if last digit is even = positive, odd = negative
           const lastDigit = tempValue % 10;
           surfaceTemp = lastDigit % 2 === 0 ? tempValue / 10 : -tempValue / 10;
         }
@@ -586,7 +537,6 @@ export default function RadiosondeAnalyzer() {
           }
         }
 
-        // Add surface level to significant levels
         significantLevels.push({
           pressure: surfacePressure,
           height: null,
@@ -599,11 +549,9 @@ export default function RadiosondeAnalyzer() {
       }
     }
 
-    // Find the 21212 separator
     const separatorIndex = parts.findIndex((part) => part === "21212");
 
-    // Process significant temperature/dewpoint levels (before 21212)
-    let index = surfacePressureIndex + 2; // Start after surface data
+    let index = surfacePressureIndex + 2;
 
     while (
       index < (separatorIndex === -1 ? parts.length : separatorIndex) &&
@@ -614,12 +562,10 @@ export default function RadiosondeAnalyzer() {
 
       if (!pressureCode || !tempCode) break;
 
-      // Check for significant level indicators (11PPP, 22PPP, 33PPP, etc.)
       if (pressureCode.length === 5 && /^[1-9][1-9]\d{3}$/.test(pressureCode)) {
         const pressure = Number.parseInt(pressureCode.substring(2));
 
         if (!isNaN(pressure)) {
-          // Decode temperature and dewpoint depression
           let temperature = null;
           let dewpoint = null;
           let dewpointDepression = null;
@@ -631,7 +577,6 @@ export default function RadiosondeAnalyzer() {
             );
 
             if (!isNaN(tempValue)) {
-              // Temperature: if last digit is even = positive, odd = negative
               const lastDigit = tempValue % 10;
               temperature =
                 lastDigit % 2 === 0 ? tempValue / 10 : -tempValue / 10;
@@ -645,7 +590,6 @@ export default function RadiosondeAnalyzer() {
             }
           }
 
-          // Add the significant level
           significantLevels.push({
             pressure,
             height: null,
@@ -661,7 +605,6 @@ export default function RadiosondeAnalyzer() {
       index += 2;
     }
 
-    // Process wind data (after 21212)
     if (separatorIndex !== -1) {
       let windIndex = separatorIndex + 1;
 
@@ -669,14 +612,12 @@ export default function RadiosondeAnalyzer() {
         const pressureCode = parts[windIndex];
         const windCode = parts[windIndex + 1];
 
-        // Check for end indicator
         if (pressureCode === "31313") {
           break;
         }
 
         if (!pressureCode || !windCode) break;
 
-        // Handle surface wind (00PPP format) and significant level winds (11PPP, 22PPP, etc.)
         if (
           pressureCode.length === 5 &&
           (/^00\d{3}$/.test(pressureCode) ||
@@ -685,7 +626,6 @@ export default function RadiosondeAnalyzer() {
           const pressure = Number.parseInt(pressureCode.substring(2));
 
           if (!isNaN(pressure)) {
-            // Decode wind direction and speed
             let windDirection = null;
             let windSpeed = null;
 
@@ -702,17 +642,14 @@ export default function RadiosondeAnalyzer() {
               }
             }
 
-            // Find existing level or create new one
             const existingLevel = significantLevels.find(
               (level) => level.pressure === pressure
             );
 
             if (existingLevel) {
-              // Update existing level with wind data
               existingLevel.windDirection = windDirection;
               existingLevel.windSpeed = windSpeed;
             } else {
-              // Create new level for wind-only data
               significantLevels.push({
                 pressure,
                 height: null,
@@ -730,7 +667,6 @@ export default function RadiosondeAnalyzer() {
       }
     }
 
-    // Sort levels by pressure (descending)
     significantLevels.sort((a, b) => b.pressure - a.pressure);
 
     return { significantLevels };
@@ -741,7 +677,7 @@ export default function RadiosondeAnalyzer() {
     setIsLoading(true);
 
     if (!ttaaData.trim()) {
-      setErrors(["TTAA data is required"]);
+      setErrors([t("errors.ttaaRequired")]);
       setIsLoading(false);
       return;
     }
@@ -770,7 +706,9 @@ export default function RadiosondeAnalyzer() {
       setDecodedData(combined);
     } catch (error) {
       setErrors([
-        `Error decoding data: ${error instanceof Error ? error.message : "Unknown error"}`,
+        t("errors.decodingError", {
+          error: error instanceof Error ? error.message : "Unknown error",
+        }),
       ]);
     } finally {
       setIsLoading(false);
@@ -794,11 +732,10 @@ export default function RadiosondeAnalyzer() {
             <Cloud className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Radiosonde Data Analyzer
+            {t("title")}
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Advanced meteorological data decoder for TTAA/TTBB upper air
-            soundings with multi-format file support
+            {t("subtitle")}
           </p>
         </div>
 
@@ -806,11 +743,10 @@ export default function RadiosondeAnalyzer() {
           <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg">
             <CardTitle className="flex items-center gap-3 text-xl">
               <Upload className="h-6 w-6" />
-              Data Input
+              {t("datainput")}
             </CardTitle>
             <CardDescription className="text-blue-100">
-              Upload files (TXT, CSV, PDF) or enter data manually. Supports drag
-              & drop functionality.
+              {t("filesupport")}
             </CardDescription>
           </CardHeader>
           <CardContent className="p-6 space-y-6">
@@ -818,7 +754,9 @@ export default function RadiosondeAnalyzer() {
             <div className="space-y-4">
               <div className="flex items-center gap-2 mb-3">
                 <FileText className="h-5 w-5 text-blue-600" />
-                <span className="font-semibold text-gray-700">File Upload</span>
+                <span className="font-semibold text-gray-700">
+                  {t("fileupload")}
+                </span>
               </div>
 
               <div
@@ -837,12 +775,10 @@ export default function RadiosondeAnalyzer() {
                   </div>
                   <div>
                     <p className="text-lg font-medium text-gray-700">
-                      {isLoading
-                        ? "Processing files..."
-                        : "Drop files here or click to browse"}
+                      {isLoading ? t("processingfiles") : t("dropfiles")}
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
-                      Supports TXT, CSV, PDF files up to 10MB each
+                      {t("supportsfiles")}
                     </p>
                   </div>
                 </div>
@@ -860,7 +796,7 @@ export default function RadiosondeAnalyzer() {
               {uploadedFiles.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-gray-700">
-                    Uploaded Files:
+                    {t("uploadedfiles")}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {uploadedFiles.map((file, index) => (
@@ -885,7 +821,7 @@ export default function RadiosondeAnalyzer() {
               <div className="flex items-center gap-2 mb-3">
                 <FileText className="h-5 w-5 text-purple-600" />
                 <span className="font-semibold text-gray-700">
-                  Manual Input
+                  {t("manualinput")}
                 </span>
               </div>
 
@@ -893,10 +829,10 @@ export default function RadiosondeAnalyzer() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                     <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                    TTAA Data (Required)
+                    {t("ttaatadata")}
                   </label>
                   <Textarea
-                    placeholder="TTAA 51231 03808 99996 07819 17005 00057 ///// ///// 92698..."
+                    placeholder={t("exampledata")}
                     value={ttaaData}
                     onChange={(e) => setTtaaData(e.target.value)}
                     rows={4}
@@ -907,10 +843,10 @@ export default function RadiosondeAnalyzer() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                     <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-                    TTBB Data (Optional)
+                    {t("ttbbdata")}
                   </label>
                   <Textarea
-                    placeholder="TTBB 51238 03808 00996 07819 11995 08018 22990..."
+                    placeholder={t("exampledata")}
                     value={ttbbData}
                     onChange={(e) => setTtbbData(e.target.value)}
                     rows={4}
@@ -929,12 +865,12 @@ export default function RadiosondeAnalyzer() {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing...
+                    {t("analyzing")}
                   </>
                 ) : (
                   <>
                     <Cloud className="mr-2 h-4 w-4" />
-                    Analyze Data
+                    {t("analyzabutton")}
                   </>
                 )}
               </Button>
@@ -960,25 +896,25 @@ export default function RadiosondeAnalyzer() {
                 value="summary"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white"
               >
-                Summary
+                {t("summary")}
               </TabsTrigger>
               <TabsTrigger
                 value="mandatory"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-teal-600 data-[state=active]:text-white"
               >
-                Mandatory Levels
+                {t("mandatorylevels")}
               </TabsTrigger>
               <TabsTrigger
                 value="significant"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white"
               >
-                Significant Levels
+                {t("significantlevels")}
               </TabsTrigger>
               <TabsTrigger
                 value="tephigram"
                 className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white"
               >
-                Tephigram
+                {t("tephigram")}
               </TabsTrigger>
             </TabsList>
 
@@ -987,7 +923,7 @@ export default function RadiosondeAnalyzer() {
                 <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 border-l-4 border-l-blue-500">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-blue-800">
-                      Station Info
+                      {t("stationinfo")}
                     </CardTitle>
                     <Badge
                       variant="outline"
@@ -998,7 +934,7 @@ export default function RadiosondeAnalyzer() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-blue-900">
-                      Day {decodedData.date}
+                      {t("day")} {decodedData.date}
                     </div>
                     <p className="text-xs text-blue-700">
                       {String(decodedData.time).padStart(2, "0")}:00 UTC
@@ -1009,16 +945,16 @@ export default function RadiosondeAnalyzer() {
                 <Card className="border-0 shadow-lg bg-gradient-to-br from-red-50 to-red-100 border-l-4 border-l-red-500">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-red-800">
-                      Surface Pressure
+                      {t("surfacepressure")}
                     </CardTitle>
                     <Thermometer className="h-4 w-4 text-red-600" />
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-red-900">
-                      {decodedData.surfacePressure} mb
+                      {decodedData.surfacePressure} {t("pressuremb")}
                     </div>
                     <p className="text-xs text-red-700">
-                      Temperature:{" "}
+                      {t("temperature")}:{" "}
                       {formatValue(decodedData.surfaceTemperature, "°C")}
                     </p>
                   </CardContent>
@@ -1027,7 +963,7 @@ export default function RadiosondeAnalyzer() {
                 <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 border-l-4 border-l-green-500">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-green-800">
-                      Surface Wind
+                      {t("surfacewind")}
                     </CardTitle>
                     <Wind className="h-4 w-4 text-green-600" />
                   </CardHeader>
@@ -1036,7 +972,7 @@ export default function RadiosondeAnalyzer() {
                       {decodedData.surfaceWindDirection}°
                     </div>
                     <p className="text-xs text-green-700">
-                      {decodedData.surfaceWindSpeed} knots
+                      {decodedData.surfaceWindSpeed} {t("windspeed")}
                     </p>
                   </CardContent>
                 </Card>
@@ -1044,7 +980,7 @@ export default function RadiosondeAnalyzer() {
                 <Card className="border-0 shadow-lg bg-gradient-to-br from-cyan-50 to-cyan-100 border-l-4 border-l-cyan-500">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium text-cyan-800">
-                      Humidity
+                      {t("humidity")}
                     </CardTitle>
                     <Droplets className="h-4 w-4 text-cyan-600" />
                   </CardHeader>
@@ -1052,7 +988,9 @@ export default function RadiosondeAnalyzer() {
                     <div className="text-2xl font-bold text-cyan-900">
                       {formatValue(decodedData.surfaceDewpointDepression, "°C")}
                     </div>
-                    <p className="text-xs text-cyan-700">Dewpoint depression</p>
+                    <p className="text-xs text-cyan-700">
+                      {t("dewpointdepression")}
+                    </p>
                   </CardContent>
                 </Card>
               </div>
@@ -1063,10 +1001,10 @@ export default function RadiosondeAnalyzer() {
                 <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm mb-8">
                   <CardHeader className="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-t-lg">
                     <CardTitle className="text-xl">
-                      Mandatory Pressure Levels
+                      {t("mandatorylevels")}
                     </CardTitle>
                     <CardDescription className="text-green-100">
-                      Standard isobaric levels (1000mb to 100mb)
+                      {t("standardlevels")}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="p-6">
@@ -1075,32 +1013,34 @@ export default function RadiosondeAnalyzer() {
                         <thead>
                           <tr className="border-b-2 border-green-200 bg-gradient-to-r from-green-50 to-teal-50">
                             <th className="text-left p-3 font-semibold text-green-800">
-                              Pressure (mb)
+                              {t("pressuremb")}
                             </th>
                             <th className="text-left p-3 font-semibold text-green-800">
-                              Height (m)
+                              {t("heightm")}
                             </th>
                             <th className="text-left p-3 font-semibold text-green-800">
-                              Temperature (°C)
+                              {t("temperaturec")}
                             </th>
                             <th className="text-left p-3 font-semibold text-green-800">
-                              Dewpoint (°C)
+                              {t("dewpointc")}
                             </th>
                             <th className="text-left p-3 font-semibold text-green-800">
-                              Wind Dir (°)
+                              {t("winddir")}
                             </th>
                             <th className="text-left p-3 font-semibold text-green-800">
-                              Wind Speed (kt)
+                              {t("windspeed")}
                             </th>
                           </tr>
                         </thead>
                         <tbody>
                           {decodedData.mandatoryLevels
-                            .filter((level) => level.pressure >= 100) // Only show levels >= 100 mb
+                            .filter((level) => level.pressure >= 100)
                             .map((level, index) => (
                               <tr
                                 key={index}
-                                className={`border-b hover:bg-green-50 transition-colors ${index % 2 === 0 ? "bg-gray-50" : "bg-white"}`}
+                                className={`border-b hover:bg-green-50 transition-colors ${
+                                  index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                                }`}
                               >
                                 <td className="p-3 font-bold text-green-700">
                                   {level.pressure}
@@ -1126,18 +1066,15 @@ export default function RadiosondeAnalyzer() {
                       </table>
                     </div>
 
-                    {/* Show count of filtered levels */}
                     <div className="mt-4 text-sm text-gray-600 bg-green-50 p-3 rounded-lg border border-green-200">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         <span>
-                          Showing{" "}
-                          {
-                            decodedData.mandatoryLevels.filter(
+                          {t("showinglevels", {
+                            count: decodedData.mandatoryLevels.filter(
                               (level) => level.pressure >= 100
-                            ).length
-                          }{" "}
-                          mandatory levels (≥100 mb pressure)
+                            ).length,
+                          })}
                         </span>
                       </div>
                       {decodedData.mandatoryLevels.filter(
@@ -1146,12 +1083,11 @@ export default function RadiosondeAnalyzer() {
                         <div className="flex items-center gap-2 mt-1">
                           <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                           <span className="text-gray-500">
-                            {
-                              decodedData.mandatoryLevels.filter(
+                            {t("filteredlevels", {
+                              count: decodedData.mandatoryLevels.filter(
                                 (level) => level.pressure < 100
-                              ).length
-                            }{" "}
-                            levels below 100 mb filtered out
+                              ).length,
+                            })}
                           </span>
                         </div>
                       )}
@@ -1163,10 +1099,10 @@ export default function RadiosondeAnalyzer() {
                     <CardHeader className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-t-lg">
                       <CardTitle className="flex items-center gap-2 text-xl">
                         <Cloud className="h-6 w-6" />
-                        Tropopause Level
+                        {t("tropopauselevel")}
                       </CardTitle>
                       <CardDescription className="text-emerald-100">
-                        Boundary between troposphere and stratosphere
+                        {t("tropopausedesc")}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6">
@@ -1175,16 +1111,18 @@ export default function RadiosondeAnalyzer() {
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-3 rounded-lg border border-blue-300">
                               <div className="text-xs font-medium text-blue-700 mb-1">
-                                Pressure
+                                {t("pressure")}
                               </div>
                               <div className="text-lg font-bold text-blue-800">
                                 {decodedData.tropopause.pressure}
                               </div>
-                              <div className="text-xs text-blue-600">mb</div>
+                              <div className="text-xs text-blue-600">
+                                {t("pressuremb")}
+                              </div>
                             </div>
                             <div className="bg-gradient-to-br from-red-100 to-red-200 p-3 rounded-lg border border-red-300">
                               <div className="text-xs font-medium text-red-700 mb-1">
-                                Temperature
+                                {t("temperature")}
                               </div>
                               <div className="text-lg font-bold text-red-800">
                                 {formatValue(
@@ -1196,7 +1134,7 @@ export default function RadiosondeAnalyzer() {
                             </div>
                             <div className="bg-gradient-to-br from-cyan-100 to-cyan-200 p-3 rounded-lg border border-cyan-300">
                               <div className="text-xs font-medium text-cyan-700 mb-1">
-                                Dewpoint
+                                {t("dewpoint")}
                               </div>
                               <div className="text-lg font-bold text-cyan-800">
                                 {formatValue(
@@ -1208,7 +1146,7 @@ export default function RadiosondeAnalyzer() {
                             </div>
                             <div className="bg-gradient-to-br from-purple-100 to-purple-200 p-3 rounded-lg border border-purple-300">
                               <div className="text-xs font-medium text-purple-700 mb-1">
-                                Altitude
+                                {t("altitude")}
                               </div>
                               <div className="text-lg font-bold text-purple-800">
                                 ~
@@ -1222,7 +1160,9 @@ export default function RadiosondeAnalyzer() {
                                       ))
                                 )}
                               </div>
-                              <div className="text-xs text-purple-600">m</div>
+                              <div className="text-xs text-purple-600">
+                                {t("heightm")}
+                              </div>
                             </div>
                           </div>
 
@@ -1233,22 +1173,25 @@ export default function RadiosondeAnalyzer() {
                               <div className="flex items-center gap-2 mb-2">
                                 <Wind className="h-4 w-4 text-green-600" />
                                 <span className="font-medium text-green-800">
-                                  Wind Information
+                                  {t("windinfo")}
                                 </span>
                               </div>
                               <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
                                   <span className="text-green-700">
-                                    Direction:
+                                    {t("direction")}:
                                   </span>
                                   <span className="font-medium text-green-800">
                                     {decodedData.tropopause.windDirection}°
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
-                                  <span className="text-green-700">Speed:</span>
+                                  <span className="text-green-700">
+                                    {t("speed")}:
+                                  </span>
                                   <span className="font-medium text-green-800">
-                                    {decodedData.tropopause.windSpeed} knots
+                                    {decodedData.tropopause.windSpeed}{" "}
+                                    {t("windspeed")}
                                   </span>
                                 </div>
                               </div>
@@ -1258,13 +1201,13 @@ export default function RadiosondeAnalyzer() {
                               <div className="flex items-center gap-2 mb-2">
                                 <Thermometer className="h-4 w-4 text-amber-600" />
                                 <span className="font-medium text-amber-800">
-                                  Thermal Data
+                                  {t("thermaldata")}
                                 </span>
                               </div>
                               <div className="space-y-2 text-sm">
                                 <div className="flex justify-between">
                                   <span className="text-amber-700">
-                                    Depression:
+                                    {t("depression")}:
                                   </span>
                                   <span className="font-medium text-amber-800">
                                     {formatValue(
@@ -1277,7 +1220,7 @@ export default function RadiosondeAnalyzer() {
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-amber-700">
-                                    Format:
+                                    {t("format")}:
                                   </span>
                                   <span className="font-mono text-xs text-amber-800 bg-amber-300 px-2 py-1 rounded">
                                     88
@@ -1294,10 +1237,10 @@ export default function RadiosondeAnalyzer() {
                         <div className="text-center py-8">
                           <Cloud className="h-12 w-12 text-gray-300 mx-auto mb-3" />
                           <p className="text-muted-foreground">
-                            No tropopause data available
+                            {t("notropopause")}
                           </p>
                           <p className="text-sm text-gray-500 mt-1">
-                            Look for 88PmPmPm format in TTAA data
+                            {t("looktropopause")}
                           </p>
                         </div>
                       )}
@@ -1308,10 +1251,10 @@ export default function RadiosondeAnalyzer() {
                     <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-t-lg">
                       <CardTitle className="flex items-center gap-2 text-xl">
                         <Wind className="h-6 w-6" />
-                        Maximum Wind Level
+                        {t("maxwindlevel")}
                       </CardTitle>
                       <CardDescription className="text-blue-100">
-                        Strongest wind observed in the atmospheric sounding
+                        {t("maxwinddesc")}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="pt-6">
@@ -1321,7 +1264,7 @@ export default function RadiosondeAnalyzer() {
                             <div className="bg-gradient-to-br from-purple-100 to-purple-200 p-4 rounded-lg border border-purple-300">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm font-medium text-purple-700">
-                                  Pressure Level
+                                  {t("pressure")}
                                 </span>
                                 <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
                               </div>
@@ -1336,7 +1279,7 @@ export default function RadiosondeAnalyzer() {
                             <div className="bg-gradient-to-br from-green-100 to-emerald-200 p-4 rounded-lg border border-green-300">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm font-medium text-green-700">
-                                  Wind Direction
+                                  {t("winddir")}
                                 </span>
                                 <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                               </div>
@@ -1382,7 +1325,7 @@ export default function RadiosondeAnalyzer() {
                             <div className="bg-gradient-to-br from-orange-100 to-red-200 p-4 rounded-lg border border-orange-300">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm font-medium text-orange-700">
-                                  Wind Speed
+                                  {t("windspeed")}
                                 </span>
                                 <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
                               </div>
@@ -1390,7 +1333,7 @@ export default function RadiosondeAnalyzer() {
                                 {decodedData.maxWind.windSpeed}
                               </div>
                               <div className="text-xs text-orange-600">
-                                knots
+                                {t("windspeed")}
                               </div>
                             </div>
                           </div>
@@ -1400,13 +1343,13 @@ export default function RadiosondeAnalyzer() {
                           <div className="bg-gradient-to-r from-slate-100 to-gray-200 p-4 rounded-lg border border-slate-300">
                             <h4 className="font-semibold text-slate-700 mb-3 flex items-center gap-2">
                               <div className="w-2 h-2 bg-slate-500 rounded-full"></div>
-                              Decoding Details
+                              {t("decodingdetails")}
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                               <div className="space-y-2">
                                 <div className="flex justify-between">
                                   <span className="text-slate-600">
-                                    Cluster Format:
+                                    {t("clusterformat")}:
                                   </span>
                                   <span className="font-mono text-slate-800 bg-slate-300 px-2 py-1 rounded">
                                     77
@@ -1423,7 +1366,7 @@ export default function RadiosondeAnalyzer() {
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-slate-600">
-                                    Group 1:
+                                    {t("group")} 1:
                                   </span>
                                   <span className="font-mono text-blue-700 bg-blue-200 px-2 py-1 rounded">
                                     77
@@ -1434,7 +1377,7 @@ export default function RadiosondeAnalyzer() {
                                 </div>
                                 <div className="flex justify-between">
                                   <span className="text-slate-600">
-                                    Group 2:
+                                    {t("group")} 2:
                                   </span>
                                   <span className="font-mono text-green-700 bg-green-200 px-2 py-1 rounded">
                                     {decodedData.maxWind.windDirection
@@ -1450,7 +1393,7 @@ export default function RadiosondeAnalyzer() {
                                 <div className="flex justify-between">
                                   <span className="text-slate-600">77 →</span>
                                   <span className="text-blue-800 font-medium">
-                                    Max wind indicator
+                                    {t("maxwindindicator")}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
@@ -1461,7 +1404,7 @@ export default function RadiosondeAnalyzer() {
                                     →
                                   </span>
                                   <span className="text-purple-800 font-medium">
-                                    Pressure level
+                                    {t("pressurelevel")}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
@@ -1472,7 +1415,7 @@ export default function RadiosondeAnalyzer() {
                                     →
                                   </span>
                                   <span className="text-green-800 font-medium">
-                                    Wind direction
+                                    {t("winddir")}
                                   </span>
                                 </div>
                                 <div className="flex justify-between">
@@ -1483,7 +1426,7 @@ export default function RadiosondeAnalyzer() {
                                     →
                                   </span>
                                   <span className="text-orange-800 font-medium">
-                                    Wind speed
+                                    {t("windspeed")}
                                   </span>
                                 </div>
                               </div>
@@ -1494,10 +1437,10 @@ export default function RadiosondeAnalyzer() {
                         <div className="text-center py-8">
                           <Wind className="h-12 w-12 text-gray-300 mx-auto mb-3" />
                           <p className="text-muted-foreground">
-                            No maximum wind data available
+                            {t("nomaxwind")}
                           </p>
                           <p className="text-sm text-gray-500 mt-1">
-                            Look for 77PmPmPm dddff format in TTAA data
+                            {t("lookmaxwind")}
                           </p>
                         </div>
                       )}
@@ -1511,11 +1454,10 @@ export default function RadiosondeAnalyzer() {
               <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
                 <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg">
                   <CardTitle className="text-xl">
-                    Significant Pressure Levels
+                    {t("significantlevels")}
                   </CardTitle>
                   <CardDescription className="text-orange-100">
-                    Levels with significant temperature, humidity, and wind
-                    changes
+                    {t("significantdesc")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
@@ -1527,14 +1469,14 @@ export default function RadiosondeAnalyzer() {
                           className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-orange-600 data-[state=active]:text-white"
                         >
                           <Thermometer className="h-4 w-4 mr-2" />
-                          Temperature Data
+                          {t("temperaturedata")}
                         </TabsTrigger>
                         <TabsTrigger
                           value="wind"
                           className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-600 data-[state=active]:text-white"
                         >
                           <Wind className="h-4 w-4 mr-2" />
-                          Wind Data
+                          {t("winddata")}
                         </TabsTrigger>
                       </TabsList>
 
@@ -1542,26 +1484,26 @@ export default function RadiosondeAnalyzer() {
                         <div className="bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-lg border border-red-200">
                           <h3 className="text-lg font-semibold text-red-800 mb-3 flex items-center gap-2">
                             <Thermometer className="h-5 w-5" />
-                            Temperature & Humidity Levels
+                            {t("temperaturedata")}
                           </h3>
                           <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                               <thead>
                                 <tr className="border-b-2 border-red-200 bg-gradient-to-r from-red-100 to-orange-100">
                                   <th className="text-left p-3 font-semibold text-red-800">
-                                    Pressure (mb)
+                                    {t("pressuremb")}
                                   </th>
                                   <th className="text-left p-3 font-semibold text-red-800">
-                                    Temperature (°C)
+                                    {t("temperaturec")}
                                   </th>
                                   <th className="text-left p-3 font-semibold text-red-800">
-                                    Dewpoint (°C)
+                                    {t("dewpointc")}
                                   </th>
                                   <th className="text-left p-3 font-semibold text-red-800">
-                                    Depression (°C)
+                                    {t("depression")}
                                   </th>
                                   <th className="text-left p-3 font-semibold text-red-800">
-                                    Data Source
+                                    {t("datasource")}
                                   </th>
                                 </tr>
                               </thead>
@@ -1608,8 +1550,8 @@ export default function RadiosondeAnalyzer() {
                                         >
                                           {level.pressure ===
                                           decodedData.surfacePressure
-                                            ? "Surface"
-                                            : "Significant"}
+                                            ? t("surface")
+                                            : t("significant")}
                                         </Badge>
                                       </td>
                                     </tr>
@@ -1618,13 +1560,12 @@ export default function RadiosondeAnalyzer() {
                             </table>
                           </div>
 
-                          {/* Temperature Data Summary */}
                           <div className="mt-4 text-sm text-gray-600 bg-red-50 p-3 rounded-lg border border-red-200">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                               <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                                 <span>
-                                  Temperature levels:{" "}
+                                  {t("temperaturelevels")}:{" "}
                                   {
                                     decodedData.significantLevels.filter(
                                       (l) => l.temperature !== null
@@ -1635,7 +1576,7 @@ export default function RadiosondeAnalyzer() {
                               <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
                                 <span>
-                                  Dewpoint levels:{" "}
+                                  {t("dewpointlevels")}:{" "}
                                   {
                                     decodedData.significantLevels.filter(
                                       (l) => l.dewpoint !== null
@@ -1646,13 +1587,13 @@ export default function RadiosondeAnalyzer() {
                               <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                 <span>
-                                  Surface included:{" "}
+                                  {t("surfaceincluded")}:{" "}
                                   {decodedData.significantLevels.some(
                                     (l) =>
                                       l.pressure === decodedData.surfacePressure
                                   )
-                                    ? "Yes"
-                                    : "No"}
+                                    ? t("yes")
+                                    : t("no")}
                                 </span>
                               </div>
                             </div>
@@ -1664,26 +1605,26 @@ export default function RadiosondeAnalyzer() {
                         <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
                           <h3 className="text-lg font-semibold text-blue-800 mb-3 flex items-center gap-2">
                             <Wind className="h-5 w-5" />
-                            Wind Data Levels
+                            {t("winddata")}
                           </h3>
                           <div className="overflow-x-auto">
                             <table className="w-full text-sm">
                               <thead>
                                 <tr className="border-b-2 border-blue-200 bg-gradient-to-r from-blue-100 to-cyan-100">
                                   <th className="text-left p-3 font-semibold text-blue-800">
-                                    Pressure (mb)
+                                    {t("pressuremb")}
                                   </th>
                                   <th className="text-left p-3 font-semibold text-blue-800">
-                                    Wind Direction (°)
+                                    {t("winddir")}
                                   </th>
                                   <th className="text-left p-3 font-semibold text-blue-800">
-                                    Wind Speed (kt)
+                                    {t("windspeed")}
                                   </th>
                                   <th className="text-left p-3 font-semibold text-blue-800">
-                                    Cardinal Direction
+                                    {t("cardinaldir")}
                                   </th>
                                   <th className="text-left p-3 font-semibold text-blue-800">
-                                    Data Source
+                                    {t("datasource")}
                                   </th>
                                 </tr>
                               </thead>
@@ -1766,8 +1707,8 @@ export default function RadiosondeAnalyzer() {
                                         >
                                           {level.pressure ===
                                           decodedData.surfacePressure
-                                            ? "Surface"
-                                            : "Significant"}
+                                            ? t("surface")
+                                            : t("significant")}
                                         </Badge>
                                       </td>
                                     </tr>
@@ -1776,13 +1717,12 @@ export default function RadiosondeAnalyzer() {
                             </table>
                           </div>
 
-                          {/* Wind Data Summary */}
                           <div className="mt-4 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg border border-blue-200">
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                               <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                 <span>
-                                  Wind levels:{" "}
+                                  {t("windlevels")}:{" "}
                                   {
                                     decodedData.significantLevels.filter(
                                       (l) => l.windSpeed !== null
@@ -1793,19 +1733,19 @@ export default function RadiosondeAnalyzer() {
                               <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                                 <span>
-                                  Max speed:{" "}
+                                  {t("maxspeed")}:{" "}
                                   {Math.max(
                                     ...decodedData.significantLevels.map(
                                       (l) => l.windSpeed || 0
                                     )
                                   )}{" "}
-                                  kt
+                                  {t("windspeed")}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                                 <span>
-                                  Avg speed:{" "}
+                                  {t("avgspeed")}:{" "}
                                   {Math.round(
                                     decodedData.significantLevels
                                       .filter((l) => l.windSpeed !== null)
@@ -1817,21 +1757,21 @@ export default function RadiosondeAnalyzer() {
                                         (l) => l.windSpeed !== null
                                       ).length
                                   )}{" "}
-                                  kt
+                                  {t("windspeed")}
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
                                 <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                                 <span>
-                                  Surface included:{" "}
+                                  {t("surfaceincluded")}:{" "}
                                   {decodedData.significantLevels.some(
                                     (l) =>
                                       l.pressure ===
                                         decodedData.surfacePressure &&
                                       l.windSpeed !== null
                                   )
-                                    ? "Yes"
-                                    : "No"}
+                                    ? t("yes")
+                                    : t("no")}
                                 </span>
                               </div>
                             </div>
@@ -1845,10 +1785,10 @@ export default function RadiosondeAnalyzer() {
                         <FileText className="h-8 w-8 text-orange-600" />
                       </div>
                       <p className="text-lg font-medium text-gray-700 mb-2">
-                        No TTBB data provided
+                        {t("nottbbdata")}
                       </p>
                       <p className="text-sm text-gray-500">
-                        Upload a file containing TTBB data or enter it manually
+                        {t("uploadttbb")}
                       </p>
                     </div>
                   )}

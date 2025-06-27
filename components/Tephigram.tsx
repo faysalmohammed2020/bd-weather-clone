@@ -1,5 +1,3 @@
-
-
 "use client"
 
 import type React from "react"
@@ -9,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Download, Info, Maximize2, Wind, Thermometer, Droplets } from "lucide-react"
 import type { JSX } from "react/jsx-runtime"
+import { useTranslations } from "next-intl"
 
 // Interface matching your RadiosondeAnalyzer data structure
 interface DecodedLevel {
@@ -246,6 +245,7 @@ const ProfessionalGradients = () => (
 )
 
 const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, decodedData }) => {
+  const t = useTranslations('tephigram')
   const svgWidth = 1400 // Increased width for better visibility
   const svgHeight = height
   const margin = { top: 80, right: 220, bottom: 100, left: 120 }
@@ -264,8 +264,8 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
                 <Info className="w-10 h-10 text-white" />
               </div>
-              <div className="text-gray-700 text-2xl mb-3 font-bold">No Atmospheric Data Available</div>
-              <div className="text-gray-500 text-lg">Please analyze TTAA/TTBB radiosonde data first</div>
+              <div className="text-gray-700 text-2xl mb-3 font-bold">{t('noData.title')}</div>
+              <div className="text-gray-500 text-lg">{t('noData.description')}</div>
             </div>
           </CardContent>
         </Card>
@@ -301,10 +301,10 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             {/* Title and description */}
             <text x={svgWidth / 2} y={35} textAnchor="middle" fontSize="24" fill="#1e293b" fontWeight="bold">
-              Isobars - Constant Pressure Lines
+              {t('charts.isobars.title')}
             </text>
             <text x={svgWidth / 2} y={60} textAnchor="middle" fontSize="16" fill="#64748b">
-              Standard atmospheric pressure levels for meteorological analysis
+              {t('charts.isobars.description')}
             </text>
 
             <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -355,7 +355,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
               {/* Y-axis labels */}
               <text x={-60} y={-20} fontSize="16" fill="#1e293b" fontWeight="bold" textAnchor="middle">
-                Pressure (hPa)
+                {t('charts.isobars.title')}
               </text>
             </g>
 
@@ -369,7 +369,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fontWeight="bold"
               transform={`rotate(-90 30 ${svgHeight / 2})`}
             >
-              Pressure (hPa)
+              {t('charts.isobars.title')}
             </text>
           </svg>
         </div>
@@ -390,10 +390,10 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             {/* Title and description */}
             <text x={svgWidth / 2} y={35} textAnchor="middle" fontSize="24" fill="#1e293b" fontWeight="bold">
-              Isotherms - Constant Temperature Lines
+              {t('charts.isotherms.title')}
             </text>
             <text x={svgWidth / 2} y={60} textAnchor="middle" fontSize="16" fill="#64748b">
-              Vertical lines showing constant temperature values across all pressure levels
+              {t('charts.isotherms.description')}
             </text>
 
             <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -464,7 +464,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fill="#1e293b"
               fontWeight="bold"
             >
-              Temperature (°C)
+              {t('charts.isotherms.title')}
             </text>
           </svg>
         </div>
@@ -485,10 +485,10 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             {/* Title and description */}
             <text x={svgWidth / 2} y={35} textAnchor="middle" fontSize="24" fill="#1e293b" fontWeight="bold">
-              Dry Adiabats - Constant Potential Temperature
+              {t('charts.dryAdiabats.title')}
             </text>
             <text x={svgWidth / 2} y={60} textAnchor="middle" fontSize="16" fill="#64748b">
-              Lines showing temperature changes for unsaturated rising air parcels
+              {t('charts.dryAdiabats.description')}
             </text>
 
             <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -574,7 +574,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fill="#1e293b"
               fontWeight="bold"
             >
-              Temperature (°C)
+              {t('charts.isotherms.title')}
             </text>
             <text
               x={30}
@@ -585,7 +585,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fontWeight="bold"
               transform={`rotate(-90 30 ${svgHeight / 2})`}
             >
-              Pressure (hPa)
+              {t('charts.isobars.title')}
             </text>
           </svg>
         </div>
@@ -606,10 +606,10 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             {/* Title and description */}
             <text x={svgWidth / 2} y={35} textAnchor="middle" fontSize="24" fill="#1e293b" fontWeight="bold">
-              Saturated Adiabats - Moist Air Parcels
+              {t('charts.satAdiabats.title')}
             </text>
             <text x={svgWidth / 2} y={60} textAnchor="middle" fontSize="16" fill="#64748b">
-              Curved lines showing temperature changes for saturated rising air
+              {t('charts.satAdiabats.description')}
             </text>
 
             <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -706,7 +706,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fill="#1e293b"
               fontWeight="bold"
             >
-              Temperature (°C)
+              {t('charts.isotherms.title')}
             </text>
             <text
               x={30}
@@ -717,7 +717,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fontWeight="bold"
               transform={`rotate(-90 30 ${svgHeight / 2})`}
             >
-              Pressure (hPa)
+              {t('charts.isobars.title')}
             </text>
           </svg>
         </div>
@@ -738,10 +738,10 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             {/* Title and description */}
             <text x={svgWidth / 2} y={35} textAnchor="middle" fontSize="24" fill="#1e293b" fontWeight="bold">
-              Humidity Mixing Ratio Lines
+              {t('charts.hmrLines.title')}
             </text>
             <text x={svgWidth / 2} y={60} textAnchor="middle" fontSize="16" fill="#64748b">
-              Lines showing constant water vapor content (g/kg of dry air)
+              {t('charts.hmrLines.description')}
             </text>
 
             <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -836,7 +836,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fill="#1e293b"
               fontWeight="bold"
             >
-              Temperature (°C)
+              {t('charts.isotherms.title')}
             </text>
             <text
               x={30}
@@ -847,7 +847,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fontWeight="bold"
               transform={`rotate(-90 30 ${svgHeight / 2})`}
             >
-              Pressure (hPa)
+              {t('charts.isobars.title')}
             </text>
           </svg>
         </div>
@@ -877,10 +877,10 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             {/* Title and description */}
             <text x={svgWidth / 2} y={35} textAnchor="middle" fontSize="24" fill="#1e293b" fontWeight="bold">
-              Environmental Lapse Rate - Temperature Profile
+              {t('charts.tempProfile.title')}
             </text>
             <text x={svgWidth / 2} y={60} textAnchor="middle" fontSize="16" fill="#64748b">
-              Actual temperature measurements from radiosonde data
+              {t('charts.tempProfile.description')}
             </text>
 
             <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -970,7 +970,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fill="#1e293b"
               fontWeight="bold"
             >
-              Temperature (°C)
+              {t('charts.isotherms.title')}
             </text>
             <text
               x={30}
@@ -981,7 +981,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fontWeight="bold"
               transform={`rotate(-90 30 ${svgHeight / 2})`}
             >
-              Pressure (hPa)
+              {t('charts.isobars.title')}
             </text>
           </svg>
         </div>
@@ -1011,10 +1011,10 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             {/* Title and description */}
             <text x={svgWidth / 2} y={35} textAnchor="middle" fontSize="24" fill="#1e293b" fontWeight="bold">
-              Dew Point Profile - Moisture Content
+              {t('charts.dewpointProfile.title')}
             </text>
             <text x={svgWidth / 2} y={60} textAnchor="middle" fontSize="16" fill="#64748b">
-              Dew point temperature profile showing atmospheric moisture distribution
+              {t('charts.dewpointProfile.description')}
             </text>
 
             <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -1104,7 +1104,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fill="#1e293b"
               fontWeight="bold"
             >
-              Dew Point Temperature (°C)
+              {t('charts.dewpointProfile.title')}
             </text>
             <text
               x={30}
@@ -1115,7 +1115,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fontWeight="bold"
               transform={`rotate(-90 30 ${svgHeight / 2})`}
             >
-              Pressure (hPa)
+              {t('charts.isobars.title')}
             </text>
           </svg>
         </div>
@@ -1136,10 +1136,10 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             {/* Title and description */}
             <text x={svgWidth / 2} y={35} textAnchor="middle" fontSize="24" fill="#1e293b" fontWeight="bold">
-              Wind Barbs - Direction and Speed
+              {t('charts.windBarbs.title')}
             </text>
             <text x={svgWidth / 2} y={60} textAnchor="middle" fontSize="16" fill="#64748b">
-              Wind direction and speed at each pressure level (flags=50kt, full barbs=10kt, half barbs=5kt)
+              {t('charts.windBarbs.description')}
             </text>
 
             <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -1206,7 +1206,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fontWeight="bold"
               transform={`rotate(-90 30 ${svgHeight / 2})`}
             >
-              Pressure (hPa)
+              {t('charts.isobars.title')}
             </text>
           </svg>
         </div>
@@ -1225,10 +1225,10 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             {/* Title and description */}
             <text x={svgWidth / 2} y={35} textAnchor="middle" fontSize="24" fill="#1e293b" fontWeight="bold">
-              Tropopause Layer - Atmospheric Boundary
+              {t('charts.tropopause.title')}
             </text>
             <text x={svgWidth / 2} y={60} textAnchor="middle" fontSize="16" fill="#64748b">
-              Boundary between troposphere and stratosphere (88PtPtPt group)
+              {t('charts.tropopause.description')}
             </text>
 
             <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -1353,7 +1353,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fill="#1e293b"
               fontWeight="bold"
             >
-              Temperature (°C)
+              {t('charts.isotherms.title')}
             </text>
             <text
               x={30}
@@ -1364,7 +1364,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fontWeight="bold"
               transform={`rotate(-90 30 ${svgHeight / 2})`}
             >
-              Pressure (hPa)
+              {t('charts.isobars.title')}
             </text>
           </svg>
         </div>
@@ -1383,10 +1383,10 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             {/* Title and description */}
             <text x={svgWidth / 2} y={35} textAnchor="middle" fontSize="24" fill="#1e293b" fontWeight="bold">
-              Maximum Wind Level
+              {t('charts.maxWind.title')}
             </text>
             <text x={svgWidth / 2} y={60} textAnchor="middle" fontSize="16" fill="#64748b">
-              Level of strongest wind in the sounding (77PmPmPm group)
+              {t('charts.maxWind.description')}
             </text>
 
             <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -1487,7 +1487,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fontWeight="bold"
               transform={`rotate(-90 30 ${svgHeight / 2})`}
             >
-              Pressure (hPa)
+              {t('charts.isobars.title')}
             </text>
           </svg>
         </div>
@@ -1529,10 +1529,10 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             {/* Title and description */}
             <text x={svgWidth / 2} y={35} textAnchor="middle" fontSize="24" fill="#1e293b" fontWeight="bold">
-              Complete Atmospheric Sounding Analysis
+              {t('charts.complete.title')}
             </text>
             <text x={svgWidth / 2} y={60} textAnchor="middle" fontSize="16" fill="#64748b">
-              Professional Tephigram with Enhanced Meteorological Elements
+              {t('charts.complete.description')}
             </text>
 
             <g transform={`translate(${margin.left}, ${margin.top})`}>
@@ -1752,7 +1752,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
                 filter="url(#shadow)"
               />
               <text x={75} y={10} textAnchor="middle" fontSize="16" fill="#1e293b" fontWeight="bold">
-                Wind Profile
+                {t('charts.windBarbs.title')}
               </text>
 
               {windData.map((point, index) => {
@@ -1781,7 +1781,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fill="#1e293b"
               fontWeight="bold"
             >
-              Temperature (°C)
+              {t('charts.isotherms.title')}
             </text>
             <text
               x={30}
@@ -1792,7 +1792,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               fontWeight="bold"
               transform={`rotate(-90 30 ${svgHeight / 2})`}
             >
-              Pressure (hPa)
+              {t('charts.isobars.title')}
             </text>
 
             {/* Enhanced legend */}
@@ -1809,17 +1809,17 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
                 filter="url(#shadow)"
               />
               <text x={80} y={5} textAnchor="middle" fontSize="16" fill="#1e293b" fontWeight="bold">
-                Legend
+                {t('charts.complete.legend')}
               </text>
 
               <line x1={15} y1={25} x2={40} y2={25} stroke="url(#temperatureGradient)" strokeWidth="5" />
               <text x={45} y={29} fontSize="13" fill="#1e293b" fontWeight="medium">
-                Temperature
+                {t('charts.complete.legend.temperature')}
               </text>
 
               <line x1={15} y1={50} x2={40} y2={50} stroke="url(#dewpointGradient)" strokeWidth="5" />
               <text x={45} y={54} fontSize="13" fill="#1e293b" fontWeight="medium">
-                Dew Point
+                {t('charts.complete.legend.dewPoint')}
               </text>
 
               <line
@@ -1832,12 +1832,12 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
                 strokeDasharray="10,5"
               />
               <text x={45} y={79} fontSize="13" fill="#1e293b" fontWeight="medium">
-                Tropopause
+                {t('charts.complete.legend.tropopause')}
               </text>
 
               <line x1={15} y1={100} x2={40} y2={100} stroke="#dc2626" strokeWidth="4" strokeDasharray="8,4" />
               <text x={45} y={104} fontSize="13" fill="#1e293b" fontWeight="medium">
-                Max Wind
+                {t('charts.complete.legend.maxWind')}
               </text>
             </g>
           </svg>
@@ -1856,14 +1856,13 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
                 <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
                   <Thermometer className="w-6 h-6 text-white" />
                 </div>
-                Professional Tephigram Analysis
+                {t('header.title')}
                 <Badge variant="secondary" className="bg-white/20 text-white border-white/30 text-lg px-4 py-2">
-                  Station {decodedData.station}
+                  {t('header.badges.station', { station: decodedData.station })}
                 </Badge>
               </CardTitle>
               <CardDescription className="text-blue-100 text-xl">
-                Advanced Atmospheric Sounding Analysis • Day {decodedData.date} •{" "}
-                {String(decodedData.time).padStart(2, "0")}:00 UTC
+                {t('header.description', { date: decodedData.date, time: String(decodedData.time).padStart(2, "0") })}
               </CardDescription>
             </div>
             <div className="flex gap-3">
@@ -1873,7 +1872,7 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
                 className="bg-white/20 hover:bg-white/30 text-white border-white/30"
               >
                 <Download className="w-5 h-5 mr-2" />
-                Export
+                {t('header.buttons.export')}
               </Button>
               <Button
                 variant="secondary"
@@ -1890,23 +1889,23 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
               className="bg-emerald-500/20 text-emerald-100 border-emerald-400/30 text-sm px-3 py-2"
             >
               <Wind className="w-4 h-4 mr-2" />
-              {decodedData.mandatoryLevels.length} Mandatory Levels
+              {t('header.badges.mandatoryLevels', { count: decodedData.mandatoryLevels.length })}
             </Badge>
             <Badge variant="secondary" className="bg-blue-500/20 text-blue-100 border-blue-400/30 text-sm px-3 py-2">
               <Droplets className="w-4 h-4 mr-2" />
-              {decodedData.significantLevels.length} Significant Levels
+              {t('header.badges.significantLevels', { count: decodedData.significantLevels.length })}
             </Badge>
             {decodedData.tropopause && (
               <Badge
                 variant="secondary"
                 className="bg-amber-500/20 text-amber-100 border-amber-400/30 text-sm px-3 py-2"
               >
-                Tropopause Detected
+                {t('header.badges.tropopause')}
               </Badge>
             )}
             {decodedData.maxWind && (
               <Badge variant="secondary" className="bg-red-500/20 text-red-100 border-red-400/30 text-sm px-3 py-2">
-                Maximum Wind Level
+                {t('header.badges.maxWind')}
               </Badge>
             )}
           </div>
@@ -1919,77 +1918,75 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
                 value="isobars"
                 className="text-sm font-semibold data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-lg"
               >
-                Isobars
+                {t('tabs.isobars')}
               </TabsTrigger>
               <TabsTrigger
                 value="isotherms"
                 className="text-sm font-semibold data-[state=active]:bg-red-500 data-[state=active]:text-white rounded-lg"
               >
-                Isotherms
+                {t('tabs.isotherms')}
               </TabsTrigger>
               <TabsTrigger
                 value="dry-adiabats"
                 className="text-sm font-semibold data-[state=active]:bg-green-500 data-[state=active]:text-white rounded-lg"
               >
-                Dry Adiabats
+                {t('tabs.dryAdiabats')}
               </TabsTrigger>
               <TabsTrigger
                 value="sat-adiabats"
                 className="text-sm font-semibold data-[state=active]:bg-purple-500 data-[state=active]:text-white rounded-lg"
               >
-                Sat Adiabats
+                {t('tabs.satAdiabats')}
               </TabsTrigger>
               <TabsTrigger
                 value="hmr-lines"
                 className="text-sm font-semibold data-[state=active]:bg-cyan-500 data-[state=active]:text-white rounded-lg"
               >
-                HMR Lines
+                {t('tabs.hmrLines')}
               </TabsTrigger>
               <TabsTrigger
                 value="temp-profile"
                 className="text-sm font-semibold data-[state=active]:bg-orange-500 data-[state=active]:text-white rounded-lg"
               >
-                Temp Profile
+                {t('tabs.tempProfile')}
               </TabsTrigger>
               <TabsTrigger
                 value="dewpoint-profile"
                 className="text-sm font-semibold data-[state=active]:bg-emerald-500 data-[state=active]:text-white rounded-lg"
               >
-                Dewpoint
+                {t('tabs.dewpointProfile')}
               </TabsTrigger>
               <TabsTrigger
                 value="wind-barbs"
                 className="text-sm font-semibold data-[state=active]:bg-indigo-500 data-[state=active]:text-white rounded-lg"
               >
-                Wind Barbs
+                {t('tabs.windBarbs')}
               </TabsTrigger>
               <TabsTrigger
                 value="tropopause"
                 className="text-sm font-semibold data-[state=active]:bg-amber-500 data-[state=active]:text-white rounded-lg"
               >
-                Tropopause
+                {t('tabs.tropopause')}
               </TabsTrigger>
               <TabsTrigger
                 value="max-wind"
                 className="text-sm font-semibold data-[state=active]:bg-rose-500 data-[state=active]:text-white rounded-lg"
               >
-                Max Wind
+                {t('tabs.maxWind')}
               </TabsTrigger>
               <TabsTrigger
                 value="complete"
                 className="text-sm font-semibold data-[state=active]:bg-violet-500 data-[state=active]:text-white rounded-lg"
               >
-                Complete
+                {t('tabs.complete')}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="isobars" className="space-y-8">
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-8 rounded-2xl border border-blue-200 shadow-sm">
-                <h3 className="text-3xl font-bold mb-4 text-blue-900">Isobars - Constant Pressure Lines</h3>
+                <h3 className="text-3xl font-bold mb-4 text-blue-900">{t('charts.isobars.title')}</h3>
                 <p className="text-blue-700 leading-relaxed text-lg">
-                  Horizontal lines representing standard atmospheric pressure levels from 1000 hPa (surface) to 100 hPa
-                  (stratosphere). These lines form the foundation of upper-air analysis and help identify pressure
-                  systems and atmospheric layers.
+                  {t('charts.isobars.description')}
                 </p>
               </div>
               <IsobarsChart />
@@ -1997,10 +1994,9 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             <TabsContent value="isotherms" className="space-y-8">
               <div className="bg-gradient-to-r from-red-50 to-orange-50 p-8 rounded-2xl border border-red-200 shadow-sm">
-                <h3 className="text-3xl font-bold mb-4 text-red-900">Isotherms - Constant Temperature Lines</h3>
+                <h3 className="text-3xl font-bold mb-4 text-red-900">{t('charts.isotherms.title')}</h3>
                 <p className="text-red-700 leading-relaxed text-lg">
-                  Vertical lines showing constant temperature values across all pressure levels. The 0°C isotherm is
-                  highlighted as it marks the freezing level, critical for aviation and precipitation type forecasting.
+                  {t('charts.isotherms.description')}
                 </p>
               </div>
               <IsothermsChart />
@@ -2009,12 +2005,10 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
             <TabsContent value="dry-adiabats" className="space-y-8">
               <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-8 rounded-2xl border border-green-200 shadow-sm">
                 <h3 className="text-3xl font-bold mb-4 text-green-900">
-                  Dry Adiabats - Constant Potential Temperature
+                  {t('charts.dryAdiabats.title')}
                 </h3>
                 <p className="text-green-700 leading-relaxed text-lg">
-                  Curved lines showing how unsaturated air parcels change temperature as they rise or sink. These lines
-                  represent constant potential temperature (θ) and are essential for analyzing atmospheric stability and
-                  convective processes.
+                  {t('charts.dryAdiabats.description')}
                 </p>
               </div>
               <DryAdiabatsChart />
@@ -2022,11 +2016,9 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             <TabsContent value="sat-adiabats" className="space-y-8">
               <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-8 rounded-2xl border border-purple-200 shadow-sm">
-                <h3 className="text-3xl font-bold mb-4 text-purple-900">Saturated Adiabats - Moist Air Parcels</h3>
+                <h3 className="text-3xl font-bold mb-4 text-purple-900">{t('charts.satAdiabats.title')}</h3>
                 <p className="text-purple-700 leading-relaxed text-lg">
-                  Curved lines showing temperature changes for saturated rising air parcels. These represent constant
-                  wet-bulb potential temperature (θw) and are crucial for analyzing precipitation processes and
-                  thunderstorm development.
+                  {t('charts.satAdiabats.description')}
                 </p>
               </div>
               <SaturatedAdiabatsChart />
@@ -2034,10 +2026,9 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             <TabsContent value="hmr-lines" className="space-y-8">
               <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-8 rounded-2xl border border-cyan-200 shadow-sm">
-                <h3 className="text-3xl font-bold mb-4 text-cyan-900">Humidity Mixing Ratio Lines</h3>
+                <h3 className="text-3xl font-bold mb-4 text-cyan-900">{t('charts.hmrLines.title')}</h3>
                 <p className="text-cyan-700 leading-relaxed text-lg">
-                  Lines showing constant water vapor content (grams of water vapor per kilogram of dry air). These help
-                  determine moisture content at different levels and are essential for cloud formation analysis.
+                  {t('charts.hmrLines.description')}
                 </p>
               </div>
               <HmrLinesChart />
@@ -2046,11 +2037,10 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
             <TabsContent value="temp-profile" className="space-y-8">
               <div className="bg-gradient-to-r from-orange-50 to-red-50 p-8 rounded-2xl border border-orange-200 shadow-sm">
                 <h3 className="text-3xl font-bold mb-4 text-orange-900">
-                  Environmental Lapse Rate - Temperature Profile
+                  {t('charts.tempProfile.title')}
                 </h3>
                 <p className="text-orange-700 leading-relaxed text-lg">
-                  The actual temperature measurements from radiosonde data plotted against pressure levels. This profile
-                  shows the environmental lapse rate and is fundamental for stability analysis and weather forecasting.
+                  {t('charts.tempProfile.description')}
                 </p>
               </div>
               <EnvironmentalLapseRateChart />
@@ -2058,10 +2048,9 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             <TabsContent value="dewpoint-profile" className="space-y-8">
               <div className="bg-gradient-to-r from-emerald-50 to-green-50 p-8 rounded-2xl border border-emerald-200 shadow-sm">
-                <h3 className="text-3xl font-bold mb-4 text-emerald-900">Dew Point Profile - Moisture Content</h3>
+                <h3 className="text-3xl font-bold mb-4 text-emerald-900">{t('charts.dewpointProfile.title')}</h3>
                 <p className="text-emerald-700 leading-relaxed text-lg">
-                  Dew point temperature profile showing atmospheric moisture distribution with altitude. The gap between
-                  temperature and dew point profiles indicates relative humidity and potential for cloud formation.
+                  {t('charts.dewpointProfile.description')}
                 </p>
               </div>
               <DewPointProfileChart />
@@ -2069,10 +2058,9 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             <TabsContent value="wind-barbs" className="space-y-8">
               <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-8 rounded-2xl border border-indigo-200 shadow-sm">
-                <h3 className="text-3xl font-bold mb-4 text-indigo-900">Wind Barbs - Direction and Speed</h3>
+                <h3 className="text-3xl font-bold mb-4 text-indigo-900">{t('charts.windBarbs.title')}</h3>
                 <p className="text-indigo-700 leading-relaxed text-lg">
-                  Wind direction and speed at each pressure level displayed using standard meteorological wind barbs.
-                  Flags represent 50 knots, full barbs represent 10 knots, and half barbs represent 5 knots.
+                  {t('charts.windBarbs.description')}
                 </p>
               </div>
               <WindBarbsChart />
@@ -2080,11 +2068,9 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             <TabsContent value="tropopause" className="space-y-8">
               <div className="bg-gradient-to-r from-amber-50 to-yellow-50 p-8 rounded-2xl border border-amber-200 shadow-sm">
-                <h3 className="text-3xl font-bold mb-4 text-amber-900">Tropopause Layer - Atmospheric Boundary</h3>
+                <h3 className="text-3xl font-bold mb-4 text-amber-900">{t('charts.tropopause.title')}</h3>
                 <p className="text-amber-700 leading-relaxed text-lg">
-                  The boundary between the troposphere and stratosphere, identified from the 88PtPtPt group in the
-                  radiosonde data. This level marks where temperature stops decreasing with height and is crucial for
-                  aviation and climate studies.
+                  {t('charts.tropopause.description')}
                 </p>
               </div>
               <TropopauseChart />
@@ -2092,10 +2078,9 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             <TabsContent value="max-wind" className="space-y-8">
               <div className="bg-gradient-to-r from-rose-50 to-red-50 p-8 rounded-2xl border border-rose-200 shadow-sm">
-                <h3 className="text-3xl font-bold mb-4 text-rose-900">Maximum Wind Level</h3>
+                <h3 className="text-3xl font-bold mb-4 text-rose-900">{t('charts.maxWind.title')}</h3>
                 <p className="text-rose-700 leading-relaxed text-lg">
-                  The pressure level with the strongest wind speed in the sounding, identified from the 77PmPmPm group.
-                  This level is important for aviation planning and understanding jet stream characteristics.
+                  {t('charts.maxWind.description')}
                 </p>
               </div>
               <MaxWindChart />
@@ -2103,28 +2088,26 @@ const Tephigram: React.FC<TephigramProps> = ({ width = "100%", height = 800, dec
 
             <TabsContent value="complete" className="space-y-8">
               <div className="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 p-8 rounded-2xl border border-purple-200 shadow-sm">
-                <h3 className="text-3xl font-bold mb-4 text-purple-900">Complete Atmospheric Sounding Analysis</h3>
+                <h3 className="text-3xl font-bold mb-4 text-purple-900">{t('charts.complete.title')}</h3>
                 <p className="text-purple-700 leading-relaxed text-lg mb-6">
-                  Comprehensive view combining all meteorological elements: temperature and dew point profiles, pressure
-                  levels, wind data, tropopause boundary, and maximum wind level. This professional visualization
-                  enables detailed atmospheric stability analysis and weather forecasting.
+                  {t('charts.complete.description')}
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-sm">
                   <div className="flex items-center gap-3 bg-white/80 p-4 rounded-xl shadow-sm">
                     <div className="w-6 h-2 bg-gradient-to-r from-red-500 to-red-600 rounded-full"></div>
-                    <span className="font-semibold text-gray-700">Temperature Profile</span>
+                    <span className="font-semibold text-gray-700">{t('charts.complete.legend.temperature')}</span>
                   </div>
                   <div className="flex items-center gap-3 bg-white/80 p-4 rounded-xl shadow-sm">
                     <div className="w-6 h-2 bg-gradient-to-r from-green-500 to-green-600 rounded-full"></div>
-                    <span className="font-semibold text-gray-700">Dew Point Profile</span>
+                    <span className="font-semibold text-gray-700">{t('charts.complete.legend.dewPoint')}</span>
                   </div>
                   <div className="flex items-center gap-3 bg-white/80 p-4 rounded-xl shadow-sm">
                     <div className="w-6 h-2 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"></div>
-                    <span className="font-semibold text-gray-700">Tropopause Layer</span>
+                    <span className="font-semibold text-gray-700">{t('charts.complete.legend.tropopause')}</span>
                   </div>
                   <div className="flex items-center gap-3 bg-white/80 p-4 rounded-xl shadow-sm">
                     <div className="w-6 h-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"></div>
-                    <span className="font-semibold text-gray-700">Wind Barbs</span>
+                    <span className="font-semibold text-gray-700">{t('charts.complete.legend.maxWind')}</span>
                   </div>
                 </div>
               </div>
