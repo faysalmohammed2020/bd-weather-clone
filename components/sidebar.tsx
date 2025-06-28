@@ -196,12 +196,12 @@ const Sidebar = () => {
         },
       ],
     },
-    {
-      href: "/dashboard/upper-air-analyzer",
-      icon: <BarChart2 className="w-5 h-5" />,
-      label: t("upperAirAnalyzer"),
-      roles: ["super_admin", "observer", "station_admin"],
-    },
+    // {
+    //   href: "/dashboard/upper-air-analyzer",
+    //   icon: <BarChart2 className="w-5 h-5" />,
+    //   label: t("upperAirAnalyzer"),
+    //   roles: ["super_admin", "observer", "station_admin"],
+    // },
     {
       href: "/dashboard/radio-sond-analyzer",
       icon: <BarChart2 className="w-5 h-5" />,

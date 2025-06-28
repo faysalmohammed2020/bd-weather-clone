@@ -14,13 +14,20 @@ import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
 import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 // Validation schema
-const validationSchema = Yup.object({
-  date: Yup.date().required("Date is required"),
-  w1: Yup.number().required("W₁ is required").positive(),
-  w2: Yup.number().required("W₂ is required").positive(),
-  w3: Yup.number().required("W₃ is required").positive(),
+const createValidationSchema = (t: any) => Yup.object({
+  date: Yup.date().required(t('SoilMoistureForm.form.errors.date')),
+  w1: Yup.number()
+    .required(t('SoilMoistureForm.form.errors.required', { field: t('SoilMoistureForm.form.weights.w1') }))
+    .positive(t('SoilMoistureForm.form.errors.positive', { field: t('SoilMoistureForm.form.weights.w1') })),
+  w2: Yup.number()
+    .required(t('SoilMoistureForm.form.errors.required', { field: t('SoilMoistureForm.form.weights.w2') }))
+    .positive(t('SoilMoistureForm.form.errors.positive', { field: t('SoilMoistureForm.form.weights.w2') })),
+  w3: Yup.number()
+    .required(t('SoilMoistureForm.form.errors.required', { field: t('SoilMoistureForm.form.weights.w3') }))
+    .positive(t('SoilMoistureForm.form.errors.positive', { field: t('SoilMoistureForm.form.weights.w3') })),
 });
 
 interface SoilMoistureData {
@@ -35,6 +42,7 @@ interface SoilMoistureData {
 }
 
 export function SoilMoistureForm() {
+  const t = useTranslations('SoilMoistureForm');
   const router = useRouter();
   const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,7 +64,7 @@ export function SoilMoistureForm() {
       Ds: '',
       Sm: '',
     },
-    validationSchema,
+    validationSchema: createValidationSchema(t),
     onSubmit: handleSubmit,
   });
 
@@ -125,7 +133,7 @@ export function SoilMoistureForm() {
       try {
         const response = await fetch('/api/soil-moisture');
         if (!response.ok) {
-          throw new Error('Failed to fetch last submission');
+          throw new Error(t('submission.fetchError'));
         }
         const data = await response.json();
 
@@ -142,7 +150,7 @@ export function SoilMoistureForm() {
           setCanSubmit(true);
         }
       } catch (error) {
-        console.error('Error checking submission status:', error);
+        console.error(t('submission.statusError'), error);
         setCanSubmit(true);
       }
     };
@@ -150,7 +158,7 @@ export function SoilMoistureForm() {
     if (session) {
       checkSubmissionStatus();
     }
-  }, [session]);
+  }, [session, t]);
 
   async function handleSubmit(values: SoilMoistureData) {
     setIsSubmitting(true);
@@ -170,10 +178,10 @@ export function SoilMoistureForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Submission failed');
+        throw new Error(data.message || t('submission.failed'));
       }
 
-      toast.success('Data submitted successfully');
+      toast.success(t('submission.success'));
 
       // Move to next depth tab if available
       const currentIndex = depths.indexOf(activeTab);
@@ -189,9 +197,9 @@ export function SoilMoistureForm() {
         });
       }
     } catch (error) {
-      console.error('Submission error:', error);
-      toast.error('Failed to submit data', {
-        description: error instanceof Error ? error.message : 'Unknown error',
+      console.error(t('submission.error'), error);
+      toast.error(t('submission.failed'), {
+        description: error instanceof Error ? error.message : t('submission.unknownError'),
       });
     } finally {
       setIsSubmitting(false);
@@ -232,39 +240,29 @@ export function SoilMoistureForm() {
     }
   };
 
-  // if (!canSubmit && lastSubmission) {
-  //   const nextSubmissionDate = new Date(lastSubmission);
-  //   nextSubmissionDate.setDate(nextSubmissionDate.getDate() + 7);
+  if (!canSubmit && lastSubmission) {
+    const nextSubmissionDate = new Date(lastSubmission);
+    nextSubmissionDate.setDate(nextSubmissionDate.getDate() + 7);
 
-  //   return (
-  //     <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-  //       <h2 className="text-2xl font-bold mb-4 text-center">Submission Limit Reached</h2>
-  //       <p className="mb-4 text-center">
-  //         Soil moisture data can only be submitted once every 7 days.
-  //       </p>
-  //       <p className="text-center">
-  //         Your next submission will be available on: {' '}
-  //         <span className="font-semibold">
-  //           {nextSubmissionDate.toLocaleDateString()}
-  //         </span>
-  //       </p>
-  //     </div>
-  //   );
-  // }
+    return (
+      <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold mb-4 text-center">{t('submissionLimit.title')}</h2>
+        <p className="mb-4 text-center">
+          {t('submissionLimit.message')}
+        </p>
+        <p className="text-center">
+          {t('submissionLimit.nextSubmission')} {' '}
+          <span className="font-semibold">
+            {nextSubmissionDate.toLocaleDateString()}
+          </span>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100 p-4">
       <div className="container mx-auto max-w-7xl">
-        {/* <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-violet-500 to-purple-600 rounded-full mb-4 shadow-lg">
-            <Layers className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            Soil Moisture Data Collection
-          </h1>
-          <div className="w-24 h-1 bg-gradient-to-r from-violet-500 to-purple-600 mx-auto mt-4 rounded-full"></div>
-        </div> */}
-
         <motion.form
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -313,7 +311,9 @@ export function SoilMoistureForm() {
                           >
                             <Layers className="size-5 mr-2" />
                           </div>
-                          <span className="text-base capitalize font-medium">{depth} cm</span>
+                          <span className="text-base capitalize font-medium">
+                            {t(`depths.${depth}`)}
+                          </span>
                         </div>
 
                         {isActive && (
@@ -338,7 +338,9 @@ export function SoilMoistureForm() {
             <Card className="mb-6 border border-gray-200 shadow-sm">
               <CardContent className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-700 font-semibold">Station Name</Label>
+                  <Label className="text-slate-700 font-semibold">
+                    {t('stationInfo.stationName')}
+                  </Label>
                   <Input
                     value={session?.user?.station?.name || "N/A"}
                     readOnly
@@ -346,7 +348,9 @@ export function SoilMoistureForm() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700 font-semibold">Latitude</Label>
+                  <Label className="text-slate-700 font-semibold">
+                    {t('stationInfo.latitude')}
+                  </Label>
                   <Input
                     value={session?.user?.station?.latitude || "N/A"}
                     readOnly
@@ -354,7 +358,9 @@ export function SoilMoistureForm() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700 font-semibold">Longitude</Label>
+                  <Label className="text-slate-700 font-semibold">
+                    {t('stationInfo.longitude')}
+                  </Label>
                   <Input
                     value={session?.user?.station?.longitude || "N/A"}
                     readOnly
@@ -362,7 +368,9 @@ export function SoilMoistureForm() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-700 font-semibold">Elevation (m)</Label>
+                  <Label className="text-slate-700 font-semibold">
+                    {t('stationInfo.elevation')}
+                  </Label>
                   <Input
                     value={session?.user?.station?.stationId || "N/A"}
                     readOnly
@@ -379,11 +387,14 @@ export function SoilMoistureForm() {
                   <div className={cn("p-6", tabStyles[depth as keyof typeof tabStyles].header)}>
                     <div className="flex items-center justify-between">
                       <h3 className="text-xl font-bold flex items-center">
-                        <Layers className="mr-3 w-6 h-6" /> Soil Moisture Data - {depth} cm Depth
+                        <Layers className="mr-3 w-6 h-6" /> 
+                        {t('title')} - {t(`depths.${depth}`)}
                       </h3>
 
                       <div className="space-y-2 flex items-center justify-between">
-                        <p className="text-slate-700 font-bold w-full text-white mb-0 mr-2">Select Date</p>
+                        <p className="text-slate-700 font-bold w-full text-white mb-0 mr-2">
+                          {t('form.selectDate')}
+                        </p>
                         <div className="relative w-full">
                           <Input
                             type="date"
@@ -412,7 +423,9 @@ export function SoilMoistureForm() {
                   <CardContent className="pt-8 pb-6 px-8 grid gap-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="space-y-2">
-                        <Label htmlFor="w1">W₁ (Weight of empty can)</Label>
+                        <Label htmlFor="w1">
+                          {t('form.weights.w1')}
+                        </Label>
                         <Input
                           id="w1"
                           name="w1"
@@ -432,7 +445,9 @@ export function SoilMoistureForm() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="w2">W₂ (Weight of can + wet soil)</Label>
+                        <Label htmlFor="w2">
+                          {t('form.weights.w2')}
+                        </Label>
                         <Input
                           id="w2"
                           name="w2"
@@ -452,7 +467,9 @@ export function SoilMoistureForm() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="w3">W₃ (Weight of can + dry soil)</Label>
+                        <Label htmlFor="w3">
+                          {t('form.weights.w3')}
+                        </Label>
                         <Input
                           id="w3"
                           name="w3"
@@ -475,11 +492,13 @@ export function SoilMoistureForm() {
 
                   <Card className="border border-gray-200 shadow-sm mx-8 mb-6">
                     <div className="p-4 bg-gray-100">
-                      <h3 className="text-lg font-semibold">Calculated Values</h3>
+                      <h3 className="text-lg font-semibold">
+                        {t('form.calculatedValues.title')}
+                      </h3>
                     </div>
                     <CardContent className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="space-y-2">
-                        <Label>Ws (W₂ - W₁)</Label>
+                        <Label>{t('form.calculatedValues.ws')}</Label>
                         <Input
                           value={formik.values.Ws}
                           readOnly
@@ -488,7 +507,7 @@ export function SoilMoistureForm() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>Ds (W₃ - W₁)</Label>
+                        <Label>{t('form.calculatedValues.ds')}</Label>
                         <Input
                           value={formik.values.Ds}
                           readOnly
@@ -497,7 +516,7 @@ export function SoilMoistureForm() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>Sm (Moisture %)</Label>
+                        <Label>{t('form.calculatedValues.sm')}</Label>
                         <Input
                           value={formik.values.Sm}
                           readOnly
@@ -515,7 +534,8 @@ export function SoilMoistureForm() {
                       disabled={activeTab === depths[0]}
                       className="px-8 py-3 rounded-xl"
                     >
-                      <ChevronLeft className="mr-2 h-5 w-5" /> Previous Depth
+                      <ChevronLeft className="mr-2 h-5 w-5" /> 
+                      {t('form.buttons.previous')}
                     </Button>
                     <div className="flex gap-4">
                       <Button
@@ -530,7 +550,7 @@ export function SoilMoistureForm() {
                         })}
                         className="px-8 py-3 rounded-xl"
                       >
-                        Reset
+                        {t('form.buttons.reset')}
                       </Button>
                       <Button
                         type="submit"
@@ -540,7 +560,9 @@ export function SoilMoistureForm() {
                           `bg-gradient-to-r from-${tabStyles[depth as keyof typeof tabStyles].color}-500 to-${tabStyles[depth as keyof typeof tabStyles].color}-600 text-white`
                         )}
                       >
-                        {isSubmitting ? 'Submitting...' : activeTab === depths[depths.length - 1] ? 'Submit All Data' : 'Submit & Next Depth'}
+                        {isSubmitting ? t('form.buttons.submitting') : 
+                         activeTab === depths[depths.length - 1] ? t('form.buttons.submitAll') : 
+                         t('form.buttons.submitNext')}
                         {activeTab !== depths[depths.length - 1] && <ChevronRight className="ml-2 h-5 w-5" />}
                       </Button>
                     </div>

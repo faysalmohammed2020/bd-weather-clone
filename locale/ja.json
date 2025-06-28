@@ -1580,5 +1580,236 @@
       "txt": "TXTでエクスポート",
       "json": "JSONでエクスポート"
     }
+  },
+  "agroclimatological":{
+  "agroclimatologicalDataCollection": "農業気候データ収集",
+    "tabs": {
+      "sunshine": "日照",
+      "soil": "土壌水分",
+      "agro": "農業気候"
+    },
+    "headers": {
+      "sunshine": "日照トラッカーデータ",
+      "soil": "土壌水分データ",
+      "agro": "農業気候データ"
+    },
+    "buttons": {
+      "previous": "前へ",
+      "next": "次へ",
+      "backToStart": "最初に戻る"
+    }
+  },
+   "agroclimatologicalForm":{
+    "form": {
+      "tabs": {
+        "station": "観測所",
+        "solar": "太陽",
+        "temperature": "温度",
+        "soil": "土壌",
+        "humidity": "湿度",
+        "weather": "天気",
+        "summary": "概要"
+      },
+      "station": {
+        "title": "観測所情報",
+        "fields": {
+          "stationName": "観測所名 *",
+          "latitude": "緯度 (°) *",
+          "longitude": "経度 (°) *",
+          "elevation": "標高 (m) *",
+          "date": "観測日 *",
+          "utcHour": "UTC時間 *"
+        },
+        "utcOptions": {
+          "select": "UTCを選択",
+          "00": "00 UTC",
+          "12": "12 UTC"
+        }
+      },
+      "solar": {
+        "title": "日射量と日照時間データ",
+        "fields": {
+          "solarRadiation": "日射量 (ラングレー day⁻¹)",
+          "sunShineHour": "日照時間 (自動入力)"
+        }
+      },
+      "temperature": {
+        "title": "気温データ",
+        "airTemp": "異なる高さでの気温 (°C)",
+        "tempSummary": "温度の概要",
+        "fields": {
+          "dryBulb": "乾球",
+          "wetBulb": "湿球",
+          "minTemp": "最低気温 (°C)",
+          "maxTemp": "最高気温 (°C)",
+          "grassMinTemp": "草面最低温度 (°C)"
+        },
+        "heights": {
+          "05m": "0.5m",
+          "12m": "1.2m",
+          "22m": "2.2m"
+        }
+      },
+      "soil": {
+        "title": "地温と土壌水分データ",
+        "soilTemp": "異なる深さでの地温 (°C)",
+        "soilMoisture": "土壌水分 % (自動入力)",
+        "depths": {
+          "5cm": "5 cm",
+          "10cm": "10 cm",
+          "20cm": "20 cm",
+          "30cm": "30 cm",
+          "50cm": "50 cm",
+          "0to20": "0-20 cm",
+          "20to50": "20-50 cm"
+        }
+      },
+      "humidity": {
+        "title": "湿度と蒸発量データ",
+        "fields": {
+          "panWaterEvap": "パン水温 (°C)",
+          "evaporation": "蒸発量 (mm)",
+          "dewPoint": "蒸発散量 (mm)"
+        }
+      },
+      "weather": {
+        "title": "気象観測データ",
+        "fields": {
+          "windSpeed": "2m高さの風程 (km/hr)",
+          "dewPoint": "露量 (mm)",
+          "duration": "持続時間 (露) (時間)",
+          "rainfall": "降水量 (mm)"
+        }
+      },
+      "summary": {
+        "title": "データ概要と送信",
+        "sections": {
+          "station": "観測所",
+          "period": "期間",
+          "location": "位置",
+          "elevation": "標高"
+        },
+        "status": {
+          "title": "データ完了状況",
+          "complete": "完了",
+          "pending": "保留中",
+          "solar": "太陽",
+          "temperature": "温度",
+          "soil": "土壌",
+          "humidity": "湿度",
+          "weather": "天気"
+        },
+        "buttons": {
+          "reset": "フォームをリセット",
+          "submit": "データを送信",
+          "submitting": "送信中..."
+        }
+      },
+      "buttons": {
+        "previous": "前へ",
+        "next": "次へ",
+        "reset": "フォームをリセット",
+        "submit": "データを送信"
+      }
+    },
+    "messages": {
+      "reset": "フォームがリセットされました",
+      "submitSuccess": "データの送信に成功しました！",
+      "submitError": "データの送信に失敗しました",
+      "fetchError": "一部の自動入力データの読み込みに失敗しました"
+    }
+  },
+  "sunShineForm":{
+    "tabs": {
+      "input": "データ入力",
+      "records": "日次記録",
+      "analytics": "分析"
+    },
+    "dataInput": {
+      "title": "日次日照データ入力",
+      "description": "時間ごとの日照時間データを入力 (午前5時～午後7時)",
+      "date": "日付:",
+      "dailyTotal": "日次合計: {total} 時間",
+      "saveButton": "日次データを保存"
+    },
+    "records": {
+      "title": "日次記録と週間平均",
+      "description": "統計分析を含む完全な日照データ記録",
+      "noData": {
+        "title": "データがまだありません",
+        "description": "日次日照データを追加してください"
+      },
+      "table": {
+        "date": "日付",
+        "total": "合計",
+        "weeklyAverage": "週間平均"
+      }
+    },
+    "analytics": {
+      "monthlyStats": {
+        "title": "月間統計",
+        "totalDays": "総日数",
+        "totalSunshine": "総日照時間",
+        "dailyAverage": "日次平均",
+        "aboveThreshold": "閾値以上"
+      },
+      "thresholdAnalysis": {
+        "title": "閾値分析",
+        "thresholdLabel": "閾値レベル (時間)",
+        "daysExceeding": "閾値を超えた日数",
+        "percentage": "日数の {percentage}%",
+        "hourlyAverages": "時間別平均"
+      }
+    },
+    "common": {
+      "hours": "時間"
+      
+    }
+  },
+  "SoilMoistureForm": {
+    "title": "土壌水分データ収集",
+    "depths": {
+      "5": "5 cm",
+      "10": "10 cm",
+      "20": "20 cm",
+      "30": "30 cm",
+      "50": "50 cm"
+    },
+    "stationInfo": {
+      "stationName": "ステーション名",
+      "latitude": "緯度",
+      "longitude": "経度",
+      "elevation": "標高 (m)"
+    },
+    "form": {
+      "selectDate": "日付を選択",
+      "weights": {
+        "w1": "W₁ (空き缶の重量)",
+        "w2": "W₂ (缶 + 湿った土の重量)",
+        "w3": "W₃ (缶 + 乾燥した土の重量)"
+      },
+      "calculatedValues": {
+        "title": "計算値",
+        "ws": "Ws (W₂ - W₁)",
+        "ds": "Ds (W₃ - W₁)",
+        "sm": "Sm (水分率 %)"
+      },
+      "buttons": {
+        "previous": "前の深さ",
+        "reset": "リセット",
+        "submitNext": "送信して次の深さへ",
+        "submitAll": "すべてのデータを送信"
+      },
+      "errors": {
+        "required": "{field}は必須です",
+        "positive": "{field}は正の値でなければなりません",
+        "date": "日付は必須です"
+      }
+    },
+    "submissionLimit": {
+      "title": "送信制限に達しました",
+      "message": "土壌水分データは7日に1回のみ送信できます。",
+      "nextSubmission": "次の送信可能日:"
+    }
   }
 }

@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, Sun, TrendingUp, Target } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface DailyData {
   id: string
@@ -44,6 +45,7 @@ const timeSlots = [
 ];
 
 export default function SunshineTracker() {
+  const t = useTranslations("sunShineForm");
   const [dailyEntries, setDailyEntries] = useState<DailyData[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(
@@ -115,9 +117,7 @@ export default function SunshineTracker() {
         throw new Error(result.error || "Submission failed");
       }
 
-      // Update local state
-     await fetchSunshineData()
-
+      await fetchSunshineData()
 
       setCurrentHours(new Array(14).fill(0));
       alert("Sunshine data saved successfully!");
@@ -165,32 +165,19 @@ export default function SunshineTracker() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-yellow-50 to-blue-50 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        {/* <div className="text-center space-y-2">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Sun className="h-8 w-8 text-orange-500" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-yellow-600 bg-clip-text text-transparent">
-              Sunshine Data Tracker
-            </h1>
-          </div>
-          <p className="text-gray-600 text-lg">
-            Daily sunshine duration monitoring system
-          </p>
-        </div> */}
-
         <Tabs defaultValue="input" className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-6">
             <TabsTrigger value="input" className="flex items-center gap-2">
               <CalendarDays className="h-4 w-4" />
-              Data Input
+              {t("tabs.input")}
             </TabsTrigger>
             <TabsTrigger value="records" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              Daily Records
+              {t("tabs.records")}
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
-              Analytics
+              {t("tabs.analytics")}
             </TabsTrigger>
           </TabsList>
 
@@ -200,17 +187,17 @@ export default function SunshineTracker() {
               <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-t-lg p-3">
                 <CardTitle className="flex items-center gap-2">
                   <Sun className="h-5 w-5" />
-                  Daily Sunshine Data Entry
+                  {t("dataInput.title")}
                 </CardTitle>
                 <CardDescription className="text-blue-100">
-                  Enter hourly sunshine duration data (5 AM - 7 PM)
+                  {t("dataInput.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="flex items-center gap-4 mb-6">
                     <Label htmlFor="date" className="text-lg font-semibold">
-                      Date:
+                      {t("dataInput.date")}
                     </Label>
                     <Input
                       id="date"
@@ -224,7 +211,7 @@ export default function SunshineTracker() {
                       variant="secondary"
                       className="ml-auto text-lg px-4 py-2 bg-gradient-to-r from-green-500 to-blue-500 text-white"
                     >
-                      Daily Total: {currentTotal.toFixed(2)} hours
+                      {t("dataInput.dailyTotal", { total: currentTotal.toFixed(2) })}
                     </Badge>
                   </div>
 
@@ -258,7 +245,7 @@ export default function SunshineTracker() {
                     type="submit"
                     className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white font-semibold py-3 text-lg"
                   >
-                    Save Daily Data
+                    {t("dataInput.saveButton")}
                   </Button>
                 </form>
               </CardContent>
@@ -271,18 +258,18 @@ export default function SunshineTracker() {
               <CardHeader className="bg-gradient-to-r from-green-500 to-teal-600 text-white rounded-t-lg p-3">
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
-                  Daily Records & Weekly Averages
+                  {t("records.title")}
                 </CardTitle>
                 <CardDescription className="text-green-100">
-                  Complete sunshine data records with statistical analysis
+                  {t("records.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6">
                 {dailyEntries.length === 0 ? (
                   <div className="text-center py-12 text-gray-500">
                     <Sun className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-                    <p className="text-xl">No data entries yet</p>
-                    <p>Start by adding daily sunshine data</p>
+                    <p className="text-xl">{t("records.noData.title")}</p>
+                    <p>{t("records.noData.description")}</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
@@ -290,7 +277,7 @@ export default function SunshineTracker() {
                       <thead>
                         <tr className="bg-gradient-to-r from-blue-100 to-purple-100">
                           <th className="border border-gray-300 p-3 text-left font-semibold">
-                            Date
+                            {t("records.table.date")}
                           </th>
                           {timeSlots.map((slot, index) => (
                             <th
@@ -301,7 +288,7 @@ export default function SunshineTracker() {
                             </th>
                           ))}
                           <th className="border border-gray-300 p-3 text-center font-semibold bg-yellow-100">
-                            Total
+                            {t("records.table.total")}
                           </th>
                         </tr>
                       </thead>
@@ -354,7 +341,7 @@ export default function SunshineTracker() {
                         <tr className="bg-gradient-to-r from-purple-200 to-blue-200 font-bold">
                           <td className="border border-gray-300 p-3">
                             <Badge className="bg-purple-600">
-                              Weekly Average
+                              {t("records.table.weeklyAverage")}
                             </Badge>
                           </td>
                           {weeklyAverages.map((avg, index) => (
@@ -387,14 +374,14 @@ export default function SunshineTracker() {
                 <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-600 text-white rounded-t-lg p-3">
                   <CardTitle className="flex items-center gap-2">
                     <Target className="h-5 w-5" />
-                    Monthly Statistics
+                    {t("analytics.monthlyStats.title")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-blue-50 p-4 rounded-lg">
                       <p className="text-sm text-blue-600 font-medium">
-                        Total Days
+                        {t("analytics.monthlyStats.totalDays")}
                       </p>
                       <p className="text-2xl font-bold text-blue-800">
                         {monthlyStats.totalDays}
@@ -402,23 +389,23 @@ export default function SunshineTracker() {
                     </div>
                     <div className="bg-green-50 p-4 rounded-lg">
                       <p className="text-sm text-green-600 font-medium">
-                        Total Sunshine
+                        {t("analytics.monthlyStats.totalSunshine")}
                       </p>
                       <p className="text-2xl font-bold text-green-800">
-                        {monthlyStats.totalSunshine.toFixed(1)}h
+                        {monthlyStats.totalSunshine.toFixed(1)}{t("common.hours")}
                       </p>
                     </div>
                     <div className="bg-yellow-50 p-4 rounded-lg">
                       <p className="text-sm text-yellow-600 font-medium">
-                        Daily Average
+                        {t("analytics.monthlyStats.dailyAverage")}
                       </p>
                       <p className="text-2xl font-bold text-yellow-800">
-                        {monthlyStats.averageDaily.toFixed(1)}h
+                        {monthlyStats.averageDaily.toFixed(1)}{t("common.hours")}
                       </p>
                     </div>
                     <div className="bg-purple-50 p-4 rounded-lg">
                       <p className="text-sm text-purple-600 font-medium">
-                        Above Threshold
+                        {t("analytics.monthlyStats.aboveThreshold")}
                       </p>
                       <p className="text-2xl font-bold text-purple-800">
                         {monthlyStats.thresholdPercentage.toFixed(1)}%
@@ -433,12 +420,12 @@ export default function SunshineTracker() {
                 <CardHeader className="bg-gradient-to-r from-orange-500 to-red-600 text-white rounded-t-lg p-3">
                   <CardTitle className="flex items-center gap-2">
                     <Sun className="h-5 w-5" />
-                    Threshold Analysis
+                    {t("analytics.thresholdAnalysis.title")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-6 space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="threshold">Threshold Level (hours)</Label>
+                    <Label htmlFor="threshold">{t("analytics.thresholdAnalysis.thresholdLabel")}</Label>
                     <Input
                       id="threshold"
                       type="number"
@@ -455,20 +442,22 @@ export default function SunshineTracker() {
 
                   <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-lg">
                     <h4 className="font-semibold text-orange-800 mb-2">
-                      Days Exceeding Threshold
+                      {t("analytics.thresholdAnalysis.daysExceeding")}
                     </h4>
                     <div className="flex items-center justify-between">
                       <span className="text-3xl font-bold text-red-600">
                         {monthlyStats.daysExceedingThreshold}
                       </span>
                       <Badge className="bg-red-500 text-white">
-                        {monthlyStats.thresholdPercentage.toFixed(1)}% of days
+                        {t("analytics.thresholdAnalysis.percentage", { 
+                          percentage: monthlyStats.thresholdPercentage.toFixed(1) 
+                        })}
                       </Badge>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <h4 className="font-semibold">Hourly Averages</h4>
+                    <h4 className="font-semibold">{t("analytics.thresholdAnalysis.hourlyAverages")}</h4>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       {timeSlots.map((slot, index) => (
                         <div
@@ -477,7 +466,7 @@ export default function SunshineTracker() {
                         >
                           <span>{slot}:00</span>
                           <span className="font-medium">
-                            {weeklyAverages[index]?.toFixed(2) || "0.00"}h
+                            {weeklyAverages[index]?.toFixed(2) || "0.00"}{t("common.hours")}
                           </span>
                         </div>
                       ))}

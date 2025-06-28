@@ -1570,5 +1570,231 @@
       "txt": "Export to TXT",
       "json": "Export to JSON"
     }
+  },
+  "agroclimatological":{
+  "agroclimatologicalDataCollection": "Agroclimatological Data Collection",
+    "tabs": {
+      "sunshine": "Sunshine",
+      "soil": "Soil Moisture",
+      "agro": "Agroclimatological"
+    },
+    "headers": {
+      "sunshine": "Sunshine Tracker Data",
+      "soil": "Soil Moisture Data",
+      "agro": "Agroclimatological Data"
+    }
+  },
+  "agroclimatologicalForm":{
+    "form": {
+      "tabs": {
+        "station": "Station",
+        "solar": "Solar",
+        "temperature": "Temperature",
+        "soil": "Soil",
+        "humidity": "Humidity",
+        "weather": "Weather",
+        "summary": "Summary"
+      },
+      "station": {
+        "title": "Station Information",
+        "fields": {
+          "stationName": "Station Name *",
+          "latitude": "Latitude (°) *",
+          "longitude": "Longitude (°) *",
+          "elevation": "Elevation (m) *",
+          "date": "Observation Date *",
+          "utcHour": "UTC Hour *"
+        },
+        "utcOptions": {
+          "select": "Select UTC",
+          "00": "00 UTC",
+          "12": "12 UTC"
+        }
+      },
+      "solar": {
+        "title": "Solar Radiation & Sunshine Data",
+        "fields": {
+          "solarRadiation": "Solar Radiation (Langley day⁻¹)",
+          "sunShineHour": "Sun Shine Hour (Auto-filled)"
+        }
+      },
+      "temperature": {
+        "title": "Air Temperature Data",
+        "airTemp": "Air Temperature (°C) at Different Heights",
+        "tempSummary": "Temperature Summary",
+        "fields": {
+          "dryBulb": "Dry Bulb",
+          "wetBulb": "Wet Bulb",
+          "minTemp": "Min Temp (°C)",
+          "maxTemp": "Max Temp (°C)",
+          "grassMinTemp": "Grass Min Temp (°C)"
+        },
+        "heights": {
+          "05m": "0.5m",
+          "12m": "1.2m",
+          "22m": "2.2m"
+        }
+      },
+      "soil": {
+        "title": "Soil Temperature & Moisture Data",
+        "soilTemp": "Soil Temperature (°C) at Different Depths",
+        "soilMoisture": "Soil Moisture % Between (Auto-filled)",
+        "depths": {
+          "5cm": "5 Cm",
+          "10cm": "10 Cm",
+          "20cm": "20 Cm",
+          "30cm": "30 Cm",
+          "50cm": "50 Cm",
+          "0to20": "0-20 Cm",
+          "20to50": "20-50 Cm"
+        }
+      },
+      "humidity": {
+        "title": "Humidity & Evaporation Data",
+        "fields": {
+          "panWaterEvap": "Pan Water temp(°C)",
+          "evaporation": "Evaporation (mm)",
+          "dewPoint": "Evapotranspiration (mm)"
+        }
+      },
+      "weather": {
+        "title": "Weather Measurements",
+        "fields": {
+          "windSpeed": "Wind run at 2m. ht. (km/hr)",
+          "dewPoint": "Dew Amount (mm)",
+          "duration": "Duration (Dew) (hrs.)",
+          "rainfall": "Rain amount (mm)"
+        }
+      },
+      "summary": {
+        "title": "Data Summary & Submission",
+        "sections": {
+          "station": "Station",
+          "period": "Period",
+          "location": "Location",
+          "elevation": "Elevation"
+        },
+        "status": {
+          "title": "Data Completion Status",
+          "complete": "Complete",
+          "pending": "Pending",
+          "solar": "Solar",
+          "temperature": "Temperature",
+          "soil": "Soil",
+          "humidity": "Humidity",
+          "weather": "Weather"
+        },
+        "buttons": {
+          "reset": "Reset Form",
+          "submit": "Submit Data",
+          "submitting": "Submitting..."
+        }
+      },
+      "buttons": {
+        "previous": "Previous",
+        "next": "Next",
+        "reset": "Reset Form",
+        "submit": "Submit Data"
+      }
+    },
+    "messages": {
+      "reset": "Form has been reset",
+      "submitSuccess": "Data submitted successfully!",
+      "submitError": "Failed to submit data",
+      "fetchError": "Failed to load some auto-fill data"
+    }
+  },
+  "sunShineForm" : {
+    "tabs": {
+      "input": "Data Input",
+      "records": "Daily Records",
+      "analytics": "Analytics"
+    },
+    "dataInput": {
+      "title": "Daily Sunshine Data Entry",
+      "description": "Enter hourly sunshine duration data (5 AM - 7 PM)",
+      "date": "Date:",
+      "dailyTotal": "Daily Total: {total} hours",
+      "saveButton": "Save Daily Data"
+    },
+    "records": {
+      "title": "Daily Records & Weekly Averages",
+      "description": "Complete sunshine data records with statistical analysis",
+      "noData": {
+        "title": "No data entries yet",
+        "description": "Start by adding daily sunshine data"
+      },
+      "table": {
+        "date": "Date",
+        "total": "Total",
+        "weeklyAverage": "Weekly Average"
+      }
+    },
+    "analytics": {
+      "monthlyStats": {
+        "title": "Monthly Statistics",
+        "totalDays": "Total Days",
+        "totalSunshine": "Total Sunshine",
+        "dailyAverage": "Daily Average",
+        "aboveThreshold": "Above Threshold"
+      },
+      "thresholdAnalysis": {
+        "title": "Threshold Analysis",
+        "thresholdLabel": "Threshold Level (hours)",
+        "daysExceeding": "Days Exceeding Threshold",
+        "percentage": "{percentage}% of days",
+        "hourlyAverages": "Hourly Averages"
+      }
+    },
+    "common": {
+      "hours": "hours"
+      
+    }
+  },
+  "SoilMoistureForm": {
+    "title": "Soil Moisture Data Collection",
+    "depths": {
+      "5": "5 cm",
+      "10": "10 cm",
+      "20": "20 cm",
+      "30": "30 cm",
+      "50": "50 cm"
+    },
+    "stationInfo": {
+      "stationName": "Station Name",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "elevation": "Elevation (m)"
+    },
+    "form": {
+      "selectDate": "Select Date",
+      "weights": {
+        "w1": "W₁ (Weight of empty can)",
+        "w2": "W₂ (Weight of can + wet soil)",
+        "w3": "W₃ (Weight of can + dry soil)"
+      },
+      "calculatedValues": {
+        "title": "Calculated Values",
+        "ws": "Ws (W₂ - W₁)",
+        "ds": "Ds (W₃ - W₁)",
+        "sm": "Sm (Moisture %)"
+      },
+      "buttons": {
+        "previous": "Previous Depth",
+        "reset": "Reset",
+        "submitNext": "Submit & Next Depth",
+        "submitAll": "Submit All Data"
+      },
+      "errors": {
+        "required": "{field} is required",
+        "positive": "{field} must be positive",
+        "date": "Date is required"
+      }
+    },
+    "submissionLimit": {
+      "title": "Submission Limit Reached",
+      "message": "Soil moisture data can only be submitted once every 7 days.",
+      "nextSubmission": "Your next submission will be available on:"
+    }
   }
 }

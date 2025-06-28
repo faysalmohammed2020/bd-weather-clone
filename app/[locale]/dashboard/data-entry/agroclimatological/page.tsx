@@ -9,9 +9,12 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ChevronRight, ChevronLeft, Sun, Thermometer, Droplets } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
+
 
 const AgroclimatologicalPage = () => {
   const [activeTab, setActiveTab] = useState("sunshine");
+  const  t  = useTranslations("agroclimatological");
 
   const tabStyles = {
     sunshine: {
@@ -64,7 +67,7 @@ const AgroclimatologicalPage = () => {
             <Thermometer className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            Agroclimatological Data Collection
+            {t('agroclimatologicalDataCollection')}
           </h1>
           <div className="w-24 h-1 bg-gradient-to-r from-violet-500 to-purple-600 mx-auto mt-4 rounded-full"></div>
         </div>
@@ -117,7 +120,7 @@ const AgroclimatologicalPage = () => {
                             {style.icon}
                           </div>
                           <span className="text-base capitalize font-medium">
-                            {key === 'sunshine' ? 'Sunshine' : key === 'soil' ? 'Soil Moisture' : 'Agroclimatological'}
+                            {t(`tabs.${key}`)}
                           </span>
                         </div>
 
@@ -144,7 +147,7 @@ const AgroclimatologicalPage = () => {
               <Card className={cn("overflow-hidden rounded-2xl border-0", tabStyles.sunshine.card)}>
                 <div className={cn("p-6", tabStyles.sunshine.header)}>
                   <h3 className="text-xl font-bold flex items-center">
-                    <Sun className="mr-3 w-6 h-6" /> Sunshine Tracker Data
+                    <Sun className="mr-3 w-6 h-6" /> {t('headers.sunshine')}
                   </h3>
                 </div>
                 <Card className="mx-8 my-6">
@@ -158,7 +161,7 @@ const AgroclimatologicalPage = () => {
                     disabled={activeTab === "sunshine"}
                     className="px-8 py-3 rounded-xl"
                   >
-                    <ChevronLeft className="mr-2 h-5 w-5" /> Previous
+                    <ChevronLeft className="mr-2 h-5 w-5" /> {t('buttons.previous')}
                   </Button>
                   <Button
                     type="button"
@@ -168,7 +171,7 @@ const AgroclimatologicalPage = () => {
                       `bg-gradient-to-r from-${tabStyles.sunshine.color}-500 to-${tabStyles.sunshine.color}-600 text-white`
                     )}
                   >
-                    Next <ChevronRight className="ml-2 h-5 w-5" />
+                    {t('buttons.next')} <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
                 </div> */}
               </Card>
@@ -179,7 +182,7 @@ const AgroclimatologicalPage = () => {
               <Card className={cn("overflow-hidden rounded-2xl border-0", tabStyles.soil.card)}>
                 <div className={cn("p-6", tabStyles.soil.header)}>
                   <h3 className="text-xl font-bold flex items-center">
-                    <Thermometer className="mr-3 w-6 h-6" /> Soil Moisture Data
+                    <Thermometer className="mr-3 w-6 h-6" /> {t('headers.soil')}
                   </h3>
                 </div>
                 <Card className="mx-8 my-6">
@@ -193,7 +196,7 @@ const AgroclimatologicalPage = () => {
                     disabled={activeTab === "soil"}
                     className="px-8 py-3 rounded-xl"
                   >
-                    <ChevronLeft className="mr-2 h-5 w-5" /> Previous
+                    <ChevronLeft className="mr-2 h-5 w-5" /> {t('buttons.previous')}
                   </Button>
                   <Button
                     type="button"
@@ -203,7 +206,7 @@ const AgroclimatologicalPage = () => {
                       `bg-gradient-to-r from-${tabStyles.soil.color}-500 to-${tabStyles.soil.color}-600 text-white`
                     )}
                   >
-                    Next <ChevronRight className="ml-2 h-5 w-5" />
+                    {t('buttons.next')} <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
                 </div> */}
               </Card>
@@ -214,7 +217,7 @@ const AgroclimatologicalPage = () => {
               <Card className={cn("overflow-hidden rounded-2xl border-0", tabStyles.agro.card)}>
                 <div className={cn("p-6", tabStyles.agro.header)}>
                   <h3 className="text-xl font-bold flex items-center">
-                    <Droplets className="mr-3 w-6 h-6" /> Agroclimatological Data
+                    <Droplets className="mr-3 w-6 h-6" /> {t('headers.agro')}
                   </h3>
                 </div>
                 <Card className="mx-8 my-6">
@@ -227,7 +230,7 @@ const AgroclimatologicalPage = () => {
                     onClick={prevTab}
                     className="px-8 py-3 rounded-xl"
                   >
-                    <ChevronLeft className="mr-2 h-5 w-5" /> Previous
+                    <ChevronLeft className="mr-2 h-5 w-5" /> {t('buttons.previous')}
                   </Button>
                   <div className="flex gap-4">
                     <Button
@@ -236,7 +239,7 @@ const AgroclimatologicalPage = () => {
                       onClick={() => setActiveTab("sunshine")}
                       className="px-8 py-3 rounded-xl"
                     >
-                      Back to Start
+                      {t('buttons.backToStart')}
                     </Button>
                   </div>
                 </div> */}

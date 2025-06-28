@@ -12,20 +12,9 @@ import { Thermometer, Wind, BarChart3, ChevronRight, ChevronLeft, Sun, MapPin, C
 import { toast } from "sonner"
 import { useFormik } from "formik"
 import { motion } from "framer-motion"
-import * as Yup from "yup"
 import { useSession } from "@/lib/auth-client"
+import { useTranslations } from "next-intl"
 
-// // Enhanced validation schema with all fields
-// const validationSchema = Yup.object({
-//   stationInfo: Yup.object({
-//     stationName: Yup.string().required("Station name is required"),
-//     latitude: Yup.number().min(-90).max(90).required("Latitude is required"),
-//     longitude: Yup.number().min(-180).max(180).required("Longitude is required"),
-//     elevation: Yup.number().min(0).required("Elevation is required"),
-//     year: Yup.number().min(1900).max(2100).required("Year is required"),
-//     month: Yup.number().min(1).max(12).required("Month is required"),
-//   }),
-// })
 
 export interface AgroclimatologicalFormData {
   stationInfo: {
@@ -72,6 +61,7 @@ export interface AgroclimatologicalFormData {
 }
 
 export function AgroclimatologicalForm() {
+  const  t  = useTranslations("agroclimatologicalForm")
   const [activeTab, setActiveTab] = useState("station")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -85,11 +75,9 @@ export function AgroclimatologicalForm() {
     }
   }, [session])
 
-
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        // Fetch sunshine data (working)
         const sunshineResponse = await fetch("/api/sunshine");
         if (sunshineResponse.ok) {
           const sunshineData = await sunshineResponse.json();
@@ -99,11 +87,9 @@ export function AgroclimatologicalForm() {
           }
         }
 
-        // Fetch soil moisture data - improved error handling
         const soilResponse = await fetch("/api/soil-moisture");
         if (soilResponse.ok) {
-          const { data: soilData } = await soilResponse.json(); // extract .data
-
+          const { data: soilData } = await soilResponse.json();
           if (Array.isArray(soilData) && soilData.length > 0) {
             const validEntries = soilData.filter(
               (entry) => typeof entry.depth === "number" && typeof entry.Sm === "number"
@@ -135,7 +121,6 @@ export function AgroclimatologicalForm() {
         const rainfallResponse = await fetch("/api/save-observation");
         if (rainfallResponse.ok) {
           const rainfallJson = await rainfallResponse.json();
-
           const latestObservation = rainfallJson?.data?.[0];
           const weatherObs = latestObservation?.WeatherObservation?.[0];
 
@@ -145,17 +130,15 @@ export function AgroclimatologicalForm() {
         }
       } catch (error) {
         console.error("Error fetching auto-fill data:", error);
-        toast.error("Failed to load some auto-fill data");
+        toast.error(t('messages.fetchError'));
       }
     };
 
     fetchAllData();
-  }, []);
+  }, [t]);
 
-  // Enhanced tab order with new sections
   const tabOrder = ["station", "solar", "temperature", "soil", "humidity", "weather", "summary"]
 
-  // Updated waterdrop tab styles with new sections
   const tabStyles = {
     station: {
       tab: "relative overflow-hidden",
@@ -208,11 +191,6 @@ export function AgroclimatologicalForm() {
     },
   }
 
-  // Initialize Formik with simplified structure - no dailyData array
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1;
-
   const formik = useFormik<AgroclimatologicalFormData>({
     initialValues: {
       stationInfo: {
@@ -220,10 +198,9 @@ export function AgroclimatologicalForm() {
         latitude: "",
         longitude: "",
         elevation: "",
-        date: new Date().toISOString().split("T")[0], // Default to today
+        date: new Date().toISOString().split("T")[0],
         utcHour: 0,
       },
-      // Direct fields instead of dailyData array
       solarRadiation: "",
       sunShineHour: "",
       airTemperature: {
@@ -259,6 +236,7 @@ export function AgroclimatologicalForm() {
     },
     onSubmit: handleSubmit,
   })
+
   const handleTabChange = (tabName: string) => {
     setActiveTab(tabName)
   }
@@ -267,10 +245,7 @@ export function AgroclimatologicalForm() {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
-    console.log("Submitting values:", values);
-
     try {
-      // Create a date object from year and month (first day of the month)
       const dateParts = values.stationInfo.date.split("-").map(Number)
       const [year, month, day] = dateParts
 
@@ -299,27 +274,24 @@ export function AgroclimatologicalForm() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Failed to submit data");
+        throw new Error(errorData.message || t('messages.submitError'));
       }
 
       const result = await response.json();
-      console.log("Result:", result);
-
       if (!result.success) {
-        throw new Error(result.message || "Server returned unsuccessful response");
+        throw new Error(result.message || t('messages.submitError'));
       }
 
-      toast.success(result.message || "Data submitted successfully!");
+      toast.success(t('messages.submitSuccess'));
       formik.resetForm();
       setActiveTab("station");
     } catch (error) {
       console.error("Submission error:", error);
-      toast.error(error instanceof Error ? error.message : "An unexpected error occurred");
+      toast.error(error instanceof Error ? error.message : t('messages.submitError'));
     } finally {
       setIsSubmitting(false);
     }
   }
-
 
   const handleNumericInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -392,7 +364,9 @@ export function AgroclimatologicalForm() {
                           >
                             {style.icon}
                           </div>
-                          <span className="text-base capitalize font-medium">{key}</span>
+                          <span className="text-base capitalize font-medium">
+                            {t(`form.tabs.${key}`)}
+                          </span>
                         </div>
 
                         {isActive && (
@@ -418,13 +392,13 @@ export function AgroclimatologicalForm() {
               <Card className={cn("overflow-hidden rounded-2xl border-0", tabStyles.station.card)}>
                 <div className={cn("p-6", tabStyles.station.header)}>
                   <h3 className="text-xl font-bold flex items-center">
-                    <MapPin className="mr-3 w-6 h-6" /> Station Information
+                    <MapPin className="mr-3 w-6 h-6" /> {t('form.station.title')}
                   </h3>
                 </div>
                 <CardContent className="pt-8 pb-6 px-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   <div className="space-y-3">
                     <Label htmlFor="stationName" className="text-slate-700 font-semibold">
-                      Station Name *
+                      {t('form.station.fields.stationName')}
                     </Label>
                     <Input
                       id="stationName"
@@ -432,14 +406,14 @@ export function AgroclimatologicalForm() {
                       value={session?.user?.station?.name}
                       onChange={formik.handleChange}
                       className="border border-slate-300 h-12 rounded-xl font-semibold"
-                      placeholder="Enter station name"
+                      placeholder={t('form.station.fields.stationName')}
                       readOnly
                     />
                   </div>
 
                   <div className="space-y-3">
                     <Label htmlFor="latitude" className="text-slate-700 font-semibold">
-                      Latitude (°) *
+                      {t('form.station.fields.latitude')}
                     </Label>
                     <Input
                       id="latitude"
@@ -455,7 +429,7 @@ export function AgroclimatologicalForm() {
                   </div>
                   <div className="space-y-3">
                     <Label htmlFor="longitude" className="text-slate-700 font-semibold">
-                      Longitude (°) *
+                      {t('form.station.fields.longitude')}
                     </Label>
                     <Input
                       id="longitude"
@@ -471,7 +445,7 @@ export function AgroclimatologicalForm() {
                   </div>
                   <div className="space-y-3">
                     <Label htmlFor="elevation" className="text-slate-700 font-semibold">
-                      Elevation (m) *
+                      {t('form.station.fields.elevation')}
                     </Label>
                     <Input
                       id="elevation"
@@ -486,7 +460,7 @@ export function AgroclimatologicalForm() {
                   </div>
                   <div className="space-y-3">
                     <Label htmlFor="date" className="text-slate-700 font-semibold">
-                      Observation Date *
+                      {t('form.station.fields.date')}
                     </Label>
                     <Input
                       id="date"
@@ -501,7 +475,7 @@ export function AgroclimatologicalForm() {
 
                   <div className="space-y-3">
                     <Label htmlFor="utcHour" className="text-slate-700 font-semibold">
-                      UTC Hour *
+                      {t('form.station.fields.utcHour')}
                     </Label>
                     <select
                       id="utcHour"
@@ -511,9 +485,9 @@ export function AgroclimatologicalForm() {
                       className="border border-slate-300 h-12 rounded-xl font-semibold px-3"
                       required
                     >
-                      <option value="">Select UTC</option>
-                      <option value={0}>00 UTC</option>
-                      <option value={12}>12 UTC</option>
+                      <option value="">{t('form.station.utcOptions.select')}</option>
+                      <option value={0}>{t('form.station.utcOptions.00')}</option>
+                      <option value={12}>{t('form.station.utcOptions.12')}</option>
                     </select>
                   </div>
                 </CardContent>
@@ -523,7 +497,7 @@ export function AgroclimatologicalForm() {
                     onClick={nextTab}
                     className="bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold"
                   >
-                    Next <ChevronRight className="ml-2 h-5 w-5" />
+                    {t('form.buttons.next')} <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
                 </CardFooter>
               </Card>
@@ -534,13 +508,13 @@ export function AgroclimatologicalForm() {
               <Card className={cn("overflow-hidden rounded-2xl border-0", tabStyles.solar.card)}>
                 <div className={cn("p-6", tabStyles.solar.header)}>
                   <h3 className="text-xl font-bold flex items-center">
-                    <Sun className="mr-3 w-6 h-6" /> Solar Radiation & Sunshine Data
+                    <Sun className="mr-3 w-6 h-6" /> {t('form.solar.title')}
                   </h3>
                 </div>
                 <CardContent className="pt-8 pb-6 px-8">
                   <div className="grid gap-6 sm:grid-cols-2">
                     <div className="space-y-3 p-4 bg-amber-50/50 rounded-xl border border-amber-200">
-                      <Label className="text-slate-700 font-semibold">Solar Radiation (Langley day⁻¹)</Label>
+                      <Label className="text-slate-700 font-semibold">{t('form.solar.fields.solarRadiation')}</Label>
                       <Input
                         name="solarRadiation"
                         type="number"
@@ -548,12 +522,12 @@ export function AgroclimatologicalForm() {
                         value={formik.values.solarRadiation}
                         onChange={handleNumericInput}
                         className="border border-slate-300 h-12 rounded-xl"
-                        placeholder="Enter solar radiation"
+                        placeholder={t('form.solar.fields.solarRadiation')}
                       />
                     </div>
 
                     <div className="space-y-3 p-4 bg-yellow-50/50 rounded-xl border border-yellow-200">
-                      <Label className="text-slate-700 font-semibold">Sun Shine Hour (Auto-filled)</Label>
+                      <Label className="text-slate-700 font-semibold">{t('form.solar.fields.sunShineHour')}</Label>
                       <Input
                         name="sunShineHour"
                         type="number"
@@ -562,21 +536,21 @@ export function AgroclimatologicalForm() {
                         value={formik.values.sunShineHour}
                         onChange={handleNumericInput}
                         className="border border-slate-300 h-12 rounded-xl"
-                        placeholder="Enter sunshine hours"
+                        placeholder={t('form.solar.fields.sunShineHour')}
                       />
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between px-8 pb-8">
                   <Button type="button" variant="outline" onClick={prevTab} className="px-8 py-3 rounded-xl">
-                    <ChevronLeft className="mr-2 h-5 w-5" /> Previous
+                    <ChevronLeft className="mr-2 h-5 w-5" /> {t('form.buttons.previous')}
                   </Button>
                   <Button
                     type="button"
                     onClick={nextTab}
                     className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-3 rounded-xl"
                   >
-                    Next <ChevronRight className="ml-2 h-5 w-5" />
+                    {t('form.buttons.next')} <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
                 </CardFooter>
               </Card>
@@ -587,7 +561,7 @@ export function AgroclimatologicalForm() {
               <Card className={cn("overflow-hidden rounded-2xl border-0", tabStyles.temperature.card)}>
                 <div className={cn("p-6", tabStyles.temperature.header)}>
                   <h3 className="text-xl font-bold flex items-center">
-                    <Thermometer className="mr-3 w-6 h-6" /> Air Temperature Data
+                    <Thermometer className="mr-3 w-6 h-6" /> {t('form.temperature.title')}
                   </h3>
                 </div>
                 <CardContent className="pt-8 pb-6 px-8">
@@ -595,22 +569,22 @@ export function AgroclimatologicalForm() {
                     {/* Air Temperature at Different Heights */}
                     <div className="p-6 bg-rose-50/50 rounded-xl border border-rose-200">
                       <h4 className="font-bold text-rose-700 text-lg mb-4">
-                        Air Temperature (°C) at Different Heights
+                        {t('form.temperature.airTemp')}
                       </h4>
                       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         {[
                           {
-                            height: "0.5m",
+                            height: t('form.temperature.heights.05m'),
                             dryKey: "dry05m",
                             wetKey: "wet05m",
                           },
                           {
-                            height: "1.2m",
+                            height: t('form.temperature.heights.12m'),
                             dryKey: "dry12m",
                             wetKey: "wet12m",
                           },
                           {
-                            height: "2.2m",
+                            height: t('form.temperature.heights.22m'),
                             dryKey: "dry22m",
                             wetKey: "wet22m",
                           },
@@ -618,7 +592,7 @@ export function AgroclimatologicalForm() {
                           <div key={height} className="space-y-3 p-4 bg-white rounded-lg border">
                             <h5 className="font-semibold text-rose-600">{height}</h5>
                             <div className="space-y-2">
-                              <Label className="text-sm text-slate-600">Dry Bulb</Label>
+                              <Label className="text-sm text-slate-600">{t('form.temperature.fields.dryBulb')}</Label>
                               <Input
                                 name={`airTemperature.${dryKey}`}
                                 type="number"
@@ -632,7 +606,7 @@ export function AgroclimatologicalForm() {
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-sm text-slate-600">Wet Bulb</Label>
+                              <Label className="text-sm text-slate-600">{t('form.temperature.fields.wetBulb')}</Label>
                               <Input
                                 name={`airTemperature.${wetKey}`}
                                 type="number"
@@ -652,10 +626,10 @@ export function AgroclimatologicalForm() {
 
                     {/* Temperature Summary */}
                     <div className="p-6 bg-pink-50/50 rounded-xl border border-pink-200">
-                      <h4 className="font-bold text-pink-700 text-lg mb-4">Temperature Summary</h4>
+                      <h4 className="font-bold text-pink-700 text-lg mb-4">{t('form.temperature.tempSummary')}</h4>
                       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         <div className="space-y-2">
-                          <Label className="text-slate-700 font-semibold">Min Temp (°C)</Label>
+                          <Label className="text-slate-700 font-semibold">{t('form.temperature.fields.minTemp')}</Label>
                           <Input
                             name="minTemp"
                             type="number"
@@ -666,7 +640,7 @@ export function AgroclimatologicalForm() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-slate-700 font-semibold">Max Temp (°C)</Label>
+                          <Label className="text-slate-700 font-semibold">{t('form.temperature.fields.maxTemp')}</Label>
                           <Input
                             name="maxTemp"
                             type="number"
@@ -677,7 +651,7 @@ export function AgroclimatologicalForm() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-slate-700 font-semibold">Grass Min Temp (°C)</Label>
+                          <Label className="text-slate-700 font-semibold">{t('form.temperature.fields.grassMinTemp')}</Label>
                           <Input
                             name="grassMinTemp"
                             type="number"
@@ -693,14 +667,14 @@ export function AgroclimatologicalForm() {
                 </CardContent>
                 <CardFooter className="flex justify-between px-8 pb-8">
                   <Button type="button" variant="outline" onClick={prevTab} className="px-8 py-3 rounded-xl">
-                    <ChevronLeft className="mr-2 h-5 w-5" /> Previous
+                    <ChevronLeft className="mr-2 h-5 w-5" /> {t('form.buttons.previous')}
                   </Button>
                   <Button
                     type="button"
                     onClick={nextTab}
                     className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-8 py-3 rounded-xl"
                   >
-                    Next <ChevronRight className="ml-2 h-5 w-5" />
+                    {t('form.buttons.next')} <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
                 </CardFooter>
               </Card>
@@ -711,7 +685,7 @@ export function AgroclimatologicalForm() {
               <Card className={cn("overflow-hidden rounded-2xl border-0", tabStyles.soil.card)}>
                 <div className={cn("p-6", tabStyles.soil.header)}>
                   <h3 className="text-xl font-bold flex items-center">
-                    <BarChart3 className="mr-3 w-6 h-6" /> Soil Temperature & Moisture Data
+                    <BarChart3 className="mr-3 w-6 h-6" /> {t('form.soil.title')}
                   </h3>
                 </div>
                 <CardContent className="pt-8 pb-6 px-8">
@@ -719,15 +693,15 @@ export function AgroclimatologicalForm() {
                     {/* Soil Temperature */}
                     <div className="p-6 bg-emerald-50/50 rounded-xl border border-emerald-200">
                       <h4 className="font-bold text-emerald-700 text-lg mb-4">
-                        Soil Temperature (°C) at Different Depths
+                        {t('form.soil.soilTemp')}
                       </h4>
                       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                         {[
-                          { depth: "5 Cm", key: "depth5cm" },
-                          { depth: "10 Cm", key: "depth10cm" },
-                          { depth: "20 Cm", key: "depth20cm" },
-                          { depth: "30 Cm", key: "depth30cm" },
-                          { depth: "50 Cm", key: "depth50cm" },
+                          { depth: t('form.soil.depths.5cm'), key: "depth5cm" },
+                          { depth: t('form.soil.depths.10cm'), key: "depth10cm" },
+                          { depth: t('form.soil.depths.20cm'), key: "depth20cm" },
+                          { depth: t('form.soil.depths.30cm'), key: "depth30cm" },
+                          { depth: t('form.soil.depths.50cm'), key: "depth50cm" },
                         ].map(({ depth, key }) => (
                           <div key={key} className="space-y-2">
                             <Label className="text-slate-700 font-semibold">{depth}</Label>
@@ -748,10 +722,10 @@ export function AgroclimatologicalForm() {
 
                     {/* Soil Moisture */}
                     <div className="p-6 bg-teal-50/50 rounded-xl border border-teal-200">
-                      <h4 className="font-bold text-teal-700 text-lg mb-4">Soil Moisture % Between (Auto-filled)</h4>
+                      <h4 className="font-bold text-teal-700 text-lg mb-4">{t('form.soil.soilMoisture')}</h4>
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
-                          <Label className="text-slate-700 font-semibold">0-20 Cm</Label>
+                          <Label className="text-slate-700 font-semibold">{t('form.soil.depths.0to20')}</Label>
                           <Input
                             name="soilMoisture.depth0to20cm"
                             type="number"
@@ -764,7 +738,7 @@ export function AgroclimatologicalForm() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-slate-700 font-semibold">20-50 Cm</Label>
+                          <Label className="text-slate-700 font-semibold">{t('form.soil.depths.20to50')}</Label>
                           <Input
                             name="soilMoisture.depth20to50cm"
                             type="number"
@@ -782,14 +756,14 @@ export function AgroclimatologicalForm() {
                 </CardContent>
                 <CardFooter className="flex justify-between px-8 pb-8">
                   <Button type="button" variant="outline" onClick={prevTab} className="px-8 py-3 rounded-xl">
-                    <ChevronLeft className="mr-2 h-5 w-5" /> Previous
+                    <ChevronLeft className="mr-2 h-5 w-5" /> {t('form.buttons.previous')}
                   </Button>
                   <Button
                     type="button"
                     onClick={nextTab}
                     className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-8 py-3 rounded-xl"
                   >
-                    Next <ChevronRight className="ml-2 h-5 w-5" />
+                    {t('form.buttons.next')} <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
                 </CardFooter>
               </Card>
@@ -800,13 +774,13 @@ export function AgroclimatologicalForm() {
               <Card className={cn("overflow-hidden rounded-2xl border-0", tabStyles.humidity.card)}>
                 <div className={cn("p-6", tabStyles.humidity.header)}>
                   <h3 className="text-xl font-bold flex items-center">
-                    <Droplets className="mr-3 w-6 h-6" /> Humidity & Evaporation Data
+                    <Droplets className="mr-3 w-6 h-6" /> {t('form.humidity.title')}
                   </h3>
                 </div>
                 <CardContent className="pt-8 pb-6 px-8">
                   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     <div className="space-y-3 p-4 bg-cyan-50/50 rounded-xl border border-cyan-200">
-                      <Label className="text-slate-700 font-semibold">Pan Water temp(°C)</Label>
+                      <Label className="text-slate-700 font-semibold">{t('form.humidity.fields.panWaterEvap')}</Label>
                       <Input
                         name="panWaterEvap"
                         type="number"
@@ -818,7 +792,7 @@ export function AgroclimatologicalForm() {
                     </div>
 
                     <div className="space-y-3 p-4 bg-indigo-50/50 rounded-xl border border-indigo-200">
-                      <Label className="text-slate-700 font-semibold">Evaporation (mm)</Label>
+                      <Label className="text-slate-700 font-semibold">{t('form.humidity.fields.evaporation')}</Label>
                       <Input
                         name="evaporation"
                         type="number"
@@ -830,7 +804,7 @@ export function AgroclimatologicalForm() {
                     </div>
 
                     <div className="space-y-3 p-4 bg-purple-50/50 rounded-xl border border-purple-200">
-                      <Label className="text-slate-700 font-semibold">Evapotranspiration (mm)</Label>
+                      <Label className="text-slate-700 font-semibold">{t('form.humidity.fields.dewPoint')}</Label>
                       <Input
                         name="dewPoint"
                         type="number"
@@ -844,14 +818,14 @@ export function AgroclimatologicalForm() {
                 </CardContent>
                 <CardFooter className="flex justify-between px-8 pb-8">
                   <Button type="button" variant="outline" onClick={prevTab} className="px-8 py-3 rounded-xl">
-                    <ChevronLeft className="mr-2 h-5 w-5" /> Previous
+                    <ChevronLeft className="mr-2 h-5 w-5" /> {t('form.buttons.previous')}
                   </Button>
                   <Button
                     type="button"
                     onClick={nextTab}
                     className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-8 py-3 rounded-xl"
                   >
-                    Next <ChevronRight className="ml-2 h-5 w-5" />
+                    {t('form.buttons.next')} <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
                 </CardFooter>
               </Card>
@@ -862,13 +836,13 @@ export function AgroclimatologicalForm() {
               <Card className={cn("overflow-hidden rounded-2xl border-0", tabStyles.weather.card)}>
                 <div className={cn("p-6", tabStyles.weather.header)}>
                   <h3 className="text-xl font-bold flex items-center">
-                    <Wind className="mr-3 w-6 h-6" /> Weather Measurements
+                    <Wind className="mr-3 w-6 h-6" /> {t('form.weather.title')}
                   </h3>
                 </div>
                 <CardContent className="pt-8 pb-6 px-8">
                   <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     <div className="space-y-3 p-4 bg-sky-50/50 rounded-xl border border-sky-200">
-                      <Label className="text-slate-700 font-semibold">Wind run at 2m. ht. (km/hr)</Label>
+                      <Label className="text-slate-700 font-semibold">{t('form.weather.fields.windSpeed')}</Label>
                       <Input
                         name="windSpeed"
                         type="number"
@@ -880,7 +854,7 @@ export function AgroclimatologicalForm() {
                     </div>
 
                     <div className="space-y-3 p-4 bg-blue-50/50 rounded-xl border border-blue-200">
-                      <Label className="text-slate-700 font-semibold">Dew Amount (mm)</Label>
+                      <Label className="text-slate-700 font-semibold">{t('form.weather.fields.dewPoint')}</Label>
                       <Input
                         name="dewPoint"
                         type="number"
@@ -892,7 +866,7 @@ export function AgroclimatologicalForm() {
                     </div>
 
                     <div className="space-y-3 p-4 bg-indigo-50/50 rounded-xl border border-indigo-200">
-                      <Label className="text-slate-700 font-semibold">Duration (Dew) (hrs.)</Label>
+                      <Label className="text-slate-700 font-semibold">{t('form.weather.fields.duration')}</Label>
                       <Input
                         name="duration"
                         type="number"
@@ -905,7 +879,7 @@ export function AgroclimatologicalForm() {
                     </div>
 
                     <div className="space-y-3 p-4 bg-blue-50/50 rounded-xl border border-blue-200">
-                      <Label className="text-slate-700 font-semibold">Rain amount (mm)</Label>
+                      <Label className="text-slate-700 font-semibold">{t('form.weather.fields.rainfall')}</Label>
                       <Input
                         name="rainfall"
                         type="number"
@@ -919,14 +893,14 @@ export function AgroclimatologicalForm() {
                 </CardContent>
                 <CardFooter className="flex justify-between px-8 pb-8">
                   <Button type="button" variant="outline" onClick={prevTab} className="px-8 py-3 rounded-xl">
-                    <ChevronLeft className="mr-2 h-5 w-5" /> Previous
+                    <ChevronLeft className="mr-2 h-5 w-5" /> {t('form.buttons.previous')}
                   </Button>
                   <Button
                     type="button"
                     onClick={nextTab}
                     className="bg-gradient-to-r from-sky-500 to-indigo-500 text-white px-8 py-3 rounded-xl"
                   >
-                    Next <ChevronRight className="ml-2 h-5 w-5" />
+                    {t('form.buttons.next')} <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
                 </CardFooter>
               </Card>
@@ -937,41 +911,43 @@ export function AgroclimatologicalForm() {
               <Card className={cn("overflow-hidden rounded-2xl border-0", tabStyles.summary.card)}>
                 <div className={cn("p-6", tabStyles.summary.header)}>
                   <h3 className="text-xl font-bold flex items-center">
-                    <Calendar className="mr-3 w-6 h-6" /> Data Summary & Submission
+                    <Calendar className="mr-3 w-6 h-6" /> {t('form.summary.title')}
                   </h3>
                 </div>
                 <CardContent className="pt-8 pb-6 px-8 space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="p-6 border-2 border-violet-200 rounded-xl bg-gradient-to-br from-violet-50 to-purple-50">
-                      <h4 className="font-bold text-sm text-violet-600 mb-2">Station</h4>
+                      <h4 className="font-bold text-sm text-violet-600 mb-2">{t('form.summary.sections.station')}</h4>
                       <p className="text-lg font-bold text-violet-800">
-                        {formik.values.stationInfo.stationName || "Not set"}
+                        {formik.values.stationInfo.stationName || t('form.summary.notSet')}
                       </p>
                     </div>
                     <div className="p-6 border-2 border-green-200 rounded-xl bg-gradient-to-br from-green-50 to-lime-50">
-                      <h4 className="font-bold text-sm text-green-600 mb-2">Period</h4>
+                      <h4 className="font-bold text-sm text-green-600 mb-2">{t('form.summary.sections.period')}</h4>
                       <p className="text-lg font-bold text-green-800">
                         {new Date(formik.values.stationInfo.date).toLocaleString('default', { month: 'long' })} {formik.values.stationInfo.date}
                       </p>
                     </div>
                     <div className="p-6 border-2 border-blue-200 rounded-xl bg-gradient-to-br from-blue-50 to-sky-50">
-                      <h4 className="font-bold text-sm text-blue-600 mb-2">Location</h4>
+                      <h4 className="font-bold text-sm text-blue-600 mb-2">{t('form.summary.sections.location')}</h4>
                       <p className="text-lg font-bold text-blue-800">
                         {formik.values.stationInfo.latitude}°, {formik.values.stationInfo.longitude}°
                       </p>
                     </div>
                     <div className="p-6 border-2 border-cyan-200 rounded-xl bg-gradient-to-br from-cyan-50 to-teal-50">
-                      <h4 className="font-bold text-sm text-cyan-600 mb-2">Elevation</h4>
+                      <h4 className="font-bold text-sm text-cyan-600 mb-2">{t('form.summary.sections.elevation')}</h4>
                       <p className="text-lg font-bold text-cyan-800">{formik.values.stationInfo.elevation} m</p>
                     </div>
                   </div>
 
                   <div className="p-6 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl">
-                    <h4 className="font-bold text-amber-800 mb-4 text-lg">Data Completion Status</h4>
+                    <h4 className="font-bold text-amber-800 mb-4 text-lg">{t('form.summary.status.title')}</h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div className="flex items-center p-3 bg-white rounded-lg">
                         <div className="w-4 h-4 rounded-full bg-emerald-500 mr-3"></div>
-                        <span className="font-medium">Station: Complete</span>
+                        <span className="font-medium">
+                          {t('form.summary.sections.station')}: {t('form.summary.status.complete')}
+                        </span>
                       </div>
                       <div className="flex items-center p-3 bg-white rounded-lg">
                         <div
@@ -981,7 +957,7 @@ export function AgroclimatologicalForm() {
                           )}
                         ></div>
                         <span className="font-medium">
-                          Solar: {formik.values.solarRadiation ? "Complete" : "Pending"}
+                          {t('form.tabs.solar')}: {formik.values.solarRadiation ? t('form.summary.status.complete') : t('form.summary.status.pending')}
                         </span>
                       </div>
                       <div className="flex items-center p-3 bg-white rounded-lg">
@@ -992,7 +968,7 @@ export function AgroclimatologicalForm() {
                           )}
                         ></div>
                         <span className="font-medium">
-                          Temperature: {formik.values.minTemp ? "Complete" : "Pending"}
+                          {t('form.tabs.temperature')}: {formik.values.minTemp ? t('form.summary.status.complete') : t('form.summary.status.pending')}
                         </span>
                       </div>
                       <div className="flex items-center p-3 bg-white rounded-lg">
@@ -1003,7 +979,7 @@ export function AgroclimatologicalForm() {
                           )}
                         ></div>
                         <span className="font-medium">
-                          Soil: {formik.values.soilTemperature.depth5cm ? "Complete" : "Pending"}
+                          {t('form.tabs.soil')}: {formik.values.soilTemperature.depth5cm ? t('form.summary.status.complete') : t('form.summary.status.pending')}
                         </span>
                       </div>
                       <div className="flex items-center p-3 bg-white rounded-lg">
@@ -1014,7 +990,7 @@ export function AgroclimatologicalForm() {
                           )}
                         ></div>
                         <span className="font-medium">
-                          Humidity: {formik.values.evaporation ? "Complete" : "Pending"}
+                          {t('form.tabs.humidity')}: {formik.values.evaporation ? t('form.summary.status.complete') : t('form.summary.status.pending')}
                         </span>
                       </div>
                       <div className="flex items-center p-3 bg-white rounded-lg">
@@ -1024,14 +1000,16 @@ export function AgroclimatologicalForm() {
                             formik.values.windSpeed ? "bg-emerald-500" : "bg-gray-300",
                           )}
                         ></div>
-                        <span className="font-medium">Weather: {formik.values.windSpeed ? "Complete" : "Pending"}</span>
+                        <span className="font-medium">
+                          {t('form.tabs.weather')}: {formik.values.windSpeed ? t('form.summary.status.complete') : t('form.summary.status.pending')}
+                        </span>
                       </div>
                     </div>
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between px-8 pb-8">
                   <Button type="button" variant="outline" onClick={prevTab} className="px-8 py-3 rounded-xl">
-                    <ChevronLeft className="mr-2 h-5 w-5" /> Previous
+                    <ChevronLeft className="mr-2 h-5 w-5" /> {t('form.buttons.previous')}
                   </Button>
                   <div className="flex gap-4">
                     <Button
@@ -1040,18 +1018,18 @@ export function AgroclimatologicalForm() {
                       onClick={() => {
                         formik.resetForm()
                         setActiveTab("station")
-                        toast.info("Form has been reset")
+                        toast.info(t('messages.reset'))
                       }}
                       className="px-8 py-3 rounded-xl"
                     >
-                      Reset Form
+                      {t('form.summary.buttons.reset')}
                     </Button>
                     <Button
                       type="submit"
                       disabled={isSubmitting}
                       className="bg-gradient-to-r from-green-500 to-lime-500 hover:from-green-600 hover:to-lime-600 text-white px-8 py-3 rounded-xl font-semibold"
                     >
-                      {isSubmitting ? "Submitting..." : "Submit Data"}
+                      {isSubmitting ? t('form.summary.buttons.submitting') : t('form.summary.buttons.submit')}
                     </Button>
                   </div>
                 </CardFooter>
