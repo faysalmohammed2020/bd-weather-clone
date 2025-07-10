@@ -32,7 +32,7 @@ export default function AboutPage() {
                 About Us
               </div>
               <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                Bangladesh Weather Dashboard
+                Jordan Weather Dashboard
               </h1>
               <p className="max-w-[700px] text-muted-foreground md:text-xl">
                 Learn about our mission to provide accurate and accessible

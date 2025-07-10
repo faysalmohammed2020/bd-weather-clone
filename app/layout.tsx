@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "BD Weather",
-  description: "BD Weather",
+  title: "Jordan Weather",
+  description: "Jordan Weather",
 };
 
 // English

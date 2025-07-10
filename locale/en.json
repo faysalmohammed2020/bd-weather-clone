@@ -7,10 +7,10 @@
     "contact": "Contact Us",
     "signIn": "Sign In",
     "accessDashboard": "Access Dashboard",
-    "brandName": "Bangladesh Weather",
+    "brandName": "Jordan Weather",
     "heroSection": {
       "liveUpdate": "Live Weather Updates",
-      "heading": "Bangladesh Weather Dashboard",
+      "heading": "Jordan Weather Dashboard",
       "description": "Professional weather monitoring and forecasting for Bangladesh. Get real-time data, forecasts, and historical trends through our interactive dashboard.",
       "launchDashboard": "Launch Dashboard",
       "exploreFeatures": "Explore Features",
@@ -137,10 +137,10 @@
     "footerSection": {
       "connectWithUs": "Connect With Us",
       "quickLinks": "Quick Links",
-      "description": "BD Weather offers real-time, hyperlocal weather updates, visualizations, and forecasts to help you stay informed and prepared across all 64 districts of Bangladesh.",
+      "description": "Jordan Weather offers real-time, hyperlocal weather updates, visualizations, and forecasts to help you stay informed and prepared across all 64 districts of Bangladesh.",
       "newsletterHeading": "Subscribe to our newsletter",
       "subscribeButton": "Subscribe",
-      "copyright": "BD Weather. All rights reserved",
+      "copyright": "Jordan Weather. All rights reserved",
       "privacyPolicy": "Privacy Policy",
       "termsOfService": "Terms of Service",
       "yourEmail": "Your email"
@@ -312,7 +312,7 @@
     }
   },
   "signin": {
-    "title": "Bangladesh Weather",
+    "title": "Jordan Weather",
     "selectStation": "Select your weather station to continue.",
     "stationLabel": "Weather Station",
     "loadingStations": "Loading stations...",
@@ -438,7 +438,7 @@
     "uvDescription": "Peak UV exposure levels today will reach {status} levels."
   },
   "common": {
-    "title": "Bangladesh Weather",
+    "title": "Jordan Weather",
     "loading": "Loading...",
     "lastUpdated": "Last updated at",
     "refresh": "Refresh",

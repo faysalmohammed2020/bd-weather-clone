@@ -692,7 +692,7 @@ export default function MapComponent() {
       {/* BBC-style header */}
       <div className="absolute top-0 left-0 right-0 bg-[#0f0f0f] text-white z-[1001] flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-2">
-          <div className="font-bold text-lg">Bangladesh Weather</div>
+          <div className="font-bold text-lg">Jordan Weather</div>
           <div className="text-sm text-gray-300 flex items-center gap-1">
             <Clock className="h-3 w-3" />
             <span>Updated: {currentTime}</span>

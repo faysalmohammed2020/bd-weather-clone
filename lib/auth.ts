@@ -56,7 +56,7 @@ export const auth = betterAuth({
     enabled: true,
     revokeSessionsOnPasswordReset: true,
   },
-  appName: "BD Weather",
+  appName: "Jordan Weather",
   plugins: [
     multiSession({
       maximumSessions: 1,

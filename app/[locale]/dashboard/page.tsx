@@ -6,7 +6,7 @@ import { Station } from "@prisma/client";
 import WeatherDashboard from "@/components/msn-weather";
 
 const MapComponent = dynamic(
-  () => import("@/components/StationMap/MapComponent"),
+  () => import("@/components/map/MapComponent"),
   { ssr: false }
 );
 
