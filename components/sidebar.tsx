@@ -255,7 +255,7 @@ const Sidebar = () => {
       <div
         ref={sidebarRef}
         className={cn(
-          "bg-sky-700 text-white h-full transition-all duration-300 ease-in-out shrink-0",
+          "bg-gradient-to-r from-teal-700 to-teal-900 text-white h-full transition-all duration-300 ease-in-out shrink-0",
           "fixed md:relative z-40 flex flex-col",
           "border-r border-sky-800",
           isCollapsed ? "w-16" : "w-64",
@@ -265,7 +265,7 @@ const Sidebar = () => {
         )}
         style={{ height: "100vh", top: 0, left: 0 }}
       >
-        <div className="flex items-center justify-between p-4 border-b border-sky-800 z-40 bg-sky-700">
+        <div className="flex items-center justify-between p-4 border-b border-sky-800 z-40 bg-gradient-to-r from-teal-700 to-teal-900">
           {(!isCollapsed || isMobileOpen) && (
             <h2 className="text-lg font-bold whitespace-nowrap">
               {common("title")}
@@ -274,7 +274,7 @@ const Sidebar = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={toggleSidebar}
-              className="hidden md:block p-1 rounded-md hover:bg-sky-600 transition-colors"
+              className="hidden md:block p-1 rounded-md hover:bg-gradient-to-r from-teal-700 to-teal-900 transition-colors"
             >
               {isCollapsed ? (
                 <Menu className="w-5 h-5" />
@@ -284,7 +284,7 @@ const Sidebar = () => {
             </button>
             <button
               onClick={toggleMobileSidebar}
-              className="md:hidden p-1 rounded-md hover:bg-sky-600 transition-colors"
+              className="md:hidden p-1 rounded-md hover:bg-gradient-to-r from-teal-700 to-teal-900 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -379,9 +379,9 @@ const SidebarLink = ({
             variant="ghost"
             className={cn(
               "w-full flex items-center justify-between text-white",
-              "hover:bg-white hover:text-sky-800 transition-colors",
+              "hover:bg-gradient-to-r from-teal-500 to-teal-700 hover:text-white transition-colors",
               "rounded-md px-3 py-2",
-              isActive && "bg-sky-600 text-white"
+              isActive && "bg-gradient-to-r from-teal-500 to-teal-700 text-white"
             )}
           >
             <div className="flex items-center gap-3">
@@ -458,8 +458,8 @@ const SidebarLink = ({
                             className={cn(
                               "w-full flex items-center gap-3 justify-start",
                               "py-1.5 pl-9 pr-3 rounded-md",
-                              "text-white hover:bg-white hover:text-sky-800",
-                              isItemActive && "bg-sky-600 text-white"
+                              "text-white hover:bg-gradient-to-r from-teal-600 to-teal-800 hover:text-white",
+                              isItemActive && "bg-gradient-to-r from-teal-600 to-teal-800 text-white"
                             )}
                           >
                             {item.icon && (
@@ -498,8 +498,8 @@ const SidebarLink = ({
         className={cn(
           "w-full flex items-center gap-3 justify-start",
           "px-3 py-2 rounded-md",
-          "text-white hover:bg-white hover:text-sky-800",
-          isActive && "bg-sky-600 text-white"
+          "text-white hover:bg-gradient-to-r from-teal-600 to-teal-800 hover:text-white",
+          isActive && "bg-gradient-to-r from-teal-600 to-teal-800 text-white"
         )}
       >
         <span className={cn(isActive ? "text-white" : "text-sky-200")}>

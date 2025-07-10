@@ -88,7 +88,7 @@ export default function MapControls({
 
   return (
     <div className="p-4">
-      <h3 className="text-lg font-medium bg-blue-400 text-white py-2 px-4 mb-4 rounded">
+      <h3 className="text-lg font-medium bg-gradient-to-r from-teal-600 to-teal-800 text-white py-2 px-4 mb-4 rounded">
         {t("title")}
       </h3>
 

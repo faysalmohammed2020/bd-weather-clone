@@ -60,3 +60,71 @@ export default function DroughtDashboard() {
     </div>
   );
 }
+
+
+// "use client"
+
+// import JordanWeatherMap from "@/components/map/jordanWeatherMap"
+// import MapControlsJordan from "@/components/map/mapControlsJordan"
+// import { useState } from "react"
+
+// interface Station {
+//   id: string
+//   stationId: string
+//   name: string
+//   latitude: number
+//   longitude: number
+//   securityCode: string
+//   createdAt: Date
+//   updatedAt: Date
+// }
+
+// interface District {
+//   id: string
+//   name: string
+//   name_en: string
+//   admin_level: number
+// }
+
+// export default function MainJordanWeatherApp() {
+//   const [currentDate, setCurrentDate] = useState(() => {
+//     const today = new Date()
+//     return today.toLocaleDateString("en-US", { day: "numeric", month: "short" })
+//   })
+//   const [isPlaying, setIsPlaying] = useState(false)
+//   const [selectedStation, setSelectedStation] = useState<Station | null>(null)
+//   const [selectedDistrict, setSelectedDistrict] = useState<District | null>(null)
+
+//   const handleStationSelect = (station: Station | null) => {
+//     setSelectedStation(station)
+//   }
+
+//   const handleDistrictSelect = (district: District | null) => {
+//     setSelectedDistrict(district)
+//   }
+
+//   return (
+//     <div className="flex h-screen">
+//       {/* Sidebar Controls */}
+//       <div className="w-80 bg-white border-r border-gray-200 overflow-y-auto">
+//         <MapControlsJordan
+//           selectedStation={selectedStation}
+//           setSelectedStation={setSelectedStation}
+//           onDistrictSelect={handleDistrictSelect}
+//         />
+//       </div>
+
+//       {/* Main Map Area */}
+//       <div className="flex-1 relative">
+//         <JordanWeatherMap
+//           currentDate={currentDate}
+//           setCurrentDate={setCurrentDate}
+//           isPlaying={isPlaying}
+//           setIsPlaying={setIsPlaying}
+//           selectedStation={selectedStation}
+//           onStationSelect={handleStationSelect}
+//         />
+//       </div>
+//     </div>
+//   )
+// }
