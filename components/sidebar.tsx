@@ -379,9 +379,9 @@ const SidebarLink = ({
             variant="ghost"
             className={cn(
               "w-full flex items-center justify-between text-white",
-              "hover:bg-gradient-to-r from-teal-500 to-teal-700 hover:text-white transition-colors",
+              "hover:bg-teal-600 hover:text-white transition-colors",
               "rounded-md px-3 py-2",
-              isActive && "bg-gradient-to-r from-teal-500 to-teal-700 text-white"
+              isActive && "bg-teal-600 text-white"
             )}
           >
             <div className="flex items-center gap-3">
@@ -459,7 +459,7 @@ const SidebarLink = ({
                               "w-full flex items-center gap-3 justify-start",
                               "py-1.5 pl-9 pr-3 rounded-md",
                               "text-white hover:bg-gradient-to-r from-teal-600 to-teal-800 hover:text-white",
-                              isItemActive && "bg-gradient-to-r from-teal-600 to-teal-800 text-white"
+                              isItemActive && "bg-teal-600 text-white"
                             )}
                           >
                             {item.icon && (
@@ -499,7 +499,7 @@ const SidebarLink = ({
           "w-full flex items-center gap-3 justify-start",
           "px-3 py-2 rounded-md",
           "text-white hover:bg-gradient-to-r from-teal-600 to-teal-800 hover:text-white",
-          isActive && "bg-gradient-to-r from-teal-600 to-teal-800 text-white"
+          isActive && "bg-teal-600 text-white"
         )}
       >
         <span className={cn(isActive ? "text-white" : "text-sky-200")}>
