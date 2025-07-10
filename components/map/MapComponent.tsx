@@ -18,6 +18,7 @@ import VisibilityAnimation from "../Animation/visibility-animation"
 import PressureAnimation from "../Animation/pressure-animation"
 import DewpointAnimation from "../Animation/dewpoint-animation"
 import TimeSeriesGraph from "./timeSeriseGraph"
+import { useTranslations } from "next-intl"
 
 
 
@@ -535,6 +536,7 @@ export default function MapComponent({
   const [weatherData, setWeatherData] = useState<DailySummary | null>(null)
   const [weatherRemarks, setWeatherRemarks] = useState<WeatherRemark[]>([])
   const [error, setError] = useState<string | null>(null)
+  const t = useTranslations("dashboard.mapComponent")
 
   // Weather layer states
   const [activeWeatherLayer, setActiveWeatherLayer] = useState<WeatherParameter | null>(null)
@@ -611,7 +613,7 @@ export default function MapComponent({
 
         if (!stationToQuery) {
           setWeatherData(null)
-          setError("No station selected")
+          setError(t("errors.noStation"))
           setLoading(false)
           return
         }
@@ -627,13 +629,13 @@ export default function MapComponent({
         )
 
         if (!response.ok) {
-          throw new Error("Failed to fetch data")
+          throw new Error(t("errors.fetchFailed"))
         }
 
         const data = await response.json()
 
         if (data.length === 0) {
-          setError("No data available for selected station")
+          setError(t("stationPopup.noData"))
           setWeatherData(null)
           return
         }
@@ -642,7 +644,7 @@ export default function MapComponent({
         setWeatherData(latestEntry)
         setError(null)
       } catch (err) {
-        setError("Failed to fetch weather data")
+        setError(t("errors.fetchFailed"))
         setWeatherData(null)
         console.error("Weather fetch error:", err)
       } finally {
@@ -739,7 +741,7 @@ export default function MapComponent({
       {/* Loading indicator */}
       {loading && (
         <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-30 z-[1000]">
-          <div className="bg-white p-4 rounded-lg shadow-lg">Loading stations...</div>
+          <div className="bg-white p-4 rounded-lg shadow-lg">{t("stationPopup.loading")}</div>
         </div>
       )}
 
@@ -769,7 +771,7 @@ export default function MapComponent({
             )
           })}
         </div>
-        {layerLoading && <div className="text-xs text-gray-500 mt-2 text-center">Loading animation data...</div>}
+        {layerLoading && <div className="text-xs text-gray-500 mt-2 text-center">{t("stationPopup.loadingAnimation")}</div>}
       </div>
 
       {/* Timeline Controls */}
@@ -800,28 +802,28 @@ export default function MapComponent({
       <div className="absolute top-4 right-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
         <div className="text-sm font-medium">
           {session?.user?.role === "super_admin"
-            ? "Super Admin"
+            ? (t("role.superAdmin"))
             : session?.user?.role === "station_admin"
-              ? "Station Admin"
+              ? (t("role.stationAdmin"))
               : session?.user?.role === "observer"
-                ? "Observer"
-                : "Guest"}
+                ? (t("role.observer"))
+                : (t("role.guest"))}
         </div>
         <div className="text-xs text-gray-500">
           {session?.user?.role === "super_admin"
-            ? "Viewing all stations"
+            ? (t("roleDescription.superAdmin"))
             : session?.user?.role === "station_admin" || session?.user?.role === "observer"
-              ? "Viewing your assigned station"
-              : "No stations available"}
+              ? (t("roleDescription.stationAdmin"))
+              : (t("roleDescription.guest"))}
         </div>
       </div>
 
       {/* Weather summary panel */}
       {selectedStation && (
         <div className="absolute bottom-20 right-4 bg-white p-3 rounded-lg shadow-lg z-[1000] w-64">
-          <div className="text-sm font-medium mb-2">Weather Summary</div>
+          <div className="text-sm font-medium mb-2">{t("weatherSummary.title")}</div>
           {loading ? (
-            <div className="text-xs">Loading weather data...</div>
+            <div className="text-xs">{t("stationPopup.loading")}</div>
           ) : error ? (
             <div className="text-xs text-red-500">{error}</div>
           ) : weatherData ? (
@@ -829,40 +831,40 @@ export default function MapComponent({
               <div className="flex items-center">
                 <Thermometer className="h-4 w-4 mr-2 text-orange-500" />
                 <div className="text-xs">
-                  <span className="font-medium">Temperature: </span>
-                  {weatherData.maxTemperature ? `${weatherData.maxTemperature}°C (max)` : "N/A"} /
-                  {weatherData.minTemperature ? `${weatherData.minTemperature}°C (min)` : "N/A"}
+                  <span className="font-medium">{t("weatherSummary.temperature")}: </span>
+                  {weatherData.maxTemperature ? `${weatherData.maxTemperature}°C ${t("common.max")}` : "N/A"} /
+                  {weatherData.minTemperature ? `${weatherData.minTemperature}°C ${t("common.min")}` : "N/A"}
                 </div>
               </div>
               <div className="flex items-center">
                 <Droplets className="h-4 w-4 mr-2 text-blue-500" />
                 <div className="text-xs">
-                  <span className="font-medium">Precipitation: </span>
-                  {weatherData.totalPrecipitation ? `${weatherData.totalPrecipitation} mm` : "No data"}
+                  <span className="font-medium">{t("weatherSummary.precipitation")}: </span>
+                  {weatherData.totalPrecipitation ? `${weatherData.totalPrecipitation} ${t("common.mm")}` : t("weatherSummary.noData")}
                 </div>
               </div>
               <div className="flex items-center">
                 <Wind className="h-4 w-4 mr-2 text-gray-500" />
                 <div className="text-xs">
-                  <span className="font-medium">Wind Speed: </span>
-                  {weatherData.windSpeed ? `${weatherData.windSpeed} NM` : "No data"}
+                  <span className="font-medium">{t("weatherSummary.windSpeed")}: </span>
+                  {weatherData.windSpeed ? `${weatherData.windSpeed} ${t("common.nm")}` : t("weatherSummary.noData")}
                 </div>
               </div>
               <div className="flex items-center">
                 <Cloud className="h-4 w-4 mr-2 text-gray-400" />
                 <div className="text-xs">
-                  <span className="font-medium">Cloud Cover: </span>
-                  {weatherData.avTotalCloud ? `${weatherData.avTotalCloud}%` : "No data"}
+                  <span className="font-medium">{t("weatherSummary.cloudCover")}: </span>
+                  {weatherData.avTotalCloud ? `${weatherData.avTotalCloud}%` : t("weatherSummary.noData")}
                 </div>
               </div>
               {weatherData.totalPrecipitation && Number.parseFloat(weatherData.totalPrecipitation) > 0 && (
                 <div className="text-xs text-blue-600 font-medium mt-1">
-                  Rain detected: {weatherData.totalPrecipitation} mm
+                  {t("weatherSummary.rainDetected", { amount: weatherData.totalPrecipitation })}
                 </div>
               )}
             </div>
           ) : (
-            <div className="text-xs text-gray-500">No weather data available</div>
+            <div className="text-xs text-gray-500">{t("weatherSummary.noData")}</div>
           )}
         </div>
       )}

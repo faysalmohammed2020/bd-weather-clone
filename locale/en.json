@@ -367,6 +367,63 @@
       "selectStation": "Select a station",
       "error": "Error: {error}"
     },
+    "mapComponent": {
+      "role": {
+        "superAdmin": "Super Admin",
+        "stationAdmin": "Station Admin",
+        "observer": "Observer",
+        "guest": "Guest"
+      },
+      "common": {
+        "mm": "mm",
+        "nm": "nm",
+        "max": "max",
+        "min": "min"
+      },
+      "roleDescription": {
+        "superAdmin": "Viewing all stations",
+        "stationAdmin": "Viewing your assigned station",
+        "observer": "Viewing your assigned station",
+        "guest": "No stations available"
+      },
+      "weatherSummary": {
+        "title": "Weather Summary",
+        "temperature": "Temperature",
+        "precipitation": "Precipitation",
+        "windSpeed": "Wind Speed",
+        "cloudCover": "Cloud Cover",
+        "rainDetected": "Rain detected: {amount} mm",
+        "loading": "Loading weather data...",
+        "noData": "No weather data available"
+      },
+      "weatherParameters": {
+        "temperature": "Temperature",
+        "precipitation": "Precipitation",
+        "wind": "Wind",
+        "clouds": "Clouds",
+        "humidity": "Humidity",
+        "visibility": "Visibility",
+        "pressure": "Pressure",
+        "dewpoint": "Dew Point"
+      },
+      "timelineControls": {
+        "play": "Play",
+        "pause": "Pause"
+      },
+      "stationPopup": {
+        "stationId": "Station ID",
+        "coordinates": "Coordinates",
+        "currentWeather": "Current Weather",
+        "noRemarks": "No weather remarks",
+        "loading": "Loading weather data...",
+        "loadingAnimation": "Loading animation data...",
+        "noData": "No weather data available for {{date}}"
+      },
+      "errors": {
+        "noStation": "No station selected",
+        "fetchFailed": "Failed to fetch weather data"
+      }
+    },
     "statusBanner": {
       "title": "System Status",
       "message": "All sensors operational • Data streaming live",
@@ -1384,7 +1441,7 @@
     "processingfiles": "Processing files...",
     "supportsfiles": "Supports TXT, CSV, PDF files up to 10MB each",
     "uploadedfiles": "Uploaded Files:",
-    "day " : "Day",
+    "day ": "Day",
     "stationinfo": "Station Info",
     "surfacepressure": "Surface Pressure",
     "surfacewind": "Surface Wind",
@@ -1439,11 +1496,11 @@
     "surfaceincluded": "Surface Included ",
     "yes": "Yes",
     "windlevels": "Wind Levels",
-    "pressure" : "Pressure",
-    "dewpoint" : "Dew Point",
-    "summary" : "Summary "
+    "pressure": "Pressure",
+    "dewpoint": "Dew Point",
+    "summary": "Summary "
   },
-  "tephigram" : {
+  "tephigram": {
     "noData": {
       "title": "No Atmospheric Data Available",
       "description": "Please analyze TTAA/TTBB radiosonde data first"
@@ -1529,7 +1586,7 @@
       }
     }
   },
-  "netCdf" : {
+  "netCdf": {
     "title": "NetCDF Visualizer",
     "description": "Upload and visualize NetCDF files with interactive charts and plots",
     "fileUpload": {
@@ -1548,7 +1605,7 @@
       "title": "Visualization",
       "selectVariable": "Select a variable to visualize",
       "plotTypes": {
-        "title" : "NetCDF VisuaLization",
+        "title": "NetCDF VisuaLization",
         "line": "Line",
         "scatter": "Scatter",
         "histogram": "Histogram",
@@ -1571,8 +1628,8 @@
       "json": "Export to JSON"
     }
   },
-  "agroclimatological":{
-  "agroclimatologicalDataCollection": "Agroclimatological Data Collection",
+  "agroclimatological": {
+    "agroclimatologicalDataCollection": "Agroclimatological Data Collection",
     "tabs": {
       "sunshine": "Sunshine",
       "soil": "Soil Moisture",
@@ -1584,7 +1641,7 @@
       "agro": "Agroclimatological Data"
     }
   },
-  "agroclimatologicalForm":{
+  "agroclimatologicalForm": {
     "form": {
       "tabs": {
         "station": "Station",
@@ -1704,7 +1761,7 @@
       "fetchError": "Failed to load some auto-fill data"
     }
   },
-  "sunShineForm" : {
+  "sunShineForm": {
     "tabs": {
       "input": "Data Input",
       "records": "Daily Records",
@@ -1748,7 +1805,6 @@
     },
     "common": {
       "hours": "hours"
-      
     }
   },
   "SoilMoistureForm": {

@@ -513,6 +513,62 @@
       "selectStation": "اختر محطة",
       "error": "خطأ: {error}"
     },
+    "mapComponent": {
+      "role": {
+        "superAdmin": "مدير عام",
+        "stationAdmin": "مدير محطة",
+        "observer": "مراقب",
+        "guest": "زائر"
+      },
+      "common": {
+        "mm": "مم",
+        "nm": "عقدة",
+        "max": "أقصى",
+        "min": "أدنى"
+      },
+      "roleDescription": {
+        "superAdmin": "عرض جميع المحطات",
+        "stationAdmin": "عرض محطتك المعينة",
+        "observer": "عرض محطتك المعينة",
+        "guest": "لا توجد محطات متاحة"
+      },
+      "weatherSummary": {
+        "title": "ملخص الطقس",
+        "temperature": "درجة الحرارة",
+        "precipitation": "الهطول",
+        "windSpeed": "سرعة الرياح",
+        "cloudCover": "تغطية السحب",
+        "rainDetected": "تم الكشف عن هطول: {amount} ملم",
+        "loading": "جاري تحميل بيانات الطقس...",
+        "noData": "لا توجد بيانات طقس متاحة"
+      },
+      "weatherParameters": {
+        "temperature": "درجة الحرارة",
+        "precipitation": "الهطول",
+        "wind": "الرياح",
+        "clouds": "السحب",
+        "humidity": "الرطوبة",
+        "visibility": "الرؤية",
+        "pressure": "الضغط",
+        "dewpoint": "نقطة الندى"
+      },
+      "timelineControls": {
+        "play": "تشغيل",
+        "pause": "إيقاف مؤقت"
+      },
+      "stationPopup": {
+        "stationId": "رمز المحطة",
+        "coordinates": "الإحداثيات",
+        "currentWeather": "الطقس الحالي",
+        "noRemarks": "لا توجد ملاحظات طقس",
+        "loading": "جاري تحميل بيانات الطقس...",
+        "noData": "لا توجد بيانات طقس متاحة لتاريخ {{date}}"
+      },
+      "errors": {
+        "noStation": "لم يتم تحديد محطة",
+        "fetchFailed": "فشل في جلب بيانات الطقس"
+      }
+    },
     "statusBanner": {
       "title": "حالة النظام",
       "message": "جميع الحساسات تعمل • البيانات تُبث مباشرة",
@@ -1447,7 +1503,7 @@
     "dewpoint": "نقطة الندى",
     "summary": "ملخص"
   },
-  "tephigram" : {
+  "tephigram": {
     "noData": {
       "title": "لا توجد بيانات جوية متاحة",
       "description": "يرجى تحليل بيانات الراديو سوند TTAA/TTBB أولاً"
@@ -1533,7 +1589,7 @@
       }
     }
   },
-  "netCdf" :{
+  "netCdf": {
     "title": "أداة تصور NetCDF",
     "description": "قم بتحميل وتصور ملفات NetCDF مع مخططات ورسوم بيانية تفاعلية",
     "fileUpload": {
@@ -1552,7 +1608,7 @@
       "title": "التصور",
       "selectVariable": "حدد متغيرًا لبدء التصور",
       "plotTypes": {
-        "title" : "تصور بيانات NetCDF",
+        "title": "تصور بيانات NetCDF",
         "line": "خطي",
         "scatter": "نقاط",
         "histogram": "هيستوجرام",
@@ -1575,7 +1631,7 @@
       "json": "تصدير إلى JSON"
     }
   },
-  "agroclimatological":{
+  "agroclimatological": {
     "agroclimatologicalDataCollection": "جمع البيانات الزراعية المناخية",
     "tabs": {
       "sunshine": "أشعة الشمس",
@@ -1593,7 +1649,7 @@
       "backToStart": "العودة إلى البداية"
     }
   },
-  "agroclimatologicalForm":{
+  "agroclimatologicalForm": {
     "form": {
       "tabs": {
         "station": "المحطة",
@@ -1713,7 +1769,7 @@
       "fetchError": "فشل في تحميل بعض البيانات التلقائية"
     }
   },
-  "sunShineForm":{
+  "sunShineForm": {
     "tabs": {
       "input": "إدخال البيانات",
       "records": "السجلات اليومية",
