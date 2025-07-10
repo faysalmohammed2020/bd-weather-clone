@@ -417,11 +417,12 @@
         "noRemarks": "No weather remarks",
         "loading": "Loading weather data...",
         "loadingAnimation": "Loading animation data...",
-        "noData": "No weather data available for {{date}}"
+        "noData": "No weather data available for this station"
       },
       "errors": {
         "noStation": "No station selected",
-        "fetchFailed": "Failed to fetch weather data"
+        "fetchFailed": "Failed to fetch weather data",
+        "noData": "No weather data available for this station"
       }
     },
     "statusBanner": {

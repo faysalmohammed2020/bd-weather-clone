@@ -352,6 +352,7 @@ function StationMarkers({
 }) {
   const [error, setError] = useState<string | null>(null)
   const map = useMap()
+  const marker = useTranslations("dashboard.mapComponent")
 
   const getStationIcon = (station: Station) => {
     const stationRemark = weatherRemarks.find((remark) => remark.stationId === station.stationId)
@@ -425,14 +426,14 @@ function StationMarkers({
           >
             <Popup className="min-w-[280px]" autoClose={false} closeOnClick={false}>
               <div className="font-bold text-lg">{station.name}</div>
-              <div className="text-sm">Station ID: {station.stationId}</div>
+              <div className="text-sm">{marker("stationPopup.stationId")}: {station.stationId}</div>
               <div className="text-sm mb-2">
-                Coordinates: {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}
+                {marker("stationPopup.coordinates")}: {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}
               </div>
 
               {hasWeatherRemark && (
                 <div className="border-t pt-2 mt-2 mb-2">
-                  <div className="text-sm font-medium mb-1">Current Weather:</div>
+                  <div className="text-sm font-medium mb-1">{marker("stationPopup.currentWeather")}:</div>
                   <div className="flex items-center gap-2">
                     <img
                       src={
@@ -454,7 +455,7 @@ function StationMarkers({
               {selectedStation?.id === station.id && (
                 <div className="border-t pt-2 mt-2">
                   {loading ? (
-                    <div className="text-xs">Loading weather data...</div>
+                    <div className="text-xs">{marker("stationPopup.loading")}</div>
                   ) : error ? (
                     <div className="text-xs text-red-500">{error}</div>
                   ) : weatherData ? (
@@ -462,35 +463,35 @@ function StationMarkers({
                       <div className="flex items-center">
                         <Thermometer className="h-4 w-4 mr-2 text-orange-500" />
                         <div className="text-xs">
-                          <span className="font-medium">Temperature: </span>
-                          {weatherData.maxTemperature ? `${weatherData.maxTemperature}°C (max)` : "N/A"} /
-                          {weatherData.minTemperature ? `${weatherData.minTemperature}°C (min)` : "N/A"}
+                          <span className="font-medium">{marker("weatherParameters.temperature")}: </span>
+                          {weatherData.maxTemperature ? `${weatherData.maxTemperature}°C (${marker("common.max")})` : marker("weatherSummary.noData")} /
+                          {weatherData.minTemperature ? `${weatherData.minTemperature}°C (${marker("common.min")})` : marker("weatherSummary.noData")}
                         </div>
                       </div>
                       <div className="flex items-center">
                         <Droplets className="h-4 w-4 mr-2 text-blue-500" />
                         <div className="text-xs">
-                          <span className="font-medium">Precipitation: </span>
-                          {weatherData.totalPrecipitation ? `${weatherData.totalPrecipitation} mm` : "No data"}
+                          <span className="font-medium">{marker("weatherParameters.precipitation")}: </span>
+                          {weatherData.totalPrecipitation ? `${weatherData.totalPrecipitation} (${marker("common.mm")})` : marker("weatherSummary.noData")}
                         </div>
                       </div>
                       <div className="flex items-center">
                         <Wind className="h-4 w-4 mr-2 text-gray-500" />
                         <div className="text-xs">
-                          <span className="font-medium">Wind Speed: </span>
-                          {weatherData.windSpeed ? `${weatherData.windSpeed} NM` : "No data"}
+                          <span className="font-medium">{marker("weatherParameters.wind")}: </span>
+                          {weatherData.windSpeed ? `${weatherData.windSpeed} (${marker("common.nm")})` : marker("weatherSummary.noData")}
                         </div>
                       </div>
                       <div className="flex items-center">
                         <Cloud className="h-4 w-4 mr-2 text-gray-400" />
                         <div className="text-xs">
-                          <span className="font-medium">Cloud Cover: </span>
-                          {weatherData.avTotalCloud ? `${weatherData.avTotalCloud}%` : "No data"}
+                          <span className="font-medium">{marker("weatherParameters.clouds")}: </span>
+                          {weatherData.avTotalCloud ? `${weatherData.avTotalCloud}%` : marker("weatherSummary.noData")}
                         </div>
                       </div>
                     </div>
                   ) : (
-                    <div className="text-xs text-gray-500">No weather data available for {currentDate}</div>
+                    <div className="text-xs text-gray-500">{marker("stationPopup.noData")}</div>
                   )}
                 </div>
               )}
@@ -635,7 +636,7 @@ export default function MapComponent({
         const data = await response.json()
 
         if (data.length === 0) {
-          setError(t("stationPopup.noData"))
+          setError(t("errors.noData"))
           setWeatherData(null)
           return
         }
