@@ -155,57 +155,72 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const session = await getSession()
+  const session = await getSession();
 
   if (!session?.user) {
     return NextResponse.json(
       { success: false, message: 'Unauthorized: Please log in to access data' },
       { status: 401 }
-    )
+    );
   }
 
   try {
-    const { searchParams } = new URL(request.url)
-    const startDate = searchParams.get('startDate')
-    const endDate = searchParams.get('endDate')
-    const stationId = searchParams.get('stationId')
-    const limit = Math.min(Number(searchParams.get('limit')) || 50, 100)
-    const offset = Number(searchParams.get('offset')) || 0
+    const { searchParams } = new URL(request.url);
+    const startDateParam = searchParams.get('startDate');
+    const endDateParam = searchParams.get('endDate');
+    const stationId = searchParams.get('stationId');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
+    const offset = parseInt(searchParams.get('offset') || '0');
 
-    const where: any = {}
+    // Initialize where clause
+    const where: any = {};
 
-    // Date filter (inclusive range)
-    if (startDate && endDate) {
-      const start = new Date(startDate)
-      start.setHours(0, 0, 0, 0)
+    // Date filtering
+    if (startDateParam && endDateParam) {
+      try {
+        const startDate = new Date(startDateParam);
+        const endDate = new Date(endDateParam);
+        
+        // Validate dates
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          throw new Error('Invalid date format');
+        }
 
-      const end = new Date(endDate)
-      end.setHours(23, 59, 59, 999)
+        // Set time to beginning and end of day respectively
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
 
-      where.date = {
-        gte: start,
-        lte: end,
+        where.date = {
+          gte: startDate,
+          lte: endDate,
+        };
+      } catch (error) {
+        console.error('Invalid date parameters:', error);
+        return NextResponse.json(
+          { success: false, message: 'Invalid date format. Please use YYYY-MM-DD' },
+          { status: 400 }
+        );
       }
     }
 
-    // Station filter
+    // Station filtering
     if (stationId && stationId !== 'all') {
-      where.stationId = stationId
-    } else {
-      // fallback to user's station if not super admin
-      if (session.user.role !== 'super_admin') {
-        where.stationId = session.user.station?.id
-      }
+      where.stationId = stationId;
+    } else if (session.user.role !== 'super_admin' && session.user.station?.id) {
+      // For non-super admins, default to their station if no specific station is requested
+      where.stationId = session.user.station.id;
     }
 
-    // User-level access control (non-super-admin sees only own or own-station data)
+    // User access control
     if (session.user.role !== 'super_admin') {
+      // Non-super admins can only see their own data or data from their station
       where.OR = [
         { userId: session.user.id },
         { stationId: session.user.station?.id },
-      ]
+      ].filter(Boolean); // Filter out undefined conditions
     }
 
+    // Fetch data with pagination
     const [data, total] = await Promise.all([
       prisma.agroclimatologicalData.findMany({
         where,
@@ -218,7 +233,7 @@ export async function GET(request: Request) {
         skip: offset,
       }),
       prisma.agroclimatologicalData.count({ where }),
-    ])
+    ]);
 
     return NextResponse.json({
       success: true,
@@ -229,10 +244,10 @@ export async function GET(request: Request) {
         offset,
         hasMore: offset + limit < total,
       },
-    })
+    });
 
   } catch (error: any) {
-    console.error('Error fetching agroclimatological data:', error)
+    console.error('Error fetching agroclimatological data:', error);
     return NextResponse.json(
       {
         success: false,
@@ -240,7 +255,7 @@ export async function GET(request: Request) {
         error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       },
       { status: 500 }
-    )
+    );
   }
 }
 

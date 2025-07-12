@@ -87,38 +87,7 @@ export default function AgroclimatologicalDataTable() {
   const [startDate, setStartDate] = useState(today)
   const [endDate, setEndDate] = useState(today)
   const [dateError, setDateError] = useState<string | null>(null)
-
-  // const fetchData = async () => {
-  //   try {
-  //     setLoading(true)
-  //     setError(null)
-
-  //     let url = `http://localhost:7999/api/agroclimatological-data?startDate=${startDate}&endDate=${endDate}`
-  //     if (stationFilter !== "all") {
-  //       url += `&stationId=${stationFilter}`
-  //     }
-
-  //     const response = await fetch(url)
-
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`)
-  //     }
-
-  //     const result: ApiResponse = await response.json()
-
-  //     if (result.success) {
-  //       setData(result.data)
-  //     } else {
-  //       throw new Error("API returned unsuccessful response")
-  //     }
-  //   } catch (err) {
-  //     console.error("Error fetching data:", err)
-  //     setError(err instanceof Error ? err.message : "Failed to fetch data")
-  //     toast.error("Failed to load agroclimatological data")
-  //   } finally {
-  //     setLoading(false)
-  //   }
-  // }
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '';
 
   const fetchData = async () => {
     try {
@@ -132,7 +101,7 @@ export default function AgroclimatologicalDataTable() {
       if (endDate) params.append('endDate', endDate);
       if (stationFilter !== "all") params.append('stationId', stationFilter);
 
-      const url = `http://localhost:7999/api/agroclimatological-data?${params.toString()}`;
+      const url = `${API_BASE_URL}/api/agroclimatological-data?${params.toString()}`;
       const response = await fetch(url);
 
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -151,7 +120,7 @@ export default function AgroclimatologicalDataTable() {
 
   const fetchStations = async () => {
     try {
-      const response = await fetch("http://localhost:7999/api/stations")
+      const response = await fetch(`${API_BASE_URL}/api/stations`)
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -364,6 +333,8 @@ export default function AgroclimatologicalDataTable() {
     URL.revokeObjectURL(url);
   }
 
+  console.log("Error: ", error)
+
   if (error) {
     return (
       <Card className="w-full border-red-200">
@@ -385,13 +356,8 @@ export default function AgroclimatologicalDataTable() {
     <div className="w-full space-y-6">
       {/* Header Card */}
       <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-        <CardHeader>
-          <CardTitle className="text-center text-2xl font-bold text-blue-800">
-            BANGLADESH METEOROLOGICAL DEPARTMENT
-          </CardTitle>
-          <div className="text-center space-y-1">
-            <p className="text-xl font-bold text-blue-800">AGROCLIMATOLOGICAL DATA</p>
-          </div>
+        <CardHeader className="text-center text-2xl font-bold text-blue-800">
+          AGROCLIMATOLOGICAL DATA
         </CardHeader>
       </Card>
 
