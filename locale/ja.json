@@ -1811,5 +1811,14 @@
       "message": "土壌水分データは7日に1回のみ送信できます。",
       "nextSubmission": "次の送信可能日:"
     }
-  }
+  },
+  "UploadAndVisualize": {
+  "title": "NetCDFファイル可視化ツール",
+  "subtitle": "NetCDFファイルをアップロードして、可視化とデータ抽出を行います",
+  "select_file": "NetCDFファイルを選択",
+  "upload_error": "有効なNetCDFファイル（.nc拡張子）をアップロードしてください",
+  "processing": "ファイルを処理中...",
+  "visualizations": "データの可視化とエクスポート",
+  "download_csv": "データをダウンロード（CSV）"
+}
 }

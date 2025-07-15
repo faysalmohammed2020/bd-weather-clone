@@ -1861,5 +1861,14 @@
       "message": "يمكن إرسال بيانات رطوبة التربة مرة واحدة كل 7 أيام فقط.",
       "nextSubmission": "سيكون الإرسال التالي متاحًا في:"
     }
+  },
+  "UploadAndVisualize": {
+    "title": "أداة تصور ملفات NetCDF",
+    "subtitle": "قم بتحميل ملف NetCDF الخاص بك لإنشاء تصورات واستخراج البيانات",
+    "select_file": "حدد ملف NetCDF",
+    "upload_error": "يرجى تحميل ملف NetCDF صالح (امتداد .nc)",
+    "processing": "جارٍ معالجة الملف...",
+    "visualizations": "تصورات البيانات والتصدير",
+    "download_csv": "تحميل البيانات (CSV)"
   }
 }
