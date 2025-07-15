@@ -1812,6 +1812,40 @@
       "nextSubmission": "次の送信可能日:"
     }
   },
+  "NetCDFCsvHeatmap": {
+    "title": "気象データ空間分析",
+    "uploadLabel": "気象データCSVファイルをアップロード",
+    "uploadHint": "対応データ: 気温 (t2_C)、降水量 (rain_mm)、相対湿度 (rh2_percent)、風 (speed + direction_deg)",
+    "clearAll": "すべてのマップをクリア",
+    "activeVisualizations": "{count, plural, =0 {表示中のビジュアライゼーションはありません} other {# 件のビジュアライゼーションを表示中}}",
+    "professionalTag": "プロフェッショナル気象可視化",
+    "noData": {
+      "title": "データが読み込まれていません",
+      "description": "空間可視化を生成するには気象データを含むCSVファイルをアップロードしてください"
+    },
+    "mapTitles": {
+      "t2_C": "気温分布 (°C)",
+      "rain_mm": "降水量分布 (mm)",
+      "rh2_percent": "相対湿度分布 (%)",
+      "wind_combined": "風速・風向解析"
+    },
+    "datasetLabel": "データセット: {filename}",
+    "removeButton": "削除",
+    "axisLabels": {
+      "x": "経度 (°E)",
+      "y": "緯度 (°N)"
+    },
+    "annotations": {
+      "precipitation": "降水強度",
+      "wind": "矢印の長さ ∝ 風速<br>矢印の方向 = 風向"
+    },
+    "colorbarTitles": {
+      "t2_C": "°C",
+      "rain_mm": "mm",
+      "rh2_percent": "%",
+      "wind_combined": "m/s"
+    }
+  },
   "UploadAndVisualize": {
   "title": "NetCDFファイル可視化ツール",
   "subtitle": "NetCDFファイルをアップロードして、可視化とデータ抽出を行います",

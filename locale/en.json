@@ -1854,6 +1854,40 @@
       "nextSubmission": "Your next submission will be available on:"
     }
   },
+  "NetCDFCsvHeatmap": {
+    "title": "Weather Data Spatial Analysis",
+    "uploadLabel": "Upload Weather Data CSV Files",
+    "uploadHint": "Supported: Temperature (t2_C), Precipitation (rain_mm), Humidity (rh2_percent), Wind (speed + direction_deg)",
+    "clearAll": "Clear All Maps",
+    "activeVisualizations": "{count, plural, one {# visualization} other {# visualizations}} active",
+    "professionalTag": "Professional Weather Visualization",
+    "noData": {
+      "title": "No Data Loaded",
+      "description": "Upload CSV files containing weather data to generate spatial visualizations"
+    },
+    "mapTitles": {
+      "t2_C": "Temperature Distribution (°C)",
+      "rain_mm": "Precipitation Distribution (mm)",
+      "rh2_percent": "Relative Humidity Distribution (%)",
+      "wind_combined": "Wind Speed & Direction Analysis"
+    },
+    "datasetLabel": "Dataset: {filename}",
+    "removeButton": "Remove",
+    "axisLabels": {
+      "x": "Longitude (°E)",
+      "y": "Latitude (°N)"
+    },
+    "annotations": {
+      "precipitation": "Precipitation Intensity",
+      "wind": "Arrow length ∝ Wind Speed<br>Arrow direction = Wind Direction"
+    },
+    "colorbarTitles": {
+      "t2_C": "°C",
+      "rain_mm": "mm",
+      "rh2_percent": "%",
+      "wind_combined": "m/s"
+    }
+  },
   "UploadAndVisualize": {
     "title": "NetCDF File Visualization Tool",
     "subtitle": "Upload your NetCDF file to generate visualizations and extract data",

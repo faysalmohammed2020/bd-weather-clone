@@ -4,6 +4,7 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import Papa from "papaparse";
+import { useTranslations } from "next-intl";
 
 const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
 
@@ -19,7 +20,22 @@ interface MapData {
 }
 
 export default function NetCDFCsvHeatmap() {
+  const t = useTranslations("NetCDFCsvHeatmap");
   const [maps, setMaps] = useState<MapData[]>([]);
+
+  const titleMap: Record<string, string> = {
+    t2_C: t("mapTitles.t2_C"),
+    rain_mm: t("mapTitles.rain_mm"),
+    rh2_percent: t("mapTitles.rh2_percent"),
+    wind_combined: t("mapTitles.wind_combined"),
+  };
+
+  const colorbarTitles: Record<string, string> = {
+    t2_C: t("colorbarTitles.t2_C"),
+    rain_mm: t("colorbarTitles.rain_mm"),
+    rh2_percent: t("colorbarTitles.rh2_percent"),
+    wind_combined: t("colorbarTitles.wind_combined"),
+  };
 
   const handleCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -69,13 +85,11 @@ export default function NetCDFCsvHeatmap() {
               const dir = d.direction_deg ?? 0;
               zSpeed[i][j] = speed;
 
-              // Create wind arrows with speed-based styling
-              const angleRad = ((dir - 90) * Math.PI) / 180; // Adjust for meteorological convention
+              const angleRad = ((dir - 90) * Math.PI) / 180;
               const arrowLength = Math.min(Math.max(speed / 20, 0.1), 0.5);
               const dx = Math.cos(angleRad) * arrowLength;
               const dy = Math.sin(angleRad) * arrowLength;
 
-              // Color based on wind speed
               const color =
                 speed > 15 ? "#FF4444" : speed > 8 ? "#FF8C00" : "#4169E1";
               const width = speed > 15 ? 2 : speed > 8 ? 1.5 : 1;
@@ -90,7 +104,6 @@ export default function NetCDFCsvHeatmap() {
                 hoverinfo: "none",
               });
 
-              // Add arrowhead
               arrows.push({
                 type: "scatter",
                 mode: "markers",
@@ -128,7 +141,6 @@ export default function NetCDFCsvHeatmap() {
               z[i][j] = value;
             });
 
-            // Create contour data for certain variables
             if (variable === "rain_mm" || variable === "t2_C") {
               contourData = {
                 z: z,
@@ -174,63 +186,56 @@ export default function NetCDFCsvHeatmap() {
     setMaps([]);
   };
 
-  const titleMap: Record<string, string> = {
-    t2_C: "Temperature Distribution (°C)",
-    rain_mm: "Precipitation Distribution (mm)",
-    rh2_percent: "Relative Humidity Distribution (%)",
-    wind_combined: "Wind Speed & Direction Analysis",
-  };
-
   const getColorScale = (plotType: string) => {
     switch (plotType) {
       case "t2_C":
         return [
-          [0, "#313695"], // Deep blue (very cold)
-          [0.1, "#4575b4"], // Blue (cold)
-          [0.2, "#74add1"], // Light blue (cool)
-          [0.3, "#abd9e9"], // Very light blue (mild cool)
-          [0.4, "#e0f3f8"], // Almost white (neutral)
-          [0.5, "#ffffcc"], // Very light yellow (neutral warm)
-          [0.6, "#fee090"], // Light yellow (warm)
-          [0.7, "#fdae61"], // Orange (hot)
-          [0.8, "#f46d43"], // Red-orange (very hot)
-          [0.9, "#d73027"], // Red (extremely hot)
-          [1, "#a50026"], // Dark red (scorching)
+          [0, "#313695"],
+          [0.1, "#4575b4"],
+          [0.2, "#74add1"],
+          [0.3, "#abd9e9"],
+          [0.4, "#e0f3f8"],
+          [0.5, "#ffffcc"],
+          [0.6, "#fee090"],
+          [0.7, "#fdae61"],
+          [0.8, "#f46d43"],
+          [0.9, "#d73027"],
+          [1, "#a50026"],
         ];
       case "rain_mm":
         return [
-          [0, "#f7fbff"], // Almost white (no rain)
-          [0.1, "#deebf7"], // Very light blue (light drizzle)
-          [0.2, "#c6dbef"], // Light blue (light rain)
-          [0.3, "#9ecae1"], // Blue (moderate rain)
-          [0.4, "#6baed6"], // Medium blue (heavy rain)
-          [0.5, "#4292c6"], // Dark blue (very heavy rain)
-          [0.6, "#2171b5"], // Darker blue (intense rain)
-          [0.7, "#08519c"], // Very dark blue (extreme rain)
-          [0.8, "#08306b"], // Navy blue (torrential)
-          [0.9, "#041f4a"], // Very dark navy (flood level)
-          [1, "#020c1f"], // Almost black (catastrophic)
+          [0, "#f7fbff"],
+          [0.1, "#deebf7"],
+          [0.2, "#c6dbef"],
+          [0.3, "#9ecae1"],
+          [0.4, "#6baed6"],
+          [0.5, "#4292c6"],
+          [0.6, "#2171b5"],
+          [0.7, "#08519c"],
+          [0.8, "#08306b"],
+          [0.9, "#041f4a"],
+          [1, "#020c1f"],
         ];
       case "rh2_percent":
         return [
-          [0, "#fff5f0"], // Very light (dry)
-          [0.2, "#fee0d2"], // Light orange (low humidity)
-          [0.4, "#fcbba1"], // Orange (moderate low)
-          [0.5, "#fc9272"], // Light red (moderate)
-          [0.6, "#fb6a4a"], // Red (moderate high)
-          [0.7, "#ef3b2c"], // Dark red (high)
-          [0.8, "#cb181d"], // Very dark red (very high)
-          [0.9, "#a50f15"], // Maroon (extremely high)
-          [1, "#67000d"], // Dark maroon (saturated)
+          [0, "#fff5f0"],
+          [0.2, "#fee0d2"],
+          [0.4, "#fcbba1"],
+          [0.5, "#fc9272"],
+          [0.6, "#fb6a4a"],
+          [0.7, "#ef3b2c"],
+          [0.8, "#cb181d"],
+          [0.9, "#a50f15"],
+          [1, "#67000d"],
         ];
       case "wind_combined":
         return [
-          [0, "#440154"], // Purple (calm)
-          [0.2, "#31688e"], // Blue (light breeze)
-          [0.4, "#35b779"], // Green (moderate breeze)
-          [0.6, "#fde725"], // Yellow (strong breeze)
-          [0.8, "#fd8d3c"], // Orange (high wind)
-          [1, "#d73027"], // Red (extreme wind)
+          [0, "#440154"],
+          [0.2, "#31688e"],
+          [0.4, "#35b779"],
+          [0.6, "#fde725"],
+          [0.8, "#fd8d3c"],
+          [1, "#d73027"],
         ];
       default:
         return "Viridis";
@@ -241,7 +246,6 @@ export default function NetCDFCsvHeatmap() {
     const baseData = [];
 
     if (mapData.plotType === "rain_mm") {
-      // For rain: Use filled contour with heatmap overlay
       baseData.push({
         z: mapData.z,
         x: mapData.lons,
@@ -256,12 +260,11 @@ export default function NetCDFCsvHeatmap() {
         },
         showscale: true,
         colorbar: {
-          title: "mm",
+          title: colorbarTitles[mapData.plotType],
           titleside: "right",
         },
       });
     } else if (mapData.plotType === "t2_C") {
-      // For temperature: Smooth heatmap with contour overlay
       baseData.push({
         z: mapData.z,
         x: mapData.lons,
@@ -270,12 +273,11 @@ export default function NetCDFCsvHeatmap() {
         colorscale: getColorScale(mapData.plotType),
         showscale: true,
         colorbar: {
-          title: "°C",
+          title: colorbarTitles[mapData.plotType],
           titleside: "right",
         },
       });
 
-      // Add contour lines
       baseData.push({
         z: mapData.z,
         x: mapData.lons,
@@ -292,7 +294,6 @@ export default function NetCDFCsvHeatmap() {
         hoverinfo: "skip",
       });
     } else if (mapData.plotType === "wind_combined") {
-      // For wind: Heatmap for speed + arrows for direction
       baseData.push({
         z: mapData.z,
         x: mapData.lons,
@@ -301,13 +302,12 @@ export default function NetCDFCsvHeatmap() {
         colorscale: getColorScale(mapData.plotType),
         showscale: true,
         colorbar: {
-          title: "m/s",
+          title: colorbarTitles[mapData.plotType],
           titleside: "right",
         },
         opacity: 0.8,
       });
     } else {
-      // For humidity: Standard heatmap
       baseData.push({
         z: mapData.z,
         x: mapData.lons,
@@ -316,7 +316,7 @@ export default function NetCDFCsvHeatmap() {
         colorscale: getColorScale(mapData.plotType),
         showscale: true,
         colorbar: {
-          title: "%",
+          title: colorbarTitles[mapData.plotType],
           titleside: "right",
         },
       });
@@ -332,12 +332,12 @@ export default function NetCDFCsvHeatmap() {
         font: { size: 14, family: "Arial, sans-serif" },
       },
       xaxis: {
-        title: "Longitude (°E)",
+        title: t("axisLabels.x"),
         showgrid: true,
         gridcolor: "rgba(255,255,255,0.2)",
       },
       yaxis: {
-        title: "Latitude (°N)",
+        title: t("axisLabels.y"),
         showgrid: true,
         gridcolor: "rgba(255,255,255,0.2)",
       },
@@ -348,11 +348,10 @@ export default function NetCDFCsvHeatmap() {
       plot_bgcolor: "#ffffff",
     };
 
-    // Add specific annotations for different data types
     if (mapData.plotType === "rain_mm") {
       baseLayout.annotations = [
         {
-          text: "Precipitation Intensity",
+          text: t("annotations.precipitation"),
           showarrow: false,
           x: 0.02,
           y: 0.98,
@@ -366,7 +365,7 @@ export default function NetCDFCsvHeatmap() {
     } else if (mapData.plotType === "wind_combined") {
       baseLayout.annotations = [
         {
-          text: "Arrow length ∝ Wind Speed<br>Arrow direction = Wind Direction",
+          text: t("annotations.wind"),
           showarrow: false,
           x: 0.02,
           y: 0.98,
@@ -387,13 +386,13 @@ export default function NetCDFCsvHeatmap() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 bg-white rounded-lg shadow-sm p-4">
           <h1 className="text-2xl font-bold mb-4 text-gray-800">
-            Weather Data Spatial Analysis
+            {t("title")}
           </h1>
 
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-2 text-gray-700">
-                Upload Weather Data CSV Files
+                {t("uploadLabel")}
               </label>
               <input
                 type="file"
@@ -403,8 +402,7 @@ export default function NetCDFCsvHeatmap() {
                 className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded-lg"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Supported: Temperature (t2_C), Precipitation (rain_mm), Humidity
-                (rh2_percent), Wind (speed + direction_deg)
+                {t("uploadHint")}
               </p>
             </div>
 
@@ -415,16 +413,15 @@ export default function NetCDFCsvHeatmap() {
                     onClick={clearAllMaps}
                     className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm transition-colors"
                   >
-                    Clear All Maps
+                    {t("clearAll")}
                   </button>
                   <span className="text-sm text-gray-600 py-2">
-                    {maps.length} visualization{maps.length > 1 ? "s" : ""}{" "}
-                    active
+                    {t("activeVisualizations", { count: maps.length })}
                   </span>
                 </div>
 
                 <div className="text-xs text-gray-500">
-                  Professional Weather Visualization
+                  {t("professionalTag")}
                 </div>
               </div>
             )}
@@ -449,11 +446,10 @@ export default function NetCDFCsvHeatmap() {
               </svg>
             </div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No Data Loaded
+              {t("noData.title")}
             </h3>
             <p className="text-gray-500">
-              Upload CSV files containing weather data to generate spatial
-              visualizations
+              {t("noData.description")}
             </p>
           </div>
         )}
@@ -468,17 +464,17 @@ export default function NetCDFCsvHeatmap() {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800">
-                      {titleMap[mapData.plotType] || "Spatial Distribution"}
+                      {titleMap[mapData.plotType] || t("mapTitles.default")}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      Dataset: {mapData.filename}
+                      {t("datasetLabel", { filename: mapData.filename })}
                     </p>
                   </div>
                   <button
                     onClick={() => removeMap(mapData.id)}
                     className="text-red-500 hover:text-red-700 text-sm font-medium px-3 py-1 rounded hover:bg-red-50 transition-colors"
                   >
-                    Remove
+                    {t("removeButton")}
                   </button>
                 </div>
               </div>
