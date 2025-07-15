@@ -443,7 +443,7 @@ export default function NetCDFVisualizer() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div className="container mx-auto p-6">
       <div className="mb-8 bg-gradient-to-r from-indigo-600 to-purple-600 p-6 rounded-xl shadow-lg backdrop-blur-sm bg-opacity-20">
         <h1 className="text-3xl font-bold mb-2 text-white">
           {t('title')}

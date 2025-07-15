@@ -1,14 +1,17 @@
 "use client";
 
-import SpatialAnalysis from "@/components/NetCDF";
-import NetCDFSpatialAnalyzer from "@/components/NetCDFSpatialAnalysis";
+import NetCDFCsvHeatmap from "@/components/NetCDFCsvHeatmap";
+import NetCDFVisualizer from "@/components/NetCDFVisualizer";
+import UploadAndVisualize from "@/components/UploadAndVisualize";
+
+
 
 export default function NetCDFVisualizerPage() {
-    return (
-
-        <div className="bg-white rounded-lg shadow-md p-6">
-            <NetCDFSpatialAnalyzer/>
-            <SpatialAnalysis/>
-        </div>
-    );
+  return (
+    <div className="">
+      <NetCDFVisualizer />
+      <UploadAndVisualize />
+      <NetCDFCsvHeatmap />
+    </div>
+  );
 }
