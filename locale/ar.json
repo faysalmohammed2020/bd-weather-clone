@@ -1862,13 +1862,38 @@
       "nextSubmission": "سيكون الإرسال التالي متاحًا في:"
     }
   },
-  "UploadAndVisualize": {
-    "title": "أداة تصور ملفات NetCDF",
-    "subtitle": "قم بتحميل ملف NetCDF الخاص بك لإنشاء تصورات واستخراج البيانات",
-    "select_file": "حدد ملف NetCDF",
-    "upload_error": "يرجى تحميل ملف NetCDF صالح (امتداد .nc)",
-    "processing": "جارٍ معالجة الملف...",
-    "visualizations": "تصورات البيانات والتصدير",
-    "download_csv": "تحميل البيانات (CSV)"
+  "NetCDFCsvHeatmap": {
+    "title": "تحليل مكاني لبيانات الطقس",
+    "uploadLabel": "رفع ملفات CSV لبيانات الطقس",
+    "uploadHint": "المدعومة: درجة الحرارة (t2_C)، هطول الأمطار (rain_mm)، الرطوبة النسبية (rh2_percent)، الرياح (speed + direction_deg)",
+    "clearAll": "مسح جميع الخرائط",
+    "activeVisualizations": "{count, plural, zero {لا توجد تصورات} one {# تصور} two {# تصوران} few {# تصورات} many {# تصورًا} other {# تصور}} نشطة",
+    "professionalTag": "تصور احترافي للطقس",
+    "noData": {
+      "title": "لا توجد بيانات محملة",
+      "description": "قم بتحميل ملفات CSV تحتوي على بيانات الطقس لإنشاء تصورات مكانية"
+    },
+    "mapTitles": {
+      "t2_C": "توزيع درجة الحرارة (°C)",
+      "rain_mm": "توزيع هطول الأمطار (مم)",
+      "rh2_percent": "توزيع الرطوبة النسبية (%)",
+      "wind_combined": "تحليل سرعة واتجاه الرياح"
+    },
+    "datasetLabel": "مجموعة البيانات: {filename}",
+    "removeButton": "إزالة",
+    "axisLabels": {
+      "x": "خط الطول (°E)",
+      "y": "خط العرض (°N)"
+    },
+    "annotations": {
+      "precipitation": "شدة هطول الأمطار",
+      "wind": "طول السهم ∝ سرعة الرياح<br>اتجاه السهم = اتجاه الرياح"
+    },
+    "colorbarTitles": {
+      "t2_C": "°م",
+      "rain_mm": "مم",
+      "rh2_percent": "%",
+      "wind_combined": "م/ث"
+    }
   }
 }
