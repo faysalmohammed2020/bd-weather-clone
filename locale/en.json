@@ -1887,5 +1887,15 @@
       "rh2_percent": "%",
       "wind_combined": "m/s"
     }
+  },
+  "UploadAndVisualize": {
+    "title": "NetCDF File Visualization Tool",
+    "subtitle": "Upload your NetCDF file to generate visualizations and extract data",
+    "select_file": "Select NetCDF File",
+    "upload_error": "Please upload a valid NetCDF file (.nc extension)",
+    "processing": "Processing your file...",
+    "visualizations": "Data Visualizations & Exports",
+    "download_csv": "Download Data (CSV)"
+    
   }
 }
