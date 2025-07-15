@@ -95,10 +95,9 @@ function App() {
 
       // ✅ Detect NetCDF version
       const version = reader.version
-      const versionNumber = Number(version)
 
       // Show version modal and wait for user confirmation
-      if (versionNumber === 2) {
+      if (version === 2) {
         // NetCDF-4 (HDF5) — Show warning modal
         setModalContent({
           title: "NetCDF-4 File Detected",
@@ -109,8 +108,8 @@ function App() {
         setShowVersionModal(true)
         setIsProcessing(false) // Stop processing until user confirms
         return
-      } else if (versionNumber === 1) {
-        // NetCDF-3 — Show success modal  
+      } else if (version === 1) {
+        // NetCDF-3 — Show success modal
         setModalContent({
           title: "NetCDF-3 File Detected",
           message: "NetCDF-3 detected: proceeding with processing...",
@@ -122,9 +121,9 @@ function App() {
       } else {
         // Unknown version — Show warning modal
         setModalContent({
-          title: `NetCDF Version ${version} (NetCDF-3) Detected `,
-          message: `NetCDF version ${version} (NetCDF-3) detected. This version fully supported.`,
-          type: "success",
+          title: `NetCDF Version ${version} Detected`,
+          message: `NetCDF version ${version} detected. This may not be fully supported and could cause processing issues.`,
+          type: "warning",
         })
         setShowVersionModal(true)
         setIsProcessing(false) // Stop processing until user confirms
@@ -580,7 +579,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <div className="mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
@@ -784,13 +783,20 @@ function App() {
 
             {/* Interactive Visualization Tabs */}
             <Tabs defaultValue="plot" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-3 bg-white/80 backdrop-blur-sm border border-gray-200 shadow-lg rounded-xl p-1">
+              <TabsList className="grid w-full grid-cols-4 bg-white/80 backdrop-blur-sm border border-gray-200 shadow-lg rounded-xl p-1">
                 <TabsTrigger
                   value="plot"
                   className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-lg transition-all"
                 >
                   <Activity className="h-4 w-4" />
                   Visualization
+                </TabsTrigger>
+                <TabsTrigger
+                  value="spatial-analysis"
+                  className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-lg transition-all"
+                >
+                  <Map className="h-4 w-4" />
+                  Spatial Analysis
                 </TabsTrigger>
                 <TabsTrigger
                   value="export"
@@ -865,6 +871,35 @@ function App() {
                 </div>
               </TabsContent>
 
+              {/* Spatial Analysis Tab */}
+              <TabsContent value="spatial-analysis">
+                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="flex items-center gap-3 text-lg">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <Map className="h-5 w-5 text-purple-600" />
+                      </div>
+                      Spatial Analysis
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="py-16">
+                    <div className="text-center text-gray-500">
+                      <div className="p-4 bg-purple-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+                        <Map className="h-10 w-10 text-purple-600" />
+                      </div>
+                      <h3 className="text-2xl font-semibold mb-2 text-gray-800">Spatial Analysis Tools</h3>
+                      <p className="text-gray-600 max-w-md mx-auto mb-4">
+                        Advanced spatial analysis features for geographic data processing and statistical analysis.
+                      </p>
+                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 border border-purple-200 rounded-lg text-purple-700">
+                        <AlertCircle className="h-4 w-4" />
+                        <span className="font-medium">This data is coming soon</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
               {/* Export Tab */}
               <TabsContent value="export">
                 <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
@@ -919,7 +954,7 @@ function App() {
                             )}
                             <span className="text-gray-700 font-medium">
                               Version {ncData.metadata.version} —{" "}
-                              {ncData.metadata.version === 2 ? "NetCDF-4 (HDF5)" : "NetCDF-3 (Classic)"}
+                              {ncData.metadata.version === 1 ? "NetCDF-3 (Classic)" : "NetCDF-4 (HDF5)"}
                             </span>
                           </div>
                         </div>
