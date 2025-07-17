@@ -18,9 +18,6 @@ model users {
   banned           Boolean?
   banReason        String?
   banExpires       Int?
-  division         String
-  district         String
-  upazila          String
   stationId        String
   twoFactorEnabled Boolean?
   createdAt        DateTime
@@ -333,7 +330,7 @@ model AgroclimatologicalData {
   // Station Information
   elevation   Float
   date      DateTime
-  utcTime   DateTime
+  utcTime   String
 
   // Solar & Sunshine Data
   solarRadiation Float?
@@ -383,7 +380,7 @@ model AgroclimatologicalData {
   stationId String
   station   Station  @relation(fields: [stationId], references: [id])
 
-  @@unique([stationId, date])
+  @@unique([stationId, date, utcTime])
   @@map("agroclimatological_data")
 }
 

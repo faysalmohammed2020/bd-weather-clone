@@ -92,9 +92,6 @@ export const UserTable = () => {
     email: string;
     password: string;
     role: UserRole;
-    division: string;
-    district: string;
-    upazila: string;
     stationId: string;
   }
 
@@ -103,16 +100,10 @@ export const UserTable = () => {
     email: "",
     password: "",
     role: "observer",
-    division: "",
-    district: "",
-    upazila: "",
     stationId: "",
   });
 
   const [loadingStations, setLoadingStations] = useState(false);
-  const [loadingDivisions, setLoadingDivisions] = useState(false);
-  const [loadingDistricts, setLoadingDistricts] = useState(false);
-  const [loadingUpazilas, setLoadingUpazilas] = useState(false);
 
   const fetchStations = useCallback(async () => {
     setLoadingStations(true);
@@ -158,12 +149,6 @@ export const UserTable = () => {
   }, [fetchStations]);
 
   useEffect(() => {
-    setLoadingDivisions(locationLoading);
-    setLoadingDistricts(locationLoading);
-    setLoadingUpazilas(locationLoading);
-  }, [locationLoading]);
-
-  useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
@@ -187,9 +172,7 @@ export const UserTable = () => {
       if (
         !formData.email ||
         !formData.password ||
-        !formData.division ||
-        !formData.district ||
-        !formData.upazila
+        !formData.stationId
       ) {
         toast.error(t("createEditDialog.errors.fillAllFields"));
         return;
@@ -221,9 +204,6 @@ export const UserTable = () => {
           email: formData.email,
           password: formData.password,
           role: formData.role,
-          division: formData.division,
-          district: formData.district,
-          upazila: formData.upazila,
           stationId: formData.stationId,
         }),
       });
@@ -273,10 +253,7 @@ export const UserTable = () => {
       }
 
       if (
-        !formData.email ||
-        !formData.division ||
-        !formData.district ||
-        !formData.upazila
+        !formData.email
       ) {
         toast.error(t("createEditDialog.errors.fillAllFields"));
         return;
@@ -311,9 +288,6 @@ export const UserTable = () => {
             ? formData.password
             : undefined,
         role: formData.role,
-        division: formData.division,
-        district: formData.district,
-        upazila: formData.upazila,
         stationId: formData.stationId,
       };
 
@@ -388,9 +362,6 @@ export const UserTable = () => {
       email: "",
       password: "",
       role: "observer",
-      division: "",
-      district: "",
-      upazila: "",
       stationId: "",
     });
     setEditUser(null);
@@ -408,9 +379,6 @@ export const UserTable = () => {
       email: user.email,
       password: "",
       role: (user.role as UserRole) || "observer",
-      division: user.division,
-      district: user.district,
-      upazila: user.upazila,
       stationId: user.stationId || "",
     });
     setOpenDialog(true);
@@ -601,130 +569,6 @@ export const UserTable = () => {
                   readOnly
                 />
               </div>
-
-              {session?.user.role === "super_admin" && (
-                <div className="grid grid-cols-3 gap-4 w-full">
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="division">
-                      {t("createEditDialog.fields.division")}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <Select
-                      value={formData.division}
-                      onValueChange={(value) => {
-                        const division = divisions.find((d) => d.name === value);
-                        if (division) {
-                          setFormData((prevData) => ({
-                            ...prevData,
-                            division: value,
-                            district: "",
-                            upazila: "",
-                          }));
-                          setSelectedDivision(division);
-                          setSelectedDistrict(null);
-                          setSelectedUpazila(null);
-                        }
-                      }}
-                      disabled={loadingDivisions}
-                    >
-                      <SelectTrigger id="division" className="w-full">
-                        <SelectValue
-                          placeholder={
-                            loadingDivisions ? t("loading") : t("createEditDialog.placeholders.selectDivision")
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {divisions.map((division) => (
-                          <SelectItem
-                            key={division.osmId}
-                            value={division.name}
-                          >
-                            {division.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="district">
-                      {t("createEditDialog.fields.district")}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <Select
-                      value={formData.district}
-                      onValueChange={(value) => {
-                        const district = districts.find((d) => d.name === value);
-                        if (district) {
-                          setFormData((prevData) => ({
-                            ...prevData,
-                            district: value,
-                            upazila: "",
-                          }));
-                          setSelectedDistrict(district);
-                          setSelectedUpazila(null);
-                        }
-                      }}
-                      disabled={!selectedDivision || districts.length === 0}
-                    >
-                      <SelectTrigger id="district" className="w-full">
-                        <SelectValue
-                          placeholder={
-                            loadingDistricts ? t("loading") : t("createEditDialog.placeholders.selectDistrict")
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {districts.map((district) => (
-                          <SelectItem
-                            key={district.osmId}
-                            value={district.name}
-                          >
-                            {district.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <label htmlFor="upazila">
-                      {t("createEditDialog.fields.upazila")}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <Select
-                      value={formData.upazila}
-                      onValueChange={(value) => {
-                        const upazila = upazilas.find((u) => u.name === value);
-                        if (upazila) {
-                          setFormData((prevData) => ({
-                            ...prevData,
-                            upazila: value,
-                          }));
-                          setSelectedUpazila(upazila);
-                        }
-                      }}
-                      disabled={!selectedDistrict || upazilas.length === 0}
-                    >
-                      <SelectTrigger id="upazila" className="w-full">
-                        <SelectValue
-                          placeholder={
-                            loadingUpazilas ? t("loading") : t("createEditDialog.placeholders.selectUpazila")
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {upazilas.map((upazila) => (
-                          <SelectItem key={upazila.osmId} value={upazila.name}>
-                            {upazila.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              )}
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setOpenDialog(false)}>

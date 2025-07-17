@@ -248,14 +248,11 @@ export async function POST(request: NextRequest) {
       email,
       password,
       role,
-      division,
-      district,
-      upazila,
       stationId,
     } = body;
 
     // Validate required fields
-    if (!email || !password || !role || !division || !district || !upazila) {
+    if (!email || !password || !role || !stationId) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -309,9 +306,6 @@ export async function POST(request: NextRequest) {
           name: name || null,
           email,
           role: role || null,
-          division,
-          district,
-          upazila,
           stationId: stationId || null,
           emailVerified: false,
           createdAt: new Date(),
