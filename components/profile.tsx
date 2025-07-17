@@ -11,7 +11,10 @@ const Profile = () => {
   const router = useRouter();
   const { data: session, isPending } = useSession();
   const t = useTranslations("common");
-
+ if (!isPending) {
+    console.log("👉 Session Data:", session);
+    console.log("👉 User Role:", session?.user?.role);
+  }
   return (
     <div className="flex items-center gap-6 h-12">
       {isPending ? (

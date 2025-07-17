@@ -9,14 +9,7 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  trustedOrigins: [
-    ...(process.env.NODE_ENV === "development"
-      ? [
-          process.env.NEXT_PUBLIC_APP_URL!,
-          process.env.NEXT_PUBLIC_SECONDARY_APP_URL!,
-        ]
-      : [process.env.NEXT_PUBLIC_APP_URL!]),
-  ],
+   trustedOrigins: ["http://localhost:3000" , "https://bd-weather-clone.vercel.app/"],
   user: {
     modelName: "users",
     additionalFields: {
