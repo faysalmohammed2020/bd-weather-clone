@@ -975,7 +975,7 @@
     "errorTitle": "Error Loading Data",
     "errorHeading": "Failed to load weather data",
     "retry": "Retry",
-    "noData": "No weather data available",
+    "noDataTitle": "No weather data available",
     "noDataHeading": "No Weather Data",
     "noDataSuggestion": "Try adjusting the time range or check if data exists for the selected period.",
     "dataTypes": {
