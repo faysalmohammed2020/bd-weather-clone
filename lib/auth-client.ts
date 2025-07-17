@@ -9,17 +9,6 @@ export const { signIn, signUp, signOut, useSession, admin, twoFactor } = createA
   plugins: [
     inferAdditionalFields({
       user: {
-        district: {
-          type: "string",
-        },
-        division: {
-          type: "string",
-        },
-        upazila: {
-          nullable: true,
-          required: false,
-          type: "string",
-        },
         stationId: {
           required: true,
           type: "string",

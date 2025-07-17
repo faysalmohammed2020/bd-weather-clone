@@ -78,9 +78,6 @@ export default function SignUpForm() {
         role,
         password,
         stationId,
-        division: "default-division",
-        district: "default-district",
-        upazila: "default-upazila",
       },
       {
         onRequest: () => {

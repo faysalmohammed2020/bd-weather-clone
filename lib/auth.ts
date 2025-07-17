@@ -9,23 +9,17 @@ export const auth = betterAuth({
   database: prismaAdapter(prisma, {
     provider: "postgresql",
   }),
-  trustedOrigins: ["http://localhost:3000", "http://localhost:4000"],
+  trustedOrigins: [
+    ...(process.env.NODE_ENV === "development"
+      ? [
+          process.env.NEXT_PUBLIC_APP_URL!,
+          process.env.NEXT_PUBLIC_SECONDARY_APP_URL!,
+        ]
+      : [process.env.NEXT_PUBLIC_APP_URL!]),
+  ],
   user: {
     modelName: "users",
     additionalFields: {
-      division: {
-        required: true,
-        type: "string",
-      },
-      district: {
-        required: true,
-        type: "string",
-      },
-      upazila: {
-        nullable: true,
-        required: false,
-        type: "string",
-      },
       stationId: {
         required: true,
         type: "string",
@@ -82,9 +76,6 @@ export const auth = betterAuth({
           ...user,
           role: authUser?.role,
           station: authUser?.Station,
-          division: authUser?.division,
-          district: authUser?.district,
-          upazila: authUser?.upazila,
         },
       };
     }),
