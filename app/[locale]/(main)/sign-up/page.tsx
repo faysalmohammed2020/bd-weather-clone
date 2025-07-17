@@ -172,7 +172,7 @@ export default function SignUpForm() {
           className="text-4xl text-center font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-cyan-700 to-blue-700"
           variants={fadeIn}
         >
-          Create Account
+        Create Account Now
         </motion.h1>
         <p className="text-center text-sm text-gray-500">
           Join us today! It&apos;s quick and easy.
