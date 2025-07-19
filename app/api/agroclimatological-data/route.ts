@@ -1,48 +1,49 @@
-// File: /app/api/agroclimatological-data/route.ts
-import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
-import { getSession } from '@/lib/getSession'
-import { AgroclimatologicalFormData } from '@/app/[locale]/dashboard/data-entry/agroclimatological/agroclimatological-form'
+import { NextResponse } from "next/server"
+import prisma from "@/lib/prisma"
+import { getSession } from "@/lib/getSession"
+import type { AgroclimatologicalFormData } from "@/app/dashboard/data-entry/agroclimatological/agroclimatological-form"
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic"
 
 // Helper function to safely parse numeric values
 function parseNumber(value: any): number | null {
-  if (value === null || value === undefined || value === '') return null
+  if (value === null || value === undefined || value === "") return null
   const num = Number(value)
   return isNaN(num) ? null : num
 }
 
 export async function POST(request: Request) {
   const session = await getSession()
-  
+
   // Authentication check
   if (!session?.user) {
-    return NextResponse.json(
-      { success: false, message: 'Unauthorized: Please log in to submit data' },
-      { status: 401 }
-    )
+    return NextResponse.json({ success: false, message: "Unauthorized: Please log in to submit data" }, { status: 401 })
   }
 
   // Validate request content type
-  const contentType = request.headers.get('content-type')
-  if (!contentType?.includes('application/json')) {
+  const contentType = request.headers.get("content-type")
+  if (!contentType?.includes("application/json")) {
     return NextResponse.json(
-      { success: false, message: 'Invalid content type. Expected application/json' },
-      { status: 400 }
+      { success: false, message: "Invalid content type. Expected application/json" },
+      { status: 400 },
     )
   }
 
   try {
-    const data: AgroclimatologicalFormData = await request.json()
-    console.log('Received submission data:', JSON.stringify(data, null, 2))
+    const data: AgroclimatologicalFormData & {
+      date: Date
+      utcTime: string
+      stationId: string
+    } = await request.json()
+
+    console.log("Received submission data:", JSON.stringify(data, null, 2))
 
     // Prepare data for database insertion
     const dbData = {
       // Station Information
       elevation: parseNumber(data.stationInfo.elevation) ?? 0,
-      date: new Date(data.stationInfo.date),
-      utcTime: new Date(),
+      date: data.date,
+      utcTime: data.utcTime, // Now saving as string: "00" or "12"
 
       // Solar & Sunshine Data
       solarRadiation: parseNumber(data.solarRadiation),
@@ -86,59 +87,53 @@ export async function POST(request: Request) {
 
       // User and Station tracking
       userId: session.user.id,
-      stationId: session.user.station?.id,  
+      stationId: data.stationId,
     }
 
-    console.log('Processed data for database:', JSON.stringify(dbData, null, 2))
+    console.log("Processed data for database:", JSON.stringify(dbData, null, 2))
 
     // Create the database entry
     const result = await prisma.agroclimatologicalData.create({
-      data: {
-        ...dbData,
-        stationId: session.user.station?.id!,  // Now guaranteed to be a string
-      },
-    });
+      data: dbData,
+    })
 
-    console.log('Database insertion successful:', result)
+    console.log("Database insertion successful:", result)
 
     return NextResponse.json({
       success: true,
-      message: 'Agroclimatological data submitted successfully!',
+      message: "Agroclimatological data submitted successfully!",
       data: {
         id: result.id,
         stationId: result.stationId,
         date: result.date,
+        utcTime: result.utcTime,
         createdAt: result.createdAt,
       },
     })
-
   } catch (error: any) {
-    console.error('Error submitting agroclimatological data:', error)
+    console.error("Error submitting agroclimatological data:", error)
 
     // Handle Prisma errors
-    if (error.code === 'P2002') {
+    if (error.code === "P2002") {
       return NextResponse.json(
         {
           success: false,
-          message: 'Data for this station and time period already exists. Please update instead.',
+          message: "Data for this station, date, and UTC time already exists. Please check your submission.",
         },
-        { status: 409 }
+        { status: 409 },
       )
     }
 
     // Handle validation errors
-    if (error.name === 'ValidationError') {
-      return NextResponse.json(
-        { success: false, message: error.message },
-        { status: 400 }
-      )
+    if (error.name === "ValidationError") {
+      return NextResponse.json({ success: false, message: error.message }, { status: 400 })
     }
 
     // Handle database connection errors
-    if (error.code === 'P1001') {
+    if (error.code === "P1001") {
       return NextResponse.json(
-        { success: false, message: 'Database connection error. Please try again later.' },
-        { status: 500 }
+        { success: false, message: "Database connection error. Please try again later." },
+        { status: 500 },
       )
     }
 
@@ -146,78 +141,72 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        message: 'An unexpected error occurred while processing your request',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        message: "An unexpected error occurred while processing your request",
+        error: process.env.NODE_ENV === "development" ? error.message : undefined,
       },
-      { status: 500 }
+      { status: 500 },
     )
   }
 }
 
 export async function GET(request: Request) {
-  const session = await getSession();
+  const session = await getSession()
 
   if (!session?.user) {
-    return NextResponse.json(
-      { success: false, message: 'Unauthorized: Please log in to access data' },
-      { status: 401 }
-    );
+    return NextResponse.json({ success: false, message: "Unauthorized: Please log in to access data" }, { status: 401 })
   }
 
   try {
-    const { searchParams } = new URL(request.url);
-    const startDateParam = searchParams.get('startDate');
-    const endDateParam = searchParams.get('endDate');
-    const stationId = searchParams.get('stationId');
-    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
-    const offset = parseInt(searchParams.get('offset') || '0');
+    const { searchParams } = new URL(request.url)
+    const startDateParam = searchParams.get("startDate")
+    const endDateParam = searchParams.get("endDate")
+    const stationId = searchParams.get("stationId")
+    const limit = Math.min(Number.parseInt(searchParams.get("limit") || "50"), 100)
+    const offset = Number.parseInt(searchParams.get("offset") || "0")
 
     // Initialize where clause
-    const where: any = {};
+    const where: any = {}
 
     // Date filtering
     if (startDateParam && endDateParam) {
       try {
-        const startDate = new Date(startDateParam);
-        const endDate = new Date(endDateParam);
-        
+        const startDate = new Date(startDateParam)
+        const endDate = new Date(endDateParam)
+
         // Validate dates
         if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-          throw new Error('Invalid date format');
+          throw new Error("Invalid date format")
         }
 
         // Set time to beginning and end of day respectively
-        startDate.setHours(0, 0, 0, 0);
-        endDate.setHours(23, 59, 59, 999);
+        startDate.setHours(0, 0, 0, 0)
+        endDate.setHours(23, 59, 59, 999)
 
         where.date = {
           gte: startDate,
           lte: endDate,
-        };
+        }
       } catch (error) {
-        console.error('Invalid date parameters:', error);
+        console.error("Invalid date parameters:", error)
         return NextResponse.json(
-          { success: false, message: 'Invalid date format. Please use YYYY-MM-DD' },
-          { status: 400 }
-        );
+          { success: false, message: "Invalid date format. Please use YYYY-MM-DD" },
+          { status: 400 },
+        )
       }
     }
 
     // Station filtering
-    if (stationId && stationId !== 'all') {
-      where.stationId = stationId;
-    } else if (session.user.role !== 'super_admin' && session.user.station?.id) {
+    if (stationId && stationId !== "all") {
+      where.stationId = stationId
+    } else if (session.user.role !== "super_admin" && session.user.station?.id) {
       // For non-super admins, default to their station if no specific station is requested
-      where.stationId = session.user.station.id;
+      where.stationId = session.user.station.id
     }
 
     // User access control
-    if (session.user.role !== 'super_admin') {
+    if (session.user.role !== "super_admin") {
       // Non-super admins can only see their own data or data from their station
-      where.OR = [
-        { userId: session.user.id },
-        { stationId: session.user.station?.id },
-      ].filter(Boolean); // Filter out undefined conditions
+      where.OR = [{ userId: session.user.id }, { stationId: session.user.station?.id }].filter(Boolean) // Filter out undefined conditions
     }
 
     // Fetch data with pagination
@@ -228,12 +217,12 @@ export async function GET(request: Request) {
           user: { select: { id: true, name: true, email: true } },
           station: { select: { id: true, name: true } },
         },
-        orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
+        orderBy: [{ date: "desc" }, { utcTime: "desc" }, { createdAt: "desc" }],
         take: limit,
         skip: offset,
       }),
       prisma.agroclimatologicalData.count({ where }),
-    ]);
+    ])
 
     return NextResponse.json({
       success: true,
@@ -244,17 +233,16 @@ export async function GET(request: Request) {
         offset,
         hasMore: offset + limit < total,
       },
-    });
-
+    })
   } catch (error: any) {
-    console.error('Error fetching agroclimatological data:', error);
+    console.error("Error fetching agroclimatological data:", error)
     return NextResponse.json(
       {
         success: false,
-        message: 'Failed to fetch data',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        message: "Failed to fetch data",
+        error: process.env.NODE_ENV === "development" ? error.message : undefined,
       },
-      { status: 500 }
-    );
+      { status: 500 },
+    )
   }
 }
