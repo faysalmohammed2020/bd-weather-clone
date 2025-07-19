@@ -1,163 +1,197 @@
 // station-data-map.ts
 
-import dhakaStation from "./station_pressure_level/dhaka_station_level";
-import dhakaSea from "./station_pressure_level/dhaka_sea_level";
+import ammanMarkaAirportStation from "./station_pressure_level/ammanMarkaAirport_station_level";
+import ammanMarkaAirportSea from "./station_pressure_level/ammanMarkaAirport_sea_level";
 
-import cxbStation from "./station_pressure_level/CXB-station_level";
-import cxbSea from "./station_pressure_level/CXB-sea_level";
+import MadabaStation from "./station_pressure_level/Madaba-station_level";
+import MadabaSea from "./station_pressure_level/Madaba-sea_level";
 
-import ambaganStation from "./station_pressure_level/Ambagan-station_level";
-import ambaganSea from "./station_pressure_level/Ambagan-sea_level";
+import ammanQueenAliaAirportStation from "./station_pressure_level/ammanQueenAliaAirport-station_level";
+import ammanQueenAliaAirportSea from "./station_pressure_level/ammanQueenAliaAirport-sea_level";
 
-import badalgachhiStation from "./station_pressure_level/Badalgachhi-station_level";
-import badalgachhiSea from "./station_pressure_level/Badalgachhi-sea_level";
+import aqabaKingHusseinAirportStation from "./station_pressure_level/aqabaKingHusseinAirport-station_level";
+import aqabaKingHusseinAirportSea from "./station_pressure_level/aqabaKingHusseinAirport-sea_level";
 
-import bandarbanStation from "./station_pressure_level/Bandarban-station_level";
-import bandarbanSea from "./station_pressure_level/Bandarban-sea_level";
+import IrbidStation from "./station_pressure_level/Irbid-station_level";
+import IrbidSea from "./station_pressure_level/Irbid-sea_level";
 
-import barisalStation from "./station_pressure_level/BSL-station_level";
-import barisalSea from "./station_pressure_level/BSL-sea_level";
+import MAANStation from "./station_pressure_level/MAAN-station_level";
+import MAANSea from "./station_pressure_level/MAAN-sea_level";
 
-import chuadangaStation from "./station_pressure_level/CDG-station_level";
-import chuadangaSea from "./station_pressure_level/CDG-sea_level";
+import MafraqStation from "./station_pressure_level/Mafraq-station_level";
+import MafraqSea from "./station_pressure_level/Mafraq-sea_level";
 
-import chandpurStation from "./station_pressure_level/CDP-station_level";
-import chandpurSea from "./station_pressure_level/CDP-sea_level";
+import ZarqaStation from "./station_pressure_level/Zarqa-station_level";
+import ZarqaSea from "./station_pressure_level/Zarqa-sea_level";
 
-import dimlaStation from "./station_pressure_level/Dimla-station_level";
-import dimlaSea from "./station_pressure_level/Dimla-sea_level";
+import DEADStation from "./station_pressure_level/DEAD-station_level";
+import DEADSea from "./station_pressure_level/DEAD-sea_level";
 
-import dinajpurStation from "./station_pressure_level/DJP-station_level";
-import dinajpurSea from "./station_pressure_level/DJP-sea_level";
+import RuwaishedStation from "./station_pressure_level/RUWS-station_level";
+import RuwaishedSea from "./station_pressure_level/RUWS-sea_level";
 
-import feniStation from "./station_pressure_level/FNI-station_level";
-import feniSea from "./station_pressure_level/FNI-sea_level";
+import SafawiStation from "./station_pressure_level/Safawi-station_level";
+import SafawiSea from "./station_pressure_level/Safawi-sea_level";
 
-import faridpurStation from "./station_pressure_level/FRD-station_level";
-import faridpurSea from "./station_pressure_level/FRD-sea_level";
+import SaltStation from "./station_pressure_level/Salt-station_level";
+import SaltSea from "./station_pressure_level/Salt-sea_level";
 
-import gopalganjStation from "./station_pressure_level/Gopalganj-station_level";
-import gopalganjSea from "./station_pressure_level/Gopalganj-sea_level";
+import AjlounStation from "./station_pressure_level/Ajloun-station_level";
+import AjlounSea from "./station_pressure_level/Ajloun-sea_level";
 
-import hatiyaStation from "./station_pressure_level/Hatiya-station_level";
-import hatiyaSea from "./station_pressure_level/Hatiya-sea_level";
+import JerashStation from "./station_pressure_level/Jerash-station_level";
+import JerashSea from "./station_pressure_level/Jerash-sea_level";
 
-import jsrStation from "./station_pressure_level/JSR-station_level";
-import jsrSea from "./station_pressure_level/JSR-sea_level";
+import BalqaStation from "./station_pressure_level/Balqa-station_level";
+import BalqaSea from "./station_pressure_level/Balqa-sea_level";
 
-import khulnaStation from "./station_pressure_level/Khulna-station_level";
-import khulnaSea from "./station_pressure_level/Khulna-sea_level";
+import KarakStation from "./station_pressure_level/Karak-station_level";
+import KarakSea from "./station_pressure_level/Karak-sea_level";
 
-import madaripurStation from "./station_pressure_level/Madaripur-station_level";
-import madaripurSea from "./station_pressure_level/Madaripur-sea_level";
+import TafilahStation from "./station_pressure_level/Tafilah-station_level";
+import TafilahSea from "./station_pressure_level/Tafilah-sea_level";
 
-import mymensinghStation from "./station_pressure_level/Mymensingh-station_level";
-import mymensinghSea from "./station_pressure_level/Mymensingh-sea_level";
+import JerichoStation from "./station_pressure_level/Jericho-station_level";
+import JerichoSea from "./station_pressure_level/Jericho-sea_level";
 
-import nikliStation from "./station_pressure_level/Nikli-station_level";
-import nikliSea from "./station_pressure_level/Nikli-sea_level";
+import DeirAllaStation from "./station_pressure_level/DEIR-station_level";
+import DeirAllaSea from "./station_pressure_level/DEIR-sea_level";
 
-import rajshahiStation from "./station_pressure_level/Rajshahi-station_level";
-import rajshahiSea from "./station_pressure_level/Rajshahi-sea_level";
+import BaquraStation from "./station_pressure_level/Baqura-station_level";
+import BaquraSea from "./station_pressure_level/Baqura-sea_level";
 
-import sandwipStation from "./station_pressure_level/Sandwip-station_level";
-import sandwipSea from "./station_pressure_level/Sandwip-sea_level";
+import ErabStation from "./station_pressure_level/ERAB-station_level";
+import ErabSea from "./station_pressure_level/ERAB-sea_level";
 
-import satkhiraStation from "./station_pressure_level/Satkhira-station_level";
-import satkhiraSea from "./station_pressure_level/Satkhira-sea_level";
+import ghorSafiStation from "./station_pressure_level/ghorSafi-station_level";
+import ghorSafiSea from "./station_pressure_level/ghorSafi-sea_level";
 
-import srimangalStation from "./station_pressure_level/Srimangal-station_level";
-import srimangalSea from "./station_pressure_level/Srimangal-sea_level";
+import H4Station from "./station_pressure_level/H4-station_level";
+import H4Sea from "./station_pressure_level/H4-sea_level";
 
-import tarashStation from "./station_pressure_level/Tarash-station_level";
-import tarashSea from "./station_pressure_level/Tarash-sea_level";
+import princeHasanAirportStation from "./station_pressure_level/princeHasanAirport-station_level";
+import princeHasanAirportSea from "./station_pressure_level/princeHasanAirport-sea_level";
 
-import tangailStation from "./station_pressure_level/Tangail-station_level";
-import tangailSea from "./station_pressure_level/Tangail-sea_level";
+import rasMuneefStation from "./station_pressure_level/rasMuneef-station_level";
+import rasMuneefSea from "./station_pressure_level/rasMuneef-sea_level";
+
+import QatranehStation from "./station_pressure_level/Qatraneh-station_level";
+import QatranehSea from "./station_pressure_level/Qatraneh-sea_level";
+
+import wadiRayanStation from "./station_pressure_level/WadiRayan-station_level";
+import wadiRayanSea from "./station_pressure_level/WadiRayan-sea_level";
+
+import jerusalemAirportStation from "./station_pressure_level/jerusalemAirport-station_level";
+import jerusalemAirportSea from "./station_pressure_level/jerusalemAirport-sea_level";
+
+import ghorSafiTwoStation from "./station_pressure_level/ghorSafiTwo-station_level";
+import ghorSafiTwoSea from "./station_pressure_level/ghorSafiTwo-sea_level";
+import H4TwoStation from "./station_pressure_level/H4-station_level";
+import H4TwoSea from "./station_pressure_level/H4-sea_level";
 
 export const stationDataMap = {
-  [dhakaStation.station.station_no]: { station: dhakaStation, sea: dhakaSea },
-  [cxbStation.station.station_no]: { station: cxbStation, sea: cxbSea },
-  [ambaganStation.station.station_no]: {
-    station: ambaganStation,
-    sea: ambaganSea,
+  [ammanMarkaAirportStation.station.station_no]: { station: ammanMarkaAirportStation, sea: ammanMarkaAirportSea },
+  [MadabaStation.station.station_no]: { station: MadabaStation, sea: MadabaSea },
+  [ammanQueenAliaAirportStation.station.station_no]: {
+    station: ammanQueenAliaAirportStation,
+    sea: ammanQueenAliaAirportSea,
   },
-  [badalgachhiStation.station.station_no]: {
-    station: badalgachhiStation,
-    sea: badalgachhiSea,
+  [aqabaKingHusseinAirportStation.station.station_no]: {
+    station: aqabaKingHusseinAirportStation,
+    sea: aqabaKingHusseinAirportSea,
   },
-  [bandarbanStation.station.station_no]: {
-    station: bandarbanStation,
-    sea: bandarbanSea,
+  [IrbidStation.station.station_no]: {
+    station: IrbidStation,
+    sea: IrbidSea,
   },
-  [barisalStation.station.station_no]: {
-    station: barisalStation,
-    sea: barisalSea,
+  [MAANStation.station.station_no]: {
+    station: MAANStation,
+    sea: MAANSea,
   },
-  [chuadangaStation.station.station_no]: {
-    station: chuadangaStation,
-    sea: chuadangaSea,
+  [MafraqStation.station.station_no]: {
+    station: MafraqStation,
+    sea: MafraqSea,
   },
-  [chandpurStation.station.station_no]: {
-    station: chandpurStation,
-    sea: chandpurSea,
+  [ZarqaStation.station.station_no]: {
+    station: ZarqaStation,
+    sea: ZarqaSea,
   },
-  [dimlaStation.station.station_no]: {
-    station: dimlaStation, sea: dimlaSea
+  [DEADStation.station.station_no]: {
+    station: DEADStation, sea: DEADSea
   },
-  [dinajpurStation.station.station_no]: {
-    station: dinajpurStation,
-    sea: dinajpurSea,
+  [RuwaishedStation.station.station_no]: {
+    station: RuwaishedStation,
+    sea: RuwaishedSea,
   },
-  [feniStation.station.station_no]: { station: feniStation, sea: feniSea },
-  [faridpurStation.station.station_no]: {
-    station: faridpurStation,
-    sea: faridpurSea,
+  [SafawiStation.station.station_no]: { station: SafawiStation, sea: SafawiSea },
+  [SaltStation.station.station_no]: {
+    station: SaltStation,
+    sea: SaltSea,
   },
-  [gopalganjStation.station.station_no]: {
-    station: gopalganjStation,
-    sea: gopalganjSea,
+  [AjlounStation.station.station_no]: {
+    station: AjlounStation,
+    sea: AjlounSea,
   },
-  [hatiyaStation.station.station_no]: {
-    station: hatiyaStation,
-    sea: hatiyaSea,
+  [JerashStation.station.station_no]: {
+    station: JerashStation,
+    sea: JerashSea,
   },
-  [jsrStation.station.station_no]: { station: jsrStation, sea: jsrSea },
-  [khulnaStation.station.station_no]: {
-    station: khulnaStation,
-    sea: khulnaSea,
+  [BalqaStation.station.station_no]: { station: BalqaStation, sea: BalqaSea },
+  [KarakStation.station.station_no]: {
+    station: KarakStation,
+    sea: KarakSea,
   },
-  [madaripurStation.station.station_no]: {
-    station: madaripurStation,
-    sea: madaripurSea,
+  [TafilahStation.station.station_no]: {
+    station: TafilahStation,
+    sea: TafilahSea,
   },
-  [mymensinghStation.station.station_no]: {
-    station: mymensinghStation,
-    sea: mymensinghSea,
+  [JerichoStation.station.station_no]: {
+    station: JerichoStation,
+    sea: JerichoSea,
   },
-  [nikliStation.station.station_no]: { station: nikliStation, sea: nikliSea },
-  [rajshahiStation.station.station_no]: {
-    station: rajshahiStation,
-    sea: rajshahiSea,
+  [DeirAllaStation.station.station_no]: { station: DeirAllaStation, sea: DeirAllaSea },
+  [BaquraStation.station.station_no]: {
+    station: BaquraStation,
+    sea: BaquraSea,
   },
-  [sandwipStation.station.station_no]: {
-    station: sandwipStation,
-    sea: sandwipSea,
+  [ErabStation.station.station_no]: {
+    station: ErabStation,
+    sea: ErabSea,
   },
-  [satkhiraStation.station.station_no]: {
-    station: satkhiraStation,
-    sea: satkhiraSea,
+  [ghorSafiStation.station.station_no]: {
+    station: ghorSafiStation,
+    sea: ghorSafiSea,
   },
-  [srimangalStation.station.station_no]: {
-    station: srimangalStation,
-    sea: srimangalSea,
+  [H4Station.station.station_no]: {
+    station: H4Station,
+    sea: H4Sea,
   },
-  [tarashStation.station.station_no]: {
-    station: tarashStation,
-    sea: tarashSea,
+  [princeHasanAirportStation.station.station_no]: {
+    station: princeHasanAirportStation,
+    sea: princeHasanAirportSea,
   },
-  [tangailStation.station.station_no]: {
-    station: tangailStation,
-    sea: tangailSea,
+  [rasMuneefStation.station.station_no]: {
+    station: rasMuneefStation,
+    sea: rasMuneefSea,
+  },
+  [QatranehStation.station.station_no]: {
+    station: QatranehStation,
+    sea: QatranehSea,
+  },
+  [wadiRayanStation.station.station_no]: {
+    station: wadiRayanStation,
+    sea: wadiRayanSea,
+  },
+  [jerusalemAirportStation.station.station_no]: {
+    station: jerusalemAirportStation,
+    sea: jerusalemAirportSea,
+  },
+  [ghorSafiTwoStation.station.station_no]: {
+    station: ghorSafiTwoStation,
+    sea: ghorSafiTwoSea,
+  },
+  [H4TwoStation.station.station_no]: {
+    station: H4TwoStation,
+    sea: H4TwoSea,
   },
 };
