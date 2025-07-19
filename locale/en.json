@@ -1759,7 +1759,11 @@
       "reset": "Form has been reset",
       "submitSuccess": "Data submitted successfully!",
       "submitError": "Failed to submit data",
-      "fetchError": "Failed to load some auto-fill data"
+      "fetchError": "Failed to load some auto-fill data",
+      "duplicateTitle": "Duplicate Entry Detected",
+      "duplicateExists" : "Data for",
+      "onDate" : "already exists on",
+      "ok" : "OK"
     }
   },
   "sunShineForm": {

@@ -1539,7 +1539,7 @@
       }
     }
   },
-  "netCdf":{
+  "netCdf": {
     "title": "NetCDF ビジュアライザー",
     "description": "NetCDFファイルをアップロードしてインタラクティブなチャートやプロットで可視化",
     "fileUpload": {
@@ -1581,8 +1581,8 @@
       "json": "JSONでエクスポート"
     }
   },
-  "agroclimatological":{
-  "agroclimatologicalDataCollection": "農業気候データ収集",
+  "agroclimatological": {
+    "agroclimatologicalDataCollection": "農業気候データ収集",
     "tabs": {
       "sunshine": "日照",
       "soil": "土壌水分",
@@ -1599,7 +1599,7 @@
       "backToStart": "最初に戻る"
     }
   },
-   "agroclimatologicalForm":{
+  "agroclimatologicalForm": {
     "form": {
       "tabs": {
         "station": "観測所",
@@ -1716,10 +1716,14 @@
       "reset": "フォームがリセットされました",
       "submitSuccess": "データの送信に成功しました！",
       "submitError": "データの送信に失敗しました",
-      "fetchError": "一部の自動入力データの読み込みに失敗しました"
+      "fetchError": "一部の自動入力データの読み込みに失敗しました",
+      "duplicateTitle": "重複エントリが検出されました",
+      "duplicateExists": "次のデータ:",
+      "onDate": "は既に存在します (日付:",
+      "ok": "重た"
     }
   },
-  "sunShineForm":{
+  "sunShineForm": {
     "tabs": {
       "input": "データ入力",
       "records": "日次記録",
@@ -1763,7 +1767,6 @@
     },
     "common": {
       "hours": "時間"
-      
     }
   },
   "SoilMoistureForm": {
@@ -1847,12 +1850,12 @@
     }
   },
   "UploadAndVisualize": {
-  "title": "NetCDFファイル可視化ツール",
-  "subtitle": "NetCDFファイルをアップロードして、可視化とデータ抽出を行います",
-  "select_file": "NetCDFファイルを選択",
-  "upload_error": "有効なNetCDFファイル（.nc拡張子）をアップロードしてください",
-  "processing": "ファイルを処理中...",
-  "visualizations": "データの可視化とエクスポート",
-  "download_csv": "データをダウンロード（CSV）"
-}
+    "title": "NetCDFファイル可視化ツール",
+    "subtitle": "NetCDFファイルをアップロードして、可視化とデータ抽出を行います",
+    "select_file": "NetCDFファイルを選択",
+    "upload_error": "有効なNetCDFファイル（.nc拡張子）をアップロードしてください",
+    "processing": "ファイルを処理中...",
+    "visualizations": "データの可視化とエクスポート",
+    "download_csv": "データをダウンロード（CSV）"
+  }
 }
