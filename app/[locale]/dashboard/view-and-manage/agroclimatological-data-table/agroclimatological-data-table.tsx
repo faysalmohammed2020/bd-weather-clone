@@ -18,6 +18,7 @@ interface AgroclimatologicalData {
   updatedAt: string
   elevation: number
   date: string;
+  utcTime: string;
   solarRadiation: number
   sunShineHour: number
   airTempDry05m: number
@@ -607,7 +608,7 @@ export default function AgroclimatologicalDataTable() {
                     {/* Hour */}
                     <td className="border border-slate-300 p-2 text-center">
                       <Badge variant="secondary" className="font-mono">
-                        24:00
+                      {formatValue(record.utcTime)}
                       </Badge>
                     </td>
 

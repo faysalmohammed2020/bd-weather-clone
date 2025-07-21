@@ -22,6 +22,7 @@ import {
 } from "react-icons/fi";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 
 interface Station {
   id: string;
@@ -55,6 +56,8 @@ export function StationManagement({
   const [isAdding, setIsAdding] = useState(false);
   const [editData, setEditData] = useState<Partial<Station>>({});
   const [loading, setLoading] = useState(false);
+  const locale = useLocale();
+  const direction = locale === "ar" ? "rtl" : "ltr";
 
   useEffect(() => {
     const fetchStations = async () => {
@@ -199,7 +202,7 @@ export function StationManagement({
   };
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm" dir="rtl">
+    <div className="p-6 bg-white rounded-lg shadow-sm">
       <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center mb-6">
         <h2 className="text-xl sm:text-2xl font-bold">{t("title")}</h2>
         <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:space-x-2 w-full sm:w-auto">
