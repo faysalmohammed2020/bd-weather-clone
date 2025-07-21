@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import moment from "moment";
-import bcrypt from "bcryptjs"; // ✅ এটা যোগ করতে ভুলবেন না
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
     const { email, password, role, securityCode, stationId, stationName } =
       body;
 
+    // Validate required fields
     if (
       !email ||
       !password ||
@@ -23,70 +24,84 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 1. Check if the station exists and security code matches
     const station = await prisma.station.findFirst({
-      where: { stationId },
+      where: { stationId: stationId },
     });
 
-    if (!station || station.securityCode !== securityCode) {
+    if (!station) {
+      return NextResponse.json({ error: "Station not found" }, { status: 404 });
+    }
+
+    if (station.securityCode !== securityCode) {
       return NextResponse.json(
-        { error: "Invalid station or security code" },
+        { error: "Invalid security code" },
         { status: 401 }
       );
     }
 
+    // 2. Check if user exists with the given email and role
+    // Use select to explicitly specify which fields to retrieve to avoid schema mismatch issues
     const user = await prisma.users.findFirst({
-      where: { email, role },
-      select: { id: true, email: true, role: true, Station: true },
-    });
-
-    if (!user || user.Station.stationId !== stationId) {
-      return NextResponse.json(
-        { error: "User not valid for this station or role" },
-        { status: 403 }
-      );
-    }
-
-    const existingSession = await prisma.sessions.findFirst({
-      where: { userId: user.id },
-      orderBy: { expiresAt: "desc" },
-    });
-
-    if (existingSession && !moment(existingSession.expiresAt).isBefore()) {
-      return NextResponse.json(
-        { error: "Already logged in from another device" },
-        { status: 403 }
-      );
-    }
-
-    // ✅ Password check
-    const account = await prisma.accounts.findFirst({
       where: {
-        accountId: email,
-        providerId: "credentials",
+        email,
+        role,
+      },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        Station: true,
       },
     });
 
-    if (!account || !account.password) {
-      return NextResponse.json({ error: "Account not found" }, { status: 404 });
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found or does not have the requested role" },
+        { status: 404 }
+      );
     }
 
-    const isValidPassword = await bcrypt.compare(password, account.password);
-
-    if (!isValidPassword) {
-      return NextResponse.json({ error: "Invalid password" }, { status: 401 });
+    // 3. Check if the user is associated with the station
+    if (user.Station.stationId !== stationId) {
+      return NextResponse.json(
+        { error: "User is not associated with this station" },
+        { status: 403 }
+      );
     }
 
-    return NextResponse.json({
-      message: "Login successful",
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        station: station.name,
+    // Check if the user already has an active session (prevent multiple logins)
+    const existingSession = await prisma.sessions.findFirst({
+      where: {
+        userId: user.id,
+      },
+      orderBy: {
+        expiresAt: "desc",
       },
     });
-  } catch (error) {
-    console.error("Login Error:", error); // ✅ Error details
+
+    // Check if session already exist and if not expired (Then don't allow multiple session)
+    if (existingSession) {
+      const isSessionExpired = moment(existingSession?.expiresAt).isBefore();
+      if (!isSessionExpired) {
+        return NextResponse.json(
+          { error: "You are already logged in from another device" },
+          { status: 403 }
+        );
+      }
+    }
+
+    // 4. Authenticate the user using better-auth
+    const response = await auth.api.signInEmail({
+      asResponse: true,
+      body: {
+        email,
+        password,
+      },
+    });
+
+    return response;
+  } catch {
     return NextResponse.json(
       { error: "An error occurred during sign in" },
       { status: 500 }

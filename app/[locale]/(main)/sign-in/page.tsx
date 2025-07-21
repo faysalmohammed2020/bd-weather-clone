@@ -447,7 +447,8 @@ export default function SignInForm() {
           <LogoHeader />
           <p className="text-center text-sm text-gray-500">
             {t("securityPrompt")}{" "}
-            <span className="font-semibold">{selectedStation}</span> {t("station")}.
+            <span className="font-semibold">{selectedStation}</span>{" "}
+            {t("station")}.
           </p>
 
           <div className="space-y-4">
@@ -530,7 +531,7 @@ export default function SignInForm() {
               }}
             >
               <ArrowLeft className="h-4 w-4" />
-             {t("backToStation")}
+              {t("backToStation")}
             </Button>
           </div>
         </motion.form>
