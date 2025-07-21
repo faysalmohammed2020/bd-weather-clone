@@ -9,25 +9,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Globe } from "lucide-react";
-import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useEffect } from "react";
 
 export default function LanguageSwitcher() {
   const router = useRouter();
   const pathname = usePathname();
-  const { locale } = useParams();
+  const locale = useLocale();
   const t = useTranslations();
 
-  // Set initial direction based on current locale
+  // Set direction and lang
   useEffect(() => {
-    document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
-    document.documentElement.lang = locale as string;
+    const dir = locale === "ar" ? "rtl" : "ltr";
+    document.documentElement.setAttribute("dir", dir);
+    document.documentElement.setAttribute("lang", locale);
   }, [locale]);
 
   const switchLanguage = (newLocale: string) => {
     router.push(pathname, { locale: newLocale });
-    // The useEffect will handle the direction change after the locale changes
   };
 
   return (
@@ -43,13 +42,13 @@ export default function LanguageSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => switchLanguage("en")}>
-          <span className={locale === "en" ? "font-bold" : ""}>English</span>
+          <span className={locale === "en" ? "font-bold text-green-700" : ""}>English</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => switchLanguage("ar")}>
-          <span className={locale === "ar" ? "font-bold" : ""}>العربية</span>
+          <span className={locale === "ar" ? "font-bold text-green-700" : ""}>العربية</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => switchLanguage("ja")}>
-          <span className={locale === "ja" ? "font-bold" : ""}>日本語</span>
+          <span className={locale === "ja" ? "font-bold text-green-700" : ""}>日本語</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
