@@ -371,6 +371,64 @@
       "selectStation": "観測所を選択",
       "error": "エラー: {error}"
     },
+    "mapComponent": {
+  "role": {
+    "superAdmin": "スーパー管理者",
+    "stationAdmin": "観測所管理者",
+    "observer": "観測者",
+    "guest": "ゲスト"
+  },
+  "common": {
+    "mm": "mm",
+    "nm": "nm",
+    "max": "最大",
+    "min": "最小"
+  },
+  "roleDescription": {
+    "superAdmin": "全ての観測所を表示中",
+    "stationAdmin": "割り当てられた観測所を表示中",
+    "observer": "割り当てられた観測所を表示中",
+    "guest": "利用可能な観測所はありません"
+  },
+  "weatherSummary": {
+    "title": "気象概要",
+    "temperature": "気温",
+    "precipitation": "降水量",
+    "windSpeed": "風速",
+    "cloudCover": "雲量",
+    "rainDetected": "降雨検出: {amount} mm",
+    "loading": "気象データを読み込み中...",
+    "noData": "気象データがありません"
+  },
+  "weatherParameters": {
+    "temperature": "気温",
+    "precipitation": "降水量",
+    "wind": "風",
+    "clouds": "雲",
+    "humidity": "湿度",
+    "visibility": "視程",
+    "pressure": "気圧",
+    "dewpoint": "露点温度"
+  },
+  "timelineControls": {
+    "play": "再生",
+    "pause": "一時停止"
+  },
+  "stationPopup": {
+    "stationId": "観測所ID",
+    "coordinates": "座標",
+    "currentWeather": "現在の気象状況",
+    "noRemarks": "気象特記なし",
+    "loading": "気象データを読み込み中...",
+    "loadingAnimation": "アニメーションデータを読み込み中...",
+    "noData": "この観測所の気象データはありません"
+  },
+  "errors": {
+    "noStation": "観測所が選択されていません",
+    "fetchFailed": "気象データの取得に失敗しました",
+    "noData": "この観測所の気象データはありません"
+  }
+},
     "statusBanner": {
       "title": "システム状態",
       "message": "すべてのセンサーが動作中 • データをライブ配信中",
@@ -1857,5 +1915,80 @@
     "processing": "ファイルを処理中...",
     "visualizations": "データの可視化とエクスポート",
     "download_csv": "データをダウンロード（CSV）"
+  },
+  "AgroclimatologicalData": {
+    "title": "農業気象データ",
+    "loading": "農業気象データを読み込み中...",
+    "noData": {
+      "title": "データがありません",
+      "description": "選択した条件に該当する農業気象データが見つかりませんでした。",
+      "refresh": "再読み込み"
+    },
+    "error": {
+      "title": "データ読み込みエラー",
+      "retry": "再試行"
+    },
+    "filters": {
+      "to": "から",
+      "station": "観測所",
+      "allStations": "すべての観測所"
+    },
+    "export": {
+      "csv": "CSVでエクスポート",
+      "txt": "TXTでエクスポート",
+      "noData": "エクスポートするデータがありません"
+    },
+    "summary": {
+      "allDates": "すべての日付",
+      "totalRecords": "総レコード数",
+      "station": "観測所"
+    },
+    "errors": {
+      "fetchFailed": "データの取得に失敗しました",
+      "fetchFailedToast": "農業気象データの読み込みに失敗しました",
+      "stationsFailed": "観測所の読み込みに失敗しました",
+      "invalidDateRange": "無効な日付範囲",
+      "invalidDateCalculation": "無効な日付計算",
+      "previousPeriodFailed": "前の期間に移動できませんでした",
+      "nextPeriodFailed": "次の期間に移動できませんでした",
+      "invalidDateFormat": "無効な日付形式",
+      "startAfterEnd": "開始日は終了日より後にできません",
+      "endBeforeStart": "終了日は開始日より前にできません",
+      "invalidDateValue": "無効な日付値"
+    },
+    "tableHeaders": {
+      "date": "日付",
+      "hour": "時間",
+      "solarRadiation": "日射量 (ラングレー/日)",
+      "sunShineHour": "日照時間",
+      "airTemperature": "気温 (°C) 測定高さ",
+      "minMaxTemp": "最低/最高気温 (°C)",
+      "grassMinTemp": "草面最低気温 (°C)",
+      "soilTemperature": "地温 (°C) 深さ",
+      "panWaterTemp": "蒸発皿水温 (°C)",
+      "elevation": "標高 (mm)",
+      "evapotranspiration": "蒸発散量 (mm)",
+      "soilMoisture": "土壌水分率 (%) 範囲",
+      "windRun": "風程 (2m高さ, km)",
+      "dew": "露",
+      "rainAmount": "降水量 (mm)",
+      "05mDry": "0.5m 乾球",
+      "05mWet": "0.5m 湿球",
+      "12mDry": "1.2m 乾球",
+      "12mWet": "1.2m 湿球",
+      "22mDry": "2.2m 乾球",
+      "22mWet": "2.2m 湿球",
+      "min": "最低",
+      "max": "最高",
+      "5cm": "5cm",
+      "10cm": "10cm",
+      "20cm": "20cm",
+      "30cm": "30cm",
+      "50cm": "50cm",
+      "0to20cm": "0-20cm",
+      "20to50cm": "20-50cm",
+      "dewAmount": "量 (mm)",
+      "dewDuration": "持続時間 (時間)"
+    }
   }
 }

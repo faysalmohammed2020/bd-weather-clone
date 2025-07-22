@@ -1730,7 +1730,8 @@
           "station": "Station",
           "period": "Period",
           "location": "Location",
-          "elevation": "Elevation"
+          "elevation": "Elevation",
+          "utcTime" : "UTC Time"
         },
         "status": {
           "title": "Data Completion Status",
@@ -1901,5 +1902,80 @@
     "visualizations": "Data Visualizations & Exports",
     "download_csv": "Download Data (CSV)"
     
+  },
+  "AgroclimatologicalData": {
+    "title": "AGROCLIMATOLOGICAL DATA",
+    "loading": "Loading agroclimatological data...",
+    "noData": {
+      "title": "No Data Available",
+      "description": "No agroclimatological data found for the selected criteria.",
+      "refresh": "Refresh"
+    },
+    "error": {
+      "title": "Error Loading Data",
+      "retry": "Retry"
+    },
+    "filters": {
+      "to": "to",
+      "station": "Station",
+      "allStations": "All Stations"
+    },
+    "export": {
+      "csv": "Export CSV",
+      "txt": "Export TXT",
+      "noData": "No data to export"
+    },
+    "summary": {
+      "allDates": "All Dates",
+      "totalRecords": "Total Records",
+      "station": "Station"
+    },
+    "errors": {
+      "fetchFailed": "Failed to fetch data",
+      "fetchFailedToast": "Failed to load agroclimatological data",
+      "stationsFailed": "Failed to load stations",
+      "invalidDateRange": "Invalid date range",
+      "invalidDateCalculation": "Invalid date calculation",
+      "previousPeriodFailed": "Failed to navigate to previous period",
+      "nextPeriodFailed": "Failed to navigate to next period",
+      "invalidDateFormat": "Invalid date format",
+      "startAfterEnd": "Start date cannot be after end date",
+      "endBeforeStart": "End date cannot be before start date",
+      "invalidDateValue": "Invalid date value"
+    },
+    "tableHeaders": {
+      "date": "Date",
+      "hour": "Hour",
+      "solarRadiation": "Solar Radiation (Langley day⁻¹)",
+      "sunShineHour": "Sun Shine Hour",
+      "airTemperature": "Air Temperature (°C) at",
+      "minMaxTemp": "Min/Max Temp (°C)",
+      "grassMinTemp": "Grass Min Temp (°C)",
+      "soilTemperature": "Soil Temperature (°C) at",
+      "panWaterTemp": "Pan Water Temp (°C)",
+      "elevation": "Elevation (mm)",
+      "evapotranspiration": "Evapotranspiration (mm)",
+      "soilMoisture": "Soil Moisture % Between",
+      "windRun": "Wind Run at 2m ht (KM)",
+      "dew": "Dew",
+      "rainAmount": "Rain Amount (mm)",
+      "05mDry": "0.5m Dry",
+      "05mWet": "0.5m Wet",
+      "12mDry": "1.2m Dry",
+      "12mWet": "1.2m Wet",
+      "22mDry": "2.2m Dry",
+      "22mWet": "2.2m Wet",
+      "min": "Min",
+      "max": "Max",
+      "5cm": "5cm",
+      "10cm": "10cm",
+      "20cm": "20cm",
+      "30cm": "30cm",
+      "50cm": "50cm",
+      "0to20cm": "0-20cm",
+      "20to50cm": "20-50cm",
+      "dewAmount": "Amount (MM)",
+      "dewDuration": "Duration (hrs)"
+    }
   }
 }
