@@ -430,7 +430,7 @@ const DailySummaryTable = forwardRef((props, ref) => {
   }
 
   return (
-    <div className="space-y-6 print:space-y-0" dir="rtl">
+    <div className="space-y-6 print:space-y-0">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center">
           <span className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 flex items-center justify-center text-white shadow-sm ml-3">
@@ -735,9 +735,9 @@ const DailySummaryTable = forwardRef((props, ref) => {
             </table>
 
             {/* Optional footer */}
-            <div className="text-left text-sm text-blue-600 mt-2 pr-4 pb-2 print:hidden">
+            {/* <div className="text-left text-sm text-blue-600 mt-2 pr-4 pb-2 print:hidden">
               {t("generated")}: {new Date().toLocaleString("ar-EG", { timeZone: "Asia/Dhaka" })}
-            </div>
+            </div> */}
           </div>
         </div>
       )}
