@@ -23,7 +23,7 @@ import {
   LineChart,
   ScatterChart,
   BarChart3,
-  Map,
+  MapIcon,
   BoxSelect,
   Box,
   Download,
@@ -33,6 +33,7 @@ import {
   TrendingUp,
   CheckCircle,
   XCircle,
+  ImageIcon,
 } from "lucide-react"
 import { saveAs } from "file-saver"
 import type { Data, Layout, PlotData } from "plotly.js"
@@ -60,45 +61,55 @@ interface SpatialCoordinates {
   hasValidCoords: boolean
 }
 
-function App() {
+interface FileData {
+  images?: Record<string, string>
+  csvs?: Record<string, string>
+}
+
+const API_ENDPOINTS = {
+  IMAGE_PROCESSING: "https://django-netcdf-visualizer.onrender.com/api/upload/",
+  CSV_PROCESSING: "https://django-netcdf-visualizer.onrender.com/api/upload-csv/",
+}
+
+function NetCDFVisualizer() {
   const [file, setFile] = useState<File | null>(null)
   const [isProcessing, setIsProcessing] = useState(false)
   const [ncData, setNcData] = useState<NCData | null>(null)
   const [selectedVariable, setSelectedVariable] = useState<string>("")
   const [plotType, setPlotType] = useState<string>("line")
   const [error, setError] = useState<string>("")
-  const [versionWarning, setVersionWarning] = useState<string>("")
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [showVersionModal, setShowVersionModal] = useState(false)
   const [modalContent, setModalContent] = useState({ title: "", message: "", type: "" })
+  const [fileData, setFileData] = useState<FileData>({})
+  const [activeTab, setActiveTab] = useState("interactive")
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
       setFile(selectedFile)
       setError("")
-      setVersionWarning("")
       setNcData(null)
+      setFileData({})
     }
   }
 
   const processFileLocally = async () => {
     if (!file) return
+
     setIsProcessing(true)
     setError("")
-    setVersionWarning("")
 
     try {
       const arrayBuffer = await file.arrayBuffer()
       const buffer = new Uint8Array(arrayBuffer)
       const reader = new NetCDFReader(buffer)
 
-      // ✅ Detect NetCDF version
+      // Detect NetCDF version
       const version = reader.version
 
       // Show version modal and wait for user confirmation
       if (version === 2) {
-        // NetCDF-4 (HDF5) — Show warning modal
         setModalContent({
           title: "NetCDF-4 File Detected",
           message:
@@ -106,27 +117,25 @@ function App() {
           type: "warning",
         })
         setShowVersionModal(true)
-        setIsProcessing(false) // Stop processing until user confirms
+        setIsProcessing(false)
         return
       } else if (version === 1) {
-        // NetCDF-3 — Show success modal
         setModalContent({
           title: "NetCDF-3 File Detected",
           message: "NetCDF-3 detected: proceeding with processing...",
           type: "success",
         })
         setShowVersionModal(true)
-        setIsProcessing(false) // Stop processing until user confirms
+        setIsProcessing(false)
         return
       } else {
-        // Unknown version — Show warning modal
         setModalContent({
           title: `NetCDF Version ${version} Detected`,
           message: `NetCDF version ${version} detected. This may not be fully supported and could cause processing issues.`,
           type: "warning",
         })
         setShowVersionModal(true)
-        setIsProcessing(false) // Stop processing until user confirms
+        setIsProcessing(false)
         return
       }
     } catch (error) {
@@ -136,17 +145,45 @@ function App() {
     }
   }
 
+  const uploadToAPI = async () => {
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append("file", file)
+
+    try {
+      const [imageRes, csvRes] = await Promise.all([
+        fetch(API_ENDPOINTS.IMAGE_PROCESSING, { method: "POST", body: formData }),
+        fetch(API_ENDPOINTS.CSV_PROCESSING, { method: "POST", body: formData }),
+      ])
+
+      if (!imageRes.ok || !csvRes.ok) {
+        throw new Error("Failed to upload file to API")
+      }
+
+      const [imageData, csvData] = await Promise.all([imageRes.json(), csvRes.json()])
+
+      setFileData({
+        images: imageData.images,
+        csvs: csvData.csvs,
+      })
+    } catch (err) {
+      console.error("API upload error:", err)
+      // Don't show error to user since local processing is primary
+    }
+  }
+
   const continueProcessing = async () => {
     setShowVersionModal(false)
     setIsProcessing(true)
 
     try {
+      // Process file locally
       const arrayBuffer = await file!.arrayBuffer()
       const buffer = new Uint8Array(arrayBuffer)
       const reader = new NetCDFReader(buffer)
 
       const dimensions = Object.fromEntries(Object.entries(reader.dimensions).map(([name, { size }]) => [name, size]))
-
       const globalAttributes = reader.globalAttributes.map((attr) => ({
         name: attr.name,
         value: attr.value,
@@ -173,6 +210,9 @@ function App() {
       if (Object.keys(variables).length > 0) {
         setSelectedVariable(Object.keys(variables)[0])
       }
+
+      // Upload to API in parallel
+      await uploadToAPI()
     } catch (error) {
       console.error("Error processing file:", error)
       setError("Failed to process NetCDF file locally. Please check the file format.")
@@ -244,6 +284,7 @@ function App() {
 
   const hasSpatialDimensions = (): boolean => {
     if (!selectedVariable || !ncData) return false
+
     const variable = ncData.variables[selectedVariable]
     const dims = variable.dimensions
 
@@ -355,7 +396,6 @@ function App() {
     const data = variable.data
 
     const minLength = Math.min(coords.lat.length, coords.lon.length, data.length)
-
     if (minLength === 0) return null
 
     return [
@@ -430,7 +470,6 @@ function App() {
         if (coords.hasValidCoords) {
           const centerLat = coords.lat.reduce((a, b) => a + b, 0) / coords.lat.length
           const centerLon = coords.lon.reduce((a, b) => a + b, 0) / coords.lon.length
-
           const latRange = Math.max(...coords.lat) - Math.min(...coords.lat)
           const lonRange = Math.max(...coords.lon) - Math.min(...coords.lon)
           const maxRange = Math.max(latRange, lonRange)
@@ -483,7 +522,6 @@ function App() {
     const headers = "index,value"
     const rows = variable.data.map((value, index) => `${index},${value}`)
     const csvContent = [headers, ...rows].join("\n")
-
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
     saveAs(blob, `${selectedVariable}.csv`)
   }
@@ -498,7 +536,6 @@ function App() {
       attributes: variable.attributes,
       data: variable.data,
     }
-
     const jsonContent = JSON.stringify(exportData, null, 2)
     const blob = new Blob([jsonContent], {
       type: "application/json;charset=utf-8;",
@@ -559,7 +596,7 @@ function App() {
     },
     {
       type: "heatmap",
-      icon: Map,
+      icon: MapIcon,
       label: "Heatmap",
       description: "2D data intensity",
     },
@@ -576,6 +613,56 @@ function App() {
       description: "3D visualization",
     },
   ]
+
+  const renderSpatialVisualizations = () => {
+    if (!fileData.images || Object.keys(fileData.images).length === 0) {
+      return (
+        <div className="flex items-center justify-center h-96 text-gray-500 bg-gray-50 rounded-lg">
+          <div className="text-center">
+            <ImageIcon className="h-12 w-12 mx-auto mb-2 text-gray-400" />
+            <p className="text-lg font-medium">No spatial visualizations available</p>
+            <p className="text-sm text-gray-400 mt-1">
+              Spatial maps will appear here once the file is processed by our API
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Object.entries(fileData.images).map(([key, url]) => (
+          <Card key={key} className="shadow-lg border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-lg text-center">{key.replace(/_/g, " ").toUpperCase()}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="relative">
+                <img
+                  src={`https://django-netcdf-visualizer.onrender.com${url}`}
+                  alt={key}
+                  className="w-full h-auto object-contain rounded-lg shadow-sm"
+                  loading="lazy"
+                />
+              </div>
+              {fileData.csvs?.[key] && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <a
+                    href={`https://django-netcdf-visualizer.onrender.com${fileData.csvs[key]}`}
+                    download
+                    className="flex items-center justify-center gap-2 text-blue-600 hover:text-blue-800 transition-colors text-sm font-medium"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download CSV Data
+                  </a>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -712,292 +799,317 @@ function App() {
         )}
 
         {/* Main Content */}
-        {ncData && (
+        {(ncData || fileData.images) && (
           <div className="space-y-8">
-            {/* Plot Type Selector */}
+            {/* Main Tabs for Spatial vs Interactive */}
             <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-3 text-xl">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <Activity className="h-5 w-5 text-purple-600" />
-                  </div>
-                  Visualization Types
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                  {plotTypes.map(({ type, icon: Icon, label, description }) => (
-                    <button
-                      key={type}
-                      onClick={() => setPlotType(type)}
-                      disabled={type === "map" && !hasSpatialDimensions()}
-                      className={`group relative p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 ${
-                        plotType === type
-                          ? "border-blue-500 bg-blue-50 shadow-lg"
-                          : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-md"
-                      } ${
-                        type === "map" && !hasSpatialDimensions() ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-                      }`}
+              <CardContent className="p-1">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid grid-cols-2 w-full h-12">
+                    <TabsTrigger
+                      value="interactive"
+                      className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-lg flex items-center gap-2"
                     >
-                      <div className="flex flex-col items-center text-center space-y-2">
-                        <div
-                          className={`p-3 rounded-lg transition-colors ${
-                            plotType === type ? "bg-blue-100" : "bg-gray-100 group-hover:bg-blue-50"
-                          }`}
-                        >
-                          <Icon
-                            className={`h-6 w-6 ${
-                              plotType === type ? "text-blue-600" : "text-gray-600 group-hover:text-blue-500"
-                            }`}
-                          />
+                      <Activity className="h-4 w-4" />
+                      Interactive Plots
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="spatial"
+                      className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-lg flex items-center gap-2"
+                    >
+                      <MapIcon className="h-4 w-4" />
+                      Spatial Visualizations
+                    </TabsTrigger>
+                  </TabsList>
+
+                  {/* Interactive Plots Tab */}
+                  <TabsContent value="interactive" className="mt-6">
+                    {ncData ? (
+                      <div className="space-y-6">
+                        {/* Plot Type Selector */}
+                        <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                          <CardHeader className="pb-4">
+                            <CardTitle className="flex items-center gap-3 text-xl">
+                              <div className="p-2 bg-purple-100 rounded-lg">
+                                <Activity className="h-5 w-5 text-purple-600" />
+                              </div>
+                              Visualization Types
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                              {plotTypes.map(({ type, icon: Icon, label, description }) => (
+                                <button
+                                  key={type}
+                                  onClick={() => setPlotType(type)}
+                                  disabled={type === "map" && !hasSpatialDimensions()}
+                                  className={`group relative p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 ${
+                                    plotType === type
+                                      ? "border-blue-500 bg-blue-50 shadow-lg"
+                                      : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-md"
+                                  } ${
+                                    type === "map" && !hasSpatialDimensions()
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : "cursor-pointer"
+                                  }`}
+                                >
+                                  <div className="flex flex-col items-center text-center space-y-2">
+                                    <div
+                                      className={`p-3 rounded-lg transition-colors ${
+                                        plotType === type ? "bg-blue-100" : "bg-gray-100 group-hover:bg-blue-50"
+                                      }`}
+                                    >
+                                      <Icon
+                                        className={`h-6 w-6 ${
+                                          plotType === type
+                                            ? "text-blue-600"
+                                            : "text-gray-600 group-hover:text-blue-500"
+                                        }`}
+                                      />
+                                    </div>
+                                    <div>
+                                      <div
+                                        className={`font-medium text-sm ${
+                                          plotType === type ? "text-blue-900" : "text-gray-900"
+                                        }`}
+                                      >
+                                        {label}
+                                      </div>
+                                      <div
+                                        className={`text-xs mt-1 ${
+                                          plotType === type ? "text-blue-600" : "text-gray-500"
+                                        }`}
+                                      >
+                                        {description}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  {plotType === type && (
+                                    <div className="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full"></div>
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                            {plotType === "map" && !hasSpatialDimensions() && (
+                              <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                <div className="flex items-center gap-2 text-amber-800">
+                                  <AlertCircle className="h-4 w-4" />
+                                  <span className="text-sm font-medium">
+                                    Geographic mapping requires spatial coordinates (lat/lon)
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+
+                        {/* Interactive Visualization */}
+                        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                          {/* Variables Panel */}
+                          <div className="lg:col-span-1">
+                            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                              <CardHeader className="pb-4">
+                                <CardTitle className="text-lg">Variables</CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="space-y-2 max-h-96 overflow-y-auto">
+                                  {Object.keys(ncData.variables).map((varName) => (
+                                    <button
+                                      key={varName}
+                                      onClick={() => setSelectedVariable(varName)}
+                                      className={`w-full text-left p-3 rounded-lg border transition-all duration-200 ${
+                                        selectedVariable === varName
+                                          ? "border-blue-500 bg-blue-50 text-blue-900 shadow-md"
+                                          : "border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50"
+                                      }`}
+                                    >
+                                      <div className="font-medium">{varName}</div>
+                                    </button>
+                                  ))}
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </div>
+
+                          {/* Visualization Panel */}
+                          <div className="lg:col-span-3">
+                            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                              <CardHeader className="pb-4">
+                                <CardTitle className="text-lg">
+                                  {selectedVariable
+                                    ? `${selectedVariable} - ${plotTypes.find((p) => p.type === plotType)?.label}`
+                                    : "Select a variable"}
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                {selectedVariable ? (
+                                  renderVisualization()
+                                ) : (
+                                  <div className="flex items-center justify-center h-96 text-gray-500 bg-gray-50 rounded-lg">
+                                    <div className="text-center">
+                                      <Database className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                                      <p className="text-lg font-medium">Select a variable to begin visualization</p>
+                                      <p className="text-sm text-gray-400 mt-1">
+                                        Choose from the variables panel on the left
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          </div>
                         </div>
-                        <div>
-                          <div
-                            className={`font-medium text-sm ${plotType === type ? "text-blue-900" : "text-gray-900"}`}
-                          >
-                            {label}
-                          </div>
-                          <div className={`text-xs mt-1 ${plotType === type ? "text-blue-600" : "text-gray-500"}`}>
-                            {description}
-                          </div>
+
+                        {/* Export and Metadata Tabs */}
+                        <Tabs defaultValue="export" className="space-y-6">
+                          <TabsList className="grid w-full grid-cols-2 bg-white/80 backdrop-blur-sm border border-gray-200 shadow-lg rounded-xl p-1">
+                            <TabsTrigger
+                              value="export"
+                              className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-lg transition-all"
+                            >
+                              <Download className="h-4 w-4" />
+                              Export Data
+                            </TabsTrigger>
+                            <TabsTrigger
+                              value="metadata"
+                              className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-lg transition-all"
+                            >
+                              <Database className="h-4 w-4" />
+                              Metadata
+                            </TabsTrigger>
+                          </TabsList>
+
+                          {/* Export Tab */}
+                          <TabsContent value="export">
+                            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                              <CardHeader className="pb-4">
+                                <CardTitle className="flex items-center gap-3 text-lg">
+                                  <div className="p-2 bg-green-100 rounded-lg">
+                                    <Download className="h-5 w-5 text-green-600" />
+                                  </div>
+                                  Export Data
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <Button
+                                    onClick={exportToCSV}
+                                    disabled={!selectedVariable}
+                                    className="flex items-center gap-2 h-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all"
+                                  >
+                                    <FileText className="h-4 w-4" />
+                                    Export to CSV
+                                  </Button>
+                                  <Button
+                                    onClick={exportToJSON}
+                                    disabled={!selectedVariable}
+                                    className="flex items-center gap-2 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all"
+                                  >
+                                    <FileText className="h-4 w-4" />
+                                    Export to JSON
+                                  </Button>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </TabsContent>
+
+                          {/* Metadata Tab */}
+                          <TabsContent value="metadata">
+                            <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
+                              <CardHeader className="pb-4">
+                                <CardTitle className="text-lg">File Metadata</CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-6">
+                                {/* NetCDF Version */}
+                                {ncData.metadata.version && (
+                                  <div>
+                                    <h4 className="font-semibold mb-3 text-gray-800">NetCDF Version</h4>
+                                    <div className="bg-gray-50 p-4 rounded-lg border">
+                                      <div className="flex items-center gap-2">
+                                        {ncData.metadata.version === 1 ? (
+                                          <CheckCircle className="h-5 w-5 text-green-600" />
+                                        ) : (
+                                          <AlertCircle className="h-5 w-5 text-amber-600" />
+                                        )}
+                                        <span className="text-gray-700 font-medium">
+                                          Version {ncData.metadata.version} —{" "}
+                                          {ncData.metadata.version === 1 ? "NetCDF-3 (Classic)" : "NetCDF-4 (HDF5)"}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div>
+                                  <h4 className="font-semibold mb-3 text-gray-800">Dimensions</h4>
+                                  <div className="bg-gray-50 p-4 rounded-lg border">
+                                    <pre className="text-sm overflow-x-auto text-gray-700">
+                                      {JSON.stringify(ncData.metadata.dimensions, null, 2)}
+                                    </pre>
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <h4 className="font-semibold mb-3 text-gray-800">Global Attributes</h4>
+                                  <div className="bg-gray-50 p-4 rounded-lg border max-h-64 overflow-y-auto">
+                                    <pre className="text-sm text-gray-700">
+                                      {JSON.stringify(ncData.metadata.globalAttributes, null, 2)}
+                                    </pre>
+                                  </div>
+                                </div>
+
+                                {selectedVariable && (
+                                  <div>
+                                    <h4 className="font-semibold mb-3 text-gray-800">
+                                      Variable Attributes: {selectedVariable}
+                                    </h4>
+                                    <div className="bg-gray-50 p-4 rounded-lg border max-h-64 overflow-y-auto">
+                                      <pre className="text-sm text-gray-700">
+                                        {JSON.stringify(ncData.variables[selectedVariable].attributes, null, 2)}
+                                      </pre>
+                                    </div>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          </TabsContent>
+                        </Tabs>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center h-96 text-gray-500 bg-gray-50 rounded-lg">
+                        <div className="text-center">
+                          <Activity className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                          <p className="text-lg font-medium">Interactive plots will appear here</p>
+                          <p className="text-sm text-gray-400 mt-1">
+                            Upload and process a NetCDF file to see interactive visualizations
+                          </p>
                         </div>
                       </div>
-                      {plotType === type && (
-                        <div className="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full"></div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-                {plotType === "map" && !hasSpatialDimensions() && (
-                  <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                    <div className="flex items-center gap-2 text-amber-800">
-                      <AlertCircle className="h-4 w-4" />
-                      <span className="text-sm font-medium">
-                        Geographic mapping requires spatial coordinates (lat/lon)
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                    )}
+                  </TabsContent>
 
-            {/* Interactive Visualization Tabs */}
-            <Tabs defaultValue="plot" className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4 bg-white/80 backdrop-blur-sm border border-gray-200 shadow-lg rounded-xl p-1">
-                <TabsTrigger
-                  value="plot"
-                  className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-lg transition-all"
-                >
-                  <Activity className="h-4 w-4" />
-                  Visualization
-                </TabsTrigger>
-                <TabsTrigger
-                  value="spatial-analysis"
-                  className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-lg transition-all"
-                >
-                  <Map className="h-4 w-4" />
-                  Spatial Analysis
-                </TabsTrigger>
-                <TabsTrigger
-                  value="export"
-                  className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-lg transition-all"
-                >
-                  <Download className="h-4 w-4" />
-                  Export Data
-                </TabsTrigger>
-                <TabsTrigger
-                  value="metadata"
-                  className="flex items-center gap-2 data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-lg transition-all"
-                >
-                  <Database className="h-4 w-4" />
-                  Metadata
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Plot Tab */}
-              <TabsContent value="plot">
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                  {/* Variables Panel */}
-                  <div className="lg:col-span-1">
+                  {/* Spatial Visualizations Tab */}
+                  <TabsContent value="spatial" className="mt-6">
                     <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
                       <CardHeader className="pb-4">
-                        <CardTitle className="text-lg">Variables</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2 max-h-96 overflow-y-auto">
-                          {Object.keys(ncData.variables).map((varName) => (
-                            <button
-                              key={varName}
-                              onClick={() => setSelectedVariable(varName)}
-                              className={`w-full text-left p-3 rounded-lg border transition-all duration-200 ${
-                                selectedVariable === varName
-                                  ? "border-blue-500 bg-blue-50 text-blue-900 shadow-md"
-                                  : "border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50"
-                              }`}
-                            >
-                              <div className="font-medium">{varName}</div>
-                            </button>
-                          ))}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* Visualization Panel */}
-                  <div className="lg:col-span-3">
-                    <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-                      <CardHeader className="pb-4">
-                        <CardTitle className="text-lg">
-                          {selectedVariable
-                            ? `${selectedVariable} - ${plotTypes.find((p) => p.type === plotType)?.label}`
-                            : "Select a variable"}
+                        <CardTitle className="flex items-center gap-3 text-xl">
+                          <div className="p-2 bg-green-100 rounded-lg">
+                            <MapIcon className="h-5 w-5 text-green-600" />
+                          </div>
+                          Spatial Visualizations
                         </CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        {selectedVariable ? (
-                          renderVisualization()
-                        ) : (
-                          <div className="flex items-center justify-center h-96 text-gray-500 bg-gray-50 rounded-lg">
-                            <div className="text-center">
-                              <Database className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                              <p className="text-lg font-medium">Select a variable to begin visualization</p>
-                              <p className="text-sm text-gray-400 mt-1">Choose from the variables panel on the left</p>
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
+                      <CardContent>{renderSpatialVisualizations()}</CardContent>
                     </Card>
-                  </div>
-                </div>
-              </TabsContent>
-
-              {/* Spatial Analysis Tab */}
-              <TabsContent value="spatial-analysis">
-                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center gap-3 text-lg">
-                      <div className="p-2 bg-purple-100 rounded-lg">
-                        <Map className="h-5 w-5 text-purple-600" />
-                      </div>
-                      Spatial Analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="py-16">
-                    <div className="text-center text-gray-500">
-                      <div className="p-4 bg-purple-100 rounded-full w-20 h-20 mx-auto mb-6 flex items-center justify-center">
-                        <Map className="h-10 w-10 text-purple-600" />
-                      </div>
-                      <h3 className="text-2xl font-semibold mb-2 text-gray-800">Spatial Analysis Tools</h3>
-                      <p className="text-gray-600 max-w-md mx-auto mb-4">
-                        Advanced spatial analysis features for geographic data processing and statistical analysis.
-                      </p>
-                      <div className="inline-flex items-center gap-2 px-4 py-2 bg-purple-50 border border-purple-200 rounded-lg text-purple-700">
-                        <AlertCircle className="h-4 w-4" />
-                        <span className="font-medium">This data is coming soon</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Export Tab */}
-              <TabsContent value="export">
-                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center gap-3 text-lg">
-                      <div className="p-2 bg-green-100 rounded-lg">
-                        <Download className="h-5 w-5 text-green-600" />
-                      </div>
-                      Export Data
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Button
-                        onClick={exportToCSV}
-                        disabled={!selectedVariable}
-                        className="flex items-center gap-2 h-12 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg hover:shadow-xl transition-all"
-                      >
-                        <FileText className="h-4 w-4" />
-                        Export to CSV
-                      </Button>
-                      <Button
-                        onClick={exportToJSON}
-                        disabled={!selectedVariable}
-                        className="flex items-center gap-2 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all"
-                      >
-                        <FileText className="h-4 w-4" />
-                        Export to JSON
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Metadata Tab */}
-              <TabsContent value="metadata">
-                <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="text-lg">File Metadata</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {/* NetCDF Version */}
-                    {ncData.metadata.version && (
-                      <div>
-                        <h4 className="font-semibold mb-3 text-gray-800">NetCDF Version</h4>
-                        <div className="bg-gray-50 p-4 rounded-lg border">
-                          <div className="flex items-center gap-2">
-                            {ncData.metadata.version === 1 ? (
-                              <CheckCircle className="h-5 w-5 text-green-600" />
-                            ) : (
-                              <AlertCircle className="h-5 w-5 text-amber-600" />
-                            )}
-                            <span className="text-gray-700 font-medium">
-                              Version {ncData.metadata.version} —{" "}
-                              {ncData.metadata.version === 1 ? "NetCDF-3 (Classic)" : "NetCDF-4 (HDF5)"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    <div>
-                      <h4 className="font-semibold mb-3 text-gray-800">Dimensions</h4>
-                      <div className="bg-gray-50 p-4 rounded-lg border">
-                        <pre className="text-sm overflow-x-auto text-gray-700">
-                          {JSON.stringify(ncData.metadata.dimensions, null, 2)}
-                        </pre>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold mb-3 text-gray-800">Global Attributes</h4>
-                      <div className="bg-gray-50 p-4 rounded-lg border max-h-64 overflow-y-auto">
-                        <pre className="text-sm text-gray-700">
-                          {JSON.stringify(ncData.metadata.globalAttributes, null, 2)}
-                        </pre>
-                      </div>
-                    </div>
-
-                    {selectedVariable && (
-                      <div>
-                        <h4 className="font-semibold mb-3 text-gray-800">Variable Attributes: {selectedVariable}</h4>
-                        <div className="bg-gray-50 p-4 rounded-lg border max-h-64 overflow-y-auto">
-                          <pre className="text-sm text-gray-700">
-                            {JSON.stringify(ncData.variables[selectedVariable].attributes, null, 2)}
-                          </pre>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
           </div>
         )}
 
         {/* No Data State */}
-        {!ncData && !isProcessing && (
+        {!ncData && !fileData.images && !isProcessing && (
           <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
             <CardContent className="py-16">
               <div className="text-center text-gray-500">
@@ -1006,8 +1118,8 @@ function App() {
                 </div>
                 <h3 className="text-2xl font-semibold mb-2 text-gray-800">Ready to Analyze Your Data</h3>
                 <p className="text-gray-600 max-w-md mx-auto">
-                  Upload a NetCDF file to start visualizing your scientific data with interactive charts and
-                  comprehensive analysis tools.
+                  Upload a NetCDF file to start visualizing your scientific data with interactive charts and spatial
+                  analysis tools.
                 </p>
               </div>
             </CardContent>
@@ -1018,4 +1130,4 @@ function App() {
   )
 }
 
-export default App
+export default NetCDFVisualizer
