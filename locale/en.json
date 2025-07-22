@@ -1268,8 +1268,8 @@
         }
       },
       "roles": {
-        "superAdmin": "Super Admin",
-        "stationAdmin": "Station Admin",
+        "super_admin": "Super Admin",
+        "station_admin": "Station Admin",
         "observer": "Observer"
       },
       "buttons": {

@@ -1220,8 +1220,8 @@
         }
       },
       "roles": {
-        "superAdmin": "スーパーアドミン",
-        "stationAdmin": "ステーションアドミン",
+        "super_admin": "スーパーアドミン",
+        "station_admin": "ステーションアドミン",
         "observer": "オブザーバー"
       },
       "buttons": {

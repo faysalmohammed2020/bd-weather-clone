@@ -1271,8 +1271,8 @@
         }
       },
       "roles": {
-        "superAdmin": "مدير عام",
-        "stationAdmin": "مدير محطة",
+        "super_admin": "مدير عام",
+        "station_admin": "مدير محطة",
         "observer": "مراقب"
       },
       "buttons": {
