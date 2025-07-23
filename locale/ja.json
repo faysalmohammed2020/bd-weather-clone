@@ -1990,5 +1990,9 @@
       "dewAmount": "量 (mm)",
       "dewDuration": "持続時間 (時間)"
     }
+  },
+  "FormikError": {
+    "validationErrorTitle": "すべての必須情報を入力してください",
+    "validationErrorDescription": "他のタブに移動する前に現在のタブのすべての項目を入力してください"
   }
 }

@@ -1983,5 +1983,9 @@
       "dewAmount": "الكمية (مم)",
       "dewDuration": "المدة (ساعات)"
     }
+  },
+  "FormikError": {
+    "validationErrorTitle": "يرجى تعبئة جميع المعلومات المطلوبة",
+    "validationErrorDescription": "يرجى إكمال جميع الحقول في التبويب الحالي قبل الانتقال إلى تبويب آخر"
   }
 }

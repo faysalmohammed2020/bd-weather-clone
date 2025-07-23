@@ -186,6 +186,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   };
 
   // Function to validate current tab before proceeding
+   const te = useTranslations('FormikError');
   const validateTab = (tabName: string) => {
     let fieldsToValidate: any[] = [];
 
@@ -236,9 +237,8 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
     // If trying to navigate away from current tab, validate it first
     if (activeTab !== tabName) {
       if (!validateTab(activeTab)) {
-        toast.error("অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন", {
-          description:
-            "অন্য ট্যাবে যাওয়ার আগে বর্তমান ট্যাবের সকল তথ্য পূরণ করুন",
+        toast.error(te('validationErrorTitle'), {
+          description: te('validationErrorDescription'),
         });
         return;
       }
@@ -776,9 +776,8 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const nextTab = () => {
     // Validate current tab before proceeding
     if (!validateTab(activeTab)) {
-      toast.error("অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন", {
-        description:
-          "পরবর্তী ট্যাবে যাওয়ার আগে বর্তমান ট্যাবের সকল তথ্য পূরণ করুন",
+       toast.error(te('validationErrorTitle'), {
+          description: te('validationErrorDescription'),
       });
       return;
     }
@@ -865,10 +864,10 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         if (activeTab !== key && !validateTab(activeTab)) {
                           e.preventDefault();
                           toast.error(
-                            "অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন",
+                            te('validationErrorTitle'),
                             {
                               description:
-                                "অন্য ট্যাবে যাওয়ার আগে বর্তমান ট্যাবের সকল তথ্য পূরণ করুন",
+                                te('validationErrorDescription'),
                             }
                           );
                           return false;
