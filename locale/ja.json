@@ -1994,5 +1994,115 @@
   "FormikError": {
     "validationErrorTitle": "すべての必須情報を入力してください",
     "validationErrorDescription": "他のタブに移動する前に現在のタブのすべての項目を入力してください"
+  },
+  "netcdf": {
+    "header": {
+      "title": "NetCDF ビジュアライザー",
+      "subtitle": "高度な科学データ可視化・分析プラットフォーム"
+    },
+    "upload": {
+      "title": "NetCDFファイルをアップロード",
+      "selectFile": "NetCDFファイルを選択 (.nc)"
+    },
+    "modal": {
+      "netcdf4": {
+        "title": "NetCDF-4ファイルを検出",
+        "message": "NetCDF-4ファイルを検出しました。処理は続行されますが、時間がかかったり互換性の問題やエラーが発生する可能性があります。"
+      },
+      "netcdf3": {
+        "title": "NetCDF-3ファイルを検出",
+        "message": "NetCDF-3を検出しました: 処理を続行します..."
+      },
+      "unsupported": {
+        "title": "NetCDFバージョン{version}を検出",
+        "message": "NetCDFバージョン{version}を検出しました。完全にはサポートされておらず、処理に問題が発生する可能性があります。"
+      }
+    },
+    "errors": {
+      "processingFailed": "NetCDFファイルのローカル処理に失敗しました。ファイル形式を確認してください。"
+    },
+    "buttons": {
+      "continueProcessing": "OK、処理を続行",
+      "analyzeVisualize": "解析と可視化",
+      "downloadCsv": "CSVデータをダウンロード"
+    },
+    "common": {
+      "error": "エラー"
+    },
+    "loading": {
+      "processing": "処理中...",
+      "title": "NetCDFファイルを処理中",
+      "description": "データを解析し、可視化を行っています。しばらくお待ちください。"
+    },
+    "tabs": {
+      "interactive": "インタラクティブプロット",
+      "spatial": "空間可視化"
+    },
+    "visualization": {
+      "title": "可視化タイプ",
+      "noData": "このデータの可視化を生成できません。",
+      "mapRequirement": "地理的マッピングには空間座標（緯度/経度）が必要です",
+      "axis": {
+        "index": "インデックス"
+      },
+      "types": {
+        "line": {
+          "label": "折れ線グラフ",
+          "description": "時系列データとトレンド"
+        },
+        "scatter": {
+          "label": "散布図",
+          "description": "データ分布"
+        },
+        "histogram": {
+          "label": "ヒストグラム",
+          "description": "値の頻度"
+        },
+        "heatmap": {
+          "label": "ヒートマップ",
+          "description": "2Dデータ強度"
+        },
+        "contour": {
+          "label": "等高線",
+          "description": "標高線"
+        },
+        "surface": {
+          "label": "3Dサーフェス",
+          "description": "3D可視化"
+        }
+      }
+    },
+    "variables": {
+      "title": "変数",
+      "selectVariable": "変数を選択",
+      "selectToVisualize": "可視化を開始するには変数を選択してください",
+      "selectDescription": "左側の変数パネルから選択してください"
+    },
+    "export": {
+      "title": "データのエクスポート",
+      "csv": "CSVにエクスポート",
+      "json": "JSONにエクスポート"
+    },
+    "metadata": {
+      "title": "メタデータ",
+      "fileMetadata": "ファイルメタデータ",
+      "version": "NetCDFバージョン",
+      "versionInfo": "バージョン{version} — {type}",
+      "dimensions": "次元",
+      "globalAttributes": "グローバル属性",
+      "variableAttributes": "変数属性: {variable}"
+    },
+    "spatial": {
+      "title": "空間可視化",
+      "noVisualizations": "利用可能な空間可視化はありません",
+      "description": "ファイルがAPIで処理されると、空間マップがここに表示されます"
+    },
+    "states": {
+      "interactivePlots": "インタラクティブプロットがここに表示されます",
+      "uploadDescription": "NetCDFファイルをアップロードして処理すると、インタラクティブな可視化が表示されます",
+      "readyToAnalyze": "データ分析の準備ができました",
+      "readyDescription": "NetCDFファイルをアップロードして、インタラクティブなチャートや空間分析ツールで科学データの可視化を開始しましょう。"
+    }
   }
+  
 }

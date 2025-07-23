@@ -1983,6 +1983,115 @@
     "required": "This field is required",
     "positive": "{field} must be positive",
     "date": "Date is required"
+  },
+  "netcdf": {
+    "header": {
+      "title": "NetCDF Visualizer",
+      "subtitle": "Advanced scientific data visualization and analysis platform"
+    },
+    "upload": {
+      "title": "Upload NetCDF File",
+      "selectFile": "Select NetCDF File (.nc)"
+    },
+    "modal": {
+      "netcdf4": {
+        "title": "NetCDF-4 File Detected",
+        "message": "NetCDF-4 file detected. Processing will continue but may take longer and could encounter compatibility issues or errors."
+      },
+      "netcdf3": {
+        "title": "NetCDF-3 File Detected",
+        "message": "NetCDF-3 detected: proceeding with processing..."
+      },
+      "unsupported": {
+        "title": "NetCDF Version {version} Detected",
+        "message": "NetCDF version {version} detected. This may not be fully supported and could cause processing issues."
+      }
+    },
+    "errors": {
+      "processingFailed": "Failed to process NetCDF file locally. Please check the file format."
+    },
+    "buttons": {
+      "continueProcessing": "OK, Continue Processing",
+      "analyzeVisualize": "Analyze & Visualize",
+      "downloadCsv": "Download CSV Data"
+    },
+    "common": {
+      "error": "Error"
+    },
+    "loading": {
+      "processing": "Processing...",
+      "title": "Processing NetCDF File",
+      "description": "Analyzing your data and generating visualizations. This may take a few moments."
+    },
+    "tabs": {
+      "interactive": "Interactive Plots",
+      "spatial": "Spatial Visualizations"
+    },
+    "visualization": {
+      "title": "Visualization Types",
+      "noData": "Unable to generate visualization for this data.",
+      "mapRequirement": "Geographic mapping requires spatial coordinates (lat/lon)",
+      "axis": {
+        "index": "Index"
+      },
+      "types": {
+        "line": {
+          "label": "Line Chart",
+          "description": "Time series and trends"
+        },
+        "scatter": {
+          "label": "Scatter Plot",
+          "description": "Data distribution"
+        },
+        "histogram": {
+          "label": "Histogram",
+          "description": "Value frequency"
+        },
+        "heatmap": {
+          "label": "Heatmap",
+          "description": "2D data intensity"
+        },
+        "contour": {
+          "label": "Contour",
+          "description": "Elevation lines"
+        },
+        "surface": {
+          "label": "3D Surface",
+          "description": "3D visualization"
+        }
+      }
+    },
+    "variables": {
+      "title": "Variables",
+      "selectVariable": "Select a variable",
+      "selectToVisualize": "Select a variable to begin visualization",
+      "selectDescription": "Choose from the variables panel on the left"
+    },
+    "export": {
+      "title": "Export Data",
+      "csv": "Export to CSV",
+      "json": "Export to JSON"
+    },
+    "metadata": {
+      "title": "Metadata",
+      "fileMetadata": "File Metadata",
+      "version": "NetCDF Version",
+      "versionInfo": "Version {version} — {type}",
+      "dimensions": "Dimensions",
+      "globalAttributes": "Global Attributes",
+      "variableAttributes": "Variable Attributes: {variable}"
+    },
+    "spatial": {
+      "title": "Spatial Visualizations",
+      "noVisualizations": "No spatial visualizations available",
+      "description": "Spatial maps will appear here once the file is processed by our API"
+    },
+    "states": {
+      "interactivePlots": "Interactive plots will appear here",
+      "uploadDescription": "Upload and process a NetCDF file to see interactive visualizations",
+      "readyToAnalyze": "Ready to Analyze Your Data",
+      "readyDescription": "Upload a NetCDF file to start visualizing your scientific data with interactive charts and spatial analysis tools."
+    }
   }
   
 }
