@@ -1815,6 +1815,7 @@
   },
   "SoilMoistureForm": {
     "title": "Soil Moisture Data Collection",
+    
     "depths": {
       "5": "5 cm",
       "10": "10 cm",
@@ -1846,12 +1847,10 @@
         "reset": "Reset",
         "submitNext": "Submit & Next Depth",
         "submitAll": "Submit All Data"
-      },
-      "errors": {
-        "required": "{field} is required",
-        "positive": "{field} must be positive",
-        "date": "Date is required"
       }
+  
+        
+      
     },
     "submissionLimit": {
       "title": "Submission Limit Reached",
@@ -1980,9 +1979,10 @@
   },
   "FormikError" : {
     "validationErrorTitle": "Please fill in all required information",
-    "validationErrorDescription": "Complete all fields in the current tab before switching to another"
-  },
-  "Validations":{
-    "barAsReadRequired": "Bar As Read অবশ্যই পূরণ করতে হবে"
+    "validationErrorDescription": "Complete all fields in the current tab before switching to another",
+    "required": "This field is required",
+    "positive": "{field} must be positive",
+    "date": "Date is required"
   }
+  
 }
