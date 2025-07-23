@@ -11,7 +11,7 @@
     "heroSection": {
       "liveUpdate": "Live Weather Updates",
       "heading": "Jordan Weather Dashboard",
-      "description": "Professional weather monitoring and forecasting for Bangladesh. Get real-time data, forecasts, and historical trends through our interactive dashboard.",
+      "description": "Professional weather monitoring and forecasting for Jordan. Get real-time data, forecasts, and historical trends through our interactive dashboard.",
       "launchDashboard": "Launch Dashboard",
       "exploreFeatures": "Explore Features",
       "stats": {
@@ -33,9 +33,9 @@
     "trustedBySection": {
       "label": "Trusted by",
       "title": "Leading Institutions and Global Partners",
-      "description": "We're proud to collaborate with prestigious organizations to deliver reliable and innovative weather solutions across Bangladesh and beyond.",
+      "description": "We're proud to collaborate with prestigious organizations to deliver reliable and innovative weather solutions across Jordan and beyond.",
       "partners": [
-        "Bangladesh Meteorological Department",
+        "Jordan Meteorological Department",
         "Ministry of Agriculture",
         "University of Dhaka",
         "ICIMOD",
@@ -45,7 +45,7 @@
     "featuresSection": {
       "weatherIntelligence": "Weather Intelligence",
       "advancedMeteorologicalData": "Advanced Meteorological Data",
-      "description": "Precise weather analytics and forecasting tools for informed decision-making across Bangladesh.",
+      "description": "Precise weather analytics and forecasting tools for informed decision-making across Jordan.",
       "temperatureAnalytics": "Temperature Analytics",
       "temperatureDescription": "Real-time and historical temperature data with interactive visualizations.",
       "rainfallPatterns": "Rainfall Patterns",
@@ -53,17 +53,17 @@
       "windConditions": "Wind Conditions",
       "windDescription": "Monitor wind speed and direction with safety alerts.",
       "regionalInsights": "Regional Insights",
-      "regionalDescription": "Comparative weather analysis across Bangladesh regions.",
+      "regionalDescription": "Comparative weather analysis across Jordan regions.",
       "exploreData": "Explore Data",
       "viewFullDashboard": "View Full Dashboard"
     },
     "howItWorks": {
       "howItWorks": "How It Works",
       "subtitle": "Advanced Weather Analytics Platform",
-      "description": "Our advanced dashboard provides comprehensive insights into Bangladesh's weather with precision and clarity.",
+      "description": "Our advanced dashboard provides comprehensive insights into Jordan's weather with precision and clarity.",
       "step1Title": "Select Location",
-      "step1Description": "Choose from 64 districts or any specific area in Bangladesh to access localized weather data.",
-      "interactiveBangladeshMap": "Interactive Bangladesh Map",
+      "step1Description": "Choose from 64 districts or any specific area in Jordan to access localized weather data.",
+      "interactiveJordanMap": "Interactive Jordan Map",
       "step2Title": "Analyze Data",
       "step2Description": "Explore real-time metrics, forecasts, and historical patterns through advanced visualizations.",
       "step3Title": "Take Action",
@@ -76,7 +76,7 @@
     "weatherAlertsSection": {
       "title": "Weather Alerts",
       "subtitle": "Stay Ahead of Extreme Weather",
-      "description": "Our advanced alert system keeps you informed about potential weather hazards across Bangladesh, helping communities stay safe and prepared.",
+      "description": "Our advanced alert system keeps you informed about potential weather hazards across Jordan, helping communities stay safe and prepared.",
       "cycloneWarnings": {
         "title": "Cyclone Warnings",
         "description": "Early detection and tracking of cyclones with detailed impact forecasts and evacuation guidance."
@@ -91,7 +91,7 @@
       },
       "learnMore": "Learn About Alert System",
       "dashboardTitle": "Weather Alerts Dashboard",
-      "dashboardSubtitle": "Real-time monitoring for Bangladesh",
+      "dashboardSubtitle": "Real-time monitoring for Jordan",
       "liveAlerts": "LIVE ALERTS",
       "details": "Details",
       "regionalAlerts": "Regional Alerts",
@@ -115,7 +115,7 @@
     },
     "testimonials": {
       "title": "Testimonials",
-      "subtitle": "Trusted by Professionals Across Bangladesh",
+      "subtitle": "Trusted by Professionals Across Jordan",
       "description": "See what our users have to say about our weather dashboard.",
       "reviews": {
         "name1": "Dr. Rahman",
@@ -131,13 +131,13 @@
     },
     "ctaSection": {
       "heading": "Unlock Smarter Weather Decisions",
-      "description": "Access our real-time weather dashboard tailored for every district in Bangladesh. Stay ahead with forecasts, alerts, and insights that matter.",
+      "description": "Access our real-time weather dashboard tailored for every district in Jordan. Stay ahead with forecasts, alerts, and insights that matter.",
       "getStartedbutton": "Get Started"
     },
     "footerSection": {
       "connectWithUs": "Connect With Us",
       "quickLinks": "Quick Links",
-      "description": "Jordan Weather offers real-time, hyperlocal weather updates, visualizations, and forecasts to help you stay informed and prepared across all 64 districts of Bangladesh.",
+      "description": "Jordan Weather offers real-time, hyperlocal weather updates, visualizations, and forecasts to help you stay informed and prepared across all 64 districts of Jordan.",
       "newsletterHeading": "Subscribe to our newsletter",
       "subscribeButton": "Subscribe",
       "copyright": "Jordan Weather. All rights reserved",
