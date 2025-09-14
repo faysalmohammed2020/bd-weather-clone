@@ -17,10 +17,7 @@ import HumidityAnimation from "../Animation/humidity-animation"
 import VisibilityAnimation from "../Animation/visibility-animation"
 import PressureAnimation from "../Animation/pressure-animation"
 import DewpointAnimation from "../Animation/dewpoint-animation"
-import TimeSeriesGraph from "./timeSeriseGraph"
 import { useTranslations } from "next-intl"
-
-
 
 // Station interface matching Prisma model
 interface Station {
@@ -192,7 +189,7 @@ function CustomZoomControl() {
   const map = useMap()
 
   return (
-    <div className="absolute top-2 left-2 flex flex-col gap-1 z-[10]">
+    <div className="absolute top-2 left-2 flex flex-col gap-1 z-[1000]">
       <Button size="icon" variant="secondary" onClick={() => map.zoomIn()} className="h-8 w-8 bg-white">
         <Plus className="h-4 w-4" />
       </Button>
@@ -426,7 +423,9 @@ function StationMarkers({
           >
             <Popup className="min-w-[280px]" autoClose={false} closeOnClick={false}>
               <div className="font-bold text-lg">{station.name}</div>
-              <div className="text-sm">{marker("stationPopup.stationId")}: {station.stationId}</div>
+              <div className="text-sm">
+                {marker("stationPopup.stationId")}: {station.stationId}
+              </div>
               <div className="text-sm mb-2">
                 {marker("stationPopup.coordinates")}: {station.latitude.toFixed(4)}, {station.longitude.toFixed(4)}
               </div>
@@ -464,22 +463,31 @@ function StationMarkers({
                         <Thermometer className="h-4 w-4 mr-2 text-orange-500" />
                         <div className="text-xs">
                           <span className="font-medium">{marker("weatherParameters.temperature")}: </span>
-                          {weatherData.maxTemperature ? `${weatherData.maxTemperature}°C (${marker("common.max")})` : marker("weatherSummary.noData")} /
-                          {weatherData.minTemperature ? `${weatherData.minTemperature}°C (${marker("common.min")})` : marker("weatherSummary.noData")}
+                          {weatherData.maxTemperature
+                            ? `${weatherData.maxTemperature}°C (${marker("common.max")})`
+                            : marker("weatherSummary.noData")}{" "}
+                          /
+                          {weatherData.minTemperature
+                            ? `${weatherData.minTemperature}°C (${marker("common.min")})`
+                            : marker("weatherSummary.noData")}
                         </div>
                       </div>
                       <div className="flex items-center">
                         <Droplets className="h-4 w-4 mr-2 text-blue-500" />
                         <div className="text-xs">
                           <span className="font-medium">{marker("weatherParameters.precipitation")}: </span>
-                          {weatherData.totalPrecipitation ? `${weatherData.totalPrecipitation} (${marker("common.mm")})` : marker("weatherSummary.noData")}
+                          {weatherData.totalPrecipitation
+                            ? `${weatherData.totalPrecipitation} (${marker("common.mm")})`
+                            : marker("weatherSummary.noData")}
                         </div>
                       </div>
                       <div className="flex items-center">
                         <Wind className="h-4 w-4 mr-2 text-gray-500" />
                         <div className="text-xs">
                           <span className="font-medium">{marker("weatherParameters.wind")}: </span>
-                          {weatherData.windSpeed ? `${weatherData.windSpeed} (${marker("common.nm")})` : marker("weatherSummary.noData")}
+                          {weatherData.windSpeed
+                            ? `${weatherData.windSpeed} (${marker("common.nm")})`
+                            : marker("weatherSummary.noData")}
                         </div>
                       </div>
                       <div className="flex items-center">
@@ -772,7 +780,9 @@ export default function MapComponent({
             )
           })}
         </div>
-        {layerLoading && <div className="text-xs text-gray-500 mt-2 text-center">{t("stationPopup.loadingAnimation")}</div>}
+        {layerLoading && (
+          <div className="text-xs text-gray-500 mt-2 text-center">{t("stationPopup.loadingAnimation")}</div>
+        )}
       </div>
 
       {/* Timeline Controls */}
@@ -803,19 +813,19 @@ export default function MapComponent({
       <div className="absolute top-4 right-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
         <div className="text-sm font-medium">
           {session?.user?.role === "super_admin"
-            ? (t("role.superAdmin"))
+            ? t("role.superAdmin")
             : session?.user?.role === "station_admin"
-              ? (t("role.stationAdmin"))
+              ? t("role.stationAdmin")
               : session?.user?.role === "observer"
-                ? (t("role.observer"))
-                : (t("role.guest"))}
+                ? t("role.observer")
+                : t("role.guest")}
         </div>
         <div className="text-xs text-gray-500">
           {session?.user?.role === "super_admin"
-            ? (t("roleDescription.superAdmin"))
+            ? t("roleDescription.superAdmin")
             : session?.user?.role === "station_admin" || session?.user?.role === "observer"
-              ? (t("roleDescription.stationAdmin"))
-              : (t("roleDescription.guest"))}
+              ? t("roleDescription.stationAdmin")
+              : t("roleDescription.guest")}
         </div>
       </div>
 
@@ -841,7 +851,9 @@ export default function MapComponent({
                 <Droplets className="h-4 w-4 mr-2 text-blue-500" />
                 <div className="text-xs">
                   <span className="font-medium">{t("weatherSummary.precipitation")}: </span>
-                  {weatherData.totalPrecipitation ? `${weatherData.totalPrecipitation} ${t("common.mm")}` : t("weatherSummary.noData")}
+                  {weatherData.totalPrecipitation
+                    ? `${weatherData.totalPrecipitation} ${t("common.mm")}`
+                    : t("weatherSummary.noData")}
                 </div>
               </div>
               <div className="flex items-center">

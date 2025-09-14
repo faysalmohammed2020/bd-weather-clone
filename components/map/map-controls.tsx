@@ -87,45 +87,47 @@ export default function MapControls({
         );
 
   return (
-    <div className="p-4">
-      <h3 className="text-lg font-medium bg-gradient-to-r from-teal-600 to-teal-800 text-white py-2 px-4 mb-4 rounded">
+    <div className="p-2">
+      <h3 className="text-base font-medium bg-gradient-to-r from-teal-600 to-teal-800 text-white py-1 px-3 mb-2 rounded text-sm">
         {t("title")}
       </h3>
 
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+      <label className="block text-xs font-medium text-gray-700 mb-1">
         {t("stationsLabel")}
       </label>
 
-      <Select
-        value={selectedStation?.stationId || ""}
-        onValueChange={(value) => {
-          const station = stations.find((s) => s.stationId === value);
-          setSelectedStation(station || null);
-        }}
-        disabled={loading || permittedStations.length === 0}
-      >
-        <SelectTrigger className="w-full">
-          <SelectValue
-            placeholder={
-              loading
-                ? t("loading")
-                : permittedStations.length === 0
-                ? t("noStations")
-                : t("selectStation")
-            }
-          />
-        </SelectTrigger>
-        <SelectContent>
-          {permittedStations.map((station) => (
-            <SelectItem key={station.id} value={station.stationId}>
-              {station.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="space-y-1">
+        <Select
+          value={selectedStation?.stationId || ""}
+          onValueChange={(value) => {
+            const station = stations.find((s) => s.stationId === value);
+            setSelectedStation(station || null);
+          }}
+          disabled={loading || permittedStations.length === 0}
+        >
+          <SelectTrigger className="w-full h-8 text-xs">
+            <SelectValue
+              placeholder={
+                loading
+                  ? t("loading")
+                  : permittedStations.length === 0
+                  ? t("noStations")
+                  : t("selectStation")
+              }
+            />
+          </SelectTrigger>
+          <SelectContent className="max-h-60 overflow-y-auto text-xs">
+            {permittedStations.map((station) => (
+              <SelectItem key={station.id} value={station.stationId} className="text-xs py-1">
+                {station.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       {error && (
-        <div className="mt-4 text-red-600 text-sm">
+        <div className="mt-2 text-red-600 text-xs">
           {t("error", { error })}
         </div>
       )}
