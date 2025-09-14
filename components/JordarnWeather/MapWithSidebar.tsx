@@ -17,7 +17,7 @@ export default function MapWithSidebar() {
     humidity: false,
     pressure: false,
     dewpoint: false,
-    solar: false,
+    solarRadiation: false,
   });
 
   const handleToggle = (id: string, on: boolean) => {

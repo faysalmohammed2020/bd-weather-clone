@@ -38,7 +38,7 @@ export default function WeatherSidebar({ onParameterToggle }: WeatherSidebarProp
     { id: "humidity", label: "Relative Humidity", icon: Droplets, enabled: false, unit: "%" },
     { id: "pressure", label: "Air Pressure", icon: Gauge, enabled: false, unit: "hPa" },
     { id: "dewpoint", label: "Dew Point", icon: CloudSnow, enabled: false, unit: "°C" },
-    { id: "solar", label: "Solar Radiation", icon: Sun, enabled: false, unit: "W/m²" },
+    { id: "solarRadiation", label: "Solar Radiation", icon: Sun, enabled: false, unit: "W/m²" },
   ]);
 
   // Optional future: forecast list (single-select behavior added here too)

@@ -1,19 +1,411 @@
+// // Weather station data from the PDF reports
+// export interface WeatherStationData {
+//   stationName: string;
+//   stationId: string;
+//   maxTemp: number | null;
+//   minTemp: number | null;
+//   relativeHumidity: number | null;
+//   precipitation: number;
+//   snowDepth: number;
+//   grassTemp?: number | null;
+//   windSpeedKph?: number | null;  // average wind speed
+//   windDirDeg?: number | null;    // 0–360, FROM which the wind blows
+//   coordinates?: {
+//     lat: number;
+//     lng: number;
+//   };
+// }
+
+// export const jordanWeatherStations: WeatherStationData[] = [
+//   {
+//     stationName: "Baqura",
+//     stationId: "BAQURA",
+//     maxTemp: 38.5,
+//     minTemp: 21.9,
+//     relativeHumidity: 65,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 12,
+//     windDirDeg: 310,
+//     coordinates: { lat: 32.671081, lng: 35.710026 },
+//   },
+//   {
+//     stationName: "Deir Alla",
+//     stationId: "DEIR_ALLA",
+//     maxTemp: 39.2,
+//     minTemp: 25.3,
+//     relativeHumidity: 50,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 15,
+//     windDirDeg: 270,
+//     coordinates: { lat: 32.2, lng: 35.6 },
+//   },
+//   {
+//     stationName: "Ghor Safi",
+//     stationId: "GHOR_SAFI",
+//     maxTemp: 40.7,
+//     minTemp: 27.5,
+//     relativeHumidity: 53,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 22,
+//     windDirDeg: 350,
+//     coordinates: { lat: 31.0, lng: 35.5 },
+//   },
+//   {
+//     stationName: "Irbed",
+//     stationId: "IRBED",
+//     maxTemp: 31.4,
+//     minTemp: 20.9,
+//     relativeHumidity: 66,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 10,
+//     windDirDeg: 200,
+//     coordinates: { lat: 32.5, lng: 35.9 },
+//   },
+//   {
+//     stationName: "Er Rabbah",
+//     stationId: "ER_RABBAH",
+//     maxTemp: 30.1,
+//     minTemp: 16.0,
+//     relativeHumidity: 49,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 18,
+//     windDirDeg: 290,
+//     coordinates: { lat: 31.3, lng: 35.7 },
+//   },
+//   {
+//     stationName: "Shoubak",
+//     stationId: "SHOUBAK",
+//     maxTemp: 28.2,
+//     minTemp: 12.6,
+//     relativeHumidity: 33,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 15,
+//     windDirDeg: 320,
+//     coordinates: { lat: 30.5, lng: 35.6 },
+//   },
+//   {
+//     stationName: "Wadi Dhulall",
+//     stationId: "WADI_DHULALL",
+//     maxTemp: 33.7,
+//     minTemp: 17.2,
+//     relativeHumidity: 60,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 14,
+//     windDirDeg: 180,
+//     coordinates: { lat: 32.0, lng: 35.8 },
+//   },
+//   {
+//     stationName: "Hussien Garden",
+//     stationId: "HUSSIEN_GARDEN",
+//     maxTemp: 29.0,
+//     minTemp: 15.6,
+//     relativeHumidity: 52,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 8,
+//     windDirDeg: 250,
+//     coordinates: { lat: 31.9, lng: 35.9 },
+//   },
+//   {
+//     stationName: "Al-Jubeiha",
+//     stationId: "AL_JUBEIHA",
+//     maxTemp: 28.5,
+//     minTemp: 19.2,
+//     relativeHumidity: 36,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 12,
+//     windDirDeg: 270,
+//     coordinates: { lat: 32.5, lng: 35.6 },
+//   },
+//   {
+//     stationName: "Al-Qawismah",
+//     stationId: "AL_QAWISMAH",
+//     maxTemp: 30.4,
+//     minTemp: 19.7,
+//     relativeHumidity: 41,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 16,
+//     windDirDeg: 290,
+//     coordinates: { lat: 31.8, lng: 36.0 },
+//   },
+//   {
+//     stationName: "Petra",
+//     stationId: "PETRA",
+//     maxTemp: 31.5,
+//     minTemp: 21.3,
+//     relativeHumidity: 39,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 18,
+//     windDirDeg: 320,
+//     coordinates: { lat: 30.3, lng: 35.4 },
+//   },
+//   {
+//     stationName: "Aqaba Port",
+//     stationId: "AQABA_PORT",
+//     maxTemp: 39.6,
+//     minTemp: 28.0,
+//     relativeHumidity: 39,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 25,
+//     windDirDeg: 20,
+//     coordinates: { lat: 29.5, lng: 35.0 },
+//   },
+//   {
+//     stationName: "Madaba",
+//     stationId: "MADABA",
+//     maxTemp: 30.6,
+//     minTemp: 17.4,
+//     relativeHumidity: 52,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 14,
+//     windDirDeg: 260,
+//     coordinates: { lat: 31.7, lng: 35.8 },
+//   },
+//   {
+//     stationName: "Qatraneh",
+//     stationId: "QATRANEH",
+//     maxTemp: 32.8,
+//     minTemp: 17.3,
+//     relativeHumidity: 56,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 20,
+//     windDirDeg: 280,
+//     coordinates: { lat: 31.2, lng: 36.0 },
+//   },
+//   {
+//     stationName: "Tafileh",
+//     stationId: "TAFILEH",
+//     maxTemp: 28.5,
+//     minTemp: 18.1,
+//     relativeHumidity: 45,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 16,
+//     windDirDeg: 300,
+//     coordinates: { lat: 30.8, lng: 35.6 },
+//   },
+//   {
+//     stationName: "Zarqa",
+//     stationId: "ZARQA",
+//     maxTemp: 33.6,
+//     minTemp: 20.4,
+//     relativeHumidity: 56,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 18,
+//     windDirDeg: 240,
+//     coordinates: { lat: 32.1, lng: 36.1 },
+//   },
+//   {
+//     stationName: "Ramtha",
+//     stationId: "RAMTHA",
+//     maxTemp: 32.0,
+//     minTemp: 16.2,
+//     relativeHumidity: 50,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 15,
+//     windDirDeg: 220,
+//     coordinates: { lat: 32.6, lng: 36.0 },
+//   },
+//   {
+//     stationName: "Downtown",
+//     stationId: "DOWNTOWN",
+//     maxTemp: 30.2,
+//     minTemp: 19.8,
+//     relativeHumidity: 37,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 10,
+//     windDirDeg: 270,
+//     coordinates: { lat: 31.9, lng: 35.9 },
+//   },
+//   {
+//     stationName: "Salt",
+//     stationId: "SALT",
+//     maxTemp: 30.4,
+//     minTemp: 19.7,
+//     relativeHumidity: 41,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 14,
+//     windDirDeg: 280,
+//     coordinates: { lat: 32.0, lng: 35.7 },
+//   },
+//   {
+//     stationName: "Jarash",
+//     stationId: "JARASH",
+//     maxTemp: 32.3,
+//     minTemp: 19.9,
+//     relativeHumidity: 52,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 16,
+//     windDirDeg: 230,
+//     coordinates: { lat: 32.3, lng: 35.9 },
+//   },
+//   {
+//     stationName: "King Hussein International Airport",
+//     stationId: "KHIA",
+//     maxTemp: 40.2,
+//     minTemp: 26.6,
+//     relativeHumidity: 46,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 28,
+//     windDirDeg: 30,
+//     coordinates: { lat: 29.6, lng: 35.0 },
+//   },
+//   {
+//     stationName: "Ras Muneef",
+//     stationId: "RAS_MUNEEF",
+//     maxTemp: 27.3,
+//     minTemp: 18.8,
+//     relativeHumidity: 35,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 20,
+//     windDirDeg: 250,
+//     coordinates: { lat: 32.4, lng: 36.2 },
+//   },
+//   {
+//     stationName: "Amman Airport",
+//     stationId: "AMMAN_AIRPORT",
+//     maxTemp: 32.0,
+//     minTemp: 19.0,
+//     relativeHumidity: 0,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 22,
+//     windDirDeg: 270,
+//     coordinates: { lat: 31.7, lng: 36.0 },
+//   },
+//   {
+//     stationName: "Mafraq",
+//     stationId: "MAFRAQ",
+//     maxTemp: 33.6,
+//     minTemp: 16.0,
+//     relativeHumidity: 52,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 24,
+//     windDirDeg: 240,
+//     coordinates: { lat: 32.3, lng: 36.2 },
+//   },
+//   {
+//     stationName: "Safawi (H5)",
+//     stationId: "SAFAWI_H5",
+//     maxTemp: 34.8,
+//     minTemp: 19.6,
+//     relativeHumidity: 48,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 26,
+//     windDirDeg: 200,
+//     coordinates: { lat: 32.2, lng: 37.1 },
+//   },
+//   {
+//     stationName: "Azraq South",
+//     stationId: "AZRAQ_SOUTH",
+//     maxTemp: 35.6,
+//     minTemp: 19.5,
+//     relativeHumidity: 44,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 24,
+//     windDirDeg: 210,
+//     coordinates: { lat: 31.8, lng: 36.8 },
+//   },
+//   {
+//     stationName: "Q.A.I.Airport",
+//     stationId: "QAI_AIRPORT",
+//     maxTemp: 31.1,
+//     minTemp: 15.1,
+//     relativeHumidity: 56,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 20,
+//     windDirDeg: 260,
+//     coordinates: { lat: 31.7, lng: 36.0 },
+//   },
+//   {
+//     stationName: "Ma'an",
+//     stationId: "MAAN",
+//     maxTemp: 34.3,
+//     minTemp: 17.6,
+//     relativeHumidity: 50,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 22,
+//     windDirDeg: 300,
+//     coordinates: { lat: 30.2, lng: 35.7 },
+//   },
+//   {
+//     stationName: "Al Jafer",
+//     stationId: "AL_JAFER",
+//     maxTemp: 37.1,
+//     minTemp: 18.2,
+//     relativeHumidity: 54,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 26,
+//     windDirDeg: 280,
+//     coordinates: { lat: 30.3, lng: 36.2 },
+//   },
+//   {
+//     stationName: "Ghabawi",
+//     stationId: "GHABAWI",
+//     maxTemp: 32.1,
+//     minTemp: 17.0,
+//     relativeHumidity: 48,
+//     precipitation: 0.0,
+//     snowDepth: 0.0,
+//     windSpeedKph: 18,
+//     windDirDeg: 240,
+//     coordinates: { lat: 31.8, lng: 35.8 },
+//   },
+// ];
+
+// export const getStationData = (stationId: string) => {
+//   return jordanWeatherStations.find(
+//     (station) => station.stationId === stationId
+//   );
+// };
+
+// export const getAllStations = () => jordanWeatherStations;
+
+
 // Weather station data from the PDF reports
 export interface WeatherStationData {
-  stationName: string;
-  stationId: string;
-  maxTemp: number | null;
-  minTemp: number | null;
-  relativeHumidity: number | null;
-  precipitation: number;
-  snowDepth: number;
-  grassTemp?: number | null;
-  windSpeedKph?: number | null;  // average wind speed
-  windDirDeg?: number | null;    // 0–360, FROM which the wind blows
+  stationName: string
+  stationId: string
+  maxTemp: number | null
+  minTemp: number | null
+  relativeHumidity: number | null
+  precipitation: number
+  snowDepth: number
+  grassTemp?: number | null
+  windSpeedKph?: number | null // average wind speed
+  windDirDeg?: number | null // 0–360, FROM which the wind blows
+  pressure?: number | null // Air pressure in hPa
+  solarRadiation?: number | null // Solar radiation in W/m²
   coordinates?: {
-    lat: number;
-    lng: number;
-  };
+    lat: number
+    lng: number
+  }
 }
 
 export const jordanWeatherStations: WeatherStationData[] = [
@@ -27,6 +419,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 12,
     windDirDeg: 310,
+    pressure: 1013,
+    solarRadiation: 500,
     coordinates: { lat: 32.671081, lng: 35.710026 },
   },
   {
@@ -39,6 +433,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 15,
     windDirDeg: 270,
+    pressure: 1010,
+    solarRadiation: 450,
     coordinates: { lat: 32.2, lng: 35.6 },
   },
   {
@@ -51,6 +447,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 22,
     windDirDeg: 350,
+    pressure: 1008,
+    solarRadiation: 400,
     coordinates: { lat: 31.0, lng: 35.5 },
   },
   {
@@ -63,6 +461,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 10,
     windDirDeg: 200,
+    pressure: 1015,
+    solarRadiation: 550,
     coordinates: { lat: 32.5, lng: 35.9 },
   },
   {
@@ -75,6 +475,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 18,
     windDirDeg: 290,
+    pressure: 1012,
+    solarRadiation: 520,
     coordinates: { lat: 31.3, lng: 35.7 },
   },
   {
@@ -87,6 +489,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 15,
     windDirDeg: 320,
+    pressure: 1009,
+    solarRadiation: 480,
     coordinates: { lat: 30.5, lng: 35.6 },
   },
   {
@@ -99,6 +503,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 14,
     windDirDeg: 180,
+    pressure: 1014,
+    solarRadiation: 530,
     coordinates: { lat: 32.0, lng: 35.8 },
   },
   {
@@ -111,6 +517,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 8,
     windDirDeg: 250,
+    pressure: 1011,
+    solarRadiation: 510,
     coordinates: { lat: 31.9, lng: 35.9 },
   },
   {
@@ -123,6 +531,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 12,
     windDirDeg: 270,
+    pressure: 1013,
+    solarRadiation: 500,
     coordinates: { lat: 32.5, lng: 35.6 },
   },
   {
@@ -135,6 +545,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 16,
     windDirDeg: 290,
+    pressure: 1012,
+    solarRadiation: 520,
     coordinates: { lat: 31.8, lng: 36.0 },
   },
   {
@@ -147,6 +559,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 18,
     windDirDeg: 320,
+    pressure: 1009,
+    solarRadiation: 480,
     coordinates: { lat: 30.3, lng: 35.4 },
   },
   {
@@ -159,6 +573,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 25,
     windDirDeg: 20,
+    pressure: 1007,
+    solarRadiation: 420,
     coordinates: { lat: 29.5, lng: 35.0 },
   },
   {
@@ -171,6 +587,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 14,
     windDirDeg: 260,
+    pressure: 1014,
+    solarRadiation: 530,
     coordinates: { lat: 31.7, lng: 35.8 },
   },
   {
@@ -183,6 +601,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 20,
     windDirDeg: 280,
+    pressure: 1013,
+    solarRadiation: 500,
     coordinates: { lat: 31.2, lng: 36.0 },
   },
   {
@@ -195,6 +615,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 16,
     windDirDeg: 300,
+    pressure: 1012,
+    solarRadiation: 520,
     coordinates: { lat: 30.8, lng: 35.6 },
   },
   {
@@ -207,6 +629,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 18,
     windDirDeg: 240,
+    pressure: 1013,
+    solarRadiation: 500,
     coordinates: { lat: 32.1, lng: 36.1 },
   },
   {
@@ -219,6 +643,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 15,
     windDirDeg: 220,
+    pressure: 1012,
+    solarRadiation: 520,
     coordinates: { lat: 32.6, lng: 36.0 },
   },
   {
@@ -231,6 +657,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 10,
     windDirDeg: 270,
+    pressure: 1014,
+    solarRadiation: 530,
     coordinates: { lat: 31.9, lng: 35.9 },
   },
   {
@@ -243,6 +671,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 14,
     windDirDeg: 280,
+    pressure: 1012,
+    solarRadiation: 520,
     coordinates: { lat: 32.0, lng: 35.7 },
   },
   {
@@ -255,6 +685,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 16,
     windDirDeg: 230,
+    pressure: 1013,
+    solarRadiation: 500,
     coordinates: { lat: 32.3, lng: 35.9 },
   },
   {
@@ -267,6 +699,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 28,
     windDirDeg: 30,
+    pressure: 1008,
+    solarRadiation: 400,
     coordinates: { lat: 29.6, lng: 35.0 },
   },
   {
@@ -279,6 +713,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 20,
     windDirDeg: 250,
+    pressure: 1007,
+    solarRadiation: 420,
     coordinates: { lat: 32.4, lng: 36.2 },
   },
   {
@@ -291,6 +727,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 22,
     windDirDeg: 270,
+    pressure: 1008,
+    solarRadiation: 400,
     coordinates: { lat: 31.7, lng: 36.0 },
   },
   {
@@ -303,6 +741,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 24,
     windDirDeg: 240,
+    pressure: 1007,
+    solarRadiation: 420,
     coordinates: { lat: 32.3, lng: 36.2 },
   },
   {
@@ -315,6 +755,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 26,
     windDirDeg: 200,
+    pressure: 1006,
+    solarRadiation: 380,
     coordinates: { lat: 32.2, lng: 37.1 },
   },
   {
@@ -327,6 +769,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 24,
     windDirDeg: 210,
+    pressure: 1005,
+    solarRadiation: 360,
     coordinates: { lat: 31.8, lng: 36.8 },
   },
   {
@@ -339,6 +783,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 20,
     windDirDeg: 260,
+    pressure: 1006,
+    solarRadiation: 380,
     coordinates: { lat: 31.7, lng: 36.0 },
   },
   {
@@ -351,6 +797,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 22,
     windDirDeg: 300,
+    pressure: 1005,
+    solarRadiation: 360,
     coordinates: { lat: 30.2, lng: 35.7 },
   },
   {
@@ -363,6 +811,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 26,
     windDirDeg: 280,
+    pressure: 1004,
+    solarRadiation: 340,
     coordinates: { lat: 30.3, lng: 36.2 },
   },
   {
@@ -375,14 +825,14 @@ export const jordanWeatherStations: WeatherStationData[] = [
     snowDepth: 0.0,
     windSpeedKph: 18,
     windDirDeg: 240,
+    pressure: 1006,
+    solarRadiation: 380,
     coordinates: { lat: 31.8, lng: 35.8 },
   },
-];
+]
 
 export const getStationData = (stationId: string) => {
-  return jordanWeatherStations.find(
-    (station) => station.stationId === stationId
-  );
-};
+  return jordanWeatherStations.find((station) => station.stationId === stationId)
+}
 
-export const getAllStations = () => jordanWeatherStations;
+export const getAllStations = () => jordanWeatherStations
