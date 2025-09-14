@@ -53,7 +53,7 @@ function FixLeafletIcons() {
  * Creates a DivIcon with gradient colored values based on parameter type.
  */
 function createParamIcon(
-  _station: WeatherStationData,
+  station: WeatherStationData,
   param: ParameterId,
   value: string | null,
 ) {
@@ -61,14 +61,51 @@ function createParamIcon(
   
   // Define color gradients for different parameter types
   const gradientMap: Record<ParameterId, string> = {
-    temperature: "linear-gradient(45deg, #ef4444, #f59e0b, #fbbf24)", // Red to orange to yellow
-    humidity: "linear-gradient(45deg, #06b6d4, #0ea5e9, #3b82f6)", // Cyan to blue
-    wind: "linear-gradient(45deg, #10b981, #059669, #047857)", // Green shades
-    pressure: "linear-gradient(45deg, #a78bfa, #8b5cf6, #7c3aed)", // Purple shades
-    dewpoint: "linear-gradient(45deg, #22c55e, #16a34a, #15803d)", // Green shades
-    solar: "linear-gradient(45deg, #f59e0b, #f97316, #ea580c)" // Orange to red-orange
+    temperature: "linear-gradient(45deg,#ef4444,#f59e0b,#fbbf24)",
+    humidity: "linear-gradient(45deg,#06b6d4,#0ea5e9,#3b82f6)",
+    wind: "linear-gradient(45deg,#10b981,#059669,#047857)",
+    pressure: "linear-gradient(45deg,#a78bfa,#8b5cf6,#7c3aed)",
+    dewpoint: "linear-gradient(45deg,#22c55e,#16a34a,#15803d)",
+    solar: "linear-gradient(45deg,#f59e0b,#f97316,#ea580c)",
   };
 
+  // Special case for wind: show speed + direction arrow
+  if (param === "wind") {
+    const rotation = ((station.windDirDeg ?? 0) + 180) % 360; // Convert from-direction to to-direction
+    const html = `
+      <div style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        background: transparent;
+        border: none;
+        padding: 0;
+        margin: 0;
+        line-height: 1;
+      ">
+        <span style="
+          background: ${gradientMap.wind};
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          color: transparent;
+          font-weight: 900;
+          font-size: 18px;
+        ">
+          ${display}
+        </span>
+        <svg width="14" height="14" viewBox="0 0 24 24" 
+             style="transform: rotate(${rotation}deg); opacity: 0.85;">
+          <!-- up-pointing triangle; rotation handles direction -->
+          <path d="M12 4 L20 20 H4 Z" fill="#6b7280"/>
+        </svg>
+      </div>
+    `;
+    return L.divIcon({ html, className: "param-div-icon", iconSize: [0, 0] });
+  }
+
+  // Default case for other parameters
   const html = `
     <div style="
       display: inline-flex;
@@ -79,7 +116,7 @@ function createParamIcon(
       padding: 0;
       margin: 0;
       font-size: 18px;
-      font-weight: 800;
+      font-weight: 900;
       line-height: 1;
     ">
       <span style="
@@ -88,7 +125,6 @@ function createParamIcon(
         -webkit-text-fill-color: transparent;
         background-clip: text;
         color: transparent;
-        font-weight: 900;
       ">
         ${display}
       </span>
@@ -228,9 +264,10 @@ export default function MapComponent({
         }
         return null;
       case "wind":
+        return s.windSpeedKph != null ? String(Math.round(s.windSpeedKph)) : null;
       case "pressure":
       case "solar":
-        return null; // sample data doesn't have these — show N/A
+        return null;
       default:
         return null;
     }

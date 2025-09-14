@@ -135,7 +135,7 @@ export default function WeatherSidebar({ onParameterToggle }: WeatherSidebarProp
       <Card className="bg-blue-800 border-blue-700 mb-4">
         <div className="p-4">
           <div className="flex items-center gap-2 mb-4">
-            <MapPin className="h-5 w-5" />
+            <MapPin className="h-5 w-5 text-white" />
             <h2 className="text-lg font-semibold text-white">Weather Stations</h2>
           </div>
 
@@ -166,7 +166,7 @@ export default function WeatherSidebar({ onParameterToggle }: WeatherSidebarProp
       <Card className="bg-blue-800 border-blue-700">
         <div className="p-4">
           <div className="flex items-center gap-2 mb-4">
-            <Cloud className="h-5 w-5" />
+            <Cloud className="h-5 w-5 text-white" />
             <h2 className="text-lg font-semibold text-white">Numerical Forecast</h2>
           </div>
 

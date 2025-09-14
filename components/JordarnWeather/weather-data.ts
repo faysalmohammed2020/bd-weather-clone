@@ -8,6 +8,8 @@ export interface WeatherStationData {
   precipitation: number;
   snowDepth: number;
   grassTemp?: number | null;
+  windSpeedKph?: number | null;  // average wind speed
+  windDirDeg?: number | null;    // 0–360, FROM which the wind blows
   coordinates?: {
     lat: number;
     lng: number;
@@ -23,7 +25,9 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 65,
     precipitation: 0.0,
     snowDepth: 0.0,
-    coordinates: { lat: 32.7, lng: 35.6 },
+    windSpeedKph: 12,
+    windDirDeg: 310,
+    coordinates: { lat: 32.671081, lng: 35.710026 },
   },
   {
     stationName: "Deir Alla",
@@ -33,6 +37,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 50,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 15,
+    windDirDeg: 270,
     coordinates: { lat: 32.2, lng: 35.6 },
   },
   {
@@ -43,6 +49,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 53,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 22,
+    windDirDeg: 350,
     coordinates: { lat: 31.0, lng: 35.5 },
   },
   {
@@ -53,6 +61,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 66,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 10,
+    windDirDeg: 200,
     coordinates: { lat: 32.5, lng: 35.9 },
   },
   {
@@ -63,6 +73,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 49,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 18,
+    windDirDeg: 290,
     coordinates: { lat: 31.3, lng: 35.7 },
   },
   {
@@ -73,6 +85,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 33,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 15,
+    windDirDeg: 320,
     coordinates: { lat: 30.5, lng: 35.6 },
   },
   {
@@ -83,6 +97,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 60,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 14,
+    windDirDeg: 180,
     coordinates: { lat: 32.0, lng: 35.8 },
   },
   {
@@ -93,6 +109,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 52,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 8,
+    windDirDeg: 250,
     coordinates: { lat: 31.9, lng: 35.9 },
   },
   {
@@ -103,7 +121,9 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 36,
     precipitation: 0.0,
     snowDepth: 0.0,
-    coordinates: { lat: 32.0, lng: 35.9 },
+    windSpeedKph: 12,
+    windDirDeg: 270,
+    coordinates: { lat: 32.5, lng: 35.6 },
   },
   {
     stationName: "Al-Qawismah",
@@ -113,6 +133,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 41,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 16,
+    windDirDeg: 290,
     coordinates: { lat: 31.8, lng: 36.0 },
   },
   {
@@ -123,6 +145,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 39,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 18,
+    windDirDeg: 320,
     coordinates: { lat: 30.3, lng: 35.4 },
   },
   {
@@ -133,6 +157,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 39,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 25,
+    windDirDeg: 20,
     coordinates: { lat: 29.5, lng: 35.0 },
   },
   {
@@ -143,6 +169,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 52,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 14,
+    windDirDeg: 260,
     coordinates: { lat: 31.7, lng: 35.8 },
   },
   {
@@ -153,6 +181,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 56,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 20,
+    windDirDeg: 280,
     coordinates: { lat: 31.2, lng: 36.0 },
   },
   {
@@ -163,6 +193,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 45,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 16,
+    windDirDeg: 300,
     coordinates: { lat: 30.8, lng: 35.6 },
   },
   {
@@ -173,6 +205,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 56,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 18,
+    windDirDeg: 240,
     coordinates: { lat: 32.1, lng: 36.1 },
   },
   {
@@ -183,6 +217,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 50,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 15,
+    windDirDeg: 220,
     coordinates: { lat: 32.6, lng: 36.0 },
   },
   {
@@ -193,6 +229,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 37,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 10,
+    windDirDeg: 270,
     coordinates: { lat: 31.9, lng: 35.9 },
   },
   {
@@ -203,6 +241,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 41,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 14,
+    windDirDeg: 280,
     coordinates: { lat: 32.0, lng: 35.7 },
   },
   {
@@ -213,6 +253,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 52,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 16,
+    windDirDeg: 230,
     coordinates: { lat: 32.3, lng: 35.9 },
   },
   {
@@ -223,6 +265,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 46,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 28,
+    windDirDeg: 30,
     coordinates: { lat: 29.6, lng: 35.0 },
   },
   {
@@ -233,6 +277,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 35,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 20,
+    windDirDeg: 250,
     coordinates: { lat: 32.4, lng: 36.2 },
   },
   {
@@ -243,6 +289,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 0,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 22,
+    windDirDeg: 270,
     coordinates: { lat: 31.7, lng: 36.0 },
   },
   {
@@ -253,6 +301,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 52,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 24,
+    windDirDeg: 240,
     coordinates: { lat: 32.3, lng: 36.2 },
   },
   {
@@ -263,6 +313,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 48,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 26,
+    windDirDeg: 200,
     coordinates: { lat: 32.2, lng: 37.1 },
   },
   {
@@ -273,6 +325,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 44,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 24,
+    windDirDeg: 210,
     coordinates: { lat: 31.8, lng: 36.8 },
   },
   {
@@ -283,6 +337,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 56,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 20,
+    windDirDeg: 260,
     coordinates: { lat: 31.7, lng: 36.0 },
   },
   {
@@ -293,6 +349,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 50,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 22,
+    windDirDeg: 300,
     coordinates: { lat: 30.2, lng: 35.7 },
   },
   {
@@ -303,6 +361,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 54,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 26,
+    windDirDeg: 280,
     coordinates: { lat: 30.3, lng: 36.2 },
   },
   {
@@ -313,6 +373,8 @@ export const jordanWeatherStations: WeatherStationData[] = [
     relativeHumidity: 48,
     precipitation: 0.0,
     snowDepth: 0.0,
+    windSpeedKph: 18,
+    windDirDeg: 240,
     coordinates: { lat: 31.8, lng: 35.8 },
   },
 ];
