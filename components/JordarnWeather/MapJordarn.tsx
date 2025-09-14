@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { Slider } from "@/components/ui/slider";
@@ -9,6 +9,7 @@ import { Play, Pause, Plus, Minus, ChevronLeft, ChevronRight } from "lucide-reac
 import { useSession } from "@/lib/auth-client";
 import { useTranslations } from "next-intl";
 import { getAllStations, type WeatherStationData } from "./weather-data";
+import { Roboto_Mono } from "next/font/google";
 
 export type ParameterId =
   | "temperature"
@@ -25,45 +26,36 @@ export interface MapComponentProps {
   setCurrentDate: (date: string) => void;
   isPlaying: boolean;
   setIsPlaying: (playing: boolean) => void;
-  enabled: EnabledMap; // <-- which layers to show
+  enabled: EnabledMap; // which layers to show
 }
 
 /** Small utility: dew point approximation (Magnus-Tetens) */
 function dewPointFromTempRH(tempC: number, rh: number): number {
-  // constants for water over liquid range
   const a = 17.27;
-  const b = 237.7; // °C
+  const b = 237.7;
   const alpha = ((a * tempC) / (b + tempC)) + Math.log(rh / 100);
   const dp = (b * alpha) / (a - alpha);
   return Math.round(dp * 10) / 10;
 }
 
-/**
- * Lightweight deterministic pseudo-random helpers so values can twitch over time
- * without changing every render. Based on stationId, param and the timeline index.
- */
+/** Deterministic “twitch” so values change over time without re-randomizing */
 function hashString(s: string): number {
-  let h = 2166136261 >>> 0; // FNV-1a seed
+  let h = 2166136261 >>> 0;
   for (let i = 0; i < s.length; i++) {
     h ^= s.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
   return h >>> 0;
 }
-
 function seededUnit(seed: number): number {
-  // returns 0..1 pseudo-random but deterministic for the same seed
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
 }
-
 function fluctuationDelta(index: number, stationId: string, param: ParameterId): number {
-  // Pattern of +1, +2, -3, 0 (user requested increase 1,2 then decrease 3, randomly)
   const pattern = [1, 2, -3, 0];
   const base = pattern[index % pattern.length];
   const seed = hashString(`${stationId}-${param}-${index}`);
   const u = seededUnit(seed);
-  // occasionally double the step to make it feel more alive
   const factor = u > 0.85 ? 2 : 1;
   return base * factor;
 }
@@ -79,17 +71,37 @@ function FixLeafletIcons() {
   return null;
 }
 
-/**
- * Creates a DivIcon with gradient colored values based on parameter type.
- */
+// Numeric font for all values
+const robotoMono = Roboto_Mono({ subsets: ["latin"], weight: ["400", "700"], display: "swap" });
+
+/* === NEW: a small base “dot” icon for stations when no parameter is active === */
+function createBaseStationIcon() {
+  const html = `
+    <div style="
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #60a5fa, #1d4ed8);
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: 0 0 8px rgba(29,78,216,0.6);
+    "></div>
+  `;
+  return L.divIcon({
+    html,
+    className: "base-station-icon",
+    iconSize: [10, 10],
+  });
+}
+
+/** Value marker icons with gradients (kept from your code; now hoverable) */
 function createParamIcon(
   station: WeatherStationData,
   param: ParameterId,
   value: string | null,
+  overrideDirectionDeg?: number | null,
 ) {
   const display = value ?? "N/A";
 
-  // Define color gradients for different parameter types
   const gradientMap: Record<ParameterId, string> = {
     temperature: "linear-gradient(45deg,#ef4444,#f59e0b,#fbbf24)",
     humidity: "linear-gradient(45deg,#06b6d4,#0ea5e9,#3b82f6)",
@@ -99,74 +111,58 @@ function createParamIcon(
     solarRadiation: "linear-gradient(45deg,#f59e0b,#f97316,#ea580c)",
   };
 
-  // Special case for wind: show speed + direction arrow
   if (param === "wind") {
-    const rotation = ((station.windDirDeg ?? 0) + 180) % 360; // Convert from-direction to to-direction
+    const base = station.windDirDeg ?? 0;
+    const dir = overrideDirectionDeg != null ? overrideDirectionDeg : base;
+    const rotation = (dir + 180) % 360; // from-direction -> to-direction
     const html = `
-      <div style="
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 2px;
-        background: transparent;
-        border: none;
-        padding: 0;
-        margin: 0;
-        line-height: 1;
-      ">
-        <span style="
-          background: ${gradientMap.wind};
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          color: transparent;
-          font-weight: 900;
-          font-size: 18px;
-        ">
-          ${display}
-        </span>
-        <svg width="14" height="14" viewBox="0 0 24 24" 
-             style="transform: rotate(${rotation}deg); opacity: 0.85;">
-          <!-- up-pointing triangle; rotation handles direction -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;border:none;padding:0;margin:0;line-height:1;">
+        <span class="${robotoMono.className}" style="
+          background:${gradientMap.wind};
+          -webkit-background-clip:text;background-clip:text;
+          -webkit-text-fill-color:transparent;color:transparent;
+          font-weight:900;font-size:18px;
+        ">${display}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" style="transform:rotate(${rotation}deg);opacity:.9;">
           <path d="M12 4 L20 20 H4 Z" fill="#6b7280"/>
         </svg>
       </div>
     `;
-    return L.divIcon({ html, className: "param-div-icon", iconSize: [0, 0] });
+    return L.divIcon({ html, className: "param-div-icon", iconSize: [24, 24] });
   }
 
-  // Default case for other parameters
   const html = `
-    <div style="
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-      border: none;
-      padding: 0;
-      margin: 0;
-      font-size: 18px;
-      font-weight: 900;
-      line-height: 1;
-    ">
-      <span style="
-        background: ${gradientMap[param] || 'linear-gradient(45deg, #4b5563, #6b7280)'};
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        color: transparent;
-      ">
-        ${display}
-      </span>
+    <div style="display:inline-flex;align-items:center;justify-content:center;background:transparent;border:none;padding:0;margin:0;font-size:18px;font-weight:900;line-height:1;">
+      <span class="${robotoMono.className}" style="
+        background:${gradientMap[param]};
+        -webkit-background-clip:text;background-clip:text;
+        -webkit-text-fill-color:transparent;color:transparent;
+      ">${display}</span>
     </div>
   `;
-
-  return L.divIcon({
-    html,
-    className: "param-div-icon",
-    iconSize: [0, 0], // size controlled by content
-  });
+  return L.divIcon({ html, className: "param-div-icon", iconSize: [24, 24] });
 }
+
+// Compute wind direction that also changes along the timeline
+function dynamicWindDirectionDeg(index: number, stationId: string, baseDir: number | null | undefined) {
+  const base = baseDir ?? 0;
+  // Use the same fluctuation pattern but scale to degrees
+  const step = fluctuationDelta(index, stationId, "wind"); // -3,0,1,2 mostly
+  const amplified = step * 12; // 12° per step for noticeable but smooth change
+  let dir = (base + amplified) % 360;
+  if (dir < 0) dir += 360;
+  return dir;
+}
+
+/* === NEW: units for tooltip readout === */
+const paramUnits: Record<ParameterId, string> = {
+  temperature: "°C",
+  humidity: "%",
+  wind: "km/h",
+  pressure: "hPa",
+  dewpoint: "°C",
+  solarRadiation: "W/m²",
+};
 
 export default function MapComponent({
   currentDate,
@@ -178,11 +174,12 @@ export default function MapComponent({
   const { data: session } = useSession();
   const t = useTranslations("dashboard.mapComponent");
 
-  // Lazy-load react-leaflet only on the client
+  /* ---------- LAZY IMPORT: add Tooltip here ---------- */
   const [leaflet, setLeaflet] = useState<null | {
     MapContainer: any;
     TileLayer: any;
     Marker: any;
+    Tooltip: any;        // 👈 NEW
     useMap: any;
   }>(null);
 
@@ -196,16 +193,14 @@ export default function MapComponent({
           MapContainer: rl.MapContainer,
           TileLayer: rl.TileLayer,
           Marker: rl.Marker,
+          Tooltip: rl.Tooltip,     // 👈 NEW
           useMap: rl.useMap,
         });
       }
     })();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
-  // Custom Zoom Control uses useMap from the lazy import
   const CustomZoomControl = useMemo(() => {
     if (!leaflet) return () => null;
     const { useMap } = leaflet;
@@ -238,11 +233,8 @@ export default function MapComponent({
   const dates = useMemo(generateDates, []);
   const currentIndex = Math.max(0, dates.indexOf(currentDate));
   const stations = useMemo(() => getAllStations().filter(s => s.coordinates), []);
-
-  // Playback speed state (1x, 2x)
   const [playbackSpeed, setPlaybackSpeed] = useState<1 | 2>(1);
 
-  // Autoplay effect advancing the date index based on speed
   useEffect(() => {
     if (!isPlaying) return;
     const intervalMs = playbackSpeed === 2 ? 600 : 1200;
@@ -278,7 +270,6 @@ export default function MapComponent({
         ? t("roleDescription.stationAdmin")
         : t("roleDescription.guest");
 
-  // Skeleton while react-leaflet loads
   if (!leaflet) {
     return (
       <div className="relative h-[calc(100vh-100px)] w-full z-10">
@@ -302,15 +293,14 @@ export default function MapComponent({
     );
   }
 
-  const { MapContainer, TileLayer, Marker } = leaflet;
+  const { MapContainer, TileLayer, Marker, Tooltip } = leaflet;
 
-  // Compute values per-parameter for each station
+  // Value per parameter per station (same logic; used for marker label + tooltip)
   const valueForParam = (s: WeatherStationData, p: ParameterId): string | null => {
-    // Calculate a small delta for the current timeline index
     const delta = fluctuationDelta(currentIndex, s.stationId, p);
     switch (p) {
       case "temperature": {
-        const base = s.maxTemp != null ? s.maxTemp : s.minTemp != null ? s.minTemp : null;
+        const base = s.maxTemp ?? s.minTemp ?? null;
         if (base == null) return null;
         const adjusted = base + delta;
         return String(Math.round(adjusted * 10) / 10);
@@ -323,7 +313,7 @@ export default function MapComponent({
       case "dewpoint": {
         if (s.maxTemp != null && s.relativeHumidity != null && s.relativeHumidity > 0) {
           const dp = dewPointFromTempRH(s.maxTemp, s.relativeHumidity);
-          const adjusted = dp + delta * 0.3; // softer fluctuation for dewpoint
+          const adjusted = dp + delta * 0.3;
           return String(Math.round(adjusted * 10) / 10);
         }
         return null;
@@ -335,12 +325,12 @@ export default function MapComponent({
       }
       case "pressure": {
         if (s.pressure == null) return null;
-        const adjusted = Math.max(800, Math.min(1100, s.pressure + delta * 0.5)); // Smaller fluctuation for pressure
+        const adjusted = Math.max(800, Math.min(1100, s.pressure + delta * 0.5));
         return String(Math.round(adjusted));
       }
       case "solarRadiation": {
         if (s.solarRadiation == null) return null;
-        const adjusted = Math.max(0, s.solarRadiation + delta * 5); // Larger multiplier for solar
+        const adjusted = Math.max(0, s.solarRadiation + delta * 5);
         return String(Math.round(adjusted));
       }
       default:
@@ -349,6 +339,38 @@ export default function MapComponent({
   };
 
   const activeParams = (Object.keys(enabled) as ParameterId[]).filter((k) => enabled[k]);
+  const anyParamActive = activeParams.length > 0;
+
+  /* === NEW: Tooltip renderer (station details). Keep it simple & compact. === */
+  const StationTooltip = ({ s, param }: { s: WeatherStationData; param?: ParameterId }) => {
+    const v = param ? valueForParam(s, param) : null;
+    const unit = param ? ` ${paramUnits[param]}` : "";
+
+    return (
+      <div style={{ fontSize: 12, lineHeight: 1.2 }}>
+        <div style={{ fontWeight: 700, marginBottom: 4 }}>{s.stationName}</div>
+        {param && (
+          <div style={{ marginBottom: 6 }}>
+            <span style={{ opacity: 0.7, marginRight: 4 }}>{param}</span>
+            <strong className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{v ?? "—"}{v ? unit : ""}</strong>
+          </div>
+        )}
+        <div style={{ display: "grid", gridTemplateColumns: "auto auto", gap: "2px 8px" }}>
+          <span>Max / Min</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.maxTemp ?? "—"}°C / {s.minTemp ?? "—"}°C</span>
+          <span>RH</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.relativeHumidity ?? "—"}%</span>
+          <span>Precip</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.precipitation} mm</span>
+          <span>Snow</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.snowDepth} cm</span>
+          <span>Wind</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.windSpeedKph ?? "—"} km/h {`@ ${dynamicWindDirectionDeg(currentIndex, s.stationId, s.windDirDeg)}°`}</span>
+          <span>Pressure</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.pressure ?? "—"} hPa</span>
+          <span>Solar</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.solarRadiation ?? "—"} W/m²</span>
+          <span>Coords</span>
+          <span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>
+            {s.coordinates ? `${s.coordinates.lat.toFixed(3)}, ${s.coordinates.lng.toFixed(3)}` : "—"}
+          </span>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="relative h-[calc(100vh-50px)] w-full z-10">
@@ -373,15 +395,48 @@ export default function MapComponent({
 
           <CustomZoomControl />
 
-          {/* For each enabled param, render a layer of markers */}
-          {activeParams.map((paramKey) =>
+          {/* === NEW: Base station markers (only when NO parameter is active) === */}
+          {!anyParamActive &&
             stations.map((s) => {
               const coords = s.coordinates!;
-              const val = valueForParam(s, paramKey);
-              const icon = createParamIcon(s, paramKey, val);
-              return <Marker key={`${paramKey}-${s.stationId}`} position={[coords.lat, coords.lng]} icon={icon} />;
-            }),
-          )}
+              const icon = createBaseStationIcon();
+              return (
+                <Marker
+                  key={`base-${s.stationId}`}
+                  position={[coords.lat, coords.lng]}
+                  icon={icon}
+                  // interactive marker so the tooltip opens on hover
+                  interactive={true}
+                >
+                  <Tooltip direction="top" offset={[0, -6]} opacity={1} sticky>
+                    <StationTooltip s={s} />
+                  </Tooltip>
+                </Marker>
+              );
+            })}
+
+          {/* Parameter markers (only for active parameter), hide base layer to avoid clutter */}
+          {anyParamActive &&
+            activeParams.map((paramKey) =>
+              stations.map((s) => {
+                const coords = s.coordinates!;
+                const val = valueForParam(s, paramKey);
+                const dir = paramKey === "wind" ? dynamicWindDirectionDeg(currentIndex, s.stationId, s.windDirDeg) : null;
+                const icon = createParamIcon(s, paramKey, val, dir ?? undefined);
+                return (
+                  <Marker
+                    key={`${paramKey}-${s.stationId}`}
+                    position={[coords.lat, coords.lng]}
+                    icon={icon}
+                    interactive={true}
+                  >
+                    <Tooltip direction="top" offset={[0, -8]} opacity={1} sticky>
+                      <StationTooltip s={s} param={paramKey} />
+                    </Tooltip>
+                  </Marker>
+                );
+              }),
+            )}
         </MapContainer>
       </div>
 
@@ -389,7 +444,6 @@ export default function MapComponent({
       <div className="absolute bottom-4 left-4 right-4 z-[1000]">
         <div className="mx-auto max-w-4xl rounded-2xl bg-blue-900/70 text-blue-50 shadow-2xl ring-1 ring-blue-400/20 backdrop-blur p-3">
           <div className="flex items-center gap-3">
-            {/* Play / Pause */}
             <Button
               size="icon"
               variant="secondary"
@@ -404,7 +458,6 @@ export default function MapComponent({
               {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </Button>
 
-            {/* Prev / Next */}
             <Button
               size="icon"
               variant="secondary"
@@ -422,7 +475,6 @@ export default function MapComponent({
               <ChevronRight className="h-4 w-4" />
             </Button>
 
-            {/* Speed */}
             <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-blue-950/40 text-[11px] ring-1 ring-blue-400/20">
               <span className="opacity-80">Speed</span>
               <Button
@@ -453,7 +505,6 @@ export default function MapComponent({
               </Button>
             </div>
 
-            {/* Slider */}
             <div className="flex-1 mx-2">
               <div className="h-3 rounded-full bg-blue-300/20 ring-1 ring-blue-400/30 flex items-center px-2">
                 <Slider
@@ -466,14 +517,12 @@ export default function MapComponent({
               </div>
             </div>
 
-            {/* Date pill */}
             <div className="min-w-28 text-center font-medium text-xs bg-blue-950/40 ring-1 ring-blue-400/20 py-1 px-2 rounded-lg text-blue-100">
               {currentDate}
             </div>
           </div>
         </div>
       </div>
-
 
       {/* Role pill */}
       <div className="absolute top-4 right-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
@@ -483,10 +532,9 @@ export default function MapComponent({
 
       {/* Global tweaks */}
       <style jsx global>{`
-        .param-div-icon {
-          /* allow clicks to pass through if needed */
-          pointer-events: none;
-        }
+        /* IMPORTANT: allow hover so tooltip works */
+        .param-div-icon { pointer-events: auto; }
+        .base-station-icon { pointer-events: auto; }
       `}</style>
     </div>
   );
