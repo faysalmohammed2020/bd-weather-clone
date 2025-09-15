@@ -217,7 +217,7 @@ export default function MapComponent({
   enabledForecast,
 }: MapComponentProps) {
   const { data: session } = useSession();
-  const t = useTranslations("dashboard.mapComponent");
+  const t = useTranslations("WeatherStation");
 
   /* ---------- LAZY IMPORT: add Tooltip here ---------- */
   const [leaflet, setLeaflet] = useState<null | {
@@ -314,14 +314,14 @@ export default function MapComponent({
         ? t("role.stationAdmin")
         : session?.user?.role === "observer"
           ? t("role.observer")
-          : t("role.guest");
+          : t("guest");
 
   const roleDesc =
     session?.user?.role === "super_admin"
       ? t("roleDescription.superAdmin")
       : session?.user?.role === "station_admin" || session?.user?.role === "observer"
         ? t("roleDescription.stationAdmin")
-        : t("roleDescription.guest");
+        : t("guestDescription");
 
   if (!leaflet) {
     return (
@@ -416,14 +416,14 @@ export default function MapComponent({
           </div>
         )}
         <div style={{ display: "grid", gridTemplateColumns: "auto auto", gap: "2px 8px" }}>
-          <span>Max / Min</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.maxTemp ?? "—"}°C / {s.minTemp ?? "—"}°C</span>
-          <span>RH</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.relativeHumidity ?? "—"}%</span>
-          <span>Precip</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.precipitation} mm</span>
-          <span>Snow</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.snowDepth} cm</span>
-          <span>Wind</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.windSpeedKph ?? "—"} km/h {`@ ${dynamicWindDirectionDeg(currentIndex, s.stationId, s.windDirDeg)}°`}</span>
-          <span>Pressure</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.pressure ?? "—"} hPa</span>
-          <span>Solar</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.solarRadiation ?? "—"} W/m²</span>
-          <span>Coords</span>
+          <span>{t("maxMin")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.maxTemp ?? "—"}{t("unitC")} / {s.minTemp ?? "—"}{t("unitC")}</span>
+          <span>{t("relativeHumidity")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.relativeHumidity ?? "—"}%</span>
+          <span>{t("precipitation")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.precipitation} {t("unitMM")}</span>
+          <span>{t("snowDepth")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.snowDepth} {t("unitCM")}</span>
+          <span>{t("windSpeed")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.windSpeedKph ?? "—"} {t("unitKMH")} {`@ ${dynamicWindDirectionDeg(currentIndex, s.stationId, s.windDirDeg)}°`}</span>
+          <span>{t("pressure")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.pressure ?? "—"} {t("unitHPA")}</span>
+          <span>{t("solarRadiation")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.solarRadiation ?? "—"} {t("unitWM2")}</span>
+          <span>{t("coords")}</span>
           <span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>
             {s.coordinates ? `${s.coordinates.lat.toFixed(3)}, ${s.coordinates.lng.toFixed(3)}` : "—"}
           </span>
@@ -548,7 +548,7 @@ export default function MapComponent({
             </Button>
 
             <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-blue-950/40 text-[11px] ring-1 ring-blue-400/20">
-              <span className="opacity-80">Speed</span>
+              <span className="opacity-80">{t("speed")}</span>
               <Button
                 size="sm"
                 variant="secondary"
@@ -560,7 +560,7 @@ export default function MapComponent({
                     : "bg-blue-900/40 hover:bg-blue-800/50 text-blue-100 border-blue-400/30")
                 }
               >
-                1x
+                {t("1x")}
               </Button>
               <Button
                 size="sm"
@@ -573,7 +573,7 @@ export default function MapComponent({
                     : "bg-blue-900/40 hover:bg-blue-800/50 text-blue-100 border-blue-400/30")
                 }
               >
-                2x
+                {t("2x")}
               </Button>
             </div>
 

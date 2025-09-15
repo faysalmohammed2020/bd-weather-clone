@@ -19,6 +19,7 @@ import {
   MapPin,
 } from "lucide-react";
 import type { ForecastLayerId } from "./Animation/ForecastOverlay";
+import { useTranslations } from "next-intl";
 
 interface WeatherParameter {
   id: string;
@@ -34,27 +35,28 @@ interface WeatherSidebarProps {
 }
 
 export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: WeatherSidebarProps) {
+    const t = useTranslations("WeatherStation");
   const [weatherStations, setWeatherStations] = useState<WeatherParameter[]>([
-    { id: "temperature", label: "Temperature", icon: Thermometer, enabled: false, unit: "°C" },
-    { id: "wind", label: "Wind", icon: Wind, enabled: false, unit: "km/h" },
-    { id: "humidity", label: "Relative Humidity", icon: Droplets, enabled: false, unit: "%" },
-    { id: "pressure", label: "Air Pressure", icon: Gauge, enabled: false, unit: "hPa" },
-    { id: "dewpoint", label: "Dew Point", icon: CloudSnow, enabled: false, unit: "°C" },
-    { id: "solarRadiation", label: "Solar Radiation", icon: Sun, enabled: false, unit: "W/m²" },
+    { id: "temperature", label: t("temperature"), icon: Thermometer, enabled: false, unit: "°C" },
+    { id: "wind", label: t("wind"), icon: Wind, enabled: false, unit: "km/h" },
+    { id: "humidity", label: t("humidity"), icon: Droplets, enabled: false, unit: "%" },
+    { id: "pressure", label: t("pressure"), icon: Gauge, enabled: false, unit: "hPa" },
+    { id: "dewpoint", label: t("dewpoint"), icon: CloudSnow, enabled: false, unit: "°C" },
+    { id: "solarRadiation", label: t("solarRadiation"), icon: Sun, enabled: false, unit: "W/m²" },
   ]);
 
   // Optional future: forecast list (single-select behavior added here too)
   type ForecastParam = Omit<WeatherParameter, "id"> & { id: ForecastLayerId };
   const [numericalForecast, setNumericalForecast] = useState<ForecastParam[]>([
-    { id: "forecast-temp", label: "Temperature", icon: Thermometer, enabled: false },
-    { id: "forecast-humidity", label: "Relative Humidity", icon: Droplets, enabled: false },
-    { id: "forecast-wind", label: "Wind", icon: Wind, enabled: false },
-    { id: "pressure-isolines", label: "Pressure Isolines", icon: Eye, enabled: false },
-    { id: "msl-pressure", label: "MSL Pressure", icon: Gauge, enabled: false },
-    { id: "geopotential", label: "Geopotential height", icon: Mountain, enabled: false },
-    { id: "forecast-dewpoint", label: "Dew Point", icon: CloudSnow, enabled: false },
-    { id: "low-clouds", label: "Low Clouds", icon: Cloud, enabled: false },
-    { id: "total-clouds", label: "Total Clouds", icon: CloudRain, enabled: false },
+    { id: "forecast-temp", label: t("temperature"), icon: Thermometer, enabled: false },
+    { id: "forecast-humidity", label: t("humidity"), icon: Droplets, enabled: false },
+    { id: "forecast-wind", label: t("wind"), icon: Wind, enabled: false },
+    { id: "pressure-isolines", label: t("pressureIsolines"), icon: Eye, enabled: false },
+    { id: "msl-pressure", label: t("mslPressure"), icon: Gauge, enabled: false },
+    { id: "geopotential", label: t("geopotential"), icon: Mountain, enabled: false },
+    { id: "forecast-dewpoint", label: t("dewpoint"), icon: CloudSnow, enabled: false },
+    { id: "low-clouds", label: t("lowClouds"), icon: Cloud, enabled: false },
+    { id: "total-clouds", label: t("totalClouds"), icon: CloudRain, enabled: false },
     // { id: "wave-height", label: "Wave Height", icon: Waves, enabled: false },
     // { id: "wave-direction", label: "Wave Direction", icon: Waves, enabled: false },
   ]);
@@ -159,7 +161,7 @@ export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: 
         <div className="p-4">
           <div className="flex items-center gap-2 mb-4">
             <MapPin className="h-5 w-5 text-white" />
-            <h2 className="text-lg font-semibold text-white">Weather Stations</h2>
+            <h2 className="text-lg font-semibold text-white">{t("weatherStations")}</h2>
           </div>
 
           <div className="space-y-3">
@@ -190,7 +192,7 @@ export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: 
         <div className="p-4">
           <div className="flex items-center gap-2 mb-4">
             <Cloud className="h-5 w-5 text-white" />
-            <h2 className="text-lg font-semibold text-white">Numerical Forecast</h2>
+            <h2 className="text-lg font-semibold text-white">{t("numericalForecast")}</h2>
           </div>
 
           <div className="space-y-3">

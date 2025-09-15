@@ -1910,8 +1910,8 @@
     "download_csv": "تحميل البيانات (CSV)"
   },
   "WeatherStation": {
-    "titleWS": "محطة الطقس",
-    "titleNF": "التوقعات العددية",
+    "weatherStations": "محطة الطقس",
+    "numericalForecast": "التوقعات العددية",
     "temperature": "درجة الحرارة",
     "humidity": "الرطوبة النسبية",
     "wind": "الرياح",
@@ -1921,6 +1921,7 @@
     "pressureIsolines": "خطوط تساوي الضغط",
     "mslPressure": "ضغط مستوى سطح البحر",
     "geopotentialHeight": "الارتفاع الجيوديناميكي",
+    "geopotential": "الارتفاع الجيوديناميكي",
     "lowClouds": "غيوم منخفضة",
     "totalClouds": "إجمالي الغيوم",
     "forecastTemperature": "درجة الحرارة (التوقع)",
@@ -1930,6 +1931,19 @@
     "unitKMH": "كم/س",
     "unitPercent": "%",
     "unitHPA": "هكتوباسكال",
-    "unitWM2": "واط/م²"
+    "unitWM2": "واط/م²",
+    "unitCM": "سم",
+    "unitMM": "مم",
+    "maxMin": "الحد الأقصى / الأدنى",
+    "relativeHumidity": "الرطوبة النسبية",
+    "precipitation": "هطول الأمطار",
+    "snowDepth": "عمق الثلج",
+    "windSpeed": "سرعة الرياح",
+    "coords": "الإحداثيات",
+    "guest": "ضيف",
+    "guestDescription": "لا يوجد محطات متاحة",
+    "speed": "السرعة",
+    "1x": "1x",
+    "2x": "2x"
   }
 }
