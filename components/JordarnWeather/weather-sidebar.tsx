@@ -13,7 +13,6 @@ import {
   Sun,
   Cloud,
   CloudRain,
-  Waves,
   Eye,
   Mountain,
   MapPin,
@@ -34,10 +33,14 @@ interface WeatherSidebarProps {
   onForecastToggle: (parameterId: ForecastLayerId, enabled: boolean) => void;
 }
 
-export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: WeatherSidebarProps) {
+export default function WeatherSidebar({
+  onParameterToggle,
+  onForecastToggle,
+}: WeatherSidebarProps) {
   const t = useTranslations("WeatherStation");
   const locale = useLocale();
   const isRTL = locale === "ar";
+
   const [weatherStations, setWeatherStations] = useState<WeatherParameter[]>([
     { id: "temperature", label: t("temperature"), icon: Thermometer, enabled: false, unit: t("unitC") },
     { id: "wind", label: t("wind"), icon: Wind, enabled: false, unit: t("unitKMH") },
@@ -47,7 +50,6 @@ export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: 
     { id: "solarRadiation", label: t("solarRadiation"), icon: Sun, enabled: false, unit: t("unitWM2") },
   ]);
 
-  // Optional future: forecast list (single-select behavior added here too)
   type ForecastParam = Omit<WeatherParameter, "id"> & { id: ForecastLayerId };
   const [numericalForecast, setNumericalForecast] = useState<ForecastParam[]>([
     { id: "forecast-temp", label: t("temperature"), icon: Thermometer, enabled: false },
@@ -59,41 +61,32 @@ export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: 
     { id: "forecast-dewpoint", label: t("dewpoint"), icon: CloudSnow, enabled: false },
     { id: "low-clouds", label: t("lowClouds"), icon: Cloud, enabled: false },
     { id: "total-clouds", label: t("totalClouds"), icon: CloudRain, enabled: false },
-    // { id: "wave-height", label: "Wave Height", icon: Waves, enabled: false },
-    // { id: "wave-direction", label: "Wave Direction", icon: Waves, enabled: false },
   ]);
 
-  // ---- Single-select handlers ----
+  // --- Handlers ---
   const handleWeatherStationToggle = (id: string) => {
     setWeatherStations((prev) => {
       const target = prev.find((p) => p.id === id);
       const turningOn = !(target?.enabled);
-      
-      // First, create the new state
+
       const nextState = prev.map((p) =>
-        p.id === id ? { ...p, enabled: turningOn } : { ...p, enabled: false },
+        p.id === id ? { ...p, enabled: turningOn } : { ...p, enabled: false }
       );
 
-      // Calculate changes after state update
-      const changes: Array<{id: string, enabled: boolean}> = [];
-      
-      // Target's state is changing
+      const changes: Array<{ id: string; enabled: boolean }> = [];
       if (target?.enabled !== turningOn) {
         changes.push({ id, enabled: turningOn });
       }
-      
-      // If turning on, turn off all others that were on
+
       if (turningOn) {
-        prev.forEach(p => {
+        prev.forEach((p) => {
           if (p.id !== id && p.enabled) {
             changes.push({ id: p.id, enabled: false });
           }
         });
-        // Also turn off ALL forecast items when a station is turned on
         setNumericalForecast((nfPrev) => {
           const turnedOff = nfPrev.filter((f) => f.enabled).map((f) => f.id);
           const nfNext = nfPrev.map((f) => ({ ...f, enabled: false }));
-          // Notify parent after render
           setTimeout(() => {
             turnedOff.forEach((fid) => onForecastToggle(fid, false));
           }, 0);
@@ -101,7 +94,6 @@ export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: 
         });
       }
 
-      // Apply changes after state is updated
       setTimeout(() => {
         changes.forEach(({ id, enabled }) => onParameterToggle(id, enabled));
       }, 0);
@@ -114,32 +106,25 @@ export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: 
     setNumericalForecast((prev) => {
       const target = prev.find((p) => p.id === id);
       const turningOn = !(target?.enabled);
-      
-      // First, create the new state
+
       const nextState = prev.map((p) =>
-        p.id === id ? { ...p, enabled: turningOn } : { ...p, enabled: false },
+        p.id === id ? { ...p, enabled: turningOn } : { ...p, enabled: false }
       );
 
-      // Calculate changes after state update
-      const changes: Array<{id: string, enabled: boolean}> = [];
-      
-      // Target's state is changing
+      const changes: Array<{ id: string; enabled: boolean }> = [];
       if (target?.enabled !== turningOn) {
         changes.push({ id, enabled: turningOn });
       }
-      
-      // If turning on, turn off all others that were on
+
       if (turningOn) {
-        prev.forEach(p => {
+        prev.forEach((p) => {
           if (p.id !== id && p.enabled) {
             changes.push({ id: p.id, enabled: false });
           }
         });
-        // Also turn off ALL station items when a forecast is turned on
         setWeatherStations((wsPrev) => {
           const turnedOff = wsPrev.filter((w) => w.enabled).map((w) => w.id);
           const wsNext = wsPrev.map((w) => ({ ...w, enabled: false }));
-          // Notify parent after render
           setTimeout(() => {
             turnedOff.forEach((wid) => onParameterToggle(wid, false));
           }, 0);
@@ -147,9 +132,10 @@ export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: 
         });
       }
 
-      // Apply changes after state is updated
       setTimeout(() => {
-        changes.forEach(({ id, enabled }) => onForecastToggle(id as ForecastLayerId, enabled));
+        changes.forEach(({ id, enabled }) =>
+          onForecastToggle(id as ForecastLayerId, enabled)
+        );
       }, 0);
 
       return nextState;
@@ -157,28 +143,45 @@ export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: 
   };
 
   return (
-    <div className="w-80 h-full bg-blue-900 text-white p-4 overflow-y-auto" dir={isRTL ? "rtl" : "ltr"}>
+    <div
+      className="w-80 h-full bg-blue-900 text-white p-4 overflow-y-auto"
+      dir={isRTL ? "rtl" : "ltr"}
+    >
       {/* Weather Stations Section */}
       <Card className="bg-blue-800 border-blue-700 mb-4">
         <div className="p-4">
           <div className="flex items-center gap-2 mb-4">
             <MapPin className="h-5 w-5 text-white" />
-            <h2 className="text-lg font-semibold text-white">{t("weatherStations")}</h2>
+            <h2 className="text-lg font-semibold text-white">
+              {t("weatherStations")}
+            </h2>
           </div>
 
           <div className="space-y-3">
             {weatherStations.map((param) => {
               const Icon = param.icon;
               return (
-                <div key={param.id} className={`flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
-                  <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+                <div
+                  key={param.id}
+                  className="flex items-center justify-between"
+                >
+                  {/* Label + icon should flip in RTL */}
+                  <div
+                    className={`flex items-center gap-3 ${
+                      isRTL ? "flex-row-reverse" : ""
+                    }`}
+                  >
                     <Icon className="h-4 w-4 text-blue-200" />
                     <span className="text-sm text-white">{param.label}</span>
-                    {param.unit && <span className="text-xs text-blue-300">({param.unit})</span>}
+                    {param.unit && (
+                      <span className="text-xs text-blue-300">
+                        ({param.unit})
+                      </span>
+                    )}
                   </div>
+                  {/* Switch always stays aligned on the opposite side */}
                   <Switch
                     checked={!!param.enabled}
-                    // clicking the same switch again turns it off (so all become off)
                     onCheckedChange={() => handleWeatherStationToggle(param.id)}
                     className="data-[state=checked]:bg-blue-500"
                   />
@@ -189,20 +192,29 @@ export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: 
         </div>
       </Card>
 
-      {/* Numerical Forecast Section (also single-select) */}
+      {/* Forecast Section */}
       <Card className="bg-blue-800 border-blue-700">
         <div className="p-4">
           <div className="flex items-center gap-2 mb-4">
             <Cloud className="h-5 w-5 text-white" />
-            <h2 className="text-lg font-semibold text-white">{t("numericalForecast")}</h2>
+            <h2 className="text-lg font-semibold text-white">
+              {t("numericalForecast")}
+            </h2>
           </div>
 
           <div className="space-y-3">
             {numericalForecast.map((param) => {
               const Icon = param.icon;
               return (
-                <div key={param.id} className={`flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
-                  <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+                <div
+                  key={param.id}
+                  className="flex items-center justify-between"
+                >
+                  <div
+                    className={`flex items-center gap-3 ${
+                      isRTL ? "flex-row-reverse" : ""
+                    }`}
+                  >
                     <Icon className="h-4 w-4 text-blue-200" />
                     <span className="text-sm text-white">{param.label}</span>
                   </div>
