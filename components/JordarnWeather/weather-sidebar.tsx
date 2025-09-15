@@ -37,12 +37,12 @@ interface WeatherSidebarProps {
 export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: WeatherSidebarProps) {
     const t = useTranslations("WeatherStation");
   const [weatherStations, setWeatherStations] = useState<WeatherParameter[]>([
-    { id: "temperature", label: t("temperature"), icon: Thermometer, enabled: false, unit: "°C" },
-    { id: "wind", label: t("wind"), icon: Wind, enabled: false, unit: "km/h" },
-    { id: "humidity", label: t("humidity"), icon: Droplets, enabled: false, unit: "%" },
-    { id: "pressure", label: t("pressure"), icon: Gauge, enabled: false, unit: "hPa" },
-    { id: "dewpoint", label: t("dewpoint"), icon: CloudSnow, enabled: false, unit: "°C" },
-    { id: "solarRadiation", label: t("solarRadiation"), icon: Sun, enabled: false, unit: "W/m²" },
+    { id: "temperature", label: t("temperature"), icon: Thermometer, enabled: false, unit: t("unitC") },
+    { id: "wind", label: t("wind"), icon: Wind, enabled: false, unit: t("unitKMH") },
+    { id: "humidity", label: t("humidity"), icon: Droplets, enabled: false, unit: t("unitPercent") },
+    { id: "pressure", label: t("pressure"), icon: Gauge, enabled: false, unit: t("unitHPA") },
+    { id: "dewpoint", label: t("dewpoint"), icon: CloudSnow, enabled: false, unit: t("unitC") },
+    { id: "solarRadiation", label: t("solarRadiation"), icon: Sun, enabled: false, unit: t("unitWM2") },
   ]);
 
   // Optional future: forecast list (single-select behavior added here too)
