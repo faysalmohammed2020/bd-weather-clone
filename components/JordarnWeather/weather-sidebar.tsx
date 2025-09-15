@@ -18,6 +18,7 @@ import {
   Mountain,
   MapPin,
 } from "lucide-react";
+import type { ForecastLayerId } from "./Animation/ForecastOverlay";
 
 interface WeatherParameter {
   id: string;
@@ -29,9 +30,10 @@ interface WeatherParameter {
 
 interface WeatherSidebarProps {
   onParameterToggle: (parameterId: string, enabled: boolean) => void;
+  onForecastToggle: (parameterId: ForecastLayerId, enabled: boolean) => void;
 }
 
-export default function WeatherSidebar({ onParameterToggle }: WeatherSidebarProps) {
+export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: WeatherSidebarProps) {
   const [weatherStations, setWeatherStations] = useState<WeatherParameter[]>([
     { id: "temperature", label: "Temperature", icon: Thermometer, enabled: false, unit: "°C" },
     { id: "wind", label: "Wind", icon: Wind, enabled: false, unit: "km/h" },
@@ -42,7 +44,8 @@ export default function WeatherSidebar({ onParameterToggle }: WeatherSidebarProp
   ]);
 
   // Optional future: forecast list (single-select behavior added here too)
-  const [numericalForecast, setNumericalForecast] = useState<WeatherParameter[]>([
+  type ForecastParam = Omit<WeatherParameter, "id"> & { id: ForecastLayerId };
+  const [numericalForecast, setNumericalForecast] = useState<ForecastParam[]>([
     { id: "forecast-temp", label: "Temperature", icon: Thermometer, enabled: false },
     { id: "forecast-humidity", label: "Relative Humidity", icon: Droplets, enabled: false },
     { id: "forecast-wind", label: "Wind", icon: Wind, enabled: false },
@@ -52,8 +55,8 @@ export default function WeatherSidebar({ onParameterToggle }: WeatherSidebarProp
     { id: "forecast-dewpoint", label: "Dew Point", icon: CloudSnow, enabled: false },
     { id: "low-clouds", label: "Low Clouds", icon: Cloud, enabled: false },
     { id: "total-clouds", label: "Total Clouds", icon: CloudRain, enabled: false },
-    { id: "wave-height", label: "Wave Height", icon: Waves, enabled: false },
-    { id: "wave-direction", label: "Wave Direction", icon: Waves, enabled: false },
+    // { id: "wave-height", label: "Wave Height", icon: Waves, enabled: false },
+    // { id: "wave-direction", label: "Wave Direction", icon: Waves, enabled: false },
   ]);
 
   // ---- Single-select handlers ----
@@ -82,6 +85,16 @@ export default function WeatherSidebar({ onParameterToggle }: WeatherSidebarProp
             changes.push({ id: p.id, enabled: false });
           }
         });
+        // Also turn off ALL forecast items when a station is turned on
+        setNumericalForecast((nfPrev) => {
+          const turnedOff = nfPrev.filter((f) => f.enabled).map((f) => f.id);
+          const nfNext = nfPrev.map((f) => ({ ...f, enabled: false }));
+          // Notify parent after render
+          setTimeout(() => {
+            turnedOff.forEach((fid) => onForecastToggle(fid, false));
+          }, 0);
+          return nfNext;
+        });
       }
 
       // Apply changes after state is updated
@@ -93,7 +106,7 @@ export default function WeatherSidebar({ onParameterToggle }: WeatherSidebarProp
     });
   };
 
-  const handleForecastToggle = (id: string) => {
+  const handleForecastToggle = (id: ForecastLayerId) => {
     setNumericalForecast((prev) => {
       const target = prev.find((p) => p.id === id);
       const turningOn = !(target?.enabled);
@@ -118,11 +131,21 @@ export default function WeatherSidebar({ onParameterToggle }: WeatherSidebarProp
             changes.push({ id: p.id, enabled: false });
           }
         });
+        // Also turn off ALL station items when a forecast is turned on
+        setWeatherStations((wsPrev) => {
+          const turnedOff = wsPrev.filter((w) => w.enabled).map((w) => w.id);
+          const wsNext = wsPrev.map((w) => ({ ...w, enabled: false }));
+          // Notify parent after render
+          setTimeout(() => {
+            turnedOff.forEach((wid) => onParameterToggle(wid, false));
+          }, 0);
+          return wsNext;
+        });
       }
 
       // Apply changes after state is updated
       setTimeout(() => {
-        changes.forEach(({ id, enabled }) => onParameterToggle(id, enabled));
+        changes.forEach(({ id, enabled }) => onForecastToggle(id as ForecastLayerId, enabled));
       }, 0);
 
       return nextState;

@@ -9,6 +9,7 @@ import { Play, Pause, Plus, Minus, ChevronLeft, ChevronRight } from "lucide-reac
 import { useSession } from "@/lib/auth-client";
 import { useTranslations } from "next-intl";
 import { getAllStations, type WeatherStationData } from "./weather-data";
+import ForecastOverlay, { type ForecastLayerId } from "./Animation/ForecastOverlay";
 import { Roboto_Mono } from "next/font/google";
 
 export type ParameterId =
@@ -27,6 +28,7 @@ export interface MapComponentProps {
   isPlaying: boolean;
   setIsPlaying: (playing: boolean) => void;
   enabled: EnabledMap; // which layers to show
+  enabledForecast: Record<ForecastLayerId, boolean>;
 }
 
 /** Small utility: dew point approximation (Magnus-Tetens) */
@@ -212,6 +214,7 @@ export default function MapComponent({
   isPlaying,
   setIsPlaying,
   enabled,
+  enabledForecast,
 }: MapComponentProps) {
   const { data: session } = useSession();
   const t = useTranslations("dashboard.mapComponent");
@@ -295,6 +298,14 @@ export default function MapComponent({
     const next = (currentIndex + 1) % dates.length;
     setCurrentDate(dates[next]);
   };
+
+  // Determine active forecast layer (single-select expected). Must be declared
+  // before any early returns to keep Hooks order consistent across renders.
+  const activeForecast: ForecastLayerId | null = useMemo(() => {
+    const entries = Object.entries(enabledForecast) as Array<[ForecastLayerId, boolean]>;
+    const found = entries.find(([, v]) => v);
+    return found ? found[0] : null;
+  }, [enabledForecast]);
 
   const roleLabel =
     session?.user?.role === "super_admin"
@@ -383,6 +394,13 @@ export default function MapComponent({
   const activeParams = (Object.keys(enabled) as ParameterId[]).filter((k) => enabled[k]);
   const anyParamActive = activeParams.length > 0;
 
+  // Hide timeline for specific forecast layers
+  const hideTimeline = !!activeForecast && (
+    activeForecast === "pressure-isolines" ||
+    activeForecast === "msl-pressure" ||
+    activeForecast === "geopotential"
+  );
+
   /* === NEW: Tooltip renderer (station details). Keep it simple & compact. === */
   const StationTooltip = ({ s, param }: { s: WeatherStationData; param?: ParameterId }) => {
     const v = param ? valueForParam(s, param) : null;
@@ -437,6 +455,17 @@ export default function MapComponent({
 
           <CustomZoomControl />
 
+          {/* Forecast animated overlay */}
+          {activeForecast && (
+            <ForecastOverlay
+              layerId={activeForecast}
+              enabled={true}
+              opacity={0.8}
+              isPlaying={isPlaying}
+              timelineKey={currentIndex}
+            />
+          )}
+
           {/* === NEW: Base station markers (only when NO parameter is active) === */}
           {!anyParamActive &&
             stations.map((s) => {
@@ -483,6 +512,7 @@ export default function MapComponent({
       </div>
 
       {/* Timeline */}
+      {!hideTimeline && (
       <div className="absolute bottom-4 left-4 right-4 z-[1000]">
         <div className="mx-auto max-w-4xl rounded-2xl bg-blue-900/70 text-blue-50 shadow-2xl ring-1 ring-blue-400/20 backdrop-blur p-3">
           <div className="flex items-center gap-3">
@@ -565,6 +595,7 @@ export default function MapComponent({
           </div>
         </div>
       </div>
+      )}
 
       {/* Role pill */}
       <div className="absolute top-4 right-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
