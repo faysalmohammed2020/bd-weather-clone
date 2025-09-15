@@ -19,7 +19,7 @@ import {
   MapPin,
 } from "lucide-react";
 import type { ForecastLayerId } from "./Animation/ForecastOverlay";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 interface WeatherParameter {
   id: string;
@@ -35,7 +35,9 @@ interface WeatherSidebarProps {
 }
 
 export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: WeatherSidebarProps) {
-    const t = useTranslations("WeatherStation");
+  const t = useTranslations("WeatherStation");
+  const locale = useLocale();
+  const isRTL = locale === "ar";
   const [weatherStations, setWeatherStations] = useState<WeatherParameter[]>([
     { id: "temperature", label: t("temperature"), icon: Thermometer, enabled: false, unit: t("unitC") },
     { id: "wind", label: t("wind"), icon: Wind, enabled: false, unit: t("unitKMH") },
@@ -155,7 +157,7 @@ export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: 
   };
 
   return (
-    <div className="w-80 h-full bg-blue-900 text-white p-4 overflow-y-auto">
+    <div className="w-80 h-full bg-blue-900 text-white p-4 overflow-y-auto" dir={isRTL ? "rtl" : "ltr"}>
       {/* Weather Stations Section */}
       <Card className="bg-blue-800 border-blue-700 mb-4">
         <div className="p-4">
@@ -168,8 +170,8 @@ export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: 
             {weatherStations.map((param) => {
               const Icon = param.icon;
               return (
-                <div key={param.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <div key={param.id} className={`flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
+                  <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
                     <Icon className="h-4 w-4 text-blue-200" />
                     <span className="text-sm text-white">{param.label}</span>
                     {param.unit && <span className="text-xs text-blue-300">({param.unit})</span>}
@@ -199,8 +201,8 @@ export default function WeatherSidebar({ onParameterToggle, onForecastToggle }: 
             {numericalForecast.map((param) => {
               const Icon = param.icon;
               return (
-                <div key={param.id} className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <div key={param.id} className={`flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
+                  <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
                     <Icon className="h-4 w-4 text-blue-200" />
                     <span className="text-sm text-white">{param.label}</span>
                   </div>

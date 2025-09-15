@@ -394,11 +394,14 @@ export default function MapComponent({
   const activeParams = (Object.keys(enabled) as ParameterId[]).filter((k) => enabled[k]);
   const anyParamActive = activeParams.length > 0;
 
-  // Hide timeline for specific forecast layers
-  const hideTimeline = !!activeForecast && (
-    activeForecast === "pressure-isolines" ||
-    activeForecast === "msl-pressure" ||
-    activeForecast === "geopotential"
+  // Hide timeline when nothing is selected (initial) or for specific forecast layers
+  const hideTimeline = (
+    (!anyParamActive && !activeForecast) ||
+    (!!activeForecast && (
+      activeForecast === "pressure-isolines" ||
+      activeForecast === "msl-pressure" ||
+      activeForecast === "geopotential"
+    ))
   );
 
   /* === NEW: Tooltip renderer (station details). Keep it simple & compact. === */
