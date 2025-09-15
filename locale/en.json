@@ -1761,9 +1761,9 @@
       "submitError": "Failed to submit data",
       "fetchError": "Failed to load some auto-fill data",
       "duplicateTitle": "Duplicate Entry Detected",
-      "duplicateExists" : "Data for",
-      "onDate" : "already exists on",
-      "ok" : "OK"
+      "duplicateExists": "Data for",
+      "onDate": "already exists on",
+      "ok": "OK"
     }
   },
   "sunShineForm": {
@@ -1900,6 +1900,21 @@
     "processing": "Processing your file...",
     "visualizations": "Data Visualizations & Exports",
     "download_csv": "Download Data (CSV)"
-    
+  },
+  "WeatherStation": {
+    "titleWS": "Weather Station",
+    "titleNF": "Numerical Forecast",
+    "temperature": "Temperature",
+    "humidity": "Humidity",
+    "wind": "Wind",
+    "pressure": "Pressure",
+    "dewpoint": "Dewpoint",
+    "solarRadiation": "Solar Radiation",
+    "pressureIsolines": "Pressure Isolines",
+    "mslPressure": "MSL Pressure",
+    "geopotentialHeight": "Geopotential height",
+    "dewPoint": "Dew Point",
+    "lowClouds": "Low Clouds",
+    "highClouds": "High Clouds"
   }
 }

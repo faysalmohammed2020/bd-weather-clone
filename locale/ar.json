@@ -1908,5 +1908,28 @@
     "processing": "جارٍ معالجة الملف...",
     "visualizations": "تصورات البيانات والتصدير",
     "download_csv": "تحميل البيانات (CSV)"
+  },
+  "WeatherStation": {
+    "titleWS": "محطة الطقس",
+    "titleNF": "التوقعات العددية",
+    "temperature": "درجة الحرارة",
+    "humidity": "الرطوبة النسبية",
+    "wind": "الرياح",
+    "pressure": "ضغط الهواء",
+    "dewpoint": "نقطة الندى",
+    "solarRadiation": "الإشعاع الشمسي",
+    "pressureIsolines": "خطوط تساوي الضغط",
+    "mslPressure": "ضغط مستوى سطح البحر",
+    "geopotentialHeight": "الارتفاع الجيوديناميكي",
+    "lowClouds": "غيوم منخفضة",
+    "totalClouds": "إجمالي الغيوم",
+    "forecastTemperature": "درجة الحرارة (التوقع)",
+    "forecastHumidity": "الرطوبة النسبية (التوقع)",
+    "forecastWind": "الرياح (التوقع)",
+    "unitC": "°م",
+    "unitKMH": "كم/س",
+    "unitPercent": "%",
+    "unitHPA": "هكتوباسكال",
+    "unitWM2": "واط/م²"
   }
 }
