@@ -31,7 +31,7 @@ export const jordanWeatherStations: WeatherStationData[] = [
     windDirDeg: 310,
     pressure: 1013,
     solarRadiation: 500,
-    coordinates: { lat: 32.671081, lng: 35.710026 },
+    coordinates: { lat: 32.665056, lng: 35.745866 },
   },
   {
     stationName: "Deir Alla",
@@ -311,7 +311,7 @@ export const jordanWeatherStations: WeatherStationData[] = [
     windDirDeg: 30,
     pressure: 1008,
     solarRadiation: 400,
-    coordinates: { lat: 29.6, lng: 35.0 },
+    coordinates: { lat: 29.609196, lng: 35.021217 },
   },
   {
     stationName: "Ras Muneef",

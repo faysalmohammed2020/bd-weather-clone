@@ -77,19 +77,22 @@ const robotoMono = Roboto_Mono({ subsets: ["latin"], weight: ["400", "700"], dis
 /* === NEW: a small base “dot” icon for stations when no parameter is active === */
 function createBaseStationIcon() {
   const html = `
-    <div style="
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #60a5fa, #1d4ed8);
-      border: 1px solid rgba(255,255,255,0.8);
-      box-shadow: 0 0 8px rgba(29,78,216,0.6);
-    "></div>
+    <div style="width: 24px; height: 24px; display: flex; justify-content: center; align-items: center;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 10C13.1046 10 14 9.10457 14 8C14 6.89543 13.1046 6 12 6C10.8954 6 10 6.89543 10 8C10 9.10457 10.8954 10 12 10Z" fill="#3b82f6"/>
+        <path d="M12 12C9.8 12 8 10.2 8 8C8 5.8 9.8 4 12 4C14.2 4 16 5.8 16 8C16 10.2 14.2 12 12 12ZM12 6C10.9 6 10 6.9 10 8C10 9.1 10.9 10 12 10C13.1 10 14 9.1 14 8C14 6.9 13.1 6 12 6Z" fill="#1d4ed8"/>
+        <path d="M12 16C15.9 16 19 12.9 19 9C19 8.4 18.6 8 18 8C17.4 8 17 8.4 17 9C17 11.8 14.8 14 12 14C9.2 14 7 11.8 7 9C7 8.4 6.6 8 6 8C5.4 8 5 8.4 5 9C5 12.9 8.1 16 12 16Z" fill="#3b82f6"/>
+        <path d="M12 20C17.5 20 22 15.5 22 10C22 9.4 21.6 9 21 9C20.4 9 20 9.4 20 10C20 14.4 16.4 18 12 18C7.6 18 4 14.4 4 10C4 9.4 3.6 9 3 9C2.4 9 2 9.4 2 10C2 15.5 6.5 20 12 20Z" fill="#1d4ed8"/>
+        <path d="M12 22C6.5 22 2 17.5 2 12C2 6.5 6.5 2 12 2C17.5 2 22 6.5 22 12C22 17.5 17.5 22 12 22ZM12 4C7.6 4 4 7.6 4 12C4 16.4 7.6 20 12 20C16.4 20 20 16.4 20 12C20 7.6 16.4 4 12 4Z" fill="#1d4ed8" fill-opacity="0.3"/>
+      </svg>
+    </div>
   `;
   return L.divIcon({
     html,
     className: "base-station-icon",
-    iconSize: [10, 10],
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -12]
   });
 }
 
@@ -115,20 +118,59 @@ function createParamIcon(
     const base = station.windDirDeg ?? 0;
     const dir = overrideDirectionDeg != null ? overrideDirectionDeg : base;
     const rotation = (dir + 180) % 360; // from-direction -> to-direction
+  
+    const valueStr = (value ?? value === 0) ? `${value}` : "—";
+  
+    // SVG geometry
+    const cx = 24, cy = 28;       // center
+    const r = 14;                 // inner radius
+    const ringR = 20;             // dotted orbit radius
+  
     const html = `
-      <div style="display:flex;flex-direction:column;align-items:center;gap:2px;background:transparent;border:none;padding:0;margin:0;line-height:1;">
-        <span class="${robotoMono.className}" style="
-          background:${gradientMap.wind};
-          -webkit-background-clip:text;background-clip:text;
-          -webkit-text-fill-color:transparent;color:transparent;
-          font-weight:900;font-size:18px;
-        ">${display}</span>
-        <svg width="14" height="14" viewBox="0 0 24 24" style="transform:rotate(${rotation}deg);opacity:.9;">
-          <path d="M12 4 L20 20 H4 Z" fill="#6b7280"/>
-        </svg>
-      </div>
+    <div style="pointer-events:none; display:flex; align-items:center; justify-content:center; background:transparent;">
+      <svg width="40" height="40" viewBox="0 0 56 64" style="overflow:visible; shape-rendering:geometricPrecision;">
+        <defs>
+          <linearGradient id="windFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#39b5ff"/>
+            <stop offset="1" stop-color="#1677ff"/>
+          </linearGradient>
+          <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="1" stdDeviation="1" flood-color="#000" flood-opacity=".35"/>
+          </filter>
+        </defs>
+  
+        <!-- dotted orbit -->
+        <circle cx="${cx}" cy="${cy}" r="${ringR}"
+                fill="none" stroke="#7fb8ff" stroke-width="2"
+                stroke-dasharray="1 6" opacity=".6"/>
+  
+        <!-- pointer wedge (rotates around center) -->
+        <g style="transform:rotate(${rotation}deg); transform-origin:${cx}px ${cy}px">
+          <path d="M ${cx} ${cy - r - 10} L ${cx - 9} ${cy - r + 4} L ${cx + 9} ${cy - r + 4} Z"
+                fill="#1a5fd0" opacity=".95" filter="url(#shadow)"/>
+        </g>
+  
+        <!-- outer ring -->
+        <circle cx="${cx}" cy="${cy}" r="${r + 4}" fill="#125ecb" filter="url(#shadow)"/>
+        <!-- inner face -->
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#windFill)"/>
+  
+        <!-- centered value -->
+        <text x="${cx}" y="${cy + 5}" text-anchor="middle"
+              font-family="Roboto Mono, ui-monospace, SFMono-Regular, Menlo, monospace"
+              font-weight="800" font-size="16"
+              fill="#ffffff" stroke="#0d3a7e" stroke-width="2" paint-order="stroke">
+          ${valueStr}
+        </text>
+      </svg>
+    </div>
     `;
-    return L.divIcon({ html, className: "param-div-icon", iconSize: [24, 24] });
+  
+    return L.divIcon({
+      html,
+      className: "wind-pin-icon",
+      iconSize: [56, 64]
+    });
   }
 
   const html = `
