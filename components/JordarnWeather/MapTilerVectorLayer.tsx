@@ -1,43 +1,59 @@
 // MapTilerVectorLayer.tsx
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useMap } from "react-leaflet";
 import { maptilerLayer } from "@maptiler/leaflet-maptilersdk";
 import * as maptilersdk from "@maptiler/sdk";
 
 // Define the available style types
-type MapTilerStyle =
-    | 'STREETS' | 'OUTDOOR' | 'SATELLITE' | 'WINTER' | 'HYBRID' | 'BRIGHT'
-    | 'TOPO' | 'VESKIA' | 'VESKIA_DARK' | 'VESKIA_HYBRID' | 'VESKIA_SATELLITE'
-    | 'VESKIA_STREETS' | 'VESKIA_TERRAIN' | 'VESKIA_TOPO' | 'VESKIA_VOYAGER';
+type MapTilerStyle = 
+  | 'STREETS' | 'OUTDOOR' | 'SATELLITE' | 'WINTER' | 'HYBRID' | 'BRIGHT'
+  | 'TOPO' | 'VESKIA' | 'VESKIA_DARK' | 'VESKIA_HYBRID' | 'VESKIA_SATELLITE'
+  | 'VESKIA_STREETS' | 'VESKIA_TERRAIN' | 'VESKIA_TOPO' | 'VESKIA_VOYAGER';
 
 export default function MapTilerVectorLayer({
-    style = 'STREETS',
-    styleUrl,
-    apiKey,
+  style = 'STREETS',
+  styleUrl,
+  apiKey,
 }: {
-    style?: MapTilerStyle;
-    styleUrl?: string; // full MapTiler style URL (e.g., https://api.maptiler.com/maps/<id>/style.json?key=...)
-    apiKey: string;
+  style?: MapTilerStyle;
+  styleUrl?: string;
+  apiKey: string;
 }) {
-    const map = useMap();
+  const map = useMap();
+  const layerRef = useRef<any>(null);
 
-    useEffect(() => {
-        // Set the API key
-        maptilersdk.config.apiKey = apiKey;
+  useEffect(() => {
+    if (!map) return;
 
-        // Create the layer using the imported maptilerLayer
-        const layer = maptilerLayer({
-            apiKey: apiKey,
-            style: styleUrl ?? style,
-            // optional: language, fog, etc.:
-            // language: "ar", // Arabic labels, if you prefer
-        }).addTo(map);
+    // Set the API key
+    maptilersdk.config.apiKey = apiKey;
 
-        return () => {
-            map.removeLayer(layer);
-        };
-    }, [map, apiKey, style, styleUrl]);
+    // Remove existing layer if it exists
+    if (layerRef.current) {
+      map.removeLayer(layerRef.current);
+    }
 
-    return null;
+    try {
+      // Create the layer with error handling
+      const layer = maptilerLayer({
+        apiKey: apiKey,
+        style: styleUrl || style.toLowerCase(),
+        language: "ar"
+      }).addTo(map);
+
+      layerRef.current = layer;
+    } catch (error) {
+      console.error("Error initializing MapTiler layer:", error);
+    }
+
+    return () => {
+      if (layerRef.current) {
+        map.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+    };
+  }, [map, apiKey, style, styleUrl]);
+
+  return null;
 }

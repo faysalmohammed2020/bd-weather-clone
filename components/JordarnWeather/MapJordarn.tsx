@@ -10,11 +10,18 @@ import { useSession } from "@/lib/auth-client";
 import { useTranslations } from "next-intl";
 import { getAllStations, type WeatherStationData } from "./weather-data";
 import ForecastOverlay, { type ForecastLayerId } from "./Animation/ForecastOverlay";
-import { Roboto_Mono } from "next/font/google";
+import { useMap } from "react-leaflet";
 import dynamic from "next/dynamic";
+import { Roboto_Mono } from 'next/font/google';
+import type { FeatureCollection } from "geojson";
 
 const MapTilerVectorLayer = dynamic(
   () => import("./MapTilerVectorLayer"),
+  { ssr: false }
+);
+
+const TemperatureShade = dynamic(
+  () => import("./Animation/TemperatureShade"),
   { ssr: false }
 );
 
@@ -110,6 +117,7 @@ function createParamIcon(
   param: ParameterId,
   value: string | null,
   overrideDirectionDeg?: number | null,
+  forceBlack?: boolean,
 ) {
   const display = value ?? "N/A";
 
@@ -181,13 +189,13 @@ function createParamIcon(
     });
   }
 
+  const blackStyle = `color:#000;-webkit-text-fill-color:initial;background:none;`;
+  const gradientStyle = `background:${gradientMap[param]};-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;`;
+  const styleSpan = forceBlack ? blackStyle : gradientStyle;
+
   const html = `
     <div style="display:inline-flex;align-items:center;justify-content:center;background:transparent;border:none;padding:0;margin:0;font-size:18px;font-weight:900;line-height:1;">
-      <span class="${robotoMono.className}" style="
-        background:${gradientMap[param]};
-        -webkit-background-clip:text;background-clip:text;
-        -webkit-text-fill-color:transparent;color:transparent;
-      ">${display}</span>
+      <span class="${robotoMono.className}" style="${styleSpan}">${display}</span>
     </div>
   `;
   return L.divIcon({ html, className: "param-div-icon", iconSize: [24, 24] });
@@ -224,6 +232,23 @@ export default function MapComponent({
 }: MapComponentProps) {
   const { data: session } = useSession();
   const t = useTranslations("WeatherStation");
+  const [jordanBoundary, setJordanBoundary] = useState<FeatureCollection | null>(null);
+
+  // Load Jordan boundary GeoJSON
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch("/jordan.json"); // served from /public
+        if (!res.ok) return;
+        const gj = (await res.json()) as FeatureCollection;
+        if (mounted) setJordanBoundary(gj);
+      } catch {
+        console.warn("Failed to load jordan.json");
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   /* ---------- LAZY IMPORT: add Tooltip here ---------- */
   const [leaflet, setLeaflet] = useState<null | {
@@ -231,6 +256,7 @@ export default function MapComponent({
     TileLayer: any;
     Marker: any;
     Tooltip: any;        // 👈 NEW
+    GeoJSON: any;
     useMap: any;
   }>(null);
 
@@ -245,6 +271,7 @@ export default function MapComponent({
           TileLayer: rl.TileLayer,
           Marker: rl.Marker,
           Tooltip: rl.Tooltip,     // 👈 NEW
+          GeoJSON: rl.GeoJSON, 
           useMap: rl.useMap,
         });
       }
@@ -270,24 +297,23 @@ export default function MapComponent({
     };
   }, [leaflet]);
 
-  const generateDates = () => {
-    const dates: string[] = [];
+  const dates = useMemo(() => {
+    const dateList: string[] = [];
     const today = new Date();
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      dates.push(date.toLocaleDateString("en-US", { day: "numeric", month: "short" }));
+      dateList.push(date.toLocaleDateString("en-US", { day: "numeric", month: "short" }));
     }
-    return dates;
-  };
-
-  const dates = useMemo(generateDates, []);
-  const currentIndex = Math.max(0, dates.indexOf(currentDate));
+    return dateList;
+  }, []);
+  
+  const currentIndex = dates.length > 0 ? Math.max(0, dates.indexOf(currentDate)) : 0;
   const stations = useMemo(() => getAllStations().filter(s => s.coordinates), []);
   const [playbackSpeed, setPlaybackSpeed] = useState<1 | 2>(1);
 
   useEffect(() => {
-    if (!isPlaying) return;
+    if (!isPlaying || dates.length === 0) return;
     const intervalMs = playbackSpeed === 2 ? 600 : 1200;
     const timer = setInterval(() => {
       const next = (currentIndex + 1) % dates.length;
@@ -297,10 +323,13 @@ export default function MapComponent({
   }, [isPlaying, playbackSpeed, currentIndex, dates, setCurrentDate]);
 
   const goPrev = () => {
+    if (dates.length === 0) return;
     const prev = (currentIndex - 1 + dates.length) % dates.length;
     setCurrentDate(dates[prev]);
   };
+
   const goNext = () => {
+    if (dates.length === 0) return;
     const next = (currentIndex + 1) % dates.length;
     setCurrentDate(dates[next]);
   };
@@ -329,30 +358,17 @@ export default function MapComponent({
         ? t("roleDescription.stationAdmin")
         : t("guestDescription");
 
-  if (!leaflet) {
-    return (
-      <div className="relative h-[calc(100vh-100px)] w-full z-10">
-        <div className="h-[calc(100vh-100px)] w-full rounded-lg border-2 border-gray-200 overflow-hidden">
-          <div className="h-full w-full animate-pulse bg-muted" />
-        </div>
-        <div className="absolute bottom-4 left-4 right-4 bg-white p-3 rounded-lg shadow-lg z-[1000]">
-          <div className="flex items-center gap-3">
-            <Button size="icon" variant={isPlaying ? "default" : "outline"} className="h-9 w-9" disabled />
-            <div className="flex-1 mx-2 h-2 rounded bg-gray-200" />
-            <div className="w-20 text-center font-medium text-sm bg-gray-100 py-1 px-2 rounded">
-              {currentDate}
-            </div>
-          </div>
-        </div>
-        <div className="absolute top-4 right-4 bg-white p-2 rounded-lg shadow-lg z-[1000]">
-          <div className="text-sm font-medium">{roleLabel}</div>
-          <div className="text-xs text-gray-500">{roleDesc}</div>
-        </div>
-      </div>
-    );
-  }
+  const { MapContainer, Marker, Tooltip, GeoJSON, useMap } = leaflet || {} as any;
 
-  const { MapContainer, Marker, Tooltip } = leaflet;
+  // Component to fit map to Jordan bounds
+  function FitJordanBounds({ data }: { data: FeatureCollection }) {
+    const map = useMap();
+    useEffect(() => {
+      const bounds = L.geoJSON(data as any).getBounds();
+      map.fitBounds(bounds, { padding: [20, 20] });
+    }, [map, data]);
+    return null;
+  }
 
   // Value per parameter per station (same logic; used for marker label + tooltip)
   const valueForParam = (s: WeatherStationData, p: ParameterId): string | null => {
@@ -397,8 +413,37 @@ export default function MapComponent({
     }
   };
 
-  const activeParams = (Object.keys(enabled) as ParameterId[]).filter((k) => enabled[k]);
-  const anyParamActive = activeParams.length > 0;
+  // Function to compute temperature samples (not a hook)
+  const getTempSamples = () => {
+    const vals: number[] = [];
+    const pts = stations
+      .map((s) => {
+        const vStr = valueForParam(s as WeatherStationData, "temperature");
+        const v = vStr != null ? Number(vStr) : null;
+        if (v == null || !isFinite(v)) return null;
+        vals.push(v);
+        return {
+          lat: s.coordinates!.lat,
+          lng: s.coordinates!.lng,
+          value: v,
+        };
+      })
+      .filter(Boolean) as Array<{ lat: number; lng: number; value: number }>;
+    const min = vals.length ? Math.min(...vals) : 0;
+    const max = vals.length ? Math.max(...vals) : 1;
+    return { pts, min, max };
+  };
+  
+  // Get temperature samples (recomputed on each render when stations or currentIndex changes)
+  const tempSamples = getTempSamples();
+
+  // Parameters explicitly enabled from the stations UI
+  const uiActiveParams = (Object.keys(enabled) as ParameterId[]).filter((k) => enabled[k]);
+  // If no parameter is enabled but forecast-temp is active, implicitly show temperature markers
+  const effectiveActiveParams: ParameterId[] = uiActiveParams.length > 0
+    ? uiActiveParams
+    : (activeForecast === "forecast-temp" ? ["temperature"] as ParameterId[] : []);
+  const anyParamActive = effectiveActiveParams.length > 0;
 
   // Hide timeline when nothing is selected (initial) or for specific forecast layers
   const hideTimeline = (
@@ -445,9 +490,16 @@ export default function MapComponent({
     <div className="relative h-[calc(100vh-50px)] w-full z-10">
       {/* Map */}
       <div className="relative h-[calc(100vh-50px)] w-full rounded-lg overflow-hidden border-2 border-gray-200">
+        {!leaflet ? (
+          <>
+            <div className="h-full w-full rounded-lg border-2 border-gray-200 overflow-hidden">
+              <div className="h-full w-full animate-pulse bg-muted" />
+            </div>
+          </>
+        ) : (
         <MapContainer
           center={[31.24, 36.51]} // Amman, Jordan
-          zoom={8}
+          zoom={5}
           style={{ height: "100%", width: "100%" }}
           zoomControl={false}
           minZoom={5}
@@ -461,11 +513,34 @@ export default function MapComponent({
             apiKey={process.env.NEXT_PUBLIC_MAPTILER_KEY as string}
             styleUrl={`https://api.maptiler.com/maps/01994da9-ef78-7028-abca-085899f842e2/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`}
           />
+          
+          {/* Jordan boundary outline */}
+          {jordanBoundary && (
+            <>
+              <GeoJSON
+                data={jordanBoundary as any}
+                style={{ weight: 1, color: "#1e40af", opacity: 0.6, fillOpacity: 0 }}
+                interactive={false}
+              />
+              <FitJordanBounds data={jordanBoundary} />
+            </>
+          )}
 
           <CustomZoomControl />
 
-          {/* Forecast animated overlay */}
-          {activeForecast && (
+          {/* Forecast overlays */}
+          {activeForecast === "forecast-temp" && (
+            <TemperatureShade
+              enabled={true}
+              forecast={true}
+              opacity={0.6}
+              points={tempSamples.pts}
+              minValue={tempSamples.min}
+              maxValue={tempSamples.max}
+              timelineKey={currentIndex}
+            />
+          )}
+          {activeForecast && activeForecast !== "forecast-temp" && (
             <ForecastOverlay
               layerId={activeForecast}
               enabled={true}
@@ -497,12 +572,13 @@ export default function MapComponent({
 
           {/* Parameter markers (only for active parameter), hide base layer to avoid clutter */}
           {anyParamActive &&
-            activeParams.map((paramKey) =>
+            effectiveActiveParams.map((paramKey: ParameterId) =>
               stations.map((s) => {
                 const coords = s.coordinates!;
                 const val = valueForParam(s, paramKey);
                 const dir = paramKey === "wind" ? dynamicWindDirectionDeg(currentIndex, s.stationId, s.windDirDeg) : null;
-                const icon = createParamIcon(s, paramKey, val, dir ?? undefined);
+                const forceBlack = activeForecast === "forecast-temp" && paramKey === "temperature";
+                const icon = createParamIcon(s, paramKey, val, dir ?? undefined, forceBlack);
                 return (
                   <Marker
                     key={`${paramKey}-${s.stationId}`}
@@ -518,6 +594,7 @@ export default function MapComponent({
               }),
             )}
         </MapContainer>
+        )}
       </div>
 
       {/* Timeline */}
