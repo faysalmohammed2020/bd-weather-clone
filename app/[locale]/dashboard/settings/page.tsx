@@ -137,7 +137,7 @@ const Settings = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto" dir="rtl">
+    <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center gap-2 mb-6">
         <SettingsIcon className="h-6 w-6" />
         <h1 className="text-2xl font-bold">{t("title")}</h1>

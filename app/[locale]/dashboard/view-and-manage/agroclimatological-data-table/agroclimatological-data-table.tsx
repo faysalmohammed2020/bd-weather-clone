@@ -10,7 +10,7 @@ import { format, parseISO, differenceInDays, isValid } from "date-fns"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useSession } from "@/lib/auth-client"
-
+import { useTranslations } from "next-intl"
 
 interface AgroclimatologicalData {
   id: string
@@ -75,6 +75,7 @@ interface Station {
 }
 
 export default function AgroclimatologicalDataTable() {
+  const t = useTranslations('AgroclimatologicalData');
   const [data, setData] = useState<AgroclimatologicalData[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -112,8 +113,8 @@ export default function AgroclimatologicalDataTable() {
 
     } catch (err) {
       console.error("Error fetching data:", err);
-      setError(err instanceof Error ? err.message : "Failed to fetch data");
-      toast.error("Failed to load agroclimatological data");
+      setError(err instanceof Error ? err.message : t('errors.fetchFailed'));
+      toast.error(t('errors.fetchFailedToast'));
     } finally {
       setLoading(false);
     }
@@ -129,7 +130,7 @@ export default function AgroclimatologicalDataTable() {
       setStations(result)
     } catch (err) {
       console.error("Error fetching stations:", err)
-      toast.error("Failed to load stations")
+      toast.error(t('errors.stationsFailed'))
     }
   }
 
@@ -158,7 +159,7 @@ export default function AgroclimatologicalDataTable() {
       const end = new Date(endDate);
 
       if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        setDateError("Invalid date range");
+        setDateError(t('errors.invalidDateRange'));
         return;
       }
 
@@ -172,7 +173,7 @@ export default function AgroclimatologicalDataTable() {
       newEnd.setDate(start.getDate() - 1);
 
       if (isNaN(newStart.getTime()) || isNaN(newEnd.getTime())) {
-        setDateError("Invalid date calculation");
+        setDateError(t('errors.invalidDateCalculation'));
         return;
       }
 
@@ -181,7 +182,7 @@ export default function AgroclimatologicalDataTable() {
       setDateError(null);
     } catch (error) {
       console.error("Error in goToPreviousWeek:", error);
-      setDateError("Failed to navigate to previous period");
+      setDateError(t('errors.previousPeriodFailed'));
     }
   }
 
@@ -193,7 +194,7 @@ export default function AgroclimatologicalDataTable() {
       const end = new Date(endDate);
 
       if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        setDateError("Invalid date range");
+        setDateError(t('errors.invalidDateRange'));
         return;
       }
 
@@ -207,7 +208,7 @@ export default function AgroclimatologicalDataTable() {
       newEnd.setDate(newStart.getDate() + daysInRange);
 
       if (isNaN(newStart.getTime()) || isNaN(newEnd.getTime())) {
-        setDateError("Invalid date calculation");
+        setDateError(t('errors.invalidDateCalculation'));
         return;
       }
 
@@ -237,7 +238,7 @@ export default function AgroclimatologicalDataTable() {
       setDateError(null);
     } catch (error) {
       console.error("Error in goToNextWeek:", error);
-      setDateError("Failed to navigate to next period");
+      setDateError(t('errors.nextPeriodFailed'));
     }
   }
 
@@ -253,7 +254,7 @@ export default function AgroclimatologicalDataTable() {
     try {
       const date = parseISO(newDate);
       if (!isValid(date)) {
-        setDateError("Invalid date format");
+        setDateError(t('errors.invalidDateFormat'));
         return;
       }
 
@@ -261,19 +262,19 @@ export default function AgroclimatologicalDataTable() {
 
       if (type === "start") {
         if (endDate && date > parseISO(endDate)) {
-          setDateError("Start date cannot be after end date");
+          setDateError(t('errors.startAfterEnd'));
           return;
         }
         setStartDate(newDate);
       } else {
         if (startDate && date < parseISO(startDate)) {
-          setDateError("End date cannot be before start date");
+          setDateError(t('errors.endBeforeStart'));
           return;
         }
         setEndDate(newDate);
       }
     } catch (e) {
-      setDateError("Invalid date value");
+      setDateError(t('errors.invalidDateValue'));
     }
   };
 
@@ -284,7 +285,7 @@ export default function AgroclimatologicalDataTable() {
 
   function exportToCSV(data: AgroclimatologicalData[], filename = "agroclimatological_data.csv") {
     if (!data.length) {
-      toast.warning("No data to export");
+      toast.warning(t('export.noData'));
       return;
     }
 
@@ -310,7 +311,7 @@ export default function AgroclimatologicalDataTable() {
 
   function exportToTXT(data: AgroclimatologicalData[], filename = "agroclimatological_data.txt") {
     if (!data.length) {
-      toast.warning("No data to export");
+      toast.warning(t('export.noData'));
       return;
     }
 
@@ -341,11 +342,11 @@ export default function AgroclimatologicalDataTable() {
       <Card className="w-full border-red-200">
         <CardContent className="flex flex-col items-center justify-center py-12">
           <div className="text-red-600 text-center">
-            <h3 className="text-lg font-semibold mb-2">Error Loading Data</h3>
+            <h3 className="text-lg font-semibold mb-2">{t('error.title')}</h3>
             <p className="text-sm mb-4">{error}</p>
             <Button onClick={fetchData} variant="outline" className="gap-2">
               <RefreshCw className="h-4 w-4" />
-              Retry
+              {t('error.retry')}
             </Button>
           </div>
         </CardContent>
@@ -358,7 +359,7 @@ export default function AgroclimatologicalDataTable() {
       {/* Header Card */}
       <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
         <CardHeader className="text-center text-2xl font-bold text-blue-800">
-          AGROCLIMATOLOGICAL DATA
+          {t('title')}
         </CardHeader>
       </Card>
 
@@ -384,7 +385,7 @@ export default function AgroclimatologicalDataTable() {
                   max={endDate}
                   className="text-xs p-2 border border-slate-300 focus:ring-blue-500 focus:ring-2 rounded"
                 />
-                <span>to</span>
+                <span>{t('filters.to')}</span>
                 <input
                   type="date"
                   value={endDate}
@@ -406,7 +407,6 @@ export default function AgroclimatologicalDataTable() {
           </div>
 
           {user?.role === "super_admin" && (
-
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-2">
                 <Button
@@ -417,7 +417,7 @@ export default function AgroclimatologicalDataTable() {
                   disabled={data.length === 0}
                 >
                   <Download className="h-4 w-4 flex-shrink-0" />
-                  <span className="whitespace-nowrap">Export CSV</span>
+                  <span className="whitespace-nowrap">{t('export.csv')}</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -427,7 +427,7 @@ export default function AgroclimatologicalDataTable() {
                   disabled={data.length === 0}
                 >
                   <Download className="h-4 w-4 flex-shrink-0" />
-                  <span className="whitespace-nowrap">Export TXT</span>
+                  <span className="whitespace-nowrap">{t('export.txt')}</span>
                 </Button>
               </div>
               <div className="flex items-center gap-2">
@@ -436,14 +436,14 @@ export default function AgroclimatologicalDataTable() {
                   htmlFor="stationFilter"
                   className="whitespace-nowrap font-medium text-slate-700"
                 >
-                  Station:
+                  {t('filters.station')}:
                 </Label>
                 <Select value={stationFilter} onValueChange={setStationFilter}>
                   <SelectTrigger className="w-[200px] border-slate-300 focus:ring-blue-500">
-                    <SelectValue placeholder="All Stations" />
+                    <SelectValue placeholder={t('filters.allStations')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Stations</SelectItem>
+                    <SelectItem value="all">{t('filters.allStations')}</SelectItem>
                     {stations.map((station) => (
                       <SelectItem key={station.id} value={station.id}>
                         {station.name}
@@ -473,96 +473,96 @@ export default function AgroclimatologicalDataTable() {
                     rowSpan={2}
                     className="border border-slate-400 p-2 bg-blue-50 text-blue-800 font-semibold min-w-[80px]"
                   >
-                    Date
+                    {t('tableHeaders.date')}
                   </th>
                   <th
                     rowSpan={2}
                     className="border border-slate-400 p-2 bg-blue-50 text-blue-800 font-semibold min-w-[100px]"
                   >
-                    Hour
+                    {t('tableHeaders.hour')}
                   </th>
                   <th rowSpan={2} className="border border-slate-400 p-2 bg-yellow-50 text-yellow-800 font-semibold">
-                    Solar Radiation (Langley day⁻¹)
+                    {t('tableHeaders.solarRadiation')}
                   </th>
                   <th rowSpan={2} className="border border-slate-400 p-2 bg-orange-50 text-orange-800 font-semibold">
-                    Sun Shine Hour
+                    {t('tableHeaders.sunShineHour')}
                   </th>
                   <th colSpan={6} className="border border-slate-400 p-2 bg-red-50 text-red-800 font-semibold">
-                    Air Temperature (°C) at
+                    {t('tableHeaders.airTemperature')}
                   </th>
                   <th colSpan={2} className="border border-slate-400 p-2 bg-pink-50 text-pink-800 font-semibold">
-                    Min/Max Temp (°C)
+                    {t('tableHeaders.minMaxTemp')}
                   </th>
                   <th
                     rowSpan={2}
                     className="border border-slate-400 p-2 bg-purple-50 text-purple-800 font-semibold min-w-[100px]"
                   >
-                    Grass Min Temp (°C)
+                    {t('tableHeaders.grassMinTemp')}
                   </th>
                   <th colSpan={5} className="border border-slate-400 p-2 bg-green-50 text-green-800 font-semibold">
-                    Soil Temperature (°C) at
+                    {t('tableHeaders.soilTemperature')}
                   </th>
                   <th
                     rowSpan={2}
                     className="border border-slate-400 p-2 bg-teal-50 text-teal-800 font-semibold min-w-[100px]"
                   >
-                    Pan Water Temp (°C)
+                    {t('tableHeaders.panWaterTemp')}
                   </th>
                   <th
                     rowSpan={2}
                     className="border border-slate-400 p-2 bg-cyan-50 text-cyan-800 font-semibold min-w-[100px]"
                   >
-                    Elevation (mm)
+                    {t('tableHeaders.elevation')}
                   </th>
                   <th
                     rowSpan={2}
                     className="border border-slate-400 p-2 bg-sky-50 text-sky-800 font-semibold min-w-[120px]"
                   >
-                    Evapotranspiration (mm)
+                    {t('tableHeaders.evapotranspiration')}
                   </th>
                   <th colSpan={2} className="border border-slate-400 p-2 bg-indigo-50 text-indigo-800 font-semibold">
-                    Soil Moisture % Between
+                    {t('tableHeaders.soilMoisture')}
                   </th>
                   <th
                     rowSpan={2}
                     className="border border-slate-400 p-2 bg-violet-50 text-violet-800 font-semibold min-w-[120px]"
                   >
-                    Wind Run at 2m ht (KM)
+                    {t('tableHeaders.windRun')}
                   </th>
                   <th colSpan={2} className="border border-slate-400 p-2 bg-amber-50 text-amber-800 font-semibold">
-                    Dew
+                    {t('tableHeaders.dew')}
                   </th>
                   <th
                     rowSpan={2}
                     className="border border-slate-400 p-2 bg-blue-50 text-blue-800 font-semibold min-w-[120px]"
                   >
-                    Rain Amount (mm)
+                    {t('tableHeaders.rainAmount')}
                   </th>
                 </tr>
 
                 {/* Second Header Row */}
                 <tr className="bg-gradient-to-r from-slate-50 to-slate-100">
-                  <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">0.5m Dry</th>
-                  <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">0.5m Wet</th>
-                  <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">1.2m Dry</th>
-                  <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">1.2m Wet</th>
-                  <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">2.2m Dry</th>
-                  <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">2.2m Wet</th>
+                  <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">{t('tableHeaders.05mDry')}</th>
+                  <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">{t('tableHeaders.05mWet')}</th>
+                  <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">{t('tableHeaders.12mDry')}</th>
+                  <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">{t('tableHeaders.12mWet')}</th>
+                  <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">{t('tableHeaders.22mDry')}</th>
+                  <th className="border border-slate-400 p-1 bg-red-100 text-red-700 text-xs">{t('tableHeaders.22mWet')}</th>
 
-                  <th className="border border-slate-400 p-1 bg-pink-100 text-pink-700 text-xs">Min</th>
-                  <th className="border border-slate-400 p-1 bg-pink-100 text-pink-700 text-xs">Max</th>
+                  <th className="border border-slate-400 p-1 bg-pink-100 text-pink-700 text-xs">{t('tableHeaders.min')}</th>
+                  <th className="border border-slate-400 p-1 bg-pink-100 text-pink-700 text-xs">{t('tableHeaders.max')}</th>
 
-                  <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">5cm</th>
-                  <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">10cm</th>
-                  <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">20cm</th>
-                  <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">30cm</th>
-                  <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">50cm</th>
+                  <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">{t('tableHeaders.5cm')}</th>
+                  <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">{t('tableHeaders.10cm')}</th>
+                  <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">{t('tableHeaders.20cm')}</th>
+                  <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">{t('tableHeaders.30cm')}</th>
+                  <th className="border border-slate-400 p-1 bg-green-100 text-green-700 text-xs">{t('tableHeaders.50cm')}</th>
 
-                  <th className="border border-slate-400 p-1 bg-indigo-100 text-indigo-700 text-xs">0-20cm</th>
-                  <th className="border border-slate-400 p-1 bg-indigo-100 text-indigo-700 text-xs">20-50cm</th>
+                  <th className="border border-slate-400 p-1 bg-indigo-100 text-indigo-700 text-xs">{t('tableHeaders.0to20cm')}</th>
+                  <th className="border border-slate-400 p-1 bg-indigo-100 text-indigo-700 text-xs">{t('tableHeaders.20to50cm')}</th>
 
-                  <th className="border border-slate-400 p-1 bg-amber-100 text-amber-700 text-xs">Amount (MM)</th>
-                  <th className="border border-slate-400 p-1 bg-amber-100 text-amber-700 text-xs">Duration (hrs)</th>
+                  <th className="border border-slate-400 p-1 bg-amber-100 text-amber-700 text-xs">{t('tableHeaders.dewAmount')}</th>
+                  <th className="border border-slate-400 p-1 bg-amber-100 text-amber-700 text-xs">{t('tableHeaders.dewDuration')}</th>
                 </tr>
               </thead>
 
@@ -573,7 +573,7 @@ export default function AgroclimatologicalDataTable() {
                     <td colSpan={27} className="text-center py-8">
                       <div className="flex justify-center items-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                        <span className="text-lg font-medium text-slate-600">Loading agroclimatological data...</span>
+                        <span className="text-lg font-medium text-slate-600">{t('loading')}</span>
                       </div>
                     </td>
                   </tr>
@@ -582,11 +582,11 @@ export default function AgroclimatologicalDataTable() {
                     <td colSpan={26} className="py-8 text-center">
                       <div className="flex flex-col items-center justify-center">
                         <Calendar className="h-12 w-12 mx-auto mb-4 text-slate-400" />
-                        <h3 className="text-lg font-semibold mb-2">No Data Available</h3>
-                        <p className="text-sm text-slate-500 mb-4">No agroclimatological data found for the selected criteria.</p>
+                        <h3 className="text-lg font-semibold mb-2">{t('noData.title')}</h3>
+                        <p className="text-sm text-slate-500 mb-4">{t('noData.description')}</p>
                         <Button onClick={fetchData} variant="outline" className="gap-2">
                           <RefreshCw className="h-4 w-4" />
-                          Refresh
+                          {t('noData.refresh')}
                         </Button>
                       </div>
                     </td>
@@ -748,16 +748,16 @@ export default function AgroclimatologicalDataTable() {
               <span className="font-semibold text-green-800">
                 {startDate && endDate ? (
                   `${format(parseISO(startDate), "MMM d")} - ${format(parseISO(endDate), "MMM d, yyyy")}`
-                ) : "All Dates"}
+                ) : t('summary.allDates')}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="bg-green-100 text-green-800 hover:bg-green-200">
-                Total Records: {data.length}
+                {t('summary.totalRecords')}: {data.length}
               </Badge>
               {stationFilter !== "all" && (
                 <Badge variant="outline" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
-                  Station: {getStationNameById(stationFilter)}
+                  {t('summary.station')}: {getStationNameById(stationFilter)}
                 </Badge>
               )}
             </div>

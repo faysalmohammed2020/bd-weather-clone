@@ -16,18 +16,20 @@ import { useFormik } from "formik";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+
+
 // Validation schema
 const createValidationSchema = (t: any) => Yup.object({
-  date: Yup.date().required(t('SoilMoistureForm.form.errors.date')),
+  date: Yup.date().required(t('form.errors.date')),
   w1: Yup.number()
-    .required(t('SoilMoistureForm.form.errors.required', { field: t('SoilMoistureForm.form.weights.w1') }))
-    .positive(t('SoilMoistureForm.form.errors.positive', { field: t('SoilMoistureForm.form.weights.w1') })),
+    .required("required")
+    .positive("Positive"),
   w2: Yup.number()
-    .required(t('SoilMoistureForm.form.errors.required', { field: t('SoilMoistureForm.form.weights.w2') }))
-    .positive(t('SoilMoistureForm.form.errors.positive', { field: t('SoilMoistureForm.form.weights.w2') })),
+    .required("required")
+    .positive("Positive"),
   w3: Yup.number()
-    .required(t('SoilMoistureForm.form.errors.required', { field: t('SoilMoistureForm.form.weights.w3') }))
-    .positive(t('SoilMoistureForm.form.errors.positive', { field: t('SoilMoistureForm.form.weights.w3') })),
+    .required("required")
+    .positive("Positive")
 });
 
 interface SoilMoistureData {
@@ -43,6 +45,7 @@ interface SoilMoistureData {
 
 export function SoilMoistureForm() {
   const t = useTranslations('SoilMoistureForm');
+  
   const router = useRouter();
   const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);

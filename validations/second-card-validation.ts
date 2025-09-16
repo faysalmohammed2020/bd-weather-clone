@@ -4,7 +4,7 @@ import * as Yup from "yup"
 export const rainfallSchema = Yup.object({
   rainfall: Yup.object({
     "since-previous": Yup.string()
-      .required(t("required"))
+      .required("required")
       .matches(/^[1-9]\d{0,2}$/, "Must be a 1-3 digit number between 1 and 989")
       .test("is-valid-range", "Value must be between 1 and 989", (value) => {
         const num = Number.parseInt(value || "0")

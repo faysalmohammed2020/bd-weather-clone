@@ -36,7 +36,7 @@ import { validationSchema } from "@/validations/first-card-validation";
 import { useTranslations } from "next-intl";
 
 export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
-  const [activeTab, setActiveTab] = useState("pressure");
+  const [activeTab, setActiveTab] = useState("temperature");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     isHourSelected,
@@ -60,8 +60,9 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const tabs = useTranslations('firstCard.tabs')
   // Tab order for navigation
   const tabOrder = [
-    "pressure",
+   
     "temperature",
+    "pressure",
     "squall",
     "visibility",
     "meteors",
@@ -70,15 +71,16 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
 
   // Tab styles with gradients and more vibrant colors
   const tabStyles = {
-    pressure: {
-      tab: "border border-rose-500 px-4 py-3 !bg-rose-50 text-rose-800 hover:opacity-90 shadow-sm shadow-rose-500/50",
-      card: "bg-gradient-to-br from-rose-50 to-white border-l-4 border-rose-200 shadow-sm",
-      icon: <BarChart3 className="size-5 mr-2" />,
-    },
+   
     temperature: {
       tab: "border border-blue-500 px-4 py-3 !bg-blue-50 text-blue-800 hover:opacity-90 shadow-sm shadow-blue-500/50",
       card: "bg-gradient-to-br from-blue-50 to-white border-l-4 border-blue-200 shadow-sm",
       icon: <Thermometer className="size-5 mr-2" />,
+    },
+     pressure: {
+      tab: "border border-rose-500 px-4 py-3 !bg-rose-50 text-rose-800 hover:opacity-90 shadow-sm shadow-rose-500/50",
+      card: "bg-gradient-to-br from-rose-50 to-white border-l-4 border-rose-200 shadow-sm",
+      icon: <BarChart3 className="size-5 mr-2" />,
     },
     squall: {
       tab: "border border-amber-500 px-4 py-3 !bg-amber-50 text-amber-800 hover:opacity-90 shadow-sm shadow-amber-500/50",
@@ -186,6 +188,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   };
 
   // Function to validate current tab before proceeding
+   const te = useTranslations('FormikError');
   const validateTab = (tabName: string) => {
     let fieldsToValidate: any[] = [];
 
@@ -236,9 +239,8 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
     // If trying to navigate away from current tab, validate it first
     if (activeTab !== tabName) {
       if (!validateTab(activeTab)) {
-        toast.error("অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন", {
-          description:
-            "অন্য ট্যাবে যাওয়ার আগে বর্তমান ট্যাবের সকল তথ্য পূরণ করুন",
+        toast.error(te('validationErrorTitle'), {
+          description: te('validationErrorDescription'),
         });
         return;
       }
@@ -776,9 +778,8 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
   const nextTab = () => {
     // Validate current tab before proceeding
     if (!validateTab(activeTab)) {
-      toast.error("অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন", {
-        description:
-          "পরবর্তী ট্যাবে যাওয়ার আগে বর্তমান ট্যাবের সকল তথ্য পূরণ করুন",
+       toast.error(te('validationErrorTitle'), {
+          description: te('validationErrorDescription'),
       });
       return;
     }
@@ -865,10 +866,10 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         if (activeTab !== key && !validateTab(activeTab)) {
                           e.preventDefault();
                           toast.error(
-                            "অনুগ্রহ করে সকল প্রয়োজনীয় তথ্য পূরণ করুন",
+                            te('validationErrorTitle'),
                             {
                               description:
-                                "অন্য ট্যাবে যাওয়ার আগে বর্তমান ট্যাবের সকল তথ্য পূরণ করুন",
+                                te('validationErrorDescription'),
                             }
                           );
                           return false;
@@ -1039,13 +1040,30 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         />
                       </div>
                     </CardContent>
-                    <CardFooter className="flex justify-end">
+                    {/* <CardFooter className="flex justify-end">
                       <Button
                         type="button"
                         onClick={nextTab}
                         className="bg-blue-600 hover:bg-blue-700"
                       >
                         {t("buttons.next")} <ChevronRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </CardFooter> */}
+                     <CardFooter className="flex justify-between p-6">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={prevTab}
+                        disabled={isFirstTab}
+                      >
+                        <ChevronLeft className="mr-2 h-4 w-4" /> {t('buttons.previous')}
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={nextTab}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                         {t('buttons.next')} <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>
                     </CardFooter>
                   </Card>
@@ -1261,7 +1279,7 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         </TabsContent>
                       </Tabs>
                     </CardContent>
-                    <CardFooter className="flex justify-between p-6">
+                    {/* <CardFooter className="flex justify-between p-6">
                       <Button
                         type="button"
                         variant="outline"
@@ -1276,6 +1294,15 @@ export function FirstCardForm({ timeInfo }: { timeInfo: TimeInfo[] }) {
                         className="bg-blue-600 hover:bg-blue-700"
                       >
                          {t('buttons.next')} <ChevronRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </CardFooter> */}
+                      <CardFooter className="flex justify-end">
+                      <Button
+                        type="button"
+                        onClick={nextTab}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        {t("buttons.next")} <ChevronRight className="ml-2 h-4 w-4" />
                       </Button>
                     </CardFooter>
                   </Card>

@@ -371,6 +371,64 @@
       "selectStation": "観測所を選択",
       "error": "エラー: {error}"
     },
+    "mapComponent": {
+  "role": {
+    "superAdmin": "スーパー管理者",
+    "stationAdmin": "観測所管理者",
+    "observer": "観測者",
+    "guest": "ゲスト"
+  },
+  "common": {
+    "mm": "mm",
+    "nm": "nm",
+    "max": "最大",
+    "min": "最小"
+  },
+  "roleDescription": {
+    "superAdmin": "全ての観測所を表示中",
+    "stationAdmin": "割り当てられた観測所を表示中",
+    "observer": "割り当てられた観測所を表示中",
+    "guest": "利用可能な観測所はありません"
+  },
+  "weatherSummary": {
+    "title": "気象概要",
+    "temperature": "気温",
+    "precipitation": "降水量",
+    "windSpeed": "風速",
+    "cloudCover": "雲量",
+    "rainDetected": "降雨検出: {amount} mm",
+    "loading": "気象データを読み込み中...",
+    "noData": "気象データがありません"
+  },
+  "weatherParameters": {
+    "temperature": "気温",
+    "precipitation": "降水量",
+    "wind": "風",
+    "clouds": "雲",
+    "humidity": "湿度",
+    "visibility": "視程",
+    "pressure": "気圧",
+    "dewpoint": "露点温度"
+  },
+  "timelineControls": {
+    "play": "再生",
+    "pause": "一時停止"
+  },
+  "stationPopup": {
+    "stationId": "観測所ID",
+    "coordinates": "座標",
+    "currentWeather": "現在の気象状況",
+    "noRemarks": "気象特記なし",
+    "loading": "気象データを読み込み中...",
+    "loadingAnimation": "アニメーションデータを読み込み中...",
+    "noData": "この観測所の気象データはありません"
+  },
+  "errors": {
+    "noStation": "観測所が選択されていません",
+    "fetchFailed": "気象データの取得に失敗しました",
+    "noData": "この観測所の気象データはありません"
+  }
+},
     "statusBanner": {
       "title": "システム状態",
       "message": "すべてのセンサーが動作中 • データをライブ配信中",
@@ -1220,8 +1278,8 @@
         }
       },
       "roles": {
-        "superAdmin": "スーパーアドミン",
-        "stationAdmin": "ステーションアドミン",
+        "super_admin": "スーパーアドミン",
+        "station_admin": "ステーションアドミン",
         "observer": "オブザーバー"
       },
       "buttons": {

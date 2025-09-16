@@ -60,17 +60,17 @@ type UserRole = "super_admin" | "station_admin" | "observer";
 
 export const UserTable = () => {
   const { data: session } = useSession();
-  const {
-    divisions,
-    districts,
-    upazilas,
-    selectedDivision,
-    setSelectedDivision,
-    selectedDistrict,
-    setSelectedDistrict,
-    setSelectedUpazila,
-    loading: locationLoading,
-  } = useLocation();
+  // const {
+  //   divisions,
+  //   districts,
+  //   upazilas,
+  //   selectedDivision,
+  //   setSelectedDivision,
+  //   selectedDistrict,
+  //   setSelectedDistrict,
+  //   setSelectedUpazila,
+  //   loading: locationLoading,
+  // } = useLocation();
 
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -402,7 +402,7 @@ export const UserTable = () => {
   };
 
   return (
-    <div className="mb-8" dir="rtl">
+    <div className="mb-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">{t("title")}</h1>
 

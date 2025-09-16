@@ -396,7 +396,7 @@ const SynopticCodeTable = forwardRef((props, ref) => {
   };
 
   return (
-    <div className="space-y-6 print:space-y-0 m-2" dir="rtl">
+    <div className="space-y-6 print:space-y-0 m-2">
 
       <h2 className="text-2xl font-bold text-gray-800 flex items-center">
         <span className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center ml-3">
@@ -867,10 +867,10 @@ const SynopticCodeTable = forwardRef((props, ref) => {
             </table>
 
             {/* Optional footer */}
-            <div className="text-left text-sm text-blue-600 mt-2 pr-4 pb-2 print:hidden">
+            {/* <div className="text-left text-sm text-blue-600 mt-2 pr-4 pb-2 print:hidden">
               {t("generated")}:{" "}
               {new Date().toLocaleString("ar-EG", { timeZone: "Asia/Dhaka" })}
-            </div>
+            </div> */}
           </div>
         </div>
       )}
