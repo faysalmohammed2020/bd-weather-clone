@@ -11,6 +11,12 @@ import { useTranslations } from "next-intl";
 import { getAllStations, type WeatherStationData } from "./weather-data";
 import ForecastOverlay, { type ForecastLayerId } from "./Animation/ForecastOverlay";
 import { Roboto_Mono } from "next/font/google";
+import dynamic from "next/dynamic";
+
+const MapTilerVectorLayer = dynamic(
+  () => import("./MapTilerVectorLayer"),
+  { ssr: false }
+);
 
 export type ParameterId =
   | "temperature"
@@ -346,7 +352,7 @@ export default function MapComponent({
     );
   }
 
-  const { MapContainer, TileLayer, Marker, Tooltip } = leaflet;
+  const { MapContainer, Marker, Tooltip } = leaflet;
 
   // Value per parameter per station (same logic; used for marker label + tooltip)
   const valueForParam = (s: WeatherStationData, p: ParameterId): string | null => {
@@ -444,16 +450,16 @@ export default function MapComponent({
           zoom={8}
           style={{ height: "100%", width: "100%" }}
           zoomControl={false}
-          minZoom={6}
+          minZoom={5}
           maxBounds={[
             [29.0, 34.8],
             [33.5, 39.3],
           ]}
         >
           <FixLeafletIcons />
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          <MapTilerVectorLayer
+            apiKey={process.env.NEXT_PUBLIC_MAPTILER_KEY as string}
+            styleUrl={`https://api.maptiler.com/maps/01994da9-ef78-7028-abca-085899f842e2/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`}
           />
 
           <CustomZoomControl />
