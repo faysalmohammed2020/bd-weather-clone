@@ -134,14 +134,14 @@ function createParamIcon(
     const base = station.windDirDeg ?? 0;
     const dir = overrideDirectionDeg != null ? overrideDirectionDeg : base;
     const rotation = (dir + 180) % 360; // from-direction -> to-direction
-  
+
     const valueStr = (value ?? value === 0) ? `${value}` : "—";
-  
+
     // SVG geometry
     const cx = 24, cy = 28;       // center
     const r = 14;                 // inner radius
     const ringR = 20;             // dotted orbit radius
-  
+
     const html = `
     <div style="pointer-events:none; display:flex; align-items:center; justify-content:center; background:transparent;">
       <svg width="40" height="40" viewBox="0 0 56 64" style="overflow:visible; shape-rendering:geometricPrecision;">
@@ -181,7 +181,7 @@ function createParamIcon(
       </svg>
     </div>
     `;
-  
+
     return L.divIcon({
       html,
       className: "wind-pin-icon",
@@ -271,7 +271,7 @@ export default function MapComponent({
           TileLayer: rl.TileLayer,
           Marker: rl.Marker,
           Tooltip: rl.Tooltip,     // 👈 NEW
-          GeoJSON: rl.GeoJSON, 
+          GeoJSON: rl.GeoJSON,
           useMap: rl.useMap,
         });
       }
@@ -307,7 +307,7 @@ export default function MapComponent({
     }
     return dateList;
   }, []);
-  
+
   const currentIndex = dates.length > 0 ? Math.max(0, dates.indexOf(currentDate)) : 0;
   const stations = useMemo(() => getAllStations().filter(s => s.coordinates), []);
   const [playbackSpeed, setPlaybackSpeed] = useState<1 | 2>(1);
@@ -433,7 +433,7 @@ export default function MapComponent({
     const max = vals.length ? Math.max(...vals) : 1;
     return { pts, min, max };
   };
-  
+
   // Get temperature samples (recomputed on each render when stations or currentIndex changes)
   const tempSamples = getTempSamples();
 
@@ -497,190 +497,191 @@ export default function MapComponent({
             </div>
           </>
         ) : (
-        <MapContainer
-          center={[31.24, 36.51]} // Amman, Jordan
-          zoom={5}
-          style={{ height: "100%", width: "100%" }}
-          zoomControl={false}
-          minZoom={5}
-          maxBounds={[
-            [29.0, 34.8],
-            [33.5, 39.3],
-          ]}
-        >
-          <FixLeafletIcons />
-          <MapTilerVectorLayer
-            apiKey={process.env.NEXT_PUBLIC_MAPTILER_KEY as string}
-            styleUrl={`https://api.maptiler.com/maps/01994da9-ef78-7028-abca-085899f842e2/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`}
-          />
-          
-          {/* Jordan boundary outline */}
-          {jordanBoundary && (
-            <>
-              <GeoJSON
-                data={jordanBoundary as any}
-                style={{ weight: 3, color: "#000000", opacity: 0.8, fillOpacity: 0 }} // Changed weight, color, and slightly increased opacity for better visibility
-                interactive={false}
-              />
-              <FitJordanBounds data={jordanBoundary} />
-            </>
-          )}
-
-          <CustomZoomControl />
-
-          {/* Forecast overlays */}
-          {activeForecast === "forecast-temp" && (
-           <TemperatureShade
-           enabled
-           forecast
-           opacity={0.6}
-           points={tempSamples.pts}
-           minValue={-10}   // clamp low
-           maxValue={55}    // clamp high
-           timelineKey={currentIndex}
-         />
-          )}
-          {activeForecast && activeForecast !== "forecast-temp" && (
-            <ForecastOverlay
-              layerId={activeForecast}
-              enabled={true}
-              opacity={0.8}
-              isPlaying={isPlaying}
-              timelineKey={currentIndex}
+          <MapContainer
+            center={[31.24, 36.51]} // Amman, Jordan
+            zoom={5}
+            style={{ height: "100%", width: "100%" }}
+            zoomControl={false}
+            minZoom={5}
+            maxBounds={[
+              [29.0, 34.8],
+              [33.5, 39.3],
+            ]}
+          >
+            <FixLeafletIcons />
+            <MapTilerVectorLayer
+              apiKey={process.env.NEXT_PUBLIC_MAPTILER_KEY as string}
+              styleUrl={`https://api.maptiler.com/maps/01994da9-ef78-7028-abca-085899f842e2/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`}
             />
-          )}
 
-          {/* === NEW: Base station markers (only when NO parameter is active) === */}
-          {!anyParamActive &&
-            stations.map((s) => {
-              const coords = s.coordinates!;
-              const icon = createBaseStationIcon();
-              return (
-                <Marker
-                  key={`base-${s.stationId}`}
-                  position={[coords.lat, coords.lng]}
-                  icon={icon}
-                  // interactive marker so the tooltip opens on hover
-                  interactive={true}
-                >
-                  <Tooltip direction="top" offset={[0, -6]} opacity={1} sticky>
-                    <StationTooltip s={s} />
-                  </Tooltip>
-                </Marker>
-              );
-            })}
+            {/* Jordan boundary outline */}
+            {jordanBoundary && (
+              <>
+                <GeoJSON
+                  data={jordanBoundary as any}
+                  style={{ weight: 3, color: "#000000", opacity: 0.8, fillOpacity: 0 }} // Changed weight, color, and slightly increased opacity for better visibility
+                  interactive={false}
+                />
+                <FitJordanBounds data={jordanBoundary} />
+              </>
+            )}
 
-          {/* Parameter markers (only for active parameter), hide base layer to avoid clutter */}
-          {anyParamActive &&
-            effectiveActiveParams.map((paramKey: ParameterId) =>
+            <CustomZoomControl />
+
+            {/* Forecast overlays */}
+            {activeForecast === "forecast-temp" && jordanBoundary && (
+              <TemperatureShade
+                enabled
+                opacity={0.6}
+                points={tempSamples.pts}      
+                minValue={-10}
+                maxValue={50}
+                timelineKey={currentIndex}
+                maskGeoJson={jordanBoundary} 
+              />
+            )}
+
+            {activeForecast && activeForecast !== "forecast-temp" && (
+              <ForecastOverlay
+                layerId={activeForecast}
+                enabled={true}
+                opacity={0.8}
+                isPlaying={isPlaying}
+                timelineKey={currentIndex}
+              />
+            )}
+
+            {/* === NEW: Base station markers (only when NO parameter is active) === */}
+            {!anyParamActive &&
               stations.map((s) => {
                 const coords = s.coordinates!;
-                const val = valueForParam(s, paramKey);
-                const dir = paramKey === "wind" ? dynamicWindDirectionDeg(currentIndex, s.stationId, s.windDirDeg) : null;
-                const forceBlack = activeForecast === "forecast-temp" && paramKey === "temperature";
-                const icon = createParamIcon(s, paramKey, val, dir ?? undefined, forceBlack);
+                const icon = createBaseStationIcon();
                 return (
                   <Marker
-                    key={`${paramKey}-${s.stationId}`}
+                    key={`base-${s.stationId}`}
                     position={[coords.lat, coords.lng]}
                     icon={icon}
+                    // interactive marker so the tooltip opens on hover
                     interactive={true}
                   >
-                    <Tooltip direction="top" offset={[0, -8]} opacity={1} sticky>
-                      <StationTooltip s={s} param={paramKey} />
+                    <Tooltip direction="top" offset={[0, -6]} opacity={1} sticky>
+                      <StationTooltip s={s} />
                     </Tooltip>
                   </Marker>
                 );
-              }),
-            )}
-        </MapContainer>
+              })}
+
+            {/* Parameter markers (only for active parameter), hide base layer to avoid clutter */}
+            {anyParamActive &&
+              effectiveActiveParams.map((paramKey: ParameterId) =>
+                stations.map((s) => {
+                  const coords = s.coordinates!;
+                  const val = valueForParam(s, paramKey);
+                  const dir = paramKey === "wind" ? dynamicWindDirectionDeg(currentIndex, s.stationId, s.windDirDeg) : null;
+                  const forceBlack = activeForecast === "forecast-temp" && paramKey === "temperature";
+                  const icon = createParamIcon(s, paramKey, val, dir ?? undefined, forceBlack);
+                  return (
+                    <Marker
+                      key={`${paramKey}-${s.stationId}`}
+                      position={[coords.lat, coords.lng]}
+                      icon={icon}
+                      interactive={true}
+                    >
+                      <Tooltip direction="top" offset={[0, -8]} opacity={1} sticky>
+                        <StationTooltip s={s} param={paramKey} />
+                      </Tooltip>
+                    </Marker>
+                  );
+                }),
+              )}
+          </MapContainer>
         )}
       </div>
 
       {/* Timeline */}
       {!hideTimeline && (
-      <div className="absolute bottom-4 left-4 right-4 z-[1000]">
-        <div className="mx-auto max-w-4xl rounded-2xl bg-blue-900/70 text-blue-50 shadow-2xl ring-1 ring-blue-400/20 backdrop-blur p-3">
-          <div className="flex items-center gap-3">
-            <Button
-              size="icon"
-              variant="secondary"
-              onClick={() => setIsPlaying(!isPlaying)}
-              className={
-                "h-8 w-8 rounded-lg border transition " +
-                (isPlaying
-                  ? "bg-blue-600/90 hover:bg-blue-500/90 text-white border-blue-300/20"
-                  : "bg-blue-950/40 hover:bg-blue-900/50 text-blue-100 border-blue-400/30")
-              }
-            >
-              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-            </Button>
-
-            <Button
-              size="icon"
-              variant="secondary"
-              onClick={goPrev}
-              className="h-8 w-8 rounded-lg bg-blue-950/40 hover:bg-blue-900/50 text-blue-100 border border-blue-400/30"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              size="icon"
-              variant="secondary"
-              onClick={goNext}
-              className="h-8 w-8 rounded-lg bg-blue-950/40 hover:bg-blue-900/50 text-blue-100 border border-blue-400/30"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-
-            <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-blue-950/40 text-[11px] ring-1 ring-blue-400/20">
-              <span className="opacity-80">{t("speed")}</span>
+        <div className="absolute bottom-4 left-4 right-4 z-[1000]">
+          <div className="mx-auto max-w-4xl rounded-2xl bg-blue-900/70 text-blue-50 shadow-2xl ring-1 ring-blue-400/20 backdrop-blur p-3">
+            <div className="flex items-center gap-3">
               <Button
-                size="sm"
+                size="icon"
                 variant="secondary"
-                onClick={() => setPlaybackSpeed(1)}
+                onClick={() => setIsPlaying(!isPlaying)}
                 className={
-                  "h-7 px-2 rounded-md border transition " +
-                  (playbackSpeed === 1
+                  "h-8 w-8 rounded-lg border transition " +
+                  (isPlaying
                     ? "bg-blue-600/90 hover:bg-blue-500/90 text-white border-blue-300/20"
-                    : "bg-blue-900/40 hover:bg-blue-800/50 text-blue-100 border-blue-400/30")
+                    : "bg-blue-950/40 hover:bg-blue-900/50 text-blue-100 border-blue-400/30")
                 }
               >
-                {t("1x")}
+                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              </Button>
+
+              <Button
+                size="icon"
+                variant="secondary"
+                onClick={goPrev}
+                className="h-8 w-8 rounded-lg bg-blue-950/40 hover:bg-blue-900/50 text-blue-100 border border-blue-400/30"
+              >
+                <ChevronLeft className="h-4 w-4" />
               </Button>
               <Button
-                size="sm"
+                size="icon"
                 variant="secondary"
-                onClick={() => setPlaybackSpeed(2)}
-                className={
-                  "h-7 px-2 rounded-md border transition " +
-                  (playbackSpeed === 2
-                    ? "bg-blue-600/90 hover:bg-blue-500/90 text-white border-blue-300/20"
-                    : "bg-blue-900/40 hover:bg-blue-800/50 text-blue-100 border-blue-400/30")
-                }
+                onClick={goNext}
+                className="h-8 w-8 rounded-lg bg-blue-950/40 hover:bg-blue-900/50 text-blue-100 border border-blue-400/30"
               >
-                {t("2x")}
+                <ChevronRight className="h-4 w-4" />
               </Button>
-            </div>
 
-            <div className="flex-1 mx-2">
-              <div className="h-3 rounded-full bg-blue-300/20 ring-1 ring-blue-400/30 flex items-center px-2">
-                <Slider
-                  value={[currentIndex]}
-                  max={dates.length - 1}
-                  step={1}
-                  onValueChange={(value) => setCurrentDate(dates[value[0]])}
-                  className="w-full"
-                />
+              <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-blue-950/40 text-[11px] ring-1 ring-blue-400/20">
+                <span className="opacity-80">{t("speed")}</span>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setPlaybackSpeed(1)}
+                  className={
+                    "h-7 px-2 rounded-md border transition " +
+                    (playbackSpeed === 1
+                      ? "bg-blue-600/90 hover:bg-blue-500/90 text-white border-blue-300/20"
+                      : "bg-blue-900/40 hover:bg-blue-800/50 text-blue-100 border-blue-400/30")
+                  }
+                >
+                  {t("1x")}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => setPlaybackSpeed(2)}
+                  className={
+                    "h-7 px-2 rounded-md border transition " +
+                    (playbackSpeed === 2
+                      ? "bg-blue-600/90 hover:bg-blue-500/90 text-white border-blue-300/20"
+                      : "bg-blue-900/40 hover:bg-blue-800/50 text-blue-100 border-blue-400/30")
+                  }
+                >
+                  {t("2x")}
+                </Button>
               </div>
-            </div>
 
-            <div className="min-w-28 text-center font-medium text-xs bg-blue-950/40 ring-1 ring-blue-400/20 py-1 px-2 rounded-lg text-blue-100">
-              {currentDate}
+              <div className="flex-1 mx-2">
+                <div className="h-3 rounded-full bg-blue-300/20 ring-1 ring-blue-400/30 flex items-center px-2">
+                  <Slider
+                    value={[currentIndex]}
+                    max={dates.length - 1}
+                    step={1}
+                    onValueChange={(value) => setCurrentDate(dates[value[0]])}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
+              <div className="min-w-28 text-center font-medium text-xs bg-blue-950/40 ring-1 ring-blue-400/20 py-1 px-2 rounded-lg text-blue-100">
+                {currentDate}
+              </div>
             </div>
           </div>
         </div>
-      </div>
       )}
 
       {/* Role pill */}
