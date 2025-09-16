@@ -5,25 +5,32 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, Plus, Minus, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Play,
+  Pause,
+  Plus,
+  Minus,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { useTranslations } from "next-intl";
 import { getAllStations, type WeatherStationData } from "./weather-data";
-import ForecastOverlay, { type ForecastLayerId } from "./Animation/ForecastOverlay";
+import ForecastOverlay, {
+  type ForecastLayerId,
+} from "./Animation/ForecastOverlay";
 import { useMap } from "react-leaflet";
 import dynamic from "next/dynamic";
-import { Roboto_Mono } from 'next/font/google';
+import { Roboto_Mono } from "next/font/google";
 import type { FeatureCollection } from "geojson";
 
-const MapTilerVectorLayer = dynamic(
-  () => import("./MapTilerVectorLayer"),
-  { ssr: false }
-);
+const MapTilerVectorLayer = dynamic(() => import("./MapTilerVectorLayer"), {
+  ssr: false,
+});
 
-const TemperatureShade = dynamic(
-  () => import("./Animation/TemperatureShade"),
-  { ssr: false }
-);
+const TemperatureShade = dynamic(() => import("./Animation/TemperatureShade"), {
+  ssr: false,
+});
 
 export type ParameterId =
   | "temperature"
@@ -48,7 +55,7 @@ export interface MapComponentProps {
 function dewPointFromTempRH(tempC: number, rh: number): number {
   const a = 17.27;
   const b = 237.7;
-  const alpha = ((a * tempC) / (b + tempC)) + Math.log(rh / 100);
+  const alpha = (a * tempC) / (b + tempC) + Math.log(rh / 100);
   const dp = (b * alpha) / (a - alpha);
   return Math.round(dp * 10) / 10;
 }
@@ -66,7 +73,11 @@ function seededUnit(seed: number): number {
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
 }
-function fluctuationDelta(index: number, stationId: string, param: ParameterId): number {
+function fluctuationDelta(
+  index: number,
+  stationId: string,
+  param: ParameterId
+): number {
   const pattern = [1, 2, -3, 0];
   const base = pattern[index % pattern.length];
   const seed = hashString(`${stationId}-${param}-${index}`);
@@ -87,7 +98,11 @@ function FixLeafletIcons() {
 }
 
 // Numeric font for all values
-const robotoMono = Roboto_Mono({ subsets: ["latin"], weight: ["400", "700"], display: "swap" });
+const robotoMono = Roboto_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+});
 
 /* === NEW: a small base “dot” icon for stations when no parameter is active === */
 function createBaseStationIcon() {
@@ -107,7 +122,7 @@ function createBaseStationIcon() {
     className: "base-station-icon",
     iconSize: [24, 24],
     iconAnchor: [12, 12],
-    popupAnchor: [0, -12]
+    popupAnchor: [0, -12],
   });
 }
 
@@ -117,7 +132,7 @@ function createParamIcon(
   param: ParameterId,
   value: string | null,
   overrideDirectionDeg?: number | null,
-  forceBlack?: boolean,
+  forceBlack?: boolean
 ) {
   const display = value ?? "N/A";
 
@@ -138,9 +153,10 @@ function createParamIcon(
     const valueStr = (value ?? value === 0) ? `${value}` : "—";
 
     // SVG geometry
-    const cx = 24, cy = 28;       // center
-    const r = 14;                 // inner radius
-    const ringR = 20;             // dotted orbit radius
+    const cx = 24,
+      cy = 28; // center
+    const r = 14; // inner radius
+    const ringR = 20; // dotted orbit radius
 
     const html = `
     <div style="pointer-events:none; display:flex; align-items:center; justify-content:center; background:transparent;">
@@ -185,7 +201,7 @@ function createParamIcon(
     return L.divIcon({
       html,
       className: "wind-pin-icon",
-      iconSize: [56, 64]
+      iconSize: [56, 64],
     });
   }
 
@@ -202,7 +218,11 @@ function createParamIcon(
 }
 
 // Compute wind direction that also changes along the timeline
-function dynamicWindDirectionDeg(index: number, stationId: string, baseDir: number | null | undefined) {
+function dynamicWindDirectionDeg(
+  index: number,
+  stationId: string,
+  baseDir: number | null | undefined
+) {
   const base = baseDir ?? 0;
   // Use the same fluctuation pattern but scale to degrees
   const step = fluctuationDelta(index, stationId, "wind"); // -3,0,1,2 mostly
@@ -232,7 +252,8 @@ export default function MapComponent({
 }: MapComponentProps) {
   const { data: session } = useSession();
   const t = useTranslations("WeatherStation");
-  const [jordanBoundary, setJordanBoundary] = useState<FeatureCollection | null>(null);
+  const [jordanBoundary, setJordanBoundary] =
+    useState<FeatureCollection | null>(null);
 
   // Load Jordan boundary GeoJSON
   useEffect(() => {
@@ -247,7 +268,9 @@ export default function MapComponent({
         console.warn("Failed to load jordan.json");
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   /* ---------- LAZY IMPORT: add Tooltip here ---------- */
@@ -255,7 +278,7 @@ export default function MapComponent({
     MapContainer: any;
     TileLayer: any;
     Marker: any;
-    Tooltip: any;        // 👈 NEW
+    Tooltip: any; // 👈 NEW
     GeoJSON: any;
     useMap: any;
   }>(null);
@@ -270,13 +293,15 @@ export default function MapComponent({
           MapContainer: rl.MapContainer,
           TileLayer: rl.TileLayer,
           Marker: rl.Marker,
-          Tooltip: rl.Tooltip,     // 👈 NEW
+          Tooltip: rl.Tooltip, // 👈 NEW
           GeoJSON: rl.GeoJSON,
           useMap: rl.useMap,
         });
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const CustomZoomControl = useMemo(() => {
@@ -286,10 +311,20 @@ export default function MapComponent({
       const map = useMap();
       return (
         <div className="absolute top-2 left-2 z-[10] flex flex-col gap-1">
-          <Button size="icon" variant="secondary" onClick={() => map.zoomIn()} className="h-8 w-8 bg-white">
+          <Button
+            size="icon"
+            variant="secondary"
+            onClick={() => map.zoomIn()}
+            className="h-8 w-8 bg-white"
+          >
             <Plus className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="secondary" onClick={() => map.zoomOut()} className="h-8 w-8 bg-white">
+          <Button
+            size="icon"
+            variant="secondary"
+            onClick={() => map.zoomOut()}
+            className="h-8 w-8 bg-white"
+          >
             <Minus className="h-4 w-4" />
           </Button>
         </div>
@@ -303,13 +338,19 @@ export default function MapComponent({
     for (let i = 6; i >= 0; i--) {
       const date = new Date(today);
       date.setDate(date.getDate() - i);
-      dateList.push(date.toLocaleDateString("en-US", { day: "numeric", month: "short" }));
+      dateList.push(
+        date.toLocaleDateString("en-US", { day: "numeric", month: "short" })
+      );
     }
     return dateList;
   }, []);
 
-  const currentIndex = dates.length > 0 ? Math.max(0, dates.indexOf(currentDate)) : 0;
-  const stations = useMemo(() => getAllStations().filter(s => s.coordinates), []);
+  const currentIndex =
+    dates.length > 0 ? Math.max(0, dates.indexOf(currentDate)) : 0;
+  const stations = useMemo(
+    () => getAllStations().filter((s) => s.coordinates),
+    []
+  );
   const [playbackSpeed, setPlaybackSpeed] = useState<1 | 2>(1);
 
   useEffect(() => {
@@ -337,7 +378,9 @@ export default function MapComponent({
   // Determine active forecast layer (single-select expected). Must be declared
   // before any early returns to keep Hooks order consistent across renders.
   const activeForecast: ForecastLayerId | null = useMemo(() => {
-    const entries = Object.entries(enabledForecast) as Array<[ForecastLayerId, boolean]>;
+    const entries = Object.entries(enabledForecast) as Array<
+      [ForecastLayerId, boolean]
+    >;
     const found = entries.find(([, v]) => v);
     return found ? found[0] : null;
   }, [enabledForecast]);
@@ -354,11 +397,13 @@ export default function MapComponent({
   const roleDesc =
     session?.user?.role === "super_admin"
       ? t("roleDescription.superAdmin")
-      : session?.user?.role === "station_admin" || session?.user?.role === "observer"
+      : session?.user?.role === "station_admin" ||
+          session?.user?.role === "observer"
         ? t("roleDescription.stationAdmin")
         : t("guestDescription");
 
-  const { MapContainer, Marker, Tooltip, GeoJSON, useMap } = leaflet || {} as any;
+  const { MapContainer, Marker, Tooltip, GeoJSON, useMap } =
+    leaflet || ({} as any);
 
   // Component to fit map to Jordan bounds
   function FitJordanBounds({ data }: { data: FeatureCollection }) {
@@ -371,7 +416,10 @@ export default function MapComponent({
   }
 
   // Value per parameter per station (same logic; used for marker label + tooltip)
-  const valueForParam = (s: WeatherStationData, p: ParameterId): string | null => {
+  const valueForParam = (
+    s: WeatherStationData,
+    p: ParameterId
+  ): string | null => {
     const delta = fluctuationDelta(currentIndex, s.stationId, p);
     switch (p) {
       case "temperature": {
@@ -386,7 +434,11 @@ export default function MapComponent({
         return String(Math.round(adjusted));
       }
       case "dewpoint": {
-        if (s.maxTemp != null && s.relativeHumidity != null && s.relativeHumidity > 0) {
+        if (
+          s.maxTemp != null &&
+          s.relativeHumidity != null &&
+          s.relativeHumidity > 0
+        ) {
           const dp = dewPointFromTempRH(s.maxTemp, s.relativeHumidity);
           const adjusted = dp + delta * 0.3;
           return String(Math.round(adjusted * 10) / 10);
@@ -400,7 +452,10 @@ export default function MapComponent({
       }
       case "pressure": {
         if (s.pressure == null) return null;
-        const adjusted = Math.max(800, Math.min(1100, s.pressure + delta * 0.5));
+        const adjusted = Math.max(
+          800,
+          Math.min(1100, s.pressure + delta * 0.5)
+        );
         return String(Math.round(adjusted));
       }
       case "solarRadiation": {
@@ -438,25 +493,34 @@ export default function MapComponent({
   const tempSamples = getTempSamples();
 
   // Parameters explicitly enabled from the stations UI
-  const uiActiveParams = (Object.keys(enabled) as ParameterId[]).filter((k) => enabled[k]);
+  const uiActiveParams = (Object.keys(enabled) as ParameterId[]).filter(
+    (k) => enabled[k]
+  );
   // If no parameter is enabled but forecast-temp is active, implicitly show temperature markers
-  const effectiveActiveParams: ParameterId[] = uiActiveParams.length > 0
-    ? uiActiveParams
-    : (activeForecast === "forecast-temp" ? ["temperature"] as ParameterId[] : []);
+  const effectiveActiveParams: ParameterId[] =
+    uiActiveParams.length > 0
+      ? uiActiveParams
+      : activeForecast === "forecast-temp"
+        ? (["temperature"] as ParameterId[])
+        : [];
   const anyParamActive = effectiveActiveParams.length > 0;
 
   // Hide timeline when nothing is selected (initial) or for specific forecast layers
-  const hideTimeline = (
+  const hideTimeline =
     (!anyParamActive && !activeForecast) ||
-    (!!activeForecast && (
-      activeForecast === "pressure-isolines" ||
-      activeForecast === "msl-pressure" ||
-      activeForecast === "geopotential"
-    ))
-  );
+    (!!activeForecast &&
+      (activeForecast === "pressure-isolines" ||
+        activeForecast === "msl-pressure" ||
+        activeForecast === "geopotential"));
 
   /* === NEW: Tooltip renderer (station details). Keep it simple & compact. === */
-  const StationTooltip = ({ s, param }: { s: WeatherStationData; param?: ParameterId }) => {
+  const StationTooltip = ({
+    s,
+    param,
+  }: {
+    s: WeatherStationData;
+    param?: ParameterId;
+  }) => {
     const v = param ? valueForParam(s, param) : null;
     const unit = param ? ` ${paramUnits[param]}` : "";
 
@@ -466,20 +530,82 @@ export default function MapComponent({
         {param && (
           <div style={{ marginBottom: 6 }}>
             <span style={{ opacity: 0.7, marginRight: 4 }}>{param}</span>
-            <strong className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{v ?? "—"}{v ? unit : ""}</strong>
+            <strong
+              className={robotoMono.className}
+              style={{ fontVariantNumeric: "tabular-nums" }}
+            >
+              {v ?? "—"}
+              {v ? unit : ""}
+            </strong>
           </div>
         )}
-        <div style={{ display: "grid", gridTemplateColumns: "auto auto", gap: "2px 8px" }}>
-          <span>{t("maxMin")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.maxTemp ?? "—"}{t("unitC")} / {s.minTemp ?? "—"}{t("unitC")}</span>
-          <span>{t("relativeHumidity")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.relativeHumidity ?? "—"}%</span>
-          <span>{t("precipitation")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.precipitation} {t("unitMM")}</span>
-          <span>{t("snowDepth")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.snowDepth} {t("unitCM")}</span>
-          <span>{t("windSpeed")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.windSpeedKph ?? "—"} {t("unitKMH")} {`@ ${dynamicWindDirectionDeg(currentIndex, s.stationId, s.windDirDeg)}°`}</span>
-          <span>{t("pressure")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.pressure ?? "—"} {t("unitHPA")}</span>
-          <span>{t("solarRadiation")}</span><span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>{s.solarRadiation ?? "—"} {t("unitWM2")}</span>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "auto auto",
+            gap: "2px 8px",
+          }}
+        >
+          <span>{t("maxMin")}</span>
+          <span
+            className={robotoMono.className}
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {s.maxTemp ?? "—"}
+            {t("unitC")} / {s.minTemp ?? "—"}
+            {t("unitC")}
+          </span>
+          <span>{t("relativeHumidity")}</span>
+          <span
+            className={robotoMono.className}
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {s.relativeHumidity ?? "—"}%
+          </span>
+          <span>{t("precipitation")}</span>
+          <span
+            className={robotoMono.className}
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {s.precipitation} {t("unitMM")}
+          </span>
+          <span>{t("snowDepth")}</span>
+          <span
+            className={robotoMono.className}
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {s.snowDepth} {t("unitCM")}
+          </span>
+          <span>{t("windSpeed")}</span>
+          <span
+            className={robotoMono.className}
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {s.windSpeedKph ?? "—"} {t("unitKMH")}{" "}
+            {`@ ${dynamicWindDirectionDeg(currentIndex, s.stationId, s.windDirDeg)}°`}
+          </span>
+          <span>{t("pressure")}</span>
+          <span
+            className={robotoMono.className}
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {s.pressure ?? "—"} {t("unitHPA")}
+          </span>
+          <span>{t("solarRadiation")}</span>
+          <span
+            className={robotoMono.className}
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {s.solarRadiation ?? "—"} {t("unitWM2")}
+          </span>
           <span>{t("coords")}</span>
-          <span className={robotoMono.className} style={{ fontVariantNumeric: "tabular-nums" }}>
-            {s.coordinates ? `${s.coordinates.lat.toFixed(3)}, ${s.coordinates.lng.toFixed(3)}` : "—"}
+          <span
+            className={robotoMono.className}
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {s.coordinates
+              ? `${s.coordinates.lat.toFixed(3)}, ${s.coordinates.lng.toFixed(3)}`
+              : "—"}
           </span>
         </div>
       </div>
@@ -499,10 +625,10 @@ export default function MapComponent({
         ) : (
           <MapContainer
             center={[31.24, 36.51]} // Amman, Jordan
-            zoom={5}
+            zoom={8}
             style={{ height: "100%", width: "100%" }}
             zoomControl={false}
-            minZoom={5}
+            minZoom={8}
             maxBounds={[
               [29.0, 34.8],
               [33.5, 39.3],
@@ -519,7 +645,12 @@ export default function MapComponent({
               <>
                 <GeoJSON
                   data={jordanBoundary as any}
-                  style={{ weight: 3, color: "#000000", opacity: 0.8, fillOpacity: 0 }} // Changed weight, color, and slightly increased opacity for better visibility
+                  style={{
+                    weight: 3,
+                    color: "#000000",
+                    opacity: 0.8,
+                    fillOpacity: 0,
+                  }} // Changed weight, color, and slightly increased opacity for better visibility
                   interactive={false}
                 />
                 <FitJordanBounds data={jordanBoundary} />
@@ -533,11 +664,11 @@ export default function MapComponent({
               <TemperatureShade
                 enabled
                 opacity={0.6}
-                points={tempSamples.pts}      
+                points={tempSamples.pts}
                 minValue={-10}
                 maxValue={50}
                 timelineKey={currentIndex}
-                maskGeoJson={jordanBoundary} 
+                maskGeoJson={jordanBoundary}
               />
             )}
 
@@ -564,7 +695,12 @@ export default function MapComponent({
                     // interactive marker so the tooltip opens on hover
                     interactive={true}
                   >
-                    <Tooltip direction="top" offset={[0, -6]} opacity={1} sticky>
+                    <Tooltip
+                      direction="top"
+                      offset={[0, -6]}
+                      opacity={1}
+                      sticky
+                    >
                       <StationTooltip s={s} />
                     </Tooltip>
                   </Marker>
@@ -577,9 +713,24 @@ export default function MapComponent({
                 stations.map((s) => {
                   const coords = s.coordinates!;
                   const val = valueForParam(s, paramKey);
-                  const dir = paramKey === "wind" ? dynamicWindDirectionDeg(currentIndex, s.stationId, s.windDirDeg) : null;
-                  const forceBlack = activeForecast === "forecast-temp" && paramKey === "temperature";
-                  const icon = createParamIcon(s, paramKey, val, dir ?? undefined, forceBlack);
+                  const dir =
+                    paramKey === "wind"
+                      ? dynamicWindDirectionDeg(
+                          currentIndex,
+                          s.stationId,
+                          s.windDirDeg
+                        )
+                      : null;
+                  const forceBlack =
+                    activeForecast === "forecast-temp" &&
+                    paramKey === "temperature";
+                  const icon = createParamIcon(
+                    s,
+                    paramKey,
+                    val,
+                    dir ?? undefined,
+                    forceBlack
+                  );
                   return (
                     <Marker
                       key={`${paramKey}-${s.stationId}`}
@@ -587,12 +738,17 @@ export default function MapComponent({
                       icon={icon}
                       interactive={true}
                     >
-                      <Tooltip direction="top" offset={[0, -8]} opacity={1} sticky>
+                      <Tooltip
+                        direction="top"
+                        offset={[0, -8]}
+                        opacity={1}
+                        sticky
+                      >
                         <StationTooltip s={s} param={paramKey} />
                       </Tooltip>
                     </Marker>
                   );
-                }),
+                })
               )}
           </MapContainer>
         )}
@@ -614,7 +770,11 @@ export default function MapComponent({
                     : "bg-blue-950/40 hover:bg-blue-900/50 text-blue-100 border-blue-400/30")
                 }
               >
-                {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                {isPlaying ? (
+                  <Pause className="h-4 w-4" />
+                ) : (
+                  <Play className="h-4 w-4" />
+                )}
               </Button>
 
               <Button
@@ -693,8 +853,12 @@ export default function MapComponent({
       {/* Global tweaks */}
       <style jsx global>{`
         /* IMPORTANT: allow hover so tooltip works */
-        .param-div-icon { pointer-events: auto; }
-        .base-station-icon { pointer-events: auto; }
+        .param-div-icon {
+          pointer-events: auto;
+        }
+        .base-station-icon {
+          pointer-events: auto;
+        }
       `}</style>
     </div>
   );
