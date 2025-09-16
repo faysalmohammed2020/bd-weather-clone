@@ -519,7 +519,7 @@ export default function MapComponent({
             <>
               <GeoJSON
                 data={jordanBoundary as any}
-                style={{ weight: 1, color: "#1e40af", opacity: 0.6, fillOpacity: 0 }}
+                style={{ weight: 3, color: "#000000", opacity: 0.8, fillOpacity: 0 }} // Changed weight, color, and slightly increased opacity for better visibility
                 interactive={false}
               />
               <FitJordanBounds data={jordanBoundary} />
@@ -530,15 +530,15 @@ export default function MapComponent({
 
           {/* Forecast overlays */}
           {activeForecast === "forecast-temp" && (
-            <TemperatureShade
-              enabled={true}
-              forecast={true}
-              opacity={0.6}
-              points={tempSamples.pts}
-              minValue={tempSamples.min}
-              maxValue={tempSamples.max}
-              timelineKey={currentIndex}
-            />
+           <TemperatureShade
+           enabled
+           forecast
+           opacity={0.6}
+           points={tempSamples.pts}
+           minValue={-10}   // clamp low
+           maxValue={55}    // clamp high
+           timelineKey={currentIndex}
+         />
           )}
           {activeForecast && activeForecast !== "forecast-temp" && (
             <ForecastOverlay
