@@ -402,7 +402,7 @@ export default function MapComponent({
         ? t("roleDescription.stationAdmin")
         : t("guestDescription");
 
-  const { MapContainer, Marker, Tooltip, GeoJSON, useMap } =
+  const { MapContainer, TileLayer, Marker, Tooltip, GeoJSON, useMap } =
     leaflet || ({} as any);
 
   // Component to fit map to Jordan bounds
@@ -635,10 +635,17 @@ export default function MapComponent({
             ]}
           >
             <FixLeafletIcons />
-            <MapTilerVectorLayer
-              apiKey={process.env.NEXT_PUBLIC_MAPTILER_KEY as string}
-              styleUrl={`https://api.maptiler.com/maps/01994da9-ef78-7028-abca-085899f842e2/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`}
-            />
+            {process.env.NEXT_PUBLIC_MAPTILER_KEY ? (
+              <MapTilerVectorLayer
+                apiKey={process.env.NEXT_PUBLIC_MAPTILER_KEY}
+                styleUrl={`https://api.maptiler.com/maps/01994da9-ef78-7028-abca-085899f842e2/style.json?key=${process.env.NEXT_PUBLIC_MAPTILER_KEY}`}
+              />
+            ) : (
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+            )}
 
             {/* Jordan boundary outline */}
             {jordanBoundary && (

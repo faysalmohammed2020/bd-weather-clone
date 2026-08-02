@@ -1,9 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import WeatherSidebar from "./weather-sidebar";
-import MapJordarn, { type EnabledMap, type ParameterId } from "./MapJordarn";
+import type { EnabledMap, ParameterId } from "./MapJordarn";
 import type { ForecastLayerId } from "./Animation/ForecastOverlay";
+
+// Leaflet reads `window` while its module is initialized. A Client Component can
+// still be pre-rendered by Next.js, so keep the entire map out of the SSR bundle.
+const MapJordarn = dynamic(() => import("./MapJordarn"), {
+  ssr: false,
+  loading: () => <div className="h-full w-full animate-pulse bg-slate-200" />,
+});
 
 export default function MapWithSidebar() {
   const [currentDate, setCurrentDate] = useState<string>(
