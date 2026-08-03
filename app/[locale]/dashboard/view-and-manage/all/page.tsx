@@ -5,7 +5,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import FirstCardTable from "../first-card-view/page"
 import SecondCardTable from "../second-card-view/page"
 import SynopticCodeTable from "../synoptic-code/page"
-import * as XLSX from "xlsx"
+import ExcelJS from "exceljs"
+import { saveAs } from "file-saver"
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import { useSession } from "@/lib/auth-client"
@@ -28,9 +29,9 @@ export default function AllViewAndManagePage() {
 
   const exportToExcel = () => {
     toast.promise(
-      new Promise((resolve, reject) => {
+      new Promise(async (resolve, reject) => {
         try {
-          const wb = XLSX.utils.book_new();
+          const workbook = new ExcelJS.Workbook();
 
           const firstCardData = firstCardRef.current?.getData?.() || [];
           const secondCardData = secondCardRef.current?.getData?.() || [];
@@ -69,20 +70,27 @@ export default function AllViewAndManagePage() {
           const cleanSynoptic = cleanData(synopticData);
           const cleanSummary = cleanData(dailySummaryData);
 
-          // Create worksheets
-          const firstSheet = XLSX.utils.json_to_sheet(cleanFirst);
-          const secondSheet = XLSX.utils.json_to_sheet(cleanSecond);
-          const synopticSheet = XLSX.utils.json_to_sheet(cleanSynoptic);
-          const summarySheet = XLSX.utils.json_to_sheet(cleanSummary);
+          const addWorksheet = (name: string, rows: Record<string, any>[]) => {
+            const safeName = name.replace(/[\\/*?:\[\]]/g, "-").slice(0, 31) || "Sheet";
+            const worksheet = workbook.addWorksheet(safeName);
+            const keys = Array.from(new Set(rows.flatMap(row => Object.keys(row))));
 
-          // Add sheets to workbook
-          XLSX.utils.book_append_sheet(wb, firstSheet, t("tabs.firstCard"));
-          XLSX.utils.book_append_sheet(wb, secondSheet, t("tabs.secondCard"));
-          XLSX.utils.book_append_sheet(wb, synopticSheet, t("tabs.synopticCode"));
-          XLSX.utils.book_append_sheet(wb, summarySheet, t("tabs.dailySummary"));
+            worksheet.columns = keys.map(key => ({ header: key, key }));
+            worksheet.addRows(rows);
+          };
 
-          // Export
-          XLSX.writeFile(wb, "Weather_Data_All_Tabs.xlsx");
+          addWorksheet(t("tabs.firstCard"), cleanFirst);
+          addWorksheet(t("tabs.secondCard"), cleanSecond);
+          addWorksheet(t("tabs.synopticCode"), cleanSynoptic);
+          addWorksheet(t("tabs.dailySummary"), cleanSummary);
+
+          const buffer = await workbook.xlsx.writeBuffer();
+          saveAs(
+            new Blob([buffer], {
+              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            }),
+            "Weather_Data_All_Tabs.xlsx"
+          );
           resolve(true);
         } catch (error) {
           console.error("Export error:", error);

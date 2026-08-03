@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { admin, twoFactor, customSession } from "better-auth/plugins";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { multiSession } from "better-auth/plugins"
+import { adminAc, userAc } from "better-auth/plugins/admin/access";
 import { nextCookies } from "better-auth/next-js";
 import prisma from "@/lib/prisma";
 
@@ -51,6 +52,11 @@ export const auth = betterAuth({
     admin({
       defaultRole: "observer",
       adminRoles: ["super_admin"],
+      roles: {
+        super_admin: adminAc,
+        station_admin: userAc,
+        observer: userAc,
+      },
     }),
     twoFactor(),
     customSession(async ({ user, session }) => {
