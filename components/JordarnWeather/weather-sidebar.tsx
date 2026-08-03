@@ -1,7 +1,5 @@
 "use client";
 
-import type React from "react";
-import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -16,24 +14,30 @@ import {
   Eye,
   Mountain,
   MapPin,
+  type LucideIcon,
 } from "lucide-react";
 import type { ForecastLayerId } from "./Animation/ForecastOverlay";
+import type { EnabledMap, ParameterId } from "./MapJordarn";
 import { useLocale, useTranslations } from "next-intl";
 
 interface WeatherParameter {
   id: string;
   label: string;
-  icon: React.ComponentType<any>;
+  icon: LucideIcon;
   enabled: boolean;
   unit?: string;
 }
 
 interface WeatherSidebarProps {
+  enabled: EnabledMap;
+  enabledForecast: Record<ForecastLayerId, boolean>;
   onParameterToggle: (parameterId: string, enabled: boolean) => void;
   onForecastToggle: (parameterId: ForecastLayerId, enabled: boolean) => void;
 }
 
 export default function WeatherSidebar({
+  enabled,
+  enabledForecast,
   onParameterToggle,
   onForecastToggle,
 }: WeatherSidebarProps) {
@@ -41,114 +45,35 @@ export default function WeatherSidebar({
   const locale = useLocale();
   const isRTL = locale === "ar";
 
-  const [weatherStations, setWeatherStations] = useState<WeatherParameter[]>([
-    { id: "temperature", label: t("temperature"), icon: Thermometer, enabled: false, unit: t("unitC") },
-    { id: "wind", label: t("wind"), icon: Wind, enabled: false, unit: t("unitKMH") },
-    { id: "humidity", label: t("humidity"), icon: Droplets, enabled: false, unit: t("unitPercent") },
-    { id: "pressure", label: t("pressure"), icon: Gauge, enabled: false, unit: t("unitHPA") },
-    { id: "dewpoint", label: t("dewpoint"), icon: CloudSnow, enabled: false, unit: t("unitC") },
-    { id: "solarRadiation", label: t("solarRadiation"), icon: Sun, enabled: false, unit: t("unitWM2") },
-  ]);
+  const weatherStations: Array<WeatherParameter & { id: ParameterId }> = [
+    { id: "temperature", label: t("temperature"), icon: Thermometer, enabled: enabled.temperature, unit: t("unitC") },
+    { id: "wind", label: t("wind"), icon: Wind, enabled: enabled.wind, unit: t("unitKMH") },
+    { id: "humidity", label: t("humidity"), icon: Droplets, enabled: enabled.humidity, unit: t("unitPercent") },
+    { id: "pressure", label: t("pressure"), icon: Gauge, enabled: enabled.pressure, unit: t("unitHPA") },
+    { id: "dewpoint", label: t("dewpoint"), icon: CloudSnow, enabled: enabled.dewpoint, unit: t("unitC") },
+    { id: "solarRadiation", label: t("solarRadiation"), icon: Sun, enabled: enabled.solarRadiation, unit: t("unitWM2") },
+  ];
 
   type ForecastParam = Omit<WeatherParameter, "id"> & { id: ForecastLayerId };
-  const [numericalForecast, setNumericalForecast] = useState<ForecastParam[]>([
-    { id: "forecast-temp", label: t("temperature"), icon: Thermometer, enabled: false },
-    { id: "forecast-humidity", label: t("humidity"), icon: Droplets, enabled: false },
-    { id: "forecast-wind", label: t("wind"), icon: Wind, enabled: false },
-    { id: "pressure-isolines", label: t("pressureIsolines"), icon: Eye, enabled: false },
-    { id: "msl-pressure", label: t("mslPressure"), icon: Gauge, enabled: false },
-    { id: "geopotential", label: t("geopotential"), icon: Mountain, enabled: false },
-    { id: "forecast-dewpoint", label: t("dewpoint"), icon: CloudSnow, enabled: false },
-    { id: "low-clouds", label: t("lowClouds"), icon: Cloud, enabled: false },
-    { id: "total-clouds", label: t("totalClouds"), icon: CloudRain, enabled: false },
-  ]);
-
-  // --- Handlers ---
-  const handleWeatherStationToggle = (id: string) => {
-    setWeatherStations((prev) => {
-      const target = prev.find((p) => p.id === id);
-      const turningOn = !(target?.enabled);
-
-      const nextState = prev.map((p) =>
-        p.id === id ? { ...p, enabled: turningOn } : { ...p, enabled: false }
-      );
-
-      const changes: Array<{ id: string; enabled: boolean }> = [];
-      if (target?.enabled !== turningOn) {
-        changes.push({ id, enabled: turningOn });
-      }
-
-      if (turningOn) {
-        prev.forEach((p) => {
-          if (p.id !== id && p.enabled) {
-            changes.push({ id: p.id, enabled: false });
-          }
-        });
-        setNumericalForecast((nfPrev) => {
-          const turnedOff = nfPrev.filter((f) => f.enabled).map((f) => f.id);
-          const nfNext = nfPrev.map((f) => ({ ...f, enabled: false }));
-          setTimeout(() => {
-            turnedOff.forEach((fid) => onForecastToggle(fid, false));
-          }, 0);
-          return nfNext;
-        });
-      }
-
-      setTimeout(() => {
-        changes.forEach(({ id, enabled }) => onParameterToggle(id, enabled));
-      }, 0);
-
-      return nextState;
-    });
-  };
-
-  const handleForecastToggle = (id: ForecastLayerId) => {
-    setNumericalForecast((prev) => {
-      const target = prev.find((p) => p.id === id);
-      const turningOn = !(target?.enabled);
-
-      const nextState = prev.map((p) =>
-        p.id === id ? { ...p, enabled: turningOn } : { ...p, enabled: false }
-      );
-
-      const changes: Array<{ id: string; enabled: boolean }> = [];
-      if (target?.enabled !== turningOn) {
-        changes.push({ id, enabled: turningOn });
-      }
-
-      if (turningOn) {
-        prev.forEach((p) => {
-          if (p.id !== id && p.enabled) {
-            changes.push({ id: p.id, enabled: false });
-          }
-        });
-        setWeatherStations((wsPrev) => {
-          const turnedOff = wsPrev.filter((w) => w.enabled).map((w) => w.id);
-          const wsNext = wsPrev.map((w) => ({ ...w, enabled: false }));
-          setTimeout(() => {
-            turnedOff.forEach((wid) => onParameterToggle(wid, false));
-          }, 0);
-          return wsNext;
-        });
-      }
-
-      setTimeout(() => {
-        changes.forEach(({ id, enabled }) =>
-          onForecastToggle(id as ForecastLayerId, enabled)
-        );
-      }, 0);
-
-      return nextState;
-    });
-  };
+  const numericalForecast: ForecastParam[] = [
+    { id: "forecast-temp", label: t("temperature"), icon: Thermometer, enabled: enabledForecast["forecast-temp"] },
+    { id: "forecast-humidity", label: t("humidity"), icon: Droplets, enabled: enabledForecast["forecast-humidity"] },
+    { id: "forecast-wind", label: t("wind"), icon: Wind, enabled: enabledForecast["forecast-wind"] },
+    { id: "pressure-isolines", label: t("pressureIsolines"), icon: Eye, enabled: enabledForecast["pressure-isolines"] },
+    { id: "msl-pressure", label: t("mslPressure"), icon: Gauge, enabled: enabledForecast["msl-pressure"] },
+    { id: "geopotential", label: t("geopotential"), icon: Mountain, enabled: enabledForecast.geopotential },
+    { id: "forecast-dewpoint", label: t("dewpoint"), icon: CloudSnow, enabled: enabledForecast["forecast-dewpoint"] },
+    { id: "low-clouds", label: t("lowClouds"), icon: Cloud, enabled: enabledForecast["low-clouds"] },
+    { id: "total-clouds", label: t("totalClouds"), icon: CloudRain, enabled: enabledForecast["total-clouds"] },
+  ];
 
   return (
     <div
-      className="w-80 h-full bg-blue-900 text-white p-4 overflow-y-auto"
+      className="h-full w-80 overflow-y-auto bg-slate-950/95 p-4 text-white backdrop-blur-xl"
       dir={isRTL ? "rtl" : "ltr"}
     >
       {/* Weather Stations Section */}
-      <Card className="bg-blue-800 border-blue-700 mb-4">
+      <Card className="mb-4 border-white/10 bg-slate-900/90 shadow-xl">
         <div className="p-4">
           <div className="flex items-center gap-2 mb-4">
             <MapPin className="h-5 w-5 text-white" />
@@ -171,10 +96,10 @@ export default function WeatherSidebar({
                       isRTL ? "flex-row-reverse" : ""
                     }`}
                   >
-                    <Icon className="h-4 w-4 text-blue-200" />
+                    <Icon className="h-4 w-4 text-slate-300" />
                     <span className="text-sm text-white">{param.label}</span>
                     {param.unit && (
-                      <span className="text-xs text-blue-300">
+                      <span className="text-xs text-slate-400">
                         ({param.unit})
                       </span>
                     )}
@@ -182,8 +107,8 @@ export default function WeatherSidebar({
                   {/* Switch always stays aligned on the opposite side */}
                   <Switch
                     checked={!!param.enabled}
-                    onCheckedChange={() => handleWeatherStationToggle(param.id)}
-                    className="data-[state=checked]:bg-blue-500"
+                    onCheckedChange={(checked) => onParameterToggle(param.id, checked)}
+                    className="data-[state=checked]:bg-amber-400"
                   />
                 </div>
               );
@@ -193,7 +118,7 @@ export default function WeatherSidebar({
       </Card>
 
       {/* Forecast Section */}
-      <Card className="bg-blue-800 border-blue-700">
+      <Card className="border-white/10 bg-slate-900/90 shadow-xl">
         <div className="p-4">
           <div className="flex items-center gap-2 mb-4">
             <Cloud className="h-5 w-5 text-white" />
@@ -215,13 +140,13 @@ export default function WeatherSidebar({
                       isRTL ? "flex-row-reverse" : ""
                     }`}
                   >
-                    <Icon className="h-4 w-4 text-blue-200" />
+                    <Icon className="h-4 w-4 text-slate-300" />
                     <span className="text-sm text-white">{param.label}</span>
                   </div>
                   <Switch
                     checked={!!param.enabled}
-                    onCheckedChange={() => handleForecastToggle(param.id)}
-                    className="data-[state=checked]:bg-blue-500"
+                    onCheckedChange={(checked) => onForecastToggle(param.id, checked)}
+                    className="data-[state=checked]:bg-amber-400"
                   />
                 </div>
               );

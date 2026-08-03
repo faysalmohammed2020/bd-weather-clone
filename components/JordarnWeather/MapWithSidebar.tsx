@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import WeatherSidebar from "./weather-sidebar";
+import WeatherLayerToolbar from "./weather-layer-toolbar";
 import type { EnabledMap, ParameterId } from "./MapJordarn";
 import type { ForecastLayerId } from "./Animation/ForecastOverlay";
 
@@ -14,49 +15,54 @@ const MapJordarn = dynamic(() => import("./MapJordarn"), {
   loading: () => <div className="h-full w-full animate-pulse bg-slate-200" />,
 });
 
+const EMPTY_ENABLED: EnabledMap = {
+  temperature: false,
+  wind: false,
+  humidity: false,
+  pressure: false,
+  dewpoint: false,
+  solarRadiation: false,
+};
+
+const EMPTY_FORECAST: Record<ForecastLayerId, boolean> = {
+  "forecast-temp": false,
+  "forecast-humidity": false,
+  "forecast-wind": false,
+  "pressure-isolines": false,
+  "msl-pressure": false,
+  geopotential: false,
+  "forecast-dewpoint": false,
+  "low-clouds": false,
+  "total-clouds": false,
+};
+
 export default function MapWithSidebar() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState<string>(
     new Date().toLocaleDateString("en-US", { day: "numeric", month: "short" }),
   );
   const [isPlaying, setIsPlaying] = useState(false);
 
   // track which parameters are enabled
-  const [enabled, setEnabled] = useState<EnabledMap>({
-    temperature: false,
-    wind: false,
-    humidity: false,
-    pressure: false,
-    dewpoint: false,
-    solarRadiation: false,
-  });
+  const [enabled, setEnabled] = useState<EnabledMap>({ ...EMPTY_ENABLED });
 
   // track which forecast overlay is enabled (single-select handled in sidebar)
   const [enabledForecast, setEnabledForecast] = useState<Record<ForecastLayerId, boolean>>({
-    "forecast-temp": false,
-    "forecast-humidity": false,
-    "forecast-wind": false,
-    "pressure-isolines": false,
-    "msl-pressure": false,
-    "geopotential": false,
-    "forecast-dewpoint": false,
-    "low-clouds": false,
-    "total-clouds": false,
+    ...EMPTY_FORECAST,
   });
 
   const handleToggle = (id: string, on: boolean) => {
-    // Pause timeline on any sidebar change
     setIsPlaying(false);
-    // only react to the six requested station parameters
     const key = id as ParameterId;
     if (!(key in enabled)) return;
-    setEnabled((prev) => ({ ...prev, [key]: on }));
+    setEnabled(on ? { ...EMPTY_ENABLED, [key]: true } : { ...EMPTY_ENABLED });
+    if (on) setEnabledForecast({ ...EMPTY_FORECAST });
   };
 
   const handleForecastToggle = (id: ForecastLayerId, on: boolean) => {
-    // Pause timeline on any sidebar change
     setIsPlaying(false);
-    setEnabledForecast((prev) => ({ ...prev, [id]: on }));
+    setEnabledForecast(on ? { ...EMPTY_FORECAST, [id]: true } : { ...EMPTY_FORECAST });
+    if (on) setEnabled({ ...EMPTY_ENABLED });
   };
 
   useEffect(() => {
@@ -88,10 +94,24 @@ export default function MapWithSidebar() {
         }`}
       >
         <WeatherSidebar
+          enabled={enabled}
+          enabledForecast={enabledForecast}
           onParameterToggle={handleToggle}
           onForecastToggle={handleForecastToggle}
         />
       </aside>
+
+      <div
+        className="absolute top-3 z-[1150] transition-[left] duration-300 ease-in-out"
+        style={{ left: isSidebarOpen ? "21rem" : "1rem" }}
+      >
+        <WeatherLayerToolbar
+          enabled={enabled}
+          enabledForecast={enabledForecast}
+          onParameterToggle={handleToggle}
+          onForecastToggle={handleForecastToggle}
+        />
+      </div>
 
       <button
         type="button"
