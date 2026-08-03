@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter, usePathname } from "@/i18n/navigation";
+import { usePathname } from "@/i18n/navigation";
+import { routing, type Locale } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,24 +10,30 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Globe } from "lucide-react";
-import { useTranslations, useLocale } from "next-intl";
-import { useEffect } from "react";
+import { useLocale } from "next-intl";
 
 export default function LanguageSwitcher() {
-  const router = useRouter();
   const pathname = usePathname();
   const locale = useLocale();
-  const t = useTranslations();
 
-  // Set direction and lang
-  useEffect(() => {
-    const dir = locale === "ar" ? "rtl" : "ltr";
-    document.documentElement.setAttribute("dir", dir);
-    document.documentElement.setAttribute("lang", locale);
-  }, [locale]);
+  const switchLanguage = (newLocale: Locale) => {
+    if (newLocale === locale) {
+      window.location.reload();
+      return;
+    }
 
-  const switchLanguage = (newLocale: string) => {
-    router.push(pathname, { locale: newLocale });
+    const localePrefix = new RegExp(
+      `^/(${routing.locales.join("|")})(?=/|$)`,
+    );
+    const unlocalizedPath = pathname.replace(localePrefix, "") || "/";
+    const nextPath =
+      unlocalizedPath === "/"
+        ? `/${newLocale}`
+        : `/${newLocale}${unlocalizedPath}`;
+    const destination = new URL(window.location.href);
+
+    destination.pathname = nextPath;
+    window.location.assign(destination.toString());
   };
 
   return (

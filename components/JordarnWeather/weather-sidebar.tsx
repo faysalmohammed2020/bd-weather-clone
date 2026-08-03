@@ -69,7 +69,7 @@ export default function WeatherSidebar({
 
   return (
     <div
-      className="h-full w-full overflow-y-auto border-r border-slate-200 bg-white/95 p-3 text-slate-900 backdrop-blur-xl transition-colors sm:w-80 sm:p-4 dark:border-slate-800 dark:bg-slate-950/95 dark:text-white"
+      className="h-full w-full overflow-y-auto border-e border-slate-200 bg-white/95 p-3 text-slate-900 backdrop-blur-xl transition-colors sm:w-80 sm:p-4 dark:border-slate-800 dark:bg-slate-950/95 dark:text-white"
       dir={isRTL ? "rtl" : "ltr"}
     >
       {/* Weather Stations Section */}

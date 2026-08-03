@@ -1955,6 +1955,17 @@
     "guestDescription": "利用可能な観測所はありません",
     "speed": "速度",
     "1x": "1倍",
-    "2x": "2倍"
+    "2x": "2倍",
+    "expandSidebar": "天気サイドバーを開く",
+    "collapseSidebar": "天気サイドバーを閉じる",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "playForecast": "予報アニメーションを再生",
+    "pauseForecast": "予報アニメーションを一時停止",
+    "previousForecastDay": "前の予報日",
+    "nextForecastDay": "次の予報日",
+    "animatedForecastField": "アニメーション予報フィールド · {unit}",
+    "forecastPlaying": "予報を再生中",
+    "flowAnimation": "流れのアニメーション"
   }
 }

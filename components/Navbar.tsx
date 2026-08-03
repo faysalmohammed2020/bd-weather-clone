@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Cloud, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Link, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "./language-switcher";
 import ThemeToggle from "./theme-toggle";
@@ -71,7 +70,7 @@ export default function Navbar({ isScrolled }: NavbarProps) {
           <Link href="/sign-in" className="hidden md:block">
             <Button className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center gap-2">
               {t("signIn")}
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="h-4 w-4 rtl:rotate-180" />
             </Button>
           </Link>
 

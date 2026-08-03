@@ -1949,6 +1949,17 @@
     "guestDescription": "لا يوجد محطات متاحة",
     "speed": "السرعة",
     "1x": "1x",
-    "2x": "2x"
+    "2x": "2x",
+    "expandSidebar": "فتح الشريط الجانبي للطقس",
+    "collapseSidebar": "إغلاق الشريط الجانبي للطقس",
+    "zoomIn": "تكبير",
+    "zoomOut": "تصغير",
+    "playForecast": "تشغيل حركة التوقعات",
+    "pauseForecast": "إيقاف حركة التوقعات مؤقتًا",
+    "previousForecastDay": "يوم التوقع السابق",
+    "nextForecastDay": "يوم التوقع التالي",
+    "animatedForecastField": "حقل توقعات متحرك · {unit}",
+    "forecastPlaying": "التوقعات قيد التشغيل",
+    "flowAnimation": "حركة التدفق"
   }
 }

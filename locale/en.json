@@ -1940,6 +1940,17 @@
     "guestDescription": "No stations available",
     "speed": "Speed",
     "1x": "1x",
-    "2x": "2x"
+    "2x": "2x",
+    "expandSidebar": "Open weather sidebar",
+    "collapseSidebar": "Close weather sidebar",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "playForecast": "Play forecast animation",
+    "pauseForecast": "Pause forecast animation",
+    "previousForecastDay": "Previous forecast day",
+    "nextForecastDay": "Next forecast day",
+    "animatedForecastField": "Animated forecast field · {unit}",
+    "forecastPlaying": "Forecast playing",
+    "flowAnimation": "Flow animation"
   }
 }

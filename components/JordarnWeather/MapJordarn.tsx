@@ -14,7 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { getAllStations, type WeatherStationData } from "./weather-data";
 import ForecastOverlay, {
   type ForecastLayerId,
@@ -247,6 +247,7 @@ export default function MapComponent({
 }: MapComponentProps) {
   const { data: session } = useSession();
   const t = useTranslations("WeatherStation");
+  const locale = useLocale();
   const [jordanBoundary, setJordanBoundary] =
     useState<FeatureCollection | null>(null);
 
@@ -305,12 +306,12 @@ export default function MapComponent({
     return function ZoomCtrl() {
       const map = useMap();
       return (
-        <div className="absolute right-3 top-16 z-[900] flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white/90 shadow-xl backdrop-blur-md transition-colors dark:border-white/15 dark:bg-slate-950/90">
+        <div className="absolute end-3 top-16 z-[900] flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white/90 shadow-xl backdrop-blur-md transition-colors dark:border-white/15 dark:bg-slate-950/90">
           <Button
             size="icon"
             variant="secondary"
             onClick={() => map.zoomIn()}
-            aria-label="Zoom in"
+            aria-label={t("zoomIn")}
             className="h-9 w-9 rounded-none border-0 bg-transparent text-slate-700 hover:bg-slate-100 dark:text-white dark:hover:bg-white/15"
           >
             <Plus className="h-4 w-4" />
@@ -319,7 +320,7 @@ export default function MapComponent({
             size="icon"
             variant="secondary"
             onClick={() => map.zoomOut()}
-            aria-label="Zoom out"
+            aria-label={t("zoomOut")}
             className="h-9 w-9 rounded-none border-0 border-t border-slate-200 bg-transparent text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-white dark:hover:bg-white/15"
           >
             <Minus className="h-4 w-4" />
@@ -327,7 +328,7 @@ export default function MapComponent({
         </div>
       );
     };
-  }, [leaflet]);
+  }, [leaflet, t]);
 
   const dates = useMemo(() => {
     const dateList: string[] = [];
@@ -336,11 +337,11 @@ export default function MapComponent({
       const date = new Date(today);
       date.setDate(date.getDate() + i);
       dateList.push(
-        date.toLocaleDateString("en-US", { day: "numeric", month: "short" })
+        date.toLocaleDateString(locale, { day: "numeric", month: "short" })
       );
     }
     return dateList;
-  }, []);
+  }, [locale]);
 
   const currentIndex =
     dates.length > 0 ? Math.max(0, dates.indexOf(currentDate)) : 0;
@@ -720,7 +721,7 @@ export default function MapComponent({
 
       {/* Timeline */}
       {!hideTimeline && (
-        <div className="absolute bottom-0 left-0 right-0 z-[1000] px-3 pb-2">
+        <div className="absolute inset-x-0 bottom-0 z-[1000] px-3 pb-2">
           <div className="mx-auto w-full rounded-xl border border-slate-200 bg-white/90 p-2 text-slate-700 shadow-xl backdrop-blur-md transition-colors dark:border-white/15 dark:bg-slate-950/90 dark:text-slate-100 dark:shadow-2xl">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
               <div className="flex shrink-0 items-center gap-2 sm:contents">
@@ -728,7 +729,7 @@ export default function MapComponent({
                 size="icon"
                 variant="secondary"
                 onClick={() => setIsPlaying(!isPlaying)}
-                aria-label={isPlaying ? "Pause forecast animation" : "Play forecast animation"}
+                aria-label={isPlaying ? t("pauseForecast") : t("playForecast")}
                 className={
                   "h-9 w-9 rounded-full border transition " +
                   (isPlaying
@@ -747,19 +748,19 @@ export default function MapComponent({
                 size="icon"
                 variant="secondary"
                 onClick={goPrev}
-                aria-label="Previous forecast day"
+                aria-label={t("previousForecastDay")}
                 className="h-8 w-8 rounded-lg border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
               </Button>
               <Button
                 size="icon"
                 variant="secondary"
                 onClick={goNext}
-                aria-label="Next forecast day"
+                aria-label={t("nextForecastDay")}
                 className="h-8 w-8 rounded-lg border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4 rtl:rotate-180" />
               </Button>
 
               <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] dark:border-white/10 dark:bg-white/5">
@@ -798,6 +799,7 @@ export default function MapComponent({
                 <div className="flex h-3 items-center rounded-full bg-slate-100 px-2 ring-1 ring-slate-200 dark:bg-white/10 dark:ring-white/15">
                   <Slider
                     value={[currentIndex]}
+                    dir="ltr"
                     max={dates.length - 1}
                     step={1}
                     onValueChange={(value) => setCurrentDate(dates[value[0]])}
@@ -816,7 +818,7 @@ export default function MapComponent({
       )}
 
       {/* Role pill */}
-      <div className="absolute right-14 top-3 z-[1000] hidden rounded-xl border border-slate-200 bg-white/90 px-3 py-2 text-slate-900 shadow-xl backdrop-blur-md transition-colors sm:block dark:border-white/15 dark:bg-slate-950/90 dark:text-white">
+      <div className="absolute end-14 top-3 z-[1000] hidden rounded-xl border border-slate-200 bg-white/90 px-3 py-2 text-slate-900 shadow-xl backdrop-blur-md transition-colors sm:block dark:border-white/15 dark:bg-slate-950/90 dark:text-white">
         <div className="text-sm font-medium">{roleLabel}</div>
         <div className="text-xs text-slate-500 dark:text-slate-300">{roleDesc}</div>
       </div>
