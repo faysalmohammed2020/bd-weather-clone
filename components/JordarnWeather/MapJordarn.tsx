@@ -305,13 +305,13 @@ export default function MapComponent({
     return function ZoomCtrl() {
       const map = useMap();
       return (
-        <div className="absolute right-3 top-16 z-[900] flex flex-col overflow-hidden rounded-lg border border-white/15 bg-slate-950/90 shadow-xl backdrop-blur-md">
+        <div className="absolute right-3 top-16 z-[900] flex flex-col overflow-hidden rounded-lg border border-slate-200 bg-white/90 shadow-xl backdrop-blur-md transition-colors dark:border-white/15 dark:bg-slate-950/90">
           <Button
             size="icon"
             variant="secondary"
             onClick={() => map.zoomIn()}
             aria-label="Zoom in"
-            className="h-9 w-9 rounded-none border-0 bg-transparent text-white hover:bg-white/15"
+            className="h-9 w-9 rounded-none border-0 bg-transparent text-slate-700 hover:bg-slate-100 dark:text-white dark:hover:bg-white/15"
           >
             <Plus className="h-4 w-4" />
           </Button>
@@ -320,7 +320,7 @@ export default function MapComponent({
             variant="secondary"
             onClick={() => map.zoomOut()}
             aria-label="Zoom out"
-            className="h-9 w-9 rounded-none border-0 border-t border-white/10 bg-transparent text-white hover:bg-white/15"
+            className="h-9 w-9 rounded-none border-0 border-t border-slate-200 bg-transparent text-slate-700 hover:bg-slate-100 dark:border-white/10 dark:text-white dark:hover:bg-white/15"
           >
             <Minus className="h-4 w-4" />
           </Button>
@@ -721,7 +721,7 @@ export default function MapComponent({
       {/* Timeline */}
       {!hideTimeline && (
         <div className="absolute bottom-0 left-0 right-0 z-[1000] px-3 pb-2">
-          <div className="mx-auto w-full rounded-xl border border-white/15 bg-slate-950/90 p-2 text-slate-100 shadow-2xl backdrop-blur-md">
+          <div className="mx-auto w-full rounded-xl border border-slate-200 bg-white/90 p-2 text-slate-700 shadow-xl backdrop-blur-md transition-colors dark:border-white/15 dark:bg-slate-950/90 dark:text-slate-100 dark:shadow-2xl">
             <div className="flex items-center gap-3">
               <Button
                 size="icon"
@@ -732,7 +732,7 @@ export default function MapComponent({
                   "h-9 w-9 rounded-full border transition " +
                   (isPlaying
                     ? "border-amber-300 bg-amber-400 text-slate-950 hover:bg-amber-300"
-                    : "border-white/15 bg-white/10 text-white hover:bg-white/20")
+                    : "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20")
                 }
               >
                 {isPlaying ? (
@@ -747,7 +747,7 @@ export default function MapComponent({
                 variant="secondary"
                 onClick={goPrev}
                 aria-label="Previous forecast day"
-                className="h-8 w-8 rounded-lg border border-white/15 bg-white/10 text-white hover:bg-white/20"
+                className="h-8 w-8 rounded-lg border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -756,12 +756,12 @@ export default function MapComponent({
                 variant="secondary"
                 onClick={goNext}
                 aria-label="Next forecast day"
-                className="h-8 w-8 rounded-lg border border-white/15 bg-white/10 text-white hover:bg-white/20"
+                className="h-8 w-8 rounded-lg border border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 dark:border-white/15 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
 
-              <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px]">
+              <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] dark:border-white/10 dark:bg-white/5">
                 <span className="opacity-80">{t("speed")}</span>
                 <Button
                   size="sm"
@@ -771,7 +771,7 @@ export default function MapComponent({
                     "h-7 rounded-md border px-2 transition " +
                     (playbackSpeed === 1
                       ? "border-amber-300 bg-amber-400 text-slate-950 hover:bg-amber-300"
-                      : "border-white/10 bg-transparent text-slate-200 hover:bg-white/10")
+                      : "border-slate-200 bg-transparent text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/10")
                   }
                 >
                   {t("1x")}
@@ -784,7 +784,7 @@ export default function MapComponent({
                     "h-7 rounded-md border px-2 transition " +
                     (playbackSpeed === 2
                       ? "border-amber-300 bg-amber-400 text-slate-950 hover:bg-amber-300"
-                      : "border-white/10 bg-transparent text-slate-200 hover:bg-white/10")
+                      : "border-slate-200 bg-transparent text-slate-600 hover:bg-slate-100 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/10")
                   }
                 >
                   {t("2x")}
@@ -792,13 +792,13 @@ export default function MapComponent({
               </div>
 
               <div className="mx-2 flex-1">
-                <div className="flex h-3 items-center rounded-full bg-white/10 px-2 ring-1 ring-white/15">
+                <div className="flex h-3 items-center rounded-full bg-slate-100 px-2 ring-1 ring-slate-200 dark:bg-white/10 dark:ring-white/15">
                   <Slider
                     value={[currentIndex]}
                     max={dates.length - 1}
                     step={1}
                     onValueChange={(value) => setCurrentDate(dates[value[0]])}
-                    className="w-full [&_[data-slot=slider-range]]:bg-amber-400 [&_[data-slot=slider-thumb]]:border-slate-950 [&_[data-slot=slider-thumb]]:bg-amber-300 [&_[data-slot=slider-track]]:bg-white/20"
+                    className="w-full [&_[data-slot=slider-range]]:bg-amber-400 [&_[data-slot=slider-thumb]]:border-white [&_[data-slot=slider-thumb]]:bg-amber-400 [&_[data-slot=slider-track]]:bg-slate-300 dark:[&_[data-slot=slider-thumb]]:border-slate-950 dark:[&_[data-slot=slider-thumb]]:bg-amber-300 dark:[&_[data-slot=slider-track]]:bg-white/20"
                   />
                 </div>
               </div>
@@ -812,9 +812,9 @@ export default function MapComponent({
       )}
 
       {/* Role pill */}
-      <div className="absolute right-14 top-3 z-[1000] rounded-xl border border-white/15 bg-slate-950/90 px-3 py-2 text-white shadow-xl backdrop-blur-md">
+      <div className="absolute right-14 top-3 z-[1000] rounded-xl border border-slate-200 bg-white/90 px-3 py-2 text-slate-900 shadow-xl backdrop-blur-md transition-colors dark:border-white/15 dark:bg-slate-950/90 dark:text-white">
         <div className="text-sm font-medium">{roleLabel}</div>
-        <div className="text-xs text-slate-300">{roleDesc}</div>
+        <div className="text-xs text-slate-500 dark:text-slate-300">{roleDesc}</div>
       </div>
 
       {/* Global tweaks */}

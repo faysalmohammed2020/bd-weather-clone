@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Cloud, ArrowRight } from "lucide-react";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import LanguageSwitcher from "./language-switcher";
+import ThemeToggle from "./theme-toggle";
 
 interface NavbarProps {
   isScrolled: boolean;
@@ -34,8 +35,8 @@ export default function Navbar({ isScrolled }: NavbarProps) {
     <header
       className={`sticky top-0 z-50 w-full backdrop-blur transition-all duration-300 ${
         isScrolled
-          ? "bg-white/95 dark:bg-gray-900/95 border-b shadow-sm"
-          : "bg-transparent"
+          ? "border-b border-slate-200 bg-white/95 shadow-sm dark:border-slate-800 dark:bg-slate-950/95"
+          : "bg-white/95 dark:bg-slate-950/95"
       }`}
     >
       <div className="container flex h-16 items-center justify-between">
@@ -73,6 +74,8 @@ export default function Navbar({ isScrolled }: NavbarProps) {
               <ArrowRight className="w-4 h-4" />
             </Button>
           </Link>
+
+          <ThemeToggle />
 
           {/* Mobile Menu Button */}
           <Button

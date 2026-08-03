@@ -444,20 +444,20 @@ export default function ForecastOverlay({
   return createPortal(
     <div
       data-forecast-legend={layerId}
-      className="pointer-events-none absolute bottom-20 right-4 z-[850] w-[min(21rem,calc(100%-2rem))] rounded-xl border border-white/20 bg-slate-950/90 px-3 py-2.5 text-white shadow-2xl backdrop-blur-md"
+      className="pointer-events-none absolute bottom-20 right-4 z-[850] w-[min(21rem,calc(100%-2rem))] rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-slate-900 shadow-2xl backdrop-blur-md transition-colors dark:border-white/20 dark:bg-slate-950/90 dark:text-white"
     >
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>
           <div className="text-xs font-semibold tracking-wide">{meta.title}</div>
-          <div className="text-[10px] text-slate-300">Animated forecast field · {meta.unit}</div>
+          <div className="text-[10px] text-slate-500 dark:text-slate-300">Animated forecast field · {meta.unit}</div>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-emerald-200">
+        <div className="flex items-center gap-1.5 text-[10px] text-emerald-700 dark:text-emerald-200">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
           {isPlaying ? "Forecast playing" : "Flow animation"}
         </div>
       </div>
-      <div className="h-2.5 rounded-full ring-1 ring-white/20" style={{ background: meta.gradient }} />
-      <div className="mt-1 flex justify-between font-mono text-[9px] text-slate-200">
+      <div className="h-2.5 rounded-full ring-1 ring-slate-300 dark:ring-white/20" style={{ background: meta.gradient }} />
+      <div className="mt-1 flex justify-between font-mono text-[9px] text-slate-600 dark:text-slate-200">
         {meta.ticks.map((tick) => (
           <span key={tick}>{tick}</span>
         ))}

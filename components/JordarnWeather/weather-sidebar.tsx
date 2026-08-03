@@ -69,15 +69,15 @@ export default function WeatherSidebar({
 
   return (
     <div
-      className="h-full w-80 overflow-y-auto bg-slate-950/95 p-4 text-white backdrop-blur-xl"
+      className="h-full w-80 overflow-y-auto border-r border-slate-200 bg-white/95 p-4 text-slate-900 backdrop-blur-xl transition-colors dark:border-slate-800 dark:bg-slate-950/95 dark:text-white"
       dir={isRTL ? "rtl" : "ltr"}
     >
       {/* Weather Stations Section */}
-      <Card className="mb-4 border-white/10 bg-slate-900/90 shadow-xl">
+      <Card className="mb-4 border-slate-200 bg-slate-50/90 shadow-sm dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-xl">
         <div className="p-4">
           <div className="flex items-center gap-2 mb-4">
-            <MapPin className="h-5 w-5 text-white" />
-            <h2 className="text-lg font-semibold text-white">
+            <MapPin className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
               {t("weatherStations")}
             </h2>
           </div>
@@ -96,10 +96,10 @@ export default function WeatherSidebar({
                       isRTL ? "flex-row-reverse" : ""
                     }`}
                   >
-                    <Icon className="h-4 w-4 text-slate-300" />
-                    <span className="text-sm text-white">{param.label}</span>
+                    <Icon className="h-4 w-4 text-slate-500 dark:text-slate-300" />
+                    <span className="text-sm text-slate-800 dark:text-white">{param.label}</span>
                     {param.unit && (
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
                         ({param.unit})
                       </span>
                     )}
@@ -108,7 +108,7 @@ export default function WeatherSidebar({
                   <Switch
                     checked={!!param.enabled}
                     onCheckedChange={(checked) => onParameterToggle(param.id, checked)}
-                    className="data-[state=checked]:bg-amber-400"
+                    className="data-[state=checked]:bg-sky-600 dark:data-[state=checked]:bg-sky-500"
                   />
                 </div>
               );
@@ -118,11 +118,11 @@ export default function WeatherSidebar({
       </Card>
 
       {/* Forecast Section */}
-      <Card className="border-white/10 bg-slate-900/90 shadow-xl">
+      <Card className="border-slate-200 bg-slate-50/90 shadow-sm dark:border-slate-800 dark:bg-slate-900/90 dark:shadow-xl">
         <div className="p-4">
           <div className="flex items-center gap-2 mb-4">
-            <Cloud className="h-5 w-5 text-white" />
-            <h2 className="text-lg font-semibold text-white">
+            <Cloud className="h-5 w-5 text-sky-600 dark:text-sky-400" />
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
               {t("numericalForecast")}
             </h2>
           </div>
@@ -140,13 +140,13 @@ export default function WeatherSidebar({
                       isRTL ? "flex-row-reverse" : ""
                     }`}
                   >
-                    <Icon className="h-4 w-4 text-slate-300" />
-                    <span className="text-sm text-white">{param.label}</span>
+                    <Icon className="h-4 w-4 text-slate-500 dark:text-slate-300" />
+                    <span className="text-sm text-slate-800 dark:text-white">{param.label}</span>
                   </div>
                   <Switch
                     checked={!!param.enabled}
                     onCheckedChange={(checked) => onForecastToggle(param.id, checked)}
-                    className="data-[state=checked]:bg-amber-400"
+                    className="data-[state=checked]:bg-sky-600 dark:data-[state=checked]:bg-sky-500"
                   />
                 </div>
               );

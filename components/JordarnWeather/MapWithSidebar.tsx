@@ -47,7 +47,9 @@ export default function MapWithSidebar() {
   const [enabled, setEnabled] = useState<EnabledMap>({ ...EMPTY_ENABLED });
 
   // track which forecast overlay is enabled (single-select handled in sidebar)
-  const [enabledForecast, setEnabledForecast] = useState<Record<ForecastLayerId, boolean>>({
+  const [enabledForecast, setEnabledForecast] = useState<
+    Record<ForecastLayerId, boolean>
+  >({
     ...EMPTY_FORECAST,
   });
 
@@ -61,7 +63,9 @@ export default function MapWithSidebar() {
 
   const handleForecastToggle = (id: ForecastLayerId, on: boolean) => {
     setIsPlaying(false);
-    setEnabledForecast(on ? { ...EMPTY_FORECAST, [id]: true } : { ...EMPTY_FORECAST });
+    setEnabledForecast(
+      on ? { ...EMPTY_FORECAST, [id]: true } : { ...EMPTY_FORECAST },
+    );
     if (on) setEnabled({ ...EMPTY_ENABLED });
   };
 
@@ -83,14 +87,20 @@ export default function MapWithSidebar() {
 
   return (
     <div
-      className="relative grid h-[calc(100vh-0px)] overflow-hidden transition-[grid-template-columns] duration-300 ease-in-out"
-      style={{ gridTemplateColumns: isSidebarOpen ? "20rem minmax(0, 1fr)" : "0 minmax(0, 1fr)" }}
+      className="relative grid h-[calc(100dvh-4rem)] min-h-0 overflow-hidden transition-[grid-template-columns] duration-300 ease-in-out"
+      style={{
+        gridTemplateColumns: isSidebarOpen
+          ? "20rem minmax(0, 1fr)"
+          : "0 minmax(0, 1fr)",
+      }}
     >
       <aside
         id="weather-sidebar"
         aria-hidden={!isSidebarOpen}
         className={`h-full min-w-0 overflow-hidden transition-opacity duration-200 ${
-          isSidebarOpen ? "visible opacity-100" : "invisible pointer-events-none opacity-0"
+          isSidebarOpen
+            ? "visible opacity-100"
+            : "invisible pointer-events-none opacity-0"
         }`}
       >
         <WeatherSidebar
@@ -117,12 +127,16 @@ export default function MapWithSidebar() {
         type="button"
         aria-controls="weather-sidebar"
         aria-expanded={isSidebarOpen}
-        aria-label={isSidebarOpen ? "Collapse weather sidebar" : "Expand weather sidebar"}
+        aria-label={
+          isSidebarOpen ? "Collapse weather sidebar" : "Expand weather sidebar"
+        }
         onClick={() => setIsSidebarOpen((open) => !open)}
         className="absolute top-1/2 z-[1200] flex h-10 w-10 items-center justify-center rounded-full border border-blue-300/40 bg-blue-700 text-white shadow-xl transition-[left,transform,background-color] duration-300 hover:bg-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2"
         style={{
           left: isSidebarOpen ? "20rem" : "0.75rem",
-          transform: isSidebarOpen ? "translate(-50%, -50%)" : "translate(0, -50%)",
+          transform: isSidebarOpen
+            ? "translate(-50%, -50%)"
+            : "translate(0, -50%)",
         }}
       >
         {isSidebarOpen ? (
