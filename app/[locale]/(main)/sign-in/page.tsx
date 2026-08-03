@@ -118,7 +118,7 @@ export default function SignInForm() {
   };
 
   const handleCredentialsSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
+    e: React.FormEvent<HTMLFormElement>,
   ) => {
     e.preventDefault();
 
@@ -204,7 +204,7 @@ export default function SignInForm() {
       setFormError(errorMessage);
     } catch (error) {
       setFormError(
-        error instanceof Error ? error.message : "An unexpected error occurred"
+        error instanceof Error ? error.message : "An unexpected error occurred",
       );
     } finally {
       setLoading(false);
@@ -416,16 +416,6 @@ export default function SignInForm() {
             {t("continue")}
             <ChevronRight className="h-4 w-4" />
           </Button>
-
-          <p className="text-center text-sm text-gray-600">
-            {t("don'tHaveAccount")}{" "}
-            <Link
-              href="/sign-up"
-              className="font-medium text-blue-700 hover:underline"
-            >
-              {t("createAccount")}
-            </Link>
-          </p>
         </motion.form>
       </div>
     );
