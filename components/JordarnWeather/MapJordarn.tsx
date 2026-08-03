@@ -19,16 +19,11 @@ import { getAllStations, type WeatherStationData } from "./weather-data";
 import ForecastOverlay, {
   type ForecastLayerId,
 } from "./Animation/ForecastOverlay";
-import { useMap } from "react-leaflet";
 import dynamic from "next/dynamic";
 import { Roboto_Mono } from "next/font/google";
 import type { FeatureCollection } from "geojson";
 
 const MapTilerVectorLayer = dynamic(() => import("./MapTilerVectorLayer"), {
-  ssr: false,
-});
-
-const TemperatureShade = dynamic(() => import("./Animation/TemperatureShade"), {
   ssr: false,
 });
 
@@ -315,6 +310,7 @@ export default function MapComponent({
             size="icon"
             variant="secondary"
             onClick={() => map.zoomIn()}
+            aria-label="Zoom in"
             className="h-8 w-8 bg-white"
           >
             <Plus className="h-4 w-4" />
@@ -323,6 +319,7 @@ export default function MapComponent({
             size="icon"
             variant="secondary"
             onClick={() => map.zoomOut()}
+            aria-label="Zoom out"
             className="h-8 w-8 bg-white"
           >
             <Minus className="h-4 w-4" />
@@ -335,9 +332,9 @@ export default function MapComponent({
   const dates = useMemo(() => {
     const dateList: string[] = [];
     const today = new Date();
-    for (let i = 6; i >= 0; i--) {
+    for (let i = 0; i < 7; i++) {
       const date = new Date(today);
-      date.setDate(date.getDate() - i);
+      date.setDate(date.getDate() + i);
       dateList.push(
         date.toLocaleDateString("en-US", { day: "numeric", month: "short" })
       );
@@ -468,30 +465,6 @@ export default function MapComponent({
     }
   };
 
-  // Function to compute temperature samples (not a hook)
-  const getTempSamples = () => {
-    const vals: number[] = [];
-    const pts = stations
-      .map((s) => {
-        const vStr = valueForParam(s as WeatherStationData, "temperature");
-        const v = vStr != null ? Number(vStr) : null;
-        if (v == null || !isFinite(v)) return null;
-        vals.push(v);
-        return {
-          lat: s.coordinates!.lat,
-          lng: s.coordinates!.lng,
-          value: v,
-        };
-      })
-      .filter(Boolean) as Array<{ lat: number; lng: number; value: number }>;
-    const min = vals.length ? Math.min(...vals) : 0;
-    const max = vals.length ? Math.max(...vals) : 1;
-    return { pts, min, max };
-  };
-
-  // Get temperature samples (recomputed on each render when stations or currentIndex changes)
-  const tempSamples = getTempSamples();
-
   // Parameters explicitly enabled from the stations UI
   const uiActiveParams = (Object.keys(enabled) as ParameterId[]).filter(
     (k) => enabled[k]
@@ -505,13 +478,9 @@ export default function MapComponent({
         : [];
   const anyParamActive = effectiveActiveParams.length > 0;
 
-  // Hide timeline when nothing is selected (initial) or for specific forecast layers
-  const hideTimeline =
-    (!anyParamActive && !activeForecast) ||
-    (!!activeForecast &&
-      (activeForecast === "pressure-isolines" ||
-        activeForecast === "msl-pressure" ||
-        activeForecast === "geopotential"));
+  // All forecast products support time scrubbing. Hide the timeline only when
+  // no station parameter or numerical forecast layer is selected.
+  const hideTimeline = !anyParamActive && !activeForecast;
 
   /* === NEW: Tooltip renderer (station details). Keep it simple & compact. === */
   const StationTooltip = ({
@@ -667,23 +636,11 @@ export default function MapComponent({
             <CustomZoomControl />
 
             {/* Forecast overlays */}
-            {activeForecast === "forecast-temp" && jordanBoundary && (
-              <TemperatureShade
-                enabled
-                opacity={0.6}
-                points={tempSamples.pts}
-                minValue={-10}
-                maxValue={50}
-                timelineKey={currentIndex}
-                maskGeoJson={jordanBoundary}
-              />
-            )}
-
-            {activeForecast && activeForecast !== "forecast-temp" && (
+            {activeForecast && (
               <ForecastOverlay
                 layerId={activeForecast}
                 enabled={true}
-                opacity={0.8}
+                opacity={0.76}
                 isPlaying={isPlaying}
                 timelineKey={currentIndex}
               />
@@ -770,6 +727,7 @@ export default function MapComponent({
                 size="icon"
                 variant="secondary"
                 onClick={() => setIsPlaying(!isPlaying)}
+                aria-label={isPlaying ? "Pause forecast animation" : "Play forecast animation"}
                 className={
                   "h-8 w-8 rounded-lg border transition " +
                   (isPlaying
@@ -788,6 +746,7 @@ export default function MapComponent({
                 size="icon"
                 variant="secondary"
                 onClick={goPrev}
+                aria-label="Previous forecast day"
                 className="h-8 w-8 rounded-lg bg-blue-950/40 hover:bg-blue-900/50 text-blue-100 border border-blue-400/30"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -796,6 +755,7 @@ export default function MapComponent({
                 size="icon"
                 variant="secondary"
                 onClick={goNext}
+                aria-label="Next forecast day"
                 className="h-8 w-8 rounded-lg bg-blue-950/40 hover:bg-blue-900/50 text-blue-100 border border-blue-400/30"
               >
                 <ChevronRight className="h-4 w-4" />
