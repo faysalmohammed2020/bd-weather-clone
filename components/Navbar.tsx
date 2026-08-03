@@ -39,13 +39,13 @@ export default function Navbar({ isScrolled }: NavbarProps) {
           : "bg-white/95 dark:bg-slate-950/95"
       }`}
     >
-      <div className="container flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="relative h-8 w-8">
+      <div className="container flex h-16 items-center justify-between gap-2">
+        <Link href="/" className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+          <div className="relative h-7 w-7 shrink-0 sm:h-8 sm:w-8">
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 animate-pulse"></div>
-            <Cloud className="h-8 w-8 text-white absolute inset-0" />
+            <Cloud className="absolute inset-0 h-7 w-7 text-white sm:h-8 sm:w-8" />
           </div>
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-cyan-400 dark:to-blue-400">
+          <span className="truncate bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-base font-bold text-transparent sm:text-xl dark:from-cyan-400 dark:to-blue-400">
             {t("brandName")}
           </span>
         </Link>
@@ -67,7 +67,7 @@ export default function Navbar({ isScrolled }: NavbarProps) {
           ))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-4">
           <Link href="/sign-in" className="hidden md:block">
             <Button className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg hover:shadow-blue-500/25 transition-all duration-300 flex items-center gap-2">
               {t("signIn")}

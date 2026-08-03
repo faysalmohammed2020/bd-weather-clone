@@ -87,7 +87,7 @@ export default function WeatherLayerToolbar({
   };
 
   return (
-    <div className="flex max-w-[calc(100vw-7rem)] items-center gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white/90 p-1.5 shadow-xl backdrop-blur-md transition-colors dark:border-white/15 dark:bg-slate-950/90 dark:shadow-2xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex max-w-[calc(100vw-5rem)] items-center gap-1 overflow-x-auto rounded-xl border border-slate-200 bg-white/90 p-1.5 shadow-xl backdrop-blur-md transition-colors sm:max-w-[calc(100vw-7rem)] dark:border-white/15 dark:bg-slate-950/90 dark:shadow-2xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       <span className="hidden px-1 text-[9px] font-bold tracking-[0.16em] text-slate-500 dark:text-slate-400 sm:inline">
         OBS
       </span>

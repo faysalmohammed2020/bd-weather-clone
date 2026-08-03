@@ -87,17 +87,16 @@ export default function MapWithSidebar() {
 
   return (
     <div
-      className="relative grid h-[calc(100dvh-4rem)] min-h-0 overflow-hidden transition-[grid-template-columns] duration-300 ease-in-out"
-      style={{
-        gridTemplateColumns: isSidebarOpen
-          ? "20rem minmax(0, 1fr)"
-          : "0 minmax(0, 1fr)",
-      }}
+      className={`relative grid h-[calc(100dvh-4rem)] min-h-0 grid-cols-[0_minmax(0,1fr)] overflow-hidden transition-[grid-template-columns] duration-300 ease-in-out ${
+        isSidebarOpen
+          ? "sm:grid-cols-[20rem_minmax(0,1fr)]"
+          : "sm:grid-cols-[0_minmax(0,1fr)]"
+      }`}
     >
       <aside
         id="weather-sidebar"
         aria-hidden={!isSidebarOpen}
-        className={`h-full min-w-0 overflow-hidden transition-opacity duration-200 ${
+        className={`absolute inset-y-0 left-0 z-[1250] h-full w-[min(20rem,calc(100vw-3rem))] min-w-0 overflow-hidden shadow-2xl transition-opacity duration-200 sm:relative sm:z-auto sm:w-auto sm:shadow-none ${
           isSidebarOpen
             ? "visible opacity-100"
             : "invisible pointer-events-none opacity-0"
@@ -112,8 +111,9 @@ export default function MapWithSidebar() {
       </aside>
 
       <div
-        className="absolute top-3 z-[1150] transition-[left] duration-300 ease-in-out"
-        style={{ left: isSidebarOpen ? "21rem" : "1rem" }}
+        className={`absolute left-4 top-3 z-[1150] transition-[left] duration-300 ease-in-out ${
+          isSidebarOpen ? "sm:left-[21rem]" : "sm:left-4"
+        }`}
       >
         <WeatherLayerToolbar
           enabled={enabled}
@@ -133,7 +133,9 @@ export default function MapWithSidebar() {
         onClick={() => setIsSidebarOpen((open) => !open)}
         className="absolute top-1/2 z-[1200] flex h-10 w-10 items-center justify-center rounded-full border border-blue-300/40 bg-blue-700 text-white shadow-xl transition-[left,transform,background-color] duration-300 hover:bg-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-300 focus-visible:ring-offset-2"
         style={{
-          left: isSidebarOpen ? "20rem" : "0.75rem",
+          left: isSidebarOpen
+            ? "min(20rem, calc(100vw - 3rem))"
+            : "0.75rem",
           transform: isSidebarOpen
             ? "translate(-50%, -50%)"
             : "translate(0, -50%)",
@@ -146,7 +148,7 @@ export default function MapWithSidebar() {
         )}
       </button>
 
-      <div className="h-full min-w-0">
+      <div className="col-start-2 h-full min-w-0">
         <MapJordarn
           currentDate={currentDate}
           setCurrentDate={setCurrentDate}

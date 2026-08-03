@@ -444,7 +444,7 @@ export default function ForecastOverlay({
   return createPortal(
     <div
       data-forecast-legend={layerId}
-      className="pointer-events-none absolute bottom-20 right-4 z-[850] w-[min(21rem,calc(100%-2rem))] rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-slate-900 shadow-2xl backdrop-blur-md transition-colors dark:border-white/20 dark:bg-slate-950/90 dark:text-white"
+      className="pointer-events-none absolute bottom-28 right-3 z-[850] w-[min(21rem,calc(100%-1.5rem))] rounded-xl border border-slate-200 bg-white/90 px-3 py-2.5 text-slate-900 shadow-2xl backdrop-blur-md transition-colors sm:bottom-20 sm:right-4 sm:w-[min(21rem,calc(100%-2rem))] dark:border-white/20 dark:bg-slate-950/90 dark:text-white"
     >
       <div className="mb-2 flex items-center justify-between gap-3">
         <div>

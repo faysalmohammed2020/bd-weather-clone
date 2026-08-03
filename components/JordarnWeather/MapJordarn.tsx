@@ -582,9 +582,9 @@ export default function MapComponent({
   };
 
   return (
-    <div className="relative h-[calc(100vh-50px)] w-full z-10">
+    <div className="relative z-10 h-full min-h-0 w-full">
       {/* Map */}
-      <div className="relative h-[calc(100vh-50px)] w-full rounded-lg overflow-hidden border-2 border-gray-200">
+      <div className="relative h-full min-h-0 w-full overflow-hidden rounded-lg border-2 border-gray-200">
         {!leaflet ? (
           <>
             <div className="h-full w-full rounded-lg border-2 border-gray-200 overflow-hidden">
@@ -722,7 +722,8 @@ export default function MapComponent({
       {!hideTimeline && (
         <div className="absolute bottom-0 left-0 right-0 z-[1000] px-3 pb-2">
           <div className="mx-auto w-full rounded-xl border border-slate-200 bg-white/90 p-2 text-slate-700 shadow-xl backdrop-blur-md transition-colors dark:border-white/15 dark:bg-slate-950/90 dark:text-slate-100 dark:shadow-2xl">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <div className="flex shrink-0 items-center gap-2 sm:contents">
               <Button
                 size="icon"
                 variant="secondary"
@@ -790,8 +791,10 @@ export default function MapComponent({
                   {t("2x")}
                 </Button>
               </div>
+              </div>
 
-              <div className="mx-2 flex-1">
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+              <div className="min-w-0 flex-1 sm:mx-2">
                 <div className="flex h-3 items-center rounded-full bg-slate-100 px-2 ring-1 ring-slate-200 dark:bg-white/10 dark:ring-white/15">
                   <Slider
                     value={[currentIndex]}
@@ -803,8 +806,9 @@ export default function MapComponent({
                 </div>
               </div>
 
-              <div className="min-w-28 rounded-lg border border-amber-300/30 bg-amber-400 px-2 py-1 text-center text-xs font-semibold text-slate-950">
+              <div className="min-w-24 shrink-0 rounded-lg border border-amber-300/30 bg-amber-400 px-2 py-1 text-center text-xs font-semibold text-slate-950 sm:min-w-28">
                 {currentDate}
+              </div>
               </div>
             </div>
           </div>
@@ -812,7 +816,7 @@ export default function MapComponent({
       )}
 
       {/* Role pill */}
-      <div className="absolute right-14 top-3 z-[1000] rounded-xl border border-slate-200 bg-white/90 px-3 py-2 text-slate-900 shadow-xl backdrop-blur-md transition-colors dark:border-white/15 dark:bg-slate-950/90 dark:text-white">
+      <div className="absolute right-14 top-3 z-[1000] hidden rounded-xl border border-slate-200 bg-white/90 px-3 py-2 text-slate-900 shadow-xl backdrop-blur-md transition-colors sm:block dark:border-white/15 dark:bg-slate-950/90 dark:text-white">
         <div className="text-sm font-medium">{roleLabel}</div>
         <div className="text-xs text-slate-500 dark:text-slate-300">{roleDesc}</div>
       </div>
