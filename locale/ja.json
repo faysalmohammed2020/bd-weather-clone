@@ -1953,6 +1953,42 @@
     "coords": "座標",
     "guest": "ゲスト",
     "guestDescription": "利用可能な観測所はありません",
+    "role": {
+      "superAdmin": "スーパー管理者",
+      "stationAdmin": "観測所管理者",
+      "observer": "観測者",
+      "guest": "ゲスト"
+    },
+    "roleDescription": {
+      "superAdmin": "すべての観測所を表示中",
+      "stationAdmin": "割り当てられた観測所を表示中",
+      "observer": "割り当てられた観測所を表示中",
+      "guest": "利用可能な観測所はありません"
+    },
+    "errors": {
+      "noStation": "気象観測所が選択されていません",
+      "fetchFailed": "気象データの読み込みに失敗しました",
+      "noData": "利用可能な気象データはありません"
+    },
+    "stationPopup": {
+      "loading": "気象データを読み込み中...",
+      "loadingAnimation": "予報アニメーションを読み込み中..."
+    },
+    "weatherSummary": {
+      "title": "気象概要",
+      "temperature": "気温",
+      "precipitation": "降水量",
+      "noData": "利用可能なデータはありません",
+      "windSpeed": "風速",
+      "cloudCover": "雲量",
+      "rainDetected": "降雨を検出: {amount} mm"
+    },
+    "common": {
+      "max": "最高",
+      "min": "最低",
+      "mm": "mm",
+      "nm": "kt"
+    },
     "speed": "速度",
     "1x": "1倍",
     "2x": "2倍",

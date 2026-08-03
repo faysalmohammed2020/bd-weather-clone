@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 import { signUp } from "@/lib/auth-client";
 import { FormError } from "@/components/ui/form-error";
@@ -86,8 +86,7 @@ export default function SignUpForm() {
         },
         onSuccess: () => {
           toast.success("Registration successful");
-          router.push("/dashboard");
-          router.refresh();
+          router.replace("/dashboard");
         },
         onError: (ctx) => {
           setFormError(ctx.error.message);

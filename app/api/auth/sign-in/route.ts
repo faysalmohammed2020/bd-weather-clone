@@ -1,110 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import moment from "moment";
+import { issueAuthTicket } from "@/lib/auth-tickets";
+import { verifyPassword } from "@/lib/password";
+
+const PENDING_COOKIE = "jordan-weather.2fa";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
     const { email, password, role, securityCode, stationId, stationName } =
-      body;
+      await request.json();
 
-    // Validate required fields
-    if (
-      !email ||
-      !password ||
-      !role ||
-      !securityCode ||
-      !stationId ||
-      !stationName
-    ) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
+    if (!email || !password || !role || !securityCode || !stationId || !stationName) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // 1. Check if the station exists and security code matches
-    const station = await prisma.station.findFirst({
-      where: { stationId: stationId },
-    });
-
+    const station = await prisma.station.findFirst({ where: { stationId } });
     if (!station) {
       return NextResponse.json({ error: "Station not found" }, { status: 404 });
     }
-
-    if (station.securityCode !== securityCode) {
-      return NextResponse.json(
-        { error: "Invalid security code" },
-        { status: 401 }
-      );
+    if (station.name !== stationName || station.securityCode !== securityCode) {
+      return NextResponse.json({ error: "Invalid station security code" }, { status: 401 });
     }
 
-    // 2. Check if user exists with the given email and role
-    // Use select to explicitly specify which fields to retrieve to avoid schema mismatch issues
     const user = await prisma.users.findFirst({
-      where: {
-        email,
-        role,
-      },
-      select: {
-        id: true,
-        email: true,
-        role: true,
+      where: { email: String(email).toLowerCase(), role },
+      include: {
         Station: true,
+        accounts: {
+          where: { providerId: "credential" },
+          select: { password: true },
+          take: 1,
+        },
       },
     });
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "User not found or does not have the requested role" },
-        { status: 404 }
-      );
+    if (!user || !user.accounts[0]?.password) {
+      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
-
-    // 3. Check if the user is associated with the station
+    if (user.banned) {
+      return NextResponse.json({ error: "This account has been disabled" }, { status: 403 });
+    }
     if (user.Station.stationId !== stationId) {
       return NextResponse.json(
         { error: "User is not associated with this station" },
-        { status: 403 }
+        { status: 403 },
       );
     }
-
-    // Check if the user already has an active session (prevent multiple logins)
-    const existingSession = await prisma.sessions.findFirst({
-      where: {
-        userId: user.id,
-      },
-      orderBy: {
-        expiresAt: "desc",
-      },
-    });
-
-    // Check if session already exist and if not expired (Then don't allow multiple session)
-    if (existingSession) {
-      const isSessionExpired = moment(existingSession?.expiresAt).isBefore();
-      if (!isSessionExpired) {
-        return NextResponse.json(
-          { error: "You are already logged in from another device" },
-          { status: 403 }
-        );
-      }
+    if (!(await verifyPassword(password, user.accounts[0].password))) {
+      return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
-    // 4. Authenticate the user using better-auth
-    const response = await auth.api.signInEmail({
-      asResponse: true,
-      body: {
-        email,
-        password,
-      },
-    });
+    // A successful credential check replaces the previous single active session.
+    await prisma.sessions.deleteMany({ where: { userId: user.id } });
 
-    return response;
-  } catch {
-    return NextResponse.json(
-      { error: "An error occurred during sign in" },
-      { status: 500 }
-    );
+    if (user.twoFactorEnabled) {
+      const pendingTicket = await issueAuthTicket(user.id, "pending-2fa", 10 * 60);
+      const response = NextResponse.json({ twoFactorRedirect: true });
+      response.cookies.set(PENDING_COOKIE, pendingTicket, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 10 * 60,
+        path: "/",
+      });
+      return response;
+    }
+
+    const loginTicket = await issueAuthTicket(user.id, "login");
+    return NextResponse.json({ loginTicket });
+  } catch (error) {
+    console.error("Sign in failed:", error);
+    return NextResponse.json({ error: "An error occurred during sign in" }, { status: 500 });
   }
 }

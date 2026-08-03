@@ -3,6 +3,7 @@ import { getLocale } from "next-intl/server";
 import { Inter, Amiri } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { AuthSessionProvider } from "@/components/auth-session-provider";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 
@@ -49,8 +50,10 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster richColors />
+          <AuthSessionProvider>
+            {children}
+            <Toaster richColors />
+          </AuthSessionProvider>
         </ThemeProvider>
       </body>
     </html>

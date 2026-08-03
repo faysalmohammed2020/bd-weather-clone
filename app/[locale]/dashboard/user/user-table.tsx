@@ -27,7 +27,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { useLocation } from "@/contexts/divisionContext";
 import { Station } from "@/data/stations";
 import { useSession } from "@/lib/auth-client";
 import { useTranslations } from "next-intl";

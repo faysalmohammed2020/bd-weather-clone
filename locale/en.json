@@ -1938,6 +1938,42 @@
     "coords": "Coordinates",
     "guest": "Guest",
     "guestDescription": "No stations available",
+    "role": {
+      "superAdmin": "Super Admin",
+      "stationAdmin": "Station Admin",
+      "observer": "Observer",
+      "guest": "Guest"
+    },
+    "roleDescription": {
+      "superAdmin": "Viewing all stations",
+      "stationAdmin": "Viewing your assigned station",
+      "observer": "Viewing your assigned station",
+      "guest": "No stations available"
+    },
+    "errors": {
+      "noStation": "No weather station selected",
+      "fetchFailed": "Failed to load weather data",
+      "noData": "No weather data available"
+    },
+    "stationPopup": {
+      "loading": "Loading weather data...",
+      "loadingAnimation": "Loading forecast animation..."
+    },
+    "weatherSummary": {
+      "title": "Weather summary",
+      "temperature": "Temperature",
+      "precipitation": "Precipitation",
+      "noData": "No data available",
+      "windSpeed": "Wind speed",
+      "cloudCover": "Cloud cover",
+      "rainDetected": "Rain detected: {amount} mm"
+    },
+    "common": {
+      "max": "Max",
+      "min": "Min",
+      "mm": "mm",
+      "nm": "kt"
+    },
     "speed": "Speed",
     "1x": "1x",
     "2x": "2x",

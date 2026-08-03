@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { hashPassword } from "better-auth/crypto";
+import { hashPassword } from "@/lib/password";
 import { getSession } from "@/lib/getSession";
 import { LogAction, LogActionType, LogModule } from "@/lib/log";
 import { diff } from "deep-object-diff";
 import { revalidateTag } from "next/cache";
-import { admin } from "@/lib/auth-client";
 
 // GET method for listing users with pagination
 export async function GET(request: NextRequest) {
@@ -165,9 +164,7 @@ export async function PUT(request: NextRequest) {
             });
 
             // Revoke User Sessions
-            await admin.revokeUserSessions({
-              userId: existingUser.id,
-            });
+            await tx.sessions.deleteMany({ where: { userId: existingUser.id } });
           } else {
             // Create a new account if it doesn't exist
             await tx.accounts.create({
@@ -295,7 +292,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash the password using better-auth's hashPassword function
+    // Keep password hashing compatible with existing credential accounts.
     const hashedPassword = await hashPassword(password);
 
     // Use a transaction to create the user and then the account
@@ -416,9 +413,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     await prisma.$transaction(async (tx) => {
-      await admin.revokeUserSessions({
-        userId: userToDelete.id,
-      });
+      await tx.sessions.deleteMany({ where: { userId: userToDelete.id } });
 
       // Log The Action
       await LogAction({

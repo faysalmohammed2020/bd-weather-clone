@@ -28,12 +28,13 @@ import {
 } from "@/components/ui/select";
 import { motion } from "framer-motion";
 // Authentication is now handled by our custom API route
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { FormError } from "@/components/ui/form-error";
 import { Station } from "@/data/stations";
 import { useTranslations } from "next-intl";
+import { signInWithTicket } from "@/lib/auth-client";
 
 // Available roles
 const roles = [
@@ -169,16 +170,24 @@ export default function SignInForm() {
       const data = await response.json();
 
       if (data.twoFactorRedirect) {
-        router.push("/2fa");
+        router.replace("/2fa");
         return;
       }
 
       // If the response is successful, redirect to dashboard
       if (response.ok) {
+        if (!data.loginTicket) {
+          setFormError("The sign-in response was incomplete");
+          return;
+        }
+        const authResult = await signInWithTicket(data.loginTicket);
+        if (authResult?.error) {
+          setFormError("Invalid email or password");
+          return;
+        }
         // Success - show toast and redirect to dashboard
         toast.success(t("loginSuccessful"));
-        router.push("/dashboard");
-        router.refresh();
+        router.replace("/dashboard");
         return;
       }
 

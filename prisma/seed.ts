@@ -2,7 +2,7 @@
 
 import prisma from "../lib/prisma";
 import { stations } from "../data/stations";
-import { hashPassword } from "better-auth/crypto";
+import { hashPassword } from "../lib/password";
 
 const SUPER_ADMIN_EMAIL =
   process.env.SEED_SUPER_ADMIN_EMAIL ?? "superadmin@jordanweather.com";

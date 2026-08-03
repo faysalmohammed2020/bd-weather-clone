@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { twoFactor } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,8 +34,7 @@ const TwoFactor = () => {
                 setError(error.message || "Invalid verification code. Please try again.");
             } else {
                 toast.success("Verification successful");
-                router.push("/dashboard");
-                router.refresh();
+                router.replace("/dashboard");
             }
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : "Invalid verification code. Please try again.";
@@ -62,8 +61,7 @@ const TwoFactor = () => {
                 setError(error.message || "Invalid backup code. Please try again.");
             } else {
                 toast.success("Backup code verified successfully");
-                router.push("/dashboard");
-                router.refresh();
+                router.replace("/dashboard");
             }
         } catch (err: unknown) {
             const errorMessage = err instanceof Error ? err.message : "Invalid backup code. Please try again.";

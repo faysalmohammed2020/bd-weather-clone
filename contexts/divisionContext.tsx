@@ -4,11 +4,12 @@ import { createContext, useState, useContext, useEffect } from "react";
 import { LatLngExpression } from "leaflet";
 import axios from "axios";
 
-// Overpass API endpoint
-const OVERPASS_API = "https://overpass-api.de/api/interpreter";
-
-// Specific relation ID for Bangladesh: 184640
-const BANGLADESH_RELATION_ID = 184640;
+// Public global Overpass instances. Queries fall through when one is busy.
+const OVERPASS_APIS = [
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.private.coffee/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+];
 
 // Admin levels in Bangladesh
 const ADMIN_LEVELS = {
@@ -16,6 +17,17 @@ const ADMIN_LEVELS = {
   DISTRICT: "5", // Districts/Zillas
   UPAZILA: "6", // Upazilas/Thanas
 };
+
+const BANGLADESH_DIVISIONS: AdministrativeArea[] = [
+  { name: "Dhaka", osmId: 3921322, coordinates: [23.7779, 90.3995], adminLevel: ADMIN_LEVELS.DIVISION },
+  { name: "Chittagong", osmId: 3824588, coordinates: [22.3569, 91.7832], adminLevel: ADMIN_LEVELS.DIVISION },
+  { name: "Mymensingh", osmId: 7318343, coordinates: [24.7145, 90.4069], adminLevel: ADMIN_LEVELS.DIVISION },
+  { name: "Khulna", osmId: 3825003, coordinates: [22.8456, 89.5403], adminLevel: ADMIN_LEVELS.DIVISION },
+  { name: "Rajshahi", osmId: 3859335, coordinates: [24.3745, 88.6042], adminLevel: ADMIN_LEVELS.DIVISION },
+  { name: "Sylhet", osmId: 3921222, coordinates: [24.8949, 91.8687], adminLevel: ADMIN_LEVELS.DIVISION },
+  { name: "Barishal", osmId: 3921298, coordinates: [22.701, 90.3535], adminLevel: ADMIN_LEVELS.DIVISION },
+  { name: "Rangpur", osmId: 3921211, coordinates: [25.7439, 89.2532], adminLevel: ADMIN_LEVELS.DIVISION },
+];
 
 interface AdministrativeArea {
   name: string;
@@ -69,32 +81,27 @@ const buildQuery = (relationId: number, adminLevel: string): string => {
   `;
 };
 
-// Function to query Bangladesh directly for divisions
-const buildDivisionsQuery = (): string => {
-  return `
-    [out:json][timeout:90];
-    // Query for Bangladesh's divisions directly
-    relation(${BANGLADESH_RELATION_ID});
-    map_to_area -> .bangladesh;
-    relation[boundary=administrative][admin_level=${ADMIN_LEVELS.DIVISION}](area.bangladesh);
-    out body geom;
-  `;
-};
-
 // Fetch administrative boundaries using Overpass API
 const fetchBoundaries = async (query: string): Promise<any[]> => {
-  try {
-    const response = await axios({
-      method: "post",
-      url: OVERPASS_API,
-      data: query,
-      headers: { "Content-Type": "text/plain" },
-    });
-    return response.data.elements || [];
-  } catch (error) {
-    console.error("Overpass API error:", error);
-    throw error;
+  for (const endpoint of OVERPASS_APIS) {
+    try {
+      const response = await axios.post(endpoint, query, {
+        timeout: 30_000,
+        headers: {
+          "Content-Type": "text/plain",
+          Accept: "application/json",
+        },
+      });
+      return response.data.elements || [];
+    } catch (error) {
+      const status = axios.isAxiosError(error) ? error.response?.status : undefined;
+      const canRetry =
+        status === undefined || [429, 502, 503, 504].includes(status);
+      if (!canRetry) return [];
+    }
   }
+
+  return [];
 };
 
 // Function to handle irregular geometry data
@@ -148,7 +155,7 @@ export const LocationProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
-  const [divisions, setDivisions] = useState<AdministrativeArea[]>([]);
+  const [divisions] = useState<AdministrativeArea[]>(BANGLADESH_DIVISIONS);
   const [districts, setDistricts] = useState<AdministrativeArea[]>([]);
   const [upazilas, setUpazilas] = useState<AdministrativeArea[]>([]);
 
@@ -161,99 +168,6 @@ export const LocationProvider = ({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Load divisions on mount
-  useEffect(() => {
-    const loadDivisions = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const query = buildDivisionsQuery();
-        const elements = await fetchBoundaries(query);
-
-        if (elements.length === 0) {
-          setError("No divisions found. Using fallback data.");
-          // Fallback to hardcoded divisions if API fails
-          const fallbackDivisions: AdministrativeArea[] = [
-            {
-              name: "Dhaka",
-              osmId: 3921322,
-              coordinates: [23.7779, 90.3995],
-              adminLevel: ADMIN_LEVELS.DIVISION,
-            },
-            {
-              name: "Chittagong",
-              osmId: 3824588,
-              coordinates: [22.3569, 91.7832],
-              adminLevel: ADMIN_LEVELS.DIVISION,
-            },
-            {
-              name: "Mymensingh",
-              osmId: 7318343,
-              coordinates: [24.7145, 90.4069],
-              adminLevel: ADMIN_LEVELS.DIVISION,
-            },
-            {
-              name: "Khulna",
-              osmId: 3825003,
-              coordinates: [22.8456, 89.5403],
-              adminLevel: ADMIN_LEVELS.DIVISION,
-            },
-            {
-              name: "Rajshahi",
-              osmId: 3859335,
-              coordinates: [24.3745, 88.6042],
-              adminLevel: ADMIN_LEVELS.DIVISION,
-            },
-            {
-              name: "Sylhet",
-              osmId: 3921222,
-              coordinates: [24.8949, 91.8687],
-              adminLevel: ADMIN_LEVELS.DIVISION,
-            },
-            {
-              name: "Barishal",
-              osmId: 3921298,
-              coordinates: [22.701, 90.3535],
-              adminLevel: ADMIN_LEVELS.DIVISION,
-            },
-            {
-              name: "Rangpur",
-              osmId: 3921211,
-              coordinates: [25.7439, 89.2532],
-              adminLevel: ADMIN_LEVELS.DIVISION,
-            },
-          ];
-          setDivisions(fallbackDivisions);
-          return;
-        }
-
-        const processedDivisions = elements.map((element) => {
-          const name = element.tags["name:en"];
-          const geometry = processGeometry(element);
-          const coordinates = calculateCenter(geometry);
-
-          return {
-            name,
-            osmId: element.id,
-            coordinates,
-            geometry,
-            adminLevel: ADMIN_LEVELS.DIVISION,
-          };
-        });
-
-        setDivisions(processedDivisions);
-      } catch (err) {
-        console.error("Error loading divisions:", err);
-        setError("Failed to load divisions. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDivisions();
-  }, []);
 
   // Load districts when division is selected
   useEffect(() => {

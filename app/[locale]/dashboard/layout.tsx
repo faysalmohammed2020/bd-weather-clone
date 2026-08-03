@@ -1,5 +1,4 @@
 import Sidebar from "../../../components/sidebar";
-import { LocationProvider } from "@/contexts/divisionContext";
 import { HourProvider } from "@/contexts/hourContext";
 import Profile from "@/components/profile";
 
@@ -13,11 +12,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             <Profile />
           </div>
           <div className="grow overflow-y-auto relative p-6">
-            <LocationProvider>
-              <HourProvider>
-                {children}
-              </HourProvider>
-            </LocationProvider>
+            <HourProvider>{children}</HourProvider>
           </div>
         </div>
       </div>
