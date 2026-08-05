@@ -39,6 +39,7 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body
+        suppressHydrationWarning
         className={cn("antialiased", {
           [inter.className]: locale === "en",
           [amiri.className]: locale === "ar",

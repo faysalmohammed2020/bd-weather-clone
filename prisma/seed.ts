@@ -5,10 +5,32 @@ import { stations } from "../data/stations";
 import { hashPassword } from "../lib/password";
 
 const SUPER_ADMIN_EMAIL =
-  process.env.SEED_SUPER_ADMIN_EMAIL ?? "superadmin@jordanweather.com";
+  process.env.SEED_SUPER_ADMIN_EMAIL ?? "demo.superadmin@local.test";
 const SUPER_ADMIN_PASSWORD =
   process.env.SEED_SUPER_ADMIN_PASSWORD ??
-  (process.env.NODE_ENV === "production" ? undefined : "SuperAdmin@123");
+  (process.env.NODE_ENV === "production" ? undefined : "SuperAdmin123!");
+
+type SeedUser = {
+  name: string;
+  email: string;
+  password: string;
+  role: "super_admin" | "station_admin" | "observer";
+};
+
+const DEVELOPMENT_USERS: SeedUser[] = [
+  {
+    name: "Demo Station Admin",
+    email: "demo.stationadmin@local.test",
+    password: "StationAdmin123!",
+    role: "station_admin",
+  },
+  {
+    name: "Demo Observer",
+    email: "demo.observer@local.test",
+    password: "Observer123!",
+    role: "observer",
+  },
+];
 
 async function main() {
   if (!SUPER_ADMIN_PASSWORD) {
@@ -17,7 +39,22 @@ async function main() {
     );
   }
 
-  const hashedSuperAdminPassword = await hashPassword(SUPER_ADMIN_PASSWORD);
+  const seedUsers: SeedUser[] = [
+    {
+      name: "Demo Super Admin",
+      email: SUPER_ADMIN_EMAIL,
+      password: SUPER_ADMIN_PASSWORD,
+      role: "super_admin",
+    },
+    ...(process.env.NODE_ENV === "production" ? [] : DEVELOPMENT_USERS),
+  ];
+
+  const usersWithPasswordHashes = await Promise.all(
+    seedUsers.map(async (user) => ({
+      ...user,
+      passwordHash: await hashPassword(user.password),
+    }))
+  );
 
   await prisma.$transaction(async (tx) => {
     console.log("🌱 Starting seed...");
@@ -66,65 +103,73 @@ async function main() {
       select: { id: true },
     });
 
-    const superAdmin = await tx.users.upsert({
-      where: { email: SUPER_ADMIN_EMAIL },
-      update: {
-        name: "Super Admin",
-        role: "super_admin",
-        stationId: adminStation.id,
-        emailVerified: true,
-        banned: false,
-        banReason: null,
-        banExpires: null,
-        updatedAt: new Date(),
-      },
-      create: {
-        name: "Super Admin",
-        email: SUPER_ADMIN_EMAIL,
-        role: "super_admin",
-        stationId: adminStation.id,
-        emailVerified: true,
-        image: null,
-        banned: false,
-        banReason: null,
-        banExpires: null,
-        twoFactorEnabled: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    });
-
-    const credentialAccount = await tx.accounts.findFirst({
-      where: {
-        userId: superAdmin.id,
-        providerId: "credential",
-      },
-      select: { id: true },
-    });
-
-    if (credentialAccount) {
-      await tx.accounts.update({
-        where: { id: credentialAccount.id },
-        data: {
-          accountId: superAdmin.id,
-          password: hashedSuperAdminPassword,
-          updatedAt: new Date(),
+    for (const seedUser of usersWithPasswordHashes) {
+      const now = new Date();
+      const user = await tx.users.upsert({
+        where: { email: seedUser.email },
+        update: {
+          name: seedUser.name,
+          role: seedUser.role,
+          stationId: adminStation.id,
+          emailVerified: true,
+          banned: false,
+          banReason: null,
+          banExpires: null,
+          ...(process.env.NODE_ENV === "production"
+            ? {}
+            : { twoFactorEnabled: false }),
+          updatedAt: now,
+        },
+        create: {
+          name: seedUser.name,
+          email: seedUser.email,
+          role: seedUser.role,
+          stationId: adminStation.id,
+          emailVerified: true,
+          image: null,
+          banned: false,
+          banReason: null,
+          banExpires: null,
+          twoFactorEnabled: false,
+          createdAt: now,
+          updatedAt: now,
         },
       });
-    } else {
-      await tx.accounts.create({
-        data: {
-          accountId: superAdmin.id,
+
+      const credentialAccount = await tx.accounts.findFirst({
+        where: {
+          userId: user.id,
           providerId: "credential",
-          userId: superAdmin.id,
-          password: hashedSuperAdminPassword,
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
+        select: { id: true },
       });
+
+      if (credentialAccount) {
+        await tx.accounts.update({
+          where: { id: credentialAccount.id },
+          data: {
+            accountId: user.id,
+            password: seedUser.passwordHash,
+            updatedAt: now,
+          },
+        });
+      } else {
+        await tx.accounts.create({
+          data: {
+            accountId: user.id,
+            providerId: "credential",
+            userId: user.id,
+            password: seedUser.passwordHash,
+            createdAt: now,
+            updatedAt: now,
+          },
+        });
+      }
+
+      await tx.sessions.deleteMany({ where: { userId: user.id } });
+      console.log(`${seedUser.role} ready: ${seedUser.email}`);
     }
 
-    console.log(`Super admin ready: ${SUPER_ADMIN_EMAIL}`);
     console.log(
       `🎉 Seed complete. Created ${createdCount} stations, updated ${updatedCount} stations.`
     );
